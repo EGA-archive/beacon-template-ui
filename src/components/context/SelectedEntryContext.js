@@ -27,7 +27,7 @@ export const SelectedEntryProvider = ({ children }) => {
         resultData,
         setResultData,
         hasSearchResults,
-        setHasSearchResult
+        setHasSearchResult,
       }}
     >
       {children}

@@ -41,7 +41,7 @@ export default function HomePage({ selectedTool, setSelectedTool }) {
             maxWidth: "338px",
             flexShrink: 0,
             top: { md: "122px" },
-            mt: { xs: "0px", md: "30px" },
+            mt: { xs: "0px", md: "37px" },
             mb: { xs: "50px", md: "40px", lg: "0px" },
             alignSelf: "flex-start",
             height: `${searchHeight}px`,
@@ -50,7 +50,7 @@ export default function HomePage({ selectedTool, setSelectedTool }) {
             borderRadius: "12px",
             display: "flex",
             flexDirection: "column",
-            gap: 2
+            gap: 2,
           }}
         >
           <FiltersContainer />
@@ -71,8 +71,9 @@ export default function HomePage({ selectedTool, setSelectedTool }) {
       </Box>
       <Box
         sx={{
-          marginBottom: '30px'
-        }}>
+          marginBottom: "30px",
+        }}
+      >
         <ResultsContainer />
       </Box>
     </>

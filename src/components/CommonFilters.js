@@ -14,11 +14,20 @@ import { useSelectedEntry } from "./context/SelectedEntryContext";
 export default function CommonFilters() {
   const filterCategories = config.ui.commonFilters.filterCategories;
   const filterLabels = config.ui.commonFilters.filterLabels;
-  const { selectedFilter, setSelectedFilter, setExtraFilter, setLoadingData, setResultData, setHasSearchResult } = useSelectedEntry();
+  const {
+    selectedFilter,
+    setSelectedFilter,
+    setExtraFilter,
+    setLoadingData,
+    setResultData,
+    setHasSearchResult,
+  } = useSelectedEntry();
 
   const getValidLabels = (topic) =>
     filterLabels[topic]?.filter(
-      (item) => (item.label).trim() !== "" && !/^(item.label)\d*$/i.test((item.label).trim())
+      (item) =>
+        item.label.trim() !== "" &&
+        !/^(item.label)\d*$/i.test(item.label.trim())
     ) ?? [];
 
   const [expanded, setExpanded] = useState(() => {
@@ -45,24 +54,17 @@ export default function CommonFilters() {
     setResultData([]);
     setHasSearchResult(false);
 
-    if(item.type === "alphanumeric") {
+    if (item.type === "alphanumeric") {
       setExtraFilter(item);
     } else {
       setSelectedFilter((prevFilters) => {
-        if (prevFilters.some(filter => filter.key === item.key)) {
+        if (prevFilters.some((filter) => filter.key === item.key)) {
           return prevFilters;
         }
         return [...prevFilters, item];
       });
     }
-
-    // mark filter selected
-    markFilterSelected(item)
-  }
-
-  function markFilterSelected(item) {
-    item.stateSelected = item.stateSelected ? !item.stateSelected : true;
-  }
+  };
 
   const summarySx = {
     px: 0,

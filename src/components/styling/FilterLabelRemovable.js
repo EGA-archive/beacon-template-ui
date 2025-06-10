@@ -1,10 +1,10 @@
 import { Chip } from "@mui/material";
 import { alpha } from "@mui/system";
-import ClearIcon from '@mui/icons-material/Clear';
+import ClearIcon from "@mui/icons-material/Clear";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import config from "../../config/config.json";
 
-export default function FilterLabelRemovable({ label, onClick, bgColor }) {  
+export default function FilterLabelRemovable({ label, onDelete, bgColor }) {
   let backgroundColor = "";
   let hoverColor = "";
 
@@ -22,7 +22,7 @@ export default function FilterLabelRemovable({ label, onClick, bgColor }) {
       component="div"
       clickable
       variant="outlined"
-      onDelete={ onClick }
+      onDelete={onDelete}
       deleteIcon={<ClearIcon />}
       sx={{
         height: 32,

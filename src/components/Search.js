@@ -17,7 +17,7 @@ import { useSelectedEntry } from "./context/SelectedEntryContext";
 import GenomicQueryBuilderButton from "./GenomicQueryBuilderButton";
 import AllFilteringTermsButton from "./AllFilteringTermsButton";
 import FilteringTermsDropdownResults from "./FilteringTermsDropdownResults";
-import QueryFilter from './search/QueryApplied';
+import QueryFilter from "./search/QueryApplied";
 import SearchButton from "./search/SearchButton";
 import FilterTermsExtra from "./search/FilterTemsExtra";
 
@@ -45,7 +45,6 @@ export default function Search({
   }, []);
 
   const configuredOrder = config.ui.entryTypesOrder;
-
   const sortEntries = (entries) =>
     configuredOrder?.length > 0 && entries.length > 1
       ? [...entries].sort(
@@ -64,12 +63,23 @@ export default function Search({
         const endpointSets = data.response.endpointSets || {};
 
         const entries = Object.entries(endpointSets)
-          .filter(([key, value]) =>  !key.includes('Endpoints') && !key.includes('genomicVariation'))
+          .filter(
+            ([key, value]) =>
+              !key.includes("Endpoints") && !key.includes("genomicVariation")
+          )
           .map(([key, value]) => {
-            const pathSegment = value.rootUrl?.split("/").pop();
-            return { id: key, pathSegment };
-        });
+            const originalSegment = value.rootUrl?.split("/").pop();
+            const normalizedSegment =
+              originalSegment === "genomicVariations"
+                ? "g_variants"
+                : originalSegment;
 
+            return {
+              id: key,
+              pathSegment: normalizedSegment,
+              originalPathSegment: originalSegment,
+            };
+          });
         const sorted = sortEntries(entries);
         setEntryTypes(sorted);
 
@@ -465,24 +475,30 @@ export default function Search({
             renderInput("filter")
           )}
         </Box>
-        { extraFilter && (
-          <FilterTermsExtra />
-        )}
-        { !hasSearchResults && selectedFilter.length>0 && (
-          <QueryFilter />
-        )}
-        <Box sx={{ mt: 5, display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "space-between" }}>
+        {extraFilter && <FilterTermsExtra />}
+        {!hasSearchResults && selectedFilter.length > 0 && <QueryFilter />}
+        <Box
+          sx={{
+            mt: 5,
+            display: "flex",
+            gap: 2,
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+          }}
+        >
           <Box
-            sx={{ 
-              display: "flex", 
-              gap: 2
+            sx={{
+              display: "flex",
+              gap: 2,
             }}
-            >
+          >
             {hasGenomic && (
               <GenomicQueryBuilderButton
                 onClick={() =>
                   setSelectedTool((prev) =>
-                    prev === "genomicQueryBuilder" ? null : "genomicQueryBuilder"
+                    prev === "genomicQueryBuilder"
+                      ? null
+                      : "genomicQueryBuilder"
                   )
                 }
                 selected={selectedTool === "genomicQueryBuilder"}

@@ -87,6 +87,7 @@ export default function FiltersContainer() {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
+
           "& .MuiTabs-indicator": {
             display: "none",
           },
@@ -109,7 +110,8 @@ export default function FiltersContainer() {
               color: tabValue === i ? "#000" : "#9E9E9E",
               marginRight: i !== tabs.length - 1 ? 1.5 : 0,
               backgroundColor: tabValue === i ? "#fff" : "transparent",
-              boxShadow: tabValue === i ? "0px 1px 3px rgba(0,0,0,0.1)" : "none",
+              boxShadow:
+                tabValue === i ? "0px 1px 3px rgba(0,0,0,0.1)" : "none",
               "&:hover": {
                 backgroundColor: tabValue === i ? "#fff" : "#e0e0e0",
               },
@@ -120,7 +122,6 @@ export default function FiltersContainer() {
           />
         ))}
       </Tabs>
-
       <Box
         sx={{
           boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.05)",
@@ -131,10 +132,11 @@ export default function FiltersContainer() {
           backgroundColor: "white",
           mt: "-4px",
           overflow: "hidden",
-        }}>
+        }}
+      >
         {tabs.map((tab, i) => (
           <TabPanel value={tabValue} index={i} key={tab.label}>
-            <Box sx={{ padding: '20px' }}>
+            <Box sx={{ padding: "20px" }}>
               <Typography
                 variant="body1"
                 sx={{
