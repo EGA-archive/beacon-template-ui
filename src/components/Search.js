@@ -58,7 +58,7 @@ export default function Search({
   useEffect(() => {
     const fetchEntryTypes = async () => {
       try {
-        const res = await fetch(`${config.apiUrlNetwork}/map`);
+        const res = await fetch(`${config.apiUrl}/map`);
         // const res = await fetch("/api.json");
         const data = await res.json();
         const endpointSets = data.response.endpointSets || {};

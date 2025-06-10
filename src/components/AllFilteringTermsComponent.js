@@ -24,7 +24,7 @@ export default function AllFilteringTermsComponent() {
   useEffect(() => {
     const fetchFilteringTerms = async () => {
       try {
-        const res = await fetch(`${config.apiUrlNetwork}/filtering_terms`);
+        const res = await fetch(`${config.apiUrl}/filtering_terms`);
         // const res = await fetch("/api.json");
         const data = await res.json();
         setFilteringTerms(data);

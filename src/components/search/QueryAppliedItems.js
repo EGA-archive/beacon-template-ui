@@ -4,7 +4,7 @@ import {
 import FilterLabelRemovable from "../styling/FilterLabelRemovable";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 
-export default function QueryAppliedItems() {
+export default function QueryAppliedItems({ handleFilterRemove }) {
   const { selectedFilter } = useSelectedEntry();
   
   return (

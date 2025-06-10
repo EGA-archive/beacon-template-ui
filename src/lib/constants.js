@@ -41,3 +41,47 @@ export const BEACON_NETWORK_COLUMNS_EXPANDED = {
   'beacon_dataset_detail': '10%',
   'beacon_dataset_contact': '10%'
 }
+
+export const DATASET_TABLE = [
+  {
+    column: 'id',
+    label: 'ID',
+    width: '10%'
+  }, {
+    column: 'name',
+    label: 'Name',
+    width: '50%'
+  }, {
+    column: 'externalUrl',
+    label: 'Url',
+    width: '20%'
+  }, {
+    column: 'version',
+    label: 'Version',
+    width: '10%'
+  }
+];
+
+export const DATASET_TABLE_INDIVIDUAL = [
+  {
+    column: 'id',
+    label: 'Id',
+    width: '20%'
+  }, {
+    column: 'diseases',
+    label: 'Diseases',
+    width: '20%'
+  }, {
+    column: 'geographicOrigin',
+    label: 'Geographic Origin',
+    width: '20%'
+  }, {
+    column: 'phenotypicFeatures',
+    label: 'Phenotypic Features',
+    width: '20%'
+  }, {
+    column: 'sex',
+    label: 'Sex',
+    width: '20%'
+  }
+]

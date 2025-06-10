@@ -55,6 +55,13 @@ export default function CommonFilters() {
         return [...prevFilters, item];
       });
     }
+
+    // mark filter selected
+    markFilterSelected(item)
+  }
+
+  function markFilterSelected(item) {
+    item.stateSelected = item.stateSelected ? !item.stateSelected : true;
   }
 
   const summarySx = {
@@ -110,6 +117,7 @@ export default function CommonFilters() {
                     label={item.label}
                     onClick={() => handleCommonFilterChange(item)}
                     bgColor="common"
+                    stateSelected={item.stateSelected ? item.stateSelected : false }
                   />
                 ))}
               </Box>

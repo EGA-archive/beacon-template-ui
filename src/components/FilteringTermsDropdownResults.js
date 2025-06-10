@@ -40,7 +40,7 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
     const fetchFilteringTerms = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${config.apiUrlNetwork}/filtering_terms`);
+        const response = await fetch(`${config.apiUrl}/filtering_terms`);
         const data = await response.json();
         console.log("✅ API Response:", data);
         setAllTerms(data.response?.filteringTerms || []);

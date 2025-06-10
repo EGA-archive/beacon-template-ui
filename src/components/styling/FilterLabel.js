@@ -2,7 +2,7 @@ import { Chip } from "@mui/material";
 import { alpha, lighten } from "@mui/system";
 import config from "../../config/config.json";
 
-export default function FilterLabel({ label, onClick, bgColor }) {
+export default function FilterLabel({ label, onClick, bgColor, stateSelected }) {
   let backgroundColor = "";
   let hoverColor = "";
 
@@ -14,7 +14,7 @@ export default function FilterLabel({ label, onClick, bgColor }) {
     hoverColor = config.ui.colors.secondary;
   }
 
-  const selectedBgColor = lighten(config.ui.colors.primary, 0.9);
+  let stateColor = stateSelected ? alpha(config.ui.colors.primary, 0.25) : backgroundColor;
 
   return (
     <Chip
@@ -27,7 +27,7 @@ export default function FilterLabel({ label, onClick, bgColor }) {
         height: 32,
         borderRadius: "8px",
         border: "1px solid black",
-        backgroundColor,
+        backgroundColor : stateColor,
         fontSize: "14px",
         fontWeight: 400,
         transition: "background-color 0.2s ease",

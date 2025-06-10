@@ -20,7 +20,7 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 import { lighten } from "@mui/system";
 import { useState } from 'react';
 import ResultsTableRow from './ResultsTableRow';
-const ResultsTableRowModal = lazy(() => import('./ResultsTableRowModal'));
+const ResultsTableModal = lazy(() => import('./modal/ResultsTableModal'));
 
 
 export default function ResultsTable() {
@@ -96,14 +96,14 @@ export default function ResultsTable() {
                     }}>
                     <TableCell sx={{ fontWeight: "bold"  }} style={{ width: BEACON_NETWORK_COLUMNS[0].width }}>
                       <Box display="flex" alignItems="center" gap={1}>
-                        { item.items.length>0  && (
+                        { item.items.length>0 && item.beaconId && (
                             expandedRow && expandedRow.beaconId === item.beaconId ? (
                             <KeyboardArrowDownIcon />
                           ) : (
                             <KeyboardArrowUpIcon />
                           )
                         )}
-                        {item.beaconId}
+                        { item.beaconId ? item.beaconId : item.id }
                       </Box>
                     </TableCell>
                     <TableCell sx={{ fontWeight: "bold"  }} style={{ width: BEACON_NETWORK_COLUMNS[1].width }}>{item.exists ? "Production Beacon" : "Development"}</TableCell>
@@ -115,7 +115,9 @@ export default function ResultsTable() {
                             variant="text"
                             sx={{
                               color: "gray"
-                          }}>
+                            }}
+                            onClick={() => handleRowClicked(item) }
+                            >
                             <CalendarViewMonthIcon /> 
                         </Button>: ''}
                     </TableCell>
@@ -132,7 +134,7 @@ export default function ResultsTable() {
                       </TableCell>
                   </TableRow>
 
-                  {expandedRow && expandedRow.beaconId === item.beaconId && (
+                  {expandedRow && expandedRow.beaconId && expandedRow.beaconId === item.beaconId && (
                     <ResultsTableRow 
                       item={expandedRow} 
                       handleRowClicked={handleRowClicked}  
@@ -146,7 +148,7 @@ export default function ResultsTable() {
       </Paper>
       {selectedSubRow && (
         <Suspense fallback={<div>Loading...</div>}>
-          <ResultsTableRowModal
+          <ResultsTableModal
             subRow={selectedSubRow}
             handleRowClicked={handleRowClicked}
             onClose={() => setSelectedSubRow(null)}

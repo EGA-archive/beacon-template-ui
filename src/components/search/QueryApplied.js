@@ -11,9 +11,19 @@ import config from '../../config/config.json';
 
 
 export default function QueryApplied() {
-  const { selectedFilter, setSelectedFilter } = useSelectedEntry();
+  const { 
+    setSelectedFilter,
+    setLoadingData,
+    setResultData,
+    setHasSearchResult  
+  } = useSelectedEntry();
 
   const handleFilterRemove = (item) => {
+    // If something has change, reload filter
+    setLoadingData(false);
+    setResultData([]);
+    setHasSearchResult(false);
+    
     setSelectedFilter((prevFilters) =>
       prevFilters.filter((filter) => filter.key !== item.key)
     );
@@ -40,7 +50,6 @@ export default function QueryApplied() {
                 fontWeight: 700,
                 fontFamily: '"Open Sans", sans-serif',
                 fontSize: "14px",
-                
               }}
             >
               Query Applied
@@ -61,7 +70,7 @@ export default function QueryApplied() {
               </Button>
             </Box>
           </Box>
-          <QueryAppliedItems />
+          <QueryAppliedItems handleFilterRemove={handleFilterRemove} />
         </Box>
     </Box>
   )
