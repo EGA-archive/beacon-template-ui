@@ -8,15 +8,17 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Button
+  CircularProgress,
+  tableCellClasses
 } from "@mui/material";
+import { styled } from '@mui/material/styles';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import config from '../../../config/config.json';
 import { DATASET_TABLE_INDIVIDUAL } from '../../../lib/constants';
 import ResultsTableModalRow from './ResultsTableModalRow';
 import { useSelectedEntry } from "../../context/SelectedEntryContext";
-
+import Loader from "../../common/Loader";
 
 const parseType = (item) => {
   switch(item) {
@@ -30,16 +32,73 @@ const ResultsTableModalBody = ({ baseItem }) => {
   const [loading, setLoading] = useState(false);
   const [expandedRow, setExpandedRow] = useState(null);
   const { selectedPathSegment } = useSelectedEntry();
-  
+
+  const StyledTableCell = styled(TableCell)(({ theme }) => ({
+    [`&.${tableCellClasses.head}`]: {
+      backgroundColor: theme.palette.primary.main,
+      color: theme.palette.common.white,
+    },
+    [`&.${tableCellClasses.body}`]: {
+      fontSize: 11,
+    },
+    border: `1px solid ${config.ui.colors.darkPrimary}`,
+  }));
+
+  const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    '&:nth-of-type(odd)': {
+      backgroundColor: theme.palette.action.hover,
+    },
+    '&:last-child td': {
+      border: `1px solid ${config.ui.colors.darkPrimary}`,
+    },
+    '&:last-child th': {
+      border: `1px solid white`,
+    }
+  }));
 
   const headerCellStyle = {
-    backgroundColor: config.ui.colors.primary,
+    backgroundColor: config.ui.colors.darkPrimary,
     fontWeight: 700,
     color: "white"
   };
 
-  console.log("base item: " , baseItem);
-  console.log("selectedPathSegment: " , selectedPathSegment);
+  const getDiseases = (row) => {
+    if(row) {
+      let diseasesString = [];
+      row.forEach(element => {
+        let diseases = element.diseaseCode.id + "-" + element.diseaseCode.label;
+        diseasesString.push(diseases);
+      });
+      return diseasesString.join(",");
+    }
+    return "-";
+  }
+
+  const getGeographicOrigin = (row) => {
+    if(row) {
+      return row.id + "-" + row.label;
+    }
+    return "-";
+  }
+
+  const getPhenotypic = (row) => {
+    if(row) {
+      let phenotypicString = [];
+      row.forEach(element => {
+        let phenotypic = element.featureType.id + "-" + element.featureType.label;
+        phenotypicString.push(phenotypic);
+      });
+      return phenotypicString.join(",");
+    }
+    return "-";
+  }
+
+  const getSex = (row) => {
+    if(row) {
+      return row.id + "-" + row.label;
+    }
+    return "-";
+  }
 
   let tableType = parseType(baseItem.setType);
 
@@ -47,13 +106,11 @@ const ResultsTableModalBody = ({ baseItem }) => {
     const fetchTableItems = async () => {
       try {
         setLoading(true);
-
         const res = await fetch(`${config.apiUrl}/${tableType}/${baseItem.id}/${selectedPathSegment}`);
         const data = await res.json();
-
-        console.log("data: " , data.response?.resultSets[0]?.results)
-        setDataTable(data.response?.resultSets[0]?.results);
-
+        let dataFiltered = data.response?.resultSets?.find((item) => item.id === baseItem.id);
+        console.log(dataFiltered.results)
+        setDataTable(dataFiltered.results);
       } catch (err) {
         console.error("Failed to fetch modal table", err);
       } finally {
@@ -65,7 +122,6 @@ const ResultsTableModalBody = ({ baseItem }) => {
   }, []);
 
   const handleRowClick = (item) => {
-    console.log(item)
     if(expandedRow && expandedRow.id === item.id) {
       setExpandedRow(null);
     } else {
@@ -83,13 +139,12 @@ const ResultsTableModalBody = ({ baseItem }) => {
           borderRadius: 0,
         }}
       >
-        { loading && <p> Loading ...</p>}
-
+        { loading && (<Loader message="Loading data..." />)}
         { !loading && dataTable && (
-          <TableContainer>
+          <TableContainer sx={{ maxHeight: 540 }}>
             <Table stickyHeader aria-label="Results table">
               <TableHead>
-                <TableRow>
+                <StyledTableRow>
                   {DATASET_TABLE_INDIVIDUAL.map((column) => (
                     <TableCell
                       key={column.id}
@@ -99,15 +154,14 @@ const ResultsTableModalBody = ({ baseItem }) => {
                       {column.label}
                     </TableCell>
                   ))}
-                </TableRow>
+                </StyledTableRow>
               </TableHead>
               <TableBody>
                 { dataTable.map((item) => (
                   <Fragment key={ item.id }>
-                    <TableRow
+                    <StyledTableRow 
                       hover
                       sx={{
-                        cursor: 'pointer',
                         '&.MuiTableRow-root': {
                           transition: 'background-color 0.2s ease',
                         },
@@ -117,23 +171,26 @@ const ResultsTableModalBody = ({ baseItem }) => {
                         },
                         fontWeight: "bold" 
                       }}>
-                      <TableCell 
-                        sx={{ fontWeight: "bold" }} 
+                      <StyledTableCell 
+                        sx={{ fontSize: "11px" }} 
                         style={{ width: DATASET_TABLE_INDIVIDUAL[0].width }}>
                         <Box display="flex" alignItems="center" gap={1}>
                           { item.beaconId ? item.beaconId : item.id }
-                      </Box>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold"  }} style={{ width: DATASET_TABLE_INDIVIDUAL[1].width }}>
-                        { item[DATASET_TABLE_INDIVIDUAL[1].column] ? item[DATASET_TABLE_INDIVIDUAL[1].column] : '-' }
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold"  }} style={{ width: DATASET_TABLE_INDIVIDUAL[2].width }}>
-                        { DATASET_TABLE_INDIVIDUAL[2].column }
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold"  }} style={{ width: DATASET_TABLE_INDIVIDUAL[3].width }}>
-                        { DATASET_TABLE_INDIVIDUAL[3].column }
-                      </TableCell>
-                    </TableRow>
+                        </Box>
+                      </StyledTableCell >
+                      <StyledTableCell sx={{ fontSize: "11px" }} style={{ width: DATASET_TABLE_INDIVIDUAL[1].width }}>
+                        { item[DATASET_TABLE_INDIVIDUAL[1].column] ? getDiseases(item[DATASET_TABLE_INDIVIDUAL[1].column]) : "-" }
+                      </StyledTableCell >
+                      <StyledTableCell sx={{ fontSize: "11px" }} style={{ width: DATASET_TABLE_INDIVIDUAL[2].width }}>
+                        { item[DATASET_TABLE_INDIVIDUAL[2].column] ? getGeographicOrigin(item[DATASET_TABLE_INDIVIDUAL[2].column]) : "-" }
+                      </StyledTableCell >
+                      <StyledTableCell sx={{ fontSize: "11px" }} style={{ width: DATASET_TABLE_INDIVIDUAL[3].width }}>
+                        { item[DATASET_TABLE_INDIVIDUAL[3].column] ? getPhenotypic(item[DATASET_TABLE_INDIVIDUAL[3].column]) : "-" }
+                      </StyledTableCell >
+                       <StyledTableCell sx={{ fontSize: "11px" }} style={{ width: DATASET_TABLE_INDIVIDUAL[4].width }}>
+                        { item[DATASET_TABLE_INDIVIDUAL[4].column] ? getSex(item[DATASET_TABLE_INDIVIDUAL[4].column]) : "-" }
+                      </StyledTableCell >
+                    </StyledTableRow>
 
                     { expandedRow && expandedRow.id && expandedRow.id === item.id && (
                       <ResultsTableModalRow 
@@ -146,6 +203,7 @@ const ResultsTableModalBody = ({ baseItem }) => {
             </Table>
           </TableContainer>
         )}
+        
       </Paper>
     </Box>
   )

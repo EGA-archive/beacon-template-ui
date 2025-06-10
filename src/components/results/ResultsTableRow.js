@@ -15,7 +15,7 @@ import MailIcon from "../../assets/logos/mail.png";
 import CalendarViewMonthIcon from '@mui/icons-material/CalendarViewMonth';
 import config from '../../config/config.json';
 
-export default function ResultsTableRow({ item, handleRowClicked }) {
+export default function ResultsTableRow({ item, handleOpenModal }) {
   const bgColor = lighten(config.ui.colors.primary, 0.95);
 
   return (
@@ -32,7 +32,7 @@ export default function ResultsTableRow({ item, handleRowClicked }) {
                 <TableBody>
                   { item.items.map((dataset, i) => (
                     <React.Fragment key={i}>
-                      <TableRow>
+                      <TableRow key={i}>
                         <TableCell style={{ width: BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset }}></TableCell>
                         <TableCell style={{ width: BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset_name }}>
                           <Box sx={{ display: 'flex'}}>
@@ -46,7 +46,7 @@ export default function ResultsTableRow({ item, handleRowClicked }) {
                         <TableCell style={{ width: BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset_detail }}>
                           <Button 
                             variant="text"
-                            onClick={ () => handleRowClicked(item) }
+                            onClick={ () => handleOpenModal(item) }
                             sx={{
                               textTransform: "none",
                               fontSize: "14px",

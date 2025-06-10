@@ -27,6 +27,7 @@ export default function ResultsTable() {
   const { resultData } = useSelectedEntry();
   const [expandedRow, setExpandedRow] = useState(null);
   const [selectedSubRow, setSelectedSubRow] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const headerCellStyle = {
     backgroundColor: config.ui.colors.primary,
@@ -48,6 +49,15 @@ export default function ResultsTable() {
     setSelectedSubRow(item);
   }
 
+  const handleOpenModal = (subRow) => {
+    console.log(subRow);
+    setSelectedSubRow(subRow);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
   return (
     <Box>
       <Paper
@@ -110,16 +120,7 @@ export default function ResultsTable() {
                     <TableCell sx={{ fontWeight: "bold"  }} style={{ width: BEACON_NETWORK_COLUMNS[2].width }}>{item.items.length>0 ?  item.items.length + " Datasets" : "-"}</TableCell>
                     <TableCell sx={{ fontWeight: "bold"  }} style={{ width: BEACON_NETWORK_COLUMNS[3].width }}>{item.totalResultsCount>0 ?  item.totalResultsCount : "-"}</TableCell>
                     <TableCell sx={{ fontWeight: "bold"  }} style={{ width: BEACON_NETWORK_COLUMNS[4].width }}>
-                      {item.items.length>0 ? 
-                        <Button 
-                            variant="text"
-                            sx={{
-                              color: "gray"
-                            }}
-                            onClick={() => handleRowClicked(item) }
-                            >
-                            <CalendarViewMonthIcon /> 
-                        </Button>: ''}
+                      
                     </TableCell>
                     <TableCell sx={{ fontWeight: "bold"  }} style={{ width: BEACON_NETWORK_COLUMNS[5].width }}>
                       <img
@@ -136,8 +137,9 @@ export default function ResultsTable() {
 
                   {expandedRow && expandedRow.beaconId && expandedRow.beaconId === item.beaconId && (
                     <ResultsTableRow 
-                      item={expandedRow} 
-                      handleRowClicked={handleRowClicked}  
+                      item={ expandedRow } 
+                      handleRowClicked={ handleRowClicked }
+                      handleOpenModal={ () => handleOpenModal(expandedRow) }
                     />
                   )}
                 </React.Fragment>
@@ -147,11 +149,12 @@ export default function ResultsTable() {
         </TableContainer>
       </Paper>
       {selectedSubRow && (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={ <div>Loading...</div> }>
           <ResultsTableModal
-            subRow={selectedSubRow}
-            handleRowClicked={handleRowClicked}
-            onClose={() => setSelectedSubRow(null)}
+            subRow={ selectedSubRow }
+            handleRowClicked={ handleRowClicked }
+            open={modalOpen}
+            onClose={() => handleCloseModal()}
           />
         </Suspense>
       )}
