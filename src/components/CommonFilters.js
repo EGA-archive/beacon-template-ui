@@ -15,7 +15,6 @@ export default function CommonFilters() {
   const filterCategories = config.ui.commonFilters.filterCategories;
   const filterLabels = config.ui.commonFilters.filterLabels;
   const {
-    selectedFilter,
     setSelectedFilter,
     setExtraFilter,
     setLoadingData,

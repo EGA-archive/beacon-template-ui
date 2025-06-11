@@ -8,12 +8,14 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  Button
+  TableRow
 } from "@mui/material";
-import CalendarViewMonthIcon from '@mui/icons-material/CalendarViewMonth';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import IconButton from '@mui/material/IconButton';
+import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
+import Tooltip from '@mui/material/Tooltip';
 import MailIcon from "../../assets/logos/mail.png";
 import config from '../../config/config.json';
 import { useSelectedEntry } from "../context/SelectedEntryContext";
@@ -50,7 +52,6 @@ export default function ResultsTable() {
   }
 
   const handleOpenModal = (subRow) => {
-    console.log(subRow);
     setSelectedSubRow(subRow);
     setModalOpen(true);
   };
@@ -58,6 +59,13 @@ export default function ResultsTable() {
   const handleCloseModal = () => {
     setModalOpen(false);
   };
+
+  const getErrors = (data) => {
+    return `error code: ${data.error.errorCode}; error message: ${data.error.errorMessage}`;
+  }
+  console.log(resultData);
+
+
   return (
     <Box>
       <Paper
@@ -106,6 +114,13 @@ export default function ResultsTable() {
                     }}>
                     <TableCell sx={{ fontWeight: "bold"  }} style={{ width: BEACON_NETWORK_COLUMNS[0].width }}>
                       <Box display="flex" alignItems="center" gap={1}>
+                        { item.info &&
+                          <Tooltip title={ getErrors(item.info) }>
+                            <IconButton>
+                              <ReportProblemIcon sx={{ color: '#FF8A8A' }} />
+                            </IconButton>
+                          </Tooltip>
+                        }
                         { item.items.length>0 && item.beaconId && (
                             expandedRow && expandedRow.beaconId === item.beaconId ? (
                             <KeyboardArrowDownIcon />

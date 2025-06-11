@@ -10,7 +10,10 @@ export default function SearchButton() {
     selectedPathSegment, 
     setLoadingData,
     setResultData,
-    setHasSearchResult 
+    setHasSearchResult,
+    selectedFilter,
+    beaconsInfo,
+    setBeaconsInfo 
   } = useSelectedEntry();
 
   const handleSearch = async () => {
@@ -19,8 +22,30 @@ export default function SearchButton() {
 
     try {
       // TODO filters items
-      const response = await fetch(`${config.apiUrl}/${selectedPathSegment}`);
-      const data = await response.json();  
+      let url = `${config.apiUrl}/${selectedPathSegment}`;
+      let response;
+      if(selectedFilter.length > 0) {
+        let query = queryBuilder(selectedFilter);
+
+        const requestOptions = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query
+          })
+        };
+        response = await fetch(url, requestOptions);
+      } else {
+        response = await fetch(url);
+      }
+
+      if(!response.ok) {
+        // TODO show error!
+      }
+      
+      const data = await response.json();
 
       // group beacons
       const groupedArray = Object.values(
@@ -56,12 +81,54 @@ export default function SearchButton() {
       );
 
       setResultData(groupedArray);
+
+
     } catch (error) {
       // TODO show msg to user!
       console.error("Search failed", error);
     } finally {
       setHasSearchResult(true)
       setLoadingData(false);
+    }
+  }
+
+  const queryBuilder = (params) => {
+    let filter = {
+      "meta": {
+        "apiVersion": "2.0"
+      },
+      "query": {
+        "filters": []
+      },
+      "includeResultsetResponses": "HIT",
+        "pagination": {
+          "skip": 0,
+          "limit": 10
+      },
+      "testMode": false,
+      "requestedGranularity": "record"
+    }
+
+    let filterData = params.map((item) =>  ({
+      id: item.key,
+      scope: selectedPathSegment
+    }));
+
+    filter.query.filters = filterData;
+    return filter;
+  }
+
+  const handleBeaconsInfo = async () => {
+    try {
+      let url = `${config.apiUrl}/info`;
+      let response = await fetch(url);
+
+      const data = await response.json();
+
+      
+    } catch (error) {
+      // TODO
+      console.error("Search failed", error);
     }
   }
   
