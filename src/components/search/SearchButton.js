@@ -11,9 +11,7 @@ export default function SearchButton() {
     setLoadingData,
     setResultData,
     setHasSearchResult,
-    selectedFilter,
-    beaconsInfo,
-    setBeaconsInfo 
+    selectedFilter
   } = useSelectedEntry();
 
   const handleSearch = async () => {
@@ -81,8 +79,6 @@ export default function SearchButton() {
       );
 
       setResultData(groupedArray);
-
-
     } catch (error) {
       // TODO show msg to user!
       console.error("Search failed", error);
@@ -114,24 +110,10 @@ export default function SearchButton() {
       scope: selectedPathSegment
     }));
 
-    filter.query.filters = filterData;
+    filter.query.filters = filterData;    
     return filter;
   }
 
-  const handleBeaconsInfo = async () => {
-    try {
-      let url = `${config.apiUrl}/info`;
-      let response = await fetch(url);
-
-      const data = await response.json();
-
-      
-    } catch (error) {
-      // TODO
-      console.error("Search failed", error);
-    }
-  }
-  
   return (
     <Button
       variant="contained"

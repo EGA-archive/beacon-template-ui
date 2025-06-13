@@ -24,6 +24,8 @@ const parseType = (item) => {
   switch(item) {
     case 'dataset':
       return 'datasets';
+    default:
+      return null;
   }
 }
 
@@ -35,7 +37,7 @@ const ResultsTableModalBody = ({ baseItem }) => {
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
-      backgroundColor: theme.palette.primary.main,
+      backgroundColor: config.ui.colors.darkPrimary,
       color: theme.palette.common.white,
     },
     [`&.${tableCellClasses.body}`]: {
@@ -63,53 +65,29 @@ const ResultsTableModalBody = ({ baseItem }) => {
   };
 
   const getDiseases = (row) => {
-    if(row) {
-      let diseasesString = [];
-      row.forEach(element => {
-        let diseases = element.diseaseCode.id + "-" + element.diseaseCode.label;
-        diseasesString.push(diseases);
-      });
-      return diseasesString.join(",");
+    if (row) {
+      return row.map(el => `${el.diseaseCode.id}-${el.diseaseCode.label}`).join(", ");
     }
     return "-";
-  }
+  };
 
-  const getGeographicOrigin = (row) => {
-    if(row) {
-      return row.id + "-" + row.label;
-    }
-    return "-";
-  }
+  const getGeographicOrigin = (row) => row ? `${row.id}-${row.label}` : "-";
 
-  const getPhenotypic = (row) => {
-    if(row) {
-      let phenotypicString = [];
-      row.forEach(element => {
-        let phenotypic = element.featureType.id + "-" + element.featureType.label;
-        phenotypicString.push(phenotypic);
-      });
-      return phenotypicString.join(",");
-    }
-    return "-";
-  }
+  const getPhenotypic = (row) => row ? row.map(el => `${el.featureType.id}-${el.featureType.label}`).join(", ") : "-";
 
-  const getSex = (row) => {
-    if(row) {
-      return row.id + "-" + row.label;
-    }
-    return "-";
-  }
+  const getSex = (row) => row ? `${row.id}-${row.label}` : "-";
 
   let tableType = parseType(baseItem.setType);
 
   useEffect(() => {
+    if (!tableType) return; 
+
     const fetchTableItems = async () => {
       try {
         setLoading(true);
         const res = await fetch(`${config.apiUrl}/${tableType}/${baseItem.id}/${selectedPathSegment}`);
         const data = await res.json();
         let dataFiltered = data.response?.resultSets?.find((item) => item.id === baseItem.id);
-        console.log(dataFiltered.results)
         setDataTable(dataFiltered.results);
       } catch (err) {
         console.error("Failed to fetch modal table", err);
@@ -147,7 +125,7 @@ const ResultsTableModalBody = ({ baseItem }) => {
                 <StyledTableRow>
                   {DATASET_TABLE_INDIVIDUAL.map((column) => (
                     <TableCell
-                      key={column.id}
+                      key={column.column}
                       style={{ width: column.width }}
                       sx={headerCellStyle}
                     >
@@ -157,53 +135,58 @@ const ResultsTableModalBody = ({ baseItem }) => {
                 </StyledTableRow>
               </TableHead>
               <TableBody>
-                { dataTable.map((item) => (
-                  <Fragment key={ item.id }>
-                    <StyledTableRow 
-                      hover
-                      sx={{
-                        '&.MuiTableRow-root': {
-                          transition: 'background-color 0.2s ease',
-                        },
-                        '& td': {
-                          borderBottom: '1px solid rgba(224, 224, 224, 1)',
-                          py: 1.5,
-                        },
-                        fontWeight: "bold" 
-                      }}>
-                      <StyledTableCell 
-                        sx={{ fontSize: "11px" }} 
-                        style={{ width: DATASET_TABLE_INDIVIDUAL[0].width }}>
-                        <Box display="flex" alignItems="center" gap={1}>
-                          { item.beaconId ? item.beaconId : item.id }
-                        </Box>
-                      </StyledTableCell >
-                      <StyledTableCell sx={{ fontSize: "11px" }} style={{ width: DATASET_TABLE_INDIVIDUAL[1].width }}>
-                        { item[DATASET_TABLE_INDIVIDUAL[1].column] ? getDiseases(item[DATASET_TABLE_INDIVIDUAL[1].column]) : "-" }
-                      </StyledTableCell >
-                      <StyledTableCell sx={{ fontSize: "11px" }} style={{ width: DATASET_TABLE_INDIVIDUAL[2].width }}>
-                        { item[DATASET_TABLE_INDIVIDUAL[2].column] ? getGeographicOrigin(item[DATASET_TABLE_INDIVIDUAL[2].column]) : "-" }
-                      </StyledTableCell >
-                      <StyledTableCell sx={{ fontSize: "11px" }} style={{ width: DATASET_TABLE_INDIVIDUAL[3].width }}>
-                        { item[DATASET_TABLE_INDIVIDUAL[3].column] ? getPhenotypic(item[DATASET_TABLE_INDIVIDUAL[3].column]) : "-" }
-                      </StyledTableCell >
-                       <StyledTableCell sx={{ fontSize: "11px" }} style={{ width: DATASET_TABLE_INDIVIDUAL[4].width }}>
-                        { item[DATASET_TABLE_INDIVIDUAL[4].column] ? getSex(item[DATASET_TABLE_INDIVIDUAL[4].column]) : "-" }
-                      </StyledTableCell >
-                    </StyledTableRow>
+                { dataTable.map((item) => {
+                  const isExpanded = expandedRow?.id === item.id;
+                  
+                  return (
+                    <Fragment key={ item.id }>
+                      <StyledTableRow
+                        key={`row-${item.id}`}
+                        hover
+                        sx={{
+                          '&.MuiTableRow-root': {
+                            transition: 'background-color 0.2s ease',
+                          },
+                          '& td': {
+                            borderBottom: '1px solid rgba(224, 224, 224, 1)',
+                            py: 1.5,
+                          },
+                          fontWeight: "bold" 
+                        }}>
+                        <StyledTableCell 
+                          sx={{ fontSize: "11px" }} 
+                          style={{ width: DATASET_TABLE_INDIVIDUAL[0].width }}>
+                          <Box display="flex" alignItems="center" gap={1}>
+                            { item.beaconId ? item.beaconId : item.id }
+                          </Box>
+                        </StyledTableCell >
+                        <StyledTableCell sx={{ fontSize: "11px" }} style={{ width: DATASET_TABLE_INDIVIDUAL[1].width }}>
+                          { item[DATASET_TABLE_INDIVIDUAL[1].column] ? getDiseases(item[DATASET_TABLE_INDIVIDUAL[1].column]) : "-" }
+                        </StyledTableCell >
+                        <StyledTableCell sx={{ fontSize: "11px" }} style={{ width: DATASET_TABLE_INDIVIDUAL[2].width }}>
+                          { item[DATASET_TABLE_INDIVIDUAL[2].column] ? getGeographicOrigin(item[DATASET_TABLE_INDIVIDUAL[2].column]) : "-" }
+                        </StyledTableCell >
+                        <StyledTableCell sx={{ fontSize: "11px" }} style={{ width: DATASET_TABLE_INDIVIDUAL[3].width }}>
+                          { item[DATASET_TABLE_INDIVIDUAL[3].column] ? getPhenotypic(item[DATASET_TABLE_INDIVIDUAL[3].column]) : "-" }
+                        </StyledTableCell >
+                        <StyledTableCell sx={{ fontSize: "11px" }} style={{ width: DATASET_TABLE_INDIVIDUAL[4].width }}>
+                          { item[DATASET_TABLE_INDIVIDUAL[4].column] ? getSex(item[DATASET_TABLE_INDIVIDUAL[4].column]) : "-" }
+                        </StyledTableCell >
+                      </StyledTableRow>
 
-                    { expandedRow && expandedRow.id && expandedRow.id === item.id && (
-                      <ResultsTableModalRow 
-                        item={expandedRow} 
-                      />
-                    )}
-                  </Fragment>
-                ))}
+                      { isExpanded && (
+                        <ResultsTableModalRow
+                          key={`expanded-${item.id}`}
+                          item={expandedRow} 
+                        />
+                      )}
+                    </Fragment>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>
         )}
-        
       </Paper>
     </Box>
   )

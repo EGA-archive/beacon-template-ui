@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import { lighten } from "@mui/system";
 import { BEACON_NETWORK_COLUMNS_EXPANDED } from '../../lib/constants';
-import MailIcon from "../../assets/logos/mail.png";
 import CalendarViewMonthIcon from '@mui/icons-material/CalendarViewMonth';
 import config from '../../config/config.json';
 
@@ -43,7 +42,15 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
                         <TableCell sx={{ fontWeight: "bold"  }}  style={{ width: BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset_response }}>
                           { dataset.results.length > 0 ? dataset.results.length : '-' }
                         </TableCell>
-                        <TableCell style={{ width: BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset_detail }}>
+                        <TableCell 
+                          style={{ 
+                            width: BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset_detail.width,
+                            paddingRight: '0px'
+                          }}
+                          align={ 
+                            BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset_detail.float 
+                          }
+                          >
                           <Button 
                             variant="text"
                             onClick={ () => handleOpenModal(item) }
@@ -66,17 +73,6 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
                             }}>
                             <CalendarViewMonthIcon />
                           </Button>
-                        </TableCell>
-                        <TableCell style={{ width: BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset_contact }}>
-                          <img
-                            src={MailIcon}
-                            alt="Contact"
-                            style={{
-                              width: '24px',
-                              height: '24px',
-                              cursor: 'pointer'
-                            }}
-                          />
                         </TableCell>
                       </TableRow>
                     </React.Fragment>

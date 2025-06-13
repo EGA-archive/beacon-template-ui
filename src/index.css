@@ -35,6 +35,10 @@
     calc(0 * var(--d)) calc(-1 * var(--d)) 0 6px;
   animation: l27 1s infinite steps(8);
 }
+
+.table-icon {
+  width: 35px;
+}
 @keyframes l27 {
   100% {
     transform: rotate(1turn);

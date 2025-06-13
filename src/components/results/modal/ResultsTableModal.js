@@ -52,7 +52,8 @@ const ResultsTableRowModal = ({ open, subRow, onClose }) => {
             <Typography id="modal-modal-title" 
               sx={{ 
                 fontWeight: "bold",
-                fontSize: "16px",
+                fontSize: "17px",
+                paddingBottom: "10px",
                 color: `${ config.ui.colors.darkPrimary }`
               }}>
               Results detailed table
@@ -68,16 +69,17 @@ const ResultsTableRowModal = ({ open, subRow, onClose }) => {
                     }}>
                     <Typography sx={{
                       color: "black",
-                      fontWeight: 700,
-                      fontSize: "16px",
-                      paddingRight: "10px"
+                      fontSize: "15px",
+                      paddingRight: "10px",
+                      color: `${ config.ui.colors.darkPrimary }`
                     }}>
                       Beacon:
                     </Typography>
                     <Typography sx={{
                       color: "black",
                       fontWeight: 700,
-                      fontSize: "16px",
+                      fontSize: "15px",
+                      color: `${ config.ui.colors.darkPrimary }`
                     }}>
                       { subRow.beaconId }
                     </Typography>
@@ -87,12 +89,12 @@ const ResultsTableRowModal = ({ open, subRow, onClose }) => {
                   <Box
                     sx={{
                       display: "flex",
-                      paddingTop: "10px",
-                      paddingBottom: "30px"
+                      paddingTop: "1px",
+                      paddingBottom: "10px"
                     }}>
                     <Typography sx={{
                       color: `${ config.ui.colors.darkPrimary }`,
-                      fontSize: "16px",
+                      fontSize: "15px",
                       paddingRight: "10px",
                     }}>
                       Dataset:
@@ -100,7 +102,7 @@ const ResultsTableRowModal = ({ open, subRow, onClose }) => {
                     <Typography sx={{
                       color: `${ config.ui.colors.darkPrimary }`,
                       fontWeight: 700,
-                      fontSize: "16px",
+                      fontSize: "15px",
                     }}>
                       { subRow.id }
                     </Typography>
