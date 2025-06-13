@@ -14,9 +14,9 @@ import config from "../config/config.json";
 import { darken, lighten } from "@mui/system";
 import SearchIcon from "@mui/icons-material/Search";
 import { useSelectedEntry } from "./context/SelectedEntryContext";
-import GenomicQueryBuilderButton from "./GenomicQueryBuilderButton";
-import AllFilteringTermsButton from "./AllFilteringTermsButton";
-import FilteringTermsDropdownResults from "./FilteringTermsDropdownResults";
+import GenomicQueryBuilderButton from "./genomic/GenomicQueryBuilderButton";
+import AllFilteringTermsButton from "./filters/AllFilteringTermsButton";
+import FilteringTermsDropdownResults from "./filters/FilteringTermsDropdownResults";
 import QueryFilter from "./search/QueryApplied";
 import SearchButton from "./search/SearchButton";
 import FilterTermsExtra from "./search/FilterTemsExtra";
@@ -37,12 +37,23 @@ export default function Search({
 
   const searchRef = useRef(null);
 
+  // useEffect(() => {
+  //   if (searchRef.current && onHeightChange) {
+  //     const height = searchRef.current.offsetHeight;
+  //     onHeightChange(height);
+  //   }
+  // }, []);
+
   useEffect(() => {
     if (searchRef.current && onHeightChange) {
-      const height = searchRef.current.offsetHeight;
-      onHeightChange(height);
+      const observer = new ResizeObserver(() => {
+        onHeightChange(searchRef.current.offsetHeight);
+      });
+      observer.observe(searchRef.current);
+
+      return () => observer.disconnect();
     }
-  }, []);
+  }, [onHeightChange]);
 
   const configuredOrder = config.ui.entryTypesOrder;
   const sortEntries = (entries) =>

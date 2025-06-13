@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 .tabpanel {
-  height: 100%;
+  /* height: 485px; */
   min-height: 360px;
 }
 

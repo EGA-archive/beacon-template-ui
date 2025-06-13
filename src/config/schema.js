@@ -33,52 +33,6 @@ const schema = Joi.object({
 
   ui: Joi.object({
     title: Joi.string().min(3).max(100).required(),
-
-    colors: Joi.object({
-      primary: hexColor.required(),
-      secondary: hexColor.required(),
-    }).required(),
-
-    logos: Joi.object({
-      main: Joi.string().uri({ relativeOnly: true }).required(),
-      founders: Joi.array()
-        .items(Joi.string().uri({ relativeOnly: true }))
-        .max(3),
-    }).required(),
-
-    commonFilters: Joi.object({
-      filterCategories: Joi.array()
-        .items(Joi.string().min(1).max(20))
-        .max(3)
-        .required(),
-
-      filterLabels: Joi.object()
-        .pattern(
-          Joi.string().valid(...Joi.ref("...filterCategories")),
-          Joi.array().items(Joi.string().min(1).max(30)).max(6)
-        )
-        .required(),
-    }).required(),
-
-    genomicAnnotations: Joi.object({
-      visibleGenomicCategories: Joi.array()
-        .items(
-          Joi.string().valid(
-            "SNP Examples",
-            "CNV Examples",
-            "Protein Examples",
-            "Molecular Effect"
-          )
-        )
-        .min(1)
-        .required()
-        .messages({
-          "any.required":
-            "visibleGenomicCategories is required under genomicAnnotations",
-          "array.min":
-            "At least one genomicAnnotations category must be provided",
-        }),
-    }).optional(),
     entryTypesOrder: Joi.array()
       .items(Joi.string().valid(...allowedEntryTypes))
       .max(7)
@@ -87,6 +41,52 @@ const schema = Joi.object({
         "array.max": "You can specify a maximum of 7 entry types for ordering.",
       }),
   }).required(),
+  colors: Joi.object({
+    primary: hexColor.required(),
+    secondary: hexColor.required(),
+    tertiary: hexColor.required(),
+  }).required(),
+
+  logos: Joi.object({
+    main: Joi.string().uri({ relativeOnly: true }).required(),
+    founders: Joi.array()
+      .items(Joi.string().uri({ relativeOnly: true }))
+      .max(3),
+  }).required(),
+
+  commonFilters: Joi.object({
+    filterCategories: Joi.array()
+      .items(Joi.string().min(1).max(20))
+      .max(3)
+      .required(),
+
+    filterLabels: Joi.object()
+      .pattern(
+        Joi.string().valid(...Joi.ref("...filterCategories")),
+        Joi.array().items(Joi.string().min(1).max(30)).max(6)
+      )
+      .required(),
+  }).required(),
+
+  genomicAnnotations: Joi.object({
+    visibleGenomicCategories: Joi.array()
+      .items(
+        Joi.string().valid(
+          "SNP Examples",
+          "CNV Examples",
+          "Protein Examples",
+          "Molecular Effect"
+        )
+      )
+      .min(1)
+      .required()
+      .messages({
+        "any.required":
+          "visibleGenomicCategories is required under genomicAnnotations",
+        "array.min":
+          "At least one genomicAnnotations category must be provided",
+      }),
+  }).optional(),
 });
 
 module.exports = schema;

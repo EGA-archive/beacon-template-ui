@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Box, Typography, TextField } from "@mui/material";
-import config from "../config/config.json";
+import config from "../../config/config.json";
 import SearchIcon from "@mui/icons-material/Search";
 import { alpha } from "@mui/material/styles";
 import FilteringTermsTable from "./FilteringTermsTable";
-import { useSelectedEntry } from "./context/SelectedEntryContext";
+import { useSelectedEntry } from "../context/SelectedEntryContext";
 import { InputAdornment, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import Fuse from "fuse.js";
+
+import { searchFilteringTerms } from "../common/filteringTermsHelpers";
 
 export default function AllFilteringTermsComponent() {
   const [filteringTerms, setFilteringTerms] = useState([]);
@@ -39,18 +40,13 @@ export default function AllFilteringTermsComponent() {
   }, []);
 
   useEffect(() => {
-    if (!filteringTerms?.response?.filteringTerms) return;
-
-    const fuse = new Fuse(filteringTerms.response.filteringTerms, {
-      keys: ["id", "label"],
-      threshold: 0.6,
-    });
+    const allTerms = filteringTerms?.response?.filteringTerms ?? [];
 
     if (searchQuery.trim() === "") {
-      setFilteredTerms(filteringTerms.response.filteringTerms);
+      setFilteredTerms(allTerms);
     } else {
-      const results = fuse.search(searchQuery);
-      setFilteredTerms(results.map((res) => res.item));
+      const results = searchFilteringTerms(allTerms, searchQuery);
+      setFilteredTerms(results);
     }
   }, [searchQuery, filteringTerms]);
 

@@ -32,7 +32,7 @@ export default function FilterLabel({ label, onClick, bgColor }) {
         fontWeight: 400,
         transition: "background-color 0.2s ease",
         "&.MuiChip-clickable:hover": {
-          backgroundColor: hoverColor,
+          backgroundColor: "hoverColor",
         },
         "&.Mui-selected": {
           backgroundColor: hoverColor,

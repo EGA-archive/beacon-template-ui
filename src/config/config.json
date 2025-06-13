@@ -1,0 +1,163 @@
+{
+  "beaconType": "networkBeacon",
+  "apiUrl": "https://beacon-spain.ega-archive.org/api",
+  "apiUrlNetwork": "https://beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
+  "apiUrlSingle": "https://beacon-spain.ega-archive.org/api",
+  "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
+  "ui": {
+    "title": "EGA Beacon Network Browser",
+    "entryTypesOrder": [
+      "individuals",
+      "g_variants",
+      "biosamples",
+      "runs",
+      "analyses",
+      "cohorts",
+      "datasets"
+    ],
+    "externalNavBarLink": [
+      {
+        "label": "AF Browser",
+        "url": "https://af-beacon.ega-archive.org/"
+      }
+    ],
+    "showAboutPage": true,
+    "showContactPage": true,
+    "colors": {
+      "primary": "#3176B1",
+      "darkPrimary": "#173D5D",
+      "secondary": "#FFE4D4",
+      "tertiary": "#B1AC31"
+    },
+
+    "logos": {
+      "main": "/assets/logos/main.svg",
+      "founders": [
+        "/assets/logos/founder1.svg",
+        "/assets/logos/founder2.svg",
+        "/assets/logos/founder3.svg"
+      ]
+    },
+    "commonFilters": {
+      "filterCategories": ["Demographics", "Cancer", "Covid"],
+      "filterLabels": {
+        "Demographics": [
+          {
+            "key": "female",
+            "label": "Female",
+            "type": "ontology"
+          },
+          {
+            "key": "male",
+            "label": "Male",
+            "type": "ontology"
+          },
+          {
+            "key": "age_of_onset",
+            "label": "Age Of Onset",
+            "type": "alphanumeric"
+          },
+          {
+            "key": "weight",
+            "label": "Weight",
+            "type": "alphanumeric"
+          },
+          {
+            "key": "height",
+            "label": "Height",
+            "type": "alphanumeric"
+          },
+          {
+            "key": "label6",
+            "label": "label6",
+            "type": "ontology"
+          }
+        ],
+        "Cancer": [
+          {
+            "key": "Colon adenocarcinoma",
+            "label": "Colon adenocarcinoma",
+            "type": "ontology",
+            "id": "NCIT:C4910"
+          },
+          {
+            "key": "Breast Cancer",
+            "label": "Breast Cancer",
+            "type": "ontology",
+            "id": "NCIT:C4872"
+          },
+          {
+            "key": "Radiation therapy",
+            "label": "Radiation therapy",
+            "type": "ontology",
+            "id": "NCIT:C15313"
+          },
+          {
+            "key": "Chemotherapy",
+            "label": "Chemotherapy",
+            "type": "ontology",
+            "id": "NCIT:C15632"
+          },
+          {
+            "key": "Tumor stage I",
+            "label": "Tumor stage I",
+            "type": "ontology",
+            "id": "NCIT:C27966"
+          },
+          {
+            "key": "Oxaliplatin",
+            "label": "Oxaliplatin",
+            "type": "ontology",
+            "id": "NCIT:C65110"
+          }
+        ],
+        "Covid": [
+          {
+            "key": "COVID-19",
+            "label": "COVID-19",
+            "type": "ontology",
+            "id": "NCIT:C171222"
+          },
+          {
+            "key": "Immunocompromised",
+            "label": "Immunocompromised",
+            "type": "ontology",
+            "id": "NCIT:C2851"
+          },
+          {
+            "key": "Asthma",
+            "label": "Asthma",
+            "type": "ontology",
+            "id": "NCIT:C2985"
+          },
+          {
+            "key": "Hospitalization",
+            "label": "Hospitalization",
+            "type": "ontology",
+            "id": "NCIT:C25179"
+          },
+          {
+            "key": "Intubation",
+            "label": "Intubation",
+            "type": "ontology",
+            "id": "NCIT:C38097"
+          },
+          {
+            "key": "Intensive Care Unit Stay",
+            "label": "Intensive Care Unit Stay",
+            "type": "ontology",
+            "id": "NCIT:C25463"
+          }
+        ]
+      }
+    },
+    "genomicAnnotations": {
+      "visibleGenomicCategories": [
+        "SNP Examples",
+        "CNV Examples",
+        "Protein Examples",
+        "Molecular Effect"
+      ]
+    }
+  }
+}

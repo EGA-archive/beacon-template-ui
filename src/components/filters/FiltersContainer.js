@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Box, Tabs, Tab, Typography } from "@mui/material";
 import CommonFilters from "./CommonFilters";
-import GenomicAnnotations from "./GenomicAnnotations";
-import { useSelectedEntry } from "./context/SelectedEntryContext";
+import GenomicAnnotations from "../genomic/GenomicAnnotations";
+import { useSelectedEntry } from "../context/SelectedEntryContext";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -21,7 +21,7 @@ function TabPanel(props) {
   );
 }
 
-export default function FiltersContainer() {
+export default function FiltersContainer({ searchHeight }) {
   const { selectedPathSegment, entryTypes } = useSelectedEntry();
   const [tabValue, setTabValue] = useState(0);
 
@@ -73,17 +73,16 @@ export default function FiltersContainer() {
 
   return (
     <Box>
+      {/* This is the tabs container for: Common Filters and Genomic Annotations. The top part only */}
       <Tabs
         value={tabValue}
         onChange={handleChange}
         aria-label="Filter tabs"
         centered
         sx={{
-          minHeight: "32px",
           backgroundColor: "#F5F5F5",
           borderRadius: "0px",
           padding: "4px",
-          minHeight: "unset",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -93,6 +92,7 @@ export default function FiltersContainer() {
           },
         }}
       >
+        {/* This is for the labels only */}
         {tabs.map((tab, i) => (
           <Tab
             key={tab.label}
@@ -122,6 +122,7 @@ export default function FiltersContainer() {
           />
         ))}
       </Tabs>
+      {/* This is for entire box where the filters are located */}
       <Box
         sx={{
           boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.05)",
@@ -132,6 +133,7 @@ export default function FiltersContainer() {
           backgroundColor: "white",
           mt: "-4px",
           overflow: "hidden",
+          height: `${searchHeight}px`,
         }}
       >
         {tabs.map((tab, i) => (

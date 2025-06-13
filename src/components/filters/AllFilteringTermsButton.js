@@ -1,5 +1,5 @@
-import StyledButton from "./styling/StyledButtons";
-import { ReactComponent as FilterIcon } from "../assets/logos/filteringterms.svg";
+import StyledButton from "../styling/StyledButtons";
+import { ReactComponent as FilterIcon } from "../../assets/logos/filteringterms.svg";
 import PropTypes from "prop-types";
 
 export default function AllFilteringTermsButton({ onClick, selected }) {

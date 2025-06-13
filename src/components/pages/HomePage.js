@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Box } from "@mui/material";
 import Founders from "../Founders";
-import FiltersContainer from "../FiltersContainer";
+import FiltersContainer from "../filters/FiltersContainer";
 import Search from "../Search";
-import AllFilteringTermsComponent from "../AllFilteringTermsComponent";
+import AllFilteringTermsComponent from "../filters/AllFilteringTermsComponent";
 import ResultsContainer from "../results/ResultsContainer";
 
 export default function HomePage({ selectedTool, setSelectedTool }) {
@@ -40,8 +40,8 @@ export default function HomePage({ selectedTool, setSelectedTool }) {
             width: { xs: "100%", md: "338px" },
             maxWidth: "338px",
             flexShrink: 0,
-            top: { md: "122px" },
-            mt: { xs: "0px", md: "37px" },
+            // top: { md: "122px" },
+            mt: { xs: "0px", md: "42px" },
             mb: { xs: "50px", md: "40px", lg: "0px" },
             alignSelf: "flex-start",
             height: `${searchHeight}px`,
@@ -53,7 +53,7 @@ export default function HomePage({ selectedTool, setSelectedTool }) {
             gap: 2,
           }}
         >
-          <FiltersContainer />
+          <FiltersContainer searchHeight={searchHeight} />
         </Box>
         {selectedTool === "allFilteringTerms" && (
           <Box
