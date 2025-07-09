@@ -34,10 +34,7 @@ export default function Search({
   const [searchInput, setSearchInput] = useState("");
   const { selectedPathSegment, setSelectedPathSegment } = useSelectedEntry();
   const [assembly, setAssembly] = useState(config.assemblyId[0]);
-
   const searchRef = useRef(null);
-
-  console.log("selectedFilter", selectedFilter);
 
   useEffect(() => {
     if (searchRef.current && onHeightChange) {
@@ -131,10 +128,6 @@ export default function Search({
   useEffect(() => {
     setActiveInput(selectedPathSegment === "g_variants" ? "genomic" : "filter");
   }, [selectedPathSegment]);
-
-  const selectedEntry = entryTypes.find(
-    (e) => e.pathSegment === selectedPathSegment
-  );
 
   const isSingleEntryType = entryTypes.length === 1;
   const onlyEntryPath = entryTypes[0]?.pathSegment;
@@ -251,38 +244,6 @@ export default function Search({
     }
 
     return (
-      // <Box>
-      // <Box
-      //   onClick={() => setActiveInput(type)}
-      //   sx={{
-      //     flex: activeInput === type ? 1 : 0.3,
-      //     display: "flex",
-      //     alignItems: "center",
-      //     border: `1.5px solid ${primaryDarkColor}`,
-      //     borderRadius: "999px",
-      //     px: 2,
-      //     py: 1,
-      //     cursor: "text",
-      //     backgroundColor: "#fff",
-      //     transition: "flex 0.3s ease",
-      //   }}
-      // >
-      //   <SearchIcon sx={{ color: primaryDarkColor, mr: 1 }} />
-      //   <InputBase
-      //     placeholder="Search by Filtering Terms"
-      //     fullWidth
-      //     value={searchInput}
-      //     onChange={(e) => setSearchInput(e.target.value)}
-      //     sx={{
-      //       fontFamily: '"Open Sans", sans-serif',
-      //       fontSize: "14px",
-      //     }}
-      //   />
-      //   <FilteringTermsDropdownResults searchInput={searchInput} />
-      // </Box>
-
-      // </Box>
-
       <Box
         onClick={() => setActiveInput(type)}
         sx={{
@@ -302,7 +263,7 @@ export default function Search({
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <SearchIcon sx={{ color: primaryDarkColor, mr: 1 }} />
           <InputBase
-            placeholder="Search by Filtering Terms"
+            placeholder="Search by Filtering Terms (min. 1 letter required)"
             fullWidth
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}

@@ -17,17 +17,28 @@ export default function AllFilteringTermsComponent() {
   const [searchQuery, setSearchQuery] = useState("");
   const { selectedPathSegment } = useSelectedEntry();
   const [filteredTerms, setFilteredTerms] = useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const primaryDarkColor = config.ui.colors.darkPrimary;
   const primaryColor = config.ui.colors.primary;
 
   const unselectedBorderColor = alpha(primaryColor, 0.15);
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(event.target.value);
+    setPage(0);
+  };
+
   useEffect(() => {
     const fetchFilteringTerms = async () => {
       try {
-        // const res = await fetch(`${config.apiUrl}/filtering_terms`);
-        const res = await fetch("/api.json");
+        const res = await fetch(`${config.apiUrl}/filtering_terms`);
+        //const res = await fetch("/api.json");
         const data = await res.json();
         setFilteringTerms(data);
       } catch (err) {
@@ -42,7 +53,6 @@ export default function AllFilteringTermsComponent() {
 
   useEffect(() => {
     const allTerms = filteringTerms?.response?.filteringTerms ?? [];
-
     if (searchQuery.trim() === "") {
       setFilteredTerms(allTerms);
     } else {
@@ -140,6 +150,10 @@ export default function AllFilteringTermsComponent() {
           defaultScope={selectedPathSegment}
           searchWasPerformed={searchQuery.trim().length > 0}
           loading={loading}
+          handleChangePage={handleChangePage}
+          handleChangeRowsPerPage={handleChangeRowsPerPage}
+          page={page}
+          rowsPerPage={rowsPerPage}
         />
       </Box>
     </Box>

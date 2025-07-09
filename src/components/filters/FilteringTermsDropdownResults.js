@@ -134,6 +134,7 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
                         : "none",
                     px: 2,
                     py: 1,
+                    cursor: "pointer",
                   }}
                 >
                   <Box

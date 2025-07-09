@@ -69,15 +69,15 @@ export default function HomePage({ selectedTool, setSelectedTool }) {
             />
           </Box>
         )}
-
+      </Box>
+      <Box>
         {selectedTool === "allFilteringTerms" && (
           <Box
             sx={{
               display: "flex",
               justifyContent: "center",
               width: "100%",
-              marginTop: "-40px",
-              marginBottom: "40px",
+              paddingBottom: "40px",
             }}
           >
             <AllFilteringTermsComponent />

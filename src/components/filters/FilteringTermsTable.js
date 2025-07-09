@@ -29,9 +29,12 @@ export default function FilteringTermsTable({
   defaultScope,
   searchWasPerformed,
   loading,
+  handleChangePage,
+  handleChangeRowsPerPage,
+  page,
+  rowsPerPage
 }) {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+
   const [selectedScopes, setSelectedScopes] = useState({});
   const [message, setMessage] = useState(null);
   const {
@@ -68,14 +71,6 @@ export default function FilteringTermsTable({
       ...prev,
       [termId]: scope,
     }));
-  };
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
   };
 
   if (loading) {
@@ -181,7 +176,7 @@ export default function FilteringTermsTable({
                         <TableCell>{term.id}</TableCell>
                         <TableCell>{`${item.label} (${item.type})`}</TableCell>
                         <TableCell>
-                          {item.scopes.length > 1 &&
+                          {item.scopes.length > 0 &&
                             item.scopes.map((scope, i) => {
                               const isSelected =
                                 selectedScopes[term.id] === scope;

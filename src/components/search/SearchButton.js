@@ -46,8 +46,10 @@ export default function SearchButton() {
       const data = await response.json();
 
       // group beacons
+      const rawItems = data?.response?.resultSets ?? data?.response?.collections ?? [];
+
       const groupedArray = Object.values(
-        Object.values(data.response.resultSets).reduce((acc, item) => {
+        Object.values(rawItems).reduce((acc, item) => {
           const isBeaconNetwork = !!item.beaconId;
           const key = isBeaconNetwork ? item.beaconId : item.id;
 
@@ -60,6 +62,7 @@ export default function SearchButton() {
               info: item.info || null,
               totalResultsCount: 0,
               setType: item.setType,
+              description: item.description ?? "",
               items: []
             };
           }

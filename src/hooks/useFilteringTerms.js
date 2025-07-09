@@ -10,10 +10,9 @@ export default function useFilteringTerms() {
     const fetchTerms = async () => {
       setLoading(true);
       try {
-        // const response = await fetch(`${config.apiUrlNetwork}/filtering_terms`);
-        const response = await fetch("/api.json");
+        const response = await fetch(`${config.apiUrlNetwork}/filtering_terms`);
+        //const response = await fetch("/api.json");
         const data = await response.json();
-        console.log("data", data);
         setFilteringTerms(data.response?.filteringTerms || []);
         setError(null);
       } catch (err) {

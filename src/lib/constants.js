@@ -27,7 +27,7 @@ export const BEACON_NETWORK_COLUMNS = [
     id: 'contact',
     label: "Contact",
     width: '10%',
-    align: 'right'
+    align: 'left'
   }
 ];
 
@@ -65,7 +65,7 @@ export const BEACON_SINGLE_COLUMNS = [
     id: "contact",
     label: "Contact",
     width: "10%",
-    align: 'right'
+    align: 'left'
   }
 ];
 
