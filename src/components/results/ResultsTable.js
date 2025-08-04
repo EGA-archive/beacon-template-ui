@@ -152,13 +152,10 @@ export default function ResultsTable() {
                 return (
                   <React.Fragment key={index}>
                     <TableRow
-                      key={index}
                       onClick={() => handleRowClick(item)}
                       sx={{
                         cursor: "pointer",
-                        "&:hover": {
-                          backgroundColor: selectedBgColor,
-                        },
+                        "&:hover": { backgroundColor: selectedBgColor },
                         "&.MuiTableRow-root": {
                           transition: "background-color 0.2s ease",
                         },
@@ -167,47 +164,55 @@ export default function ResultsTable() {
                           py: 1.5,
                         },
                         fontWeight: "bold",
-                      <TableCell sx={{ fontWeight: "bold"  }} style={{ width: BEACON_NETWORK_COLUMNS[0].width }}>
-                        <Box display="flex"  justifyContent="flex-start" alignItems="center" gap={1}>
-                          { item.info &&
-                            <Tooltip title={ getErrors(item.info) }>
-                              <IconButton>
-                                <ReportProblemIcon sx={{ color: "#FF8A8A" }} />
-                              </IconButton>
-                            </Tooltip>
-                          }
-                          { item.description &&
-                            <Tooltip title={ item.description	 ? item.description	: item.name }>
-                              <IconButton>
-                                <InfoIcon sx={{ color: config.ui.colors.primary }} />
-                              </IconButton>
-                            </Tooltip>
-                          }
-                          { item.items.length>0 && item.beaconId && (
-                              expandedRow && expandedRow.beaconId === item.beaconId ? (
-                              <KeyboardArrowDownIcon />
-                            ) : (
-                              <KeyboardArrowUpIcon />
-                            ))}
-                          {iconUrl && (
-                            <img
-                              className="table-icon"
-                              src={iconUrl}
-                              alt="Beacon logo"
-                            />
-                          )}
-                          <span>{ item.beaconId ? item.beaconId : item.id }</span>
-                        </Box>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold"  }} style={{ width: BEACON_NETWORK_COLUMNS[1].width }}>{item.exists ? "Production Beacon" : "Development"}</TableCell>
-                      <TableCell sx={{ fontWeight: "bold"  }} style={{ width: BEACON_NETWORK_COLUMNS[2].width }}>{item.items.length>0 ?  item.items.length + " Datasets" : "-"}</TableCell>
-                      <TableCell sx={{ fontWeight: "bold"  }} style={{ width: BEACON_NETWORK_COLUMNS[3].width }}>
-                        {item.totalResultsCount>0 ?  new Intl.NumberFormat(navigator.language).format(item.totalResultsCount) : "-"}
-                      </TableCell>
-                      { config.beaconType === 'singleBeacon' &&
-                      <TableCell 
-                          style={{ width: BEACON_NETWORK_COLUMNS[3].width }}
-                        >
+                      }}
+                    >
+                    <TableCell sx={{ fontWeight: "bold", width: BEACON_NETWORK_COLUMNS[0].width }}>
+                      <Box display="flex" justifyContent="flex-start" alignItems="center" gap={1}>
+                        {item.info && (
+                          <Tooltip title={getErrors(item.info)}>
+                            <IconButton>
+                              <ReportProblemIcon sx={{ color: "#FF8A8A" }} />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {item.description && (
+                          <Tooltip title={item.description || item.name}>
+                            <IconButton>
+                              <InfoIcon sx={{ color: config.ui.colors.primary }} />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {item.items?.length > 0 && item.beaconId && (
+                          expandedRow?.beaconId === item.beaconId ? (
+                            <KeyboardArrowDownIcon />
+                          ) : (
+                            <KeyboardArrowUpIcon />
+                          )
+                        )}
+                        {iconUrl && (
+                          <img className="table-icon" src={iconUrl} alt="Beacon logo" />
+                        )}
+                        <span>{item.beaconId || item.id}</span>
+                      </Box>
+                    </TableCell>
+
+                    <TableCell sx={{ fontWeight: "bold", width: BEACON_NETWORK_COLUMNS[1].width }}>
+                      {item.exists ? "Production Beacon" : "Development"}
+                    </TableCell>
+
+                    <TableCell sx={{ fontWeight: "bold", width: BEACON_NETWORK_COLUMNS[2].width }}>
+                      {item.items?.length > 0 ? `${item.items.length} Datasets` : "-"}
+                    </TableCell>
+
+                    <TableCell sx={{ fontWeight: "bold", width: BEACON_NETWORK_COLUMNS[3].width }}>
+                      {item.totalResultsCount > 0
+                        ? new Intl.NumberFormat(navigator.language).format(item.totalResultsCount)
+                        : "-"}
+                    </TableCell>
+
+                    {config.beaconType === 'singleBeacon' && (
+                      <TableCell sx={{ width: BEACON_NETWORK_COLUMNS[3].width }}>
+                        {item.totalResultsCount > 0 ? (
                           <Button
                             variant="text"
                             onClick={(e) => {
@@ -222,98 +227,61 @@ export default function ResultsTable() {
                               color: "gray",
                               width: "50px",
                               height: "30px",
-                              minWidth: "30px",
-                              minHeight: "30px",
                               backgroundColor: "transparent",
                               padding: 0,
+                              "&:hover": { color: config.ui.colors.primary },
+                            }}
+                          >
+                            <CalendarViewMonthIcon />
+                          </Button>
+                        ) : "-"}
+                      </TableCell>
+                    )}
+
+                    <TableCell
+                      sx={{ width: BEACON_NETWORK_COLUMNS[4].width }}
+                      align={BEACON_NETWORK_COLUMNS[4].align}
+                    >
+                      {itemEmail && (
+                        <Tooltip title="Contact this beacon" arrow>
+                          <Button
+                            variant="text"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEmail(itemEmail);
+                            }}
+                            sx={{
+                              textTransform: "none",
+                              fontSize: "14px",
+                              fontWeight: 400,
+                              fontFamily: '"Open Sans", sans-serif',
+                              backgroundColor: "transparent",
+                              color: "gray",
+                              width: "50px",
+                              height: "30px",
+                              padding: 0,
+                              transition: "all 0.3s ease",
                               "&:hover": {
                                 color: config.ui.colors.primary,
+                                transform: "scale(1.1)",
                               },
                             }}
                           >
-                            {item.totalResultsCount > 0 ? (
-                              <Button
-                                variant="text"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenModal(item);
-                                }}
-                                sx={{
-                                  textTransform: "none",
-                                  fontSize: "14px",
-                                  fontWeight: 400,
-                                  fontFamily: '"Open Sans", sans-serif',
-                                  color: "gray",
-                                  width: "50px",
-                                  height: "30px",
-                                  minWidth: "30px",
-                                  minHeight: "30px",
-                                  backgroundColor: "transparent",
-                                  padding: 0,
-                                  "&:hover": {
-                                    color: config.ui.colors.primary,
-                                  },
-                                }}
-                              >
-                                <CalendarViewMonthIcon />
-                              </Button>
-                            ) : (
-                              "-"
-                            )}
-                        </TableCell>
-                      }
-                      <TableCell
-                        style={{ 
-                          width: BEACON_NETWORK_COLUMNS[4].width,
-                          align: BEACON_NETWORK_COLUMNS[4].align,
-                        }}
-                        align={ 
-                          BEACON_NETWORK_COLUMNS[4].align
-                        }
-                        >
-                          { itemEmail && (
-                            <Tooltip title="Contact this beacon" arrow>
-                              <Button 
-                                variant="text"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEmail(itemEmail);
-                                }}
-                                sx={{
-                                  textTransform: "none",
-                                  fontSize: "14px",
-                                  fontWeight: 400,
-                                  fontFamily: '"Open Sans", sans-serif',
-                                  backgroundColor: "transparent",
-                                  color: "gray",
-                                  width: "50px",
-                                  height: "30px",
-                                  minWidth: "30px",
-                                  minHeight: "30px",
-                                  padding: 0,
-                                  transition: 'all 0.3s ease',
-                                  "&:hover": {
-                                    color: config.ui.colors.primary,
-                                    transform: 'scale(1.1)'
-                                  },
-                                }}
-                                >
-                                  <MailOutlineIcon />
-                              </Button>
-                            </Tooltip>
-                          )}
-                        </TableCell>
-                    </TableRow>
-
-                    {expandedRow &&
-                      expandedRow.beaconId &&
-                      expandedRow.beaconId === item.beaconId && (
-                        <ResultsTableRow
-                          item={expandedRow}
-                          handleRowClicked={handleRowClicked}
-                          handleOpenModal={() => handleOpenModal(expandedRow)}
-                        />
+                            <MailOutlineIcon />
+                          </Button>
+                        </Tooltip>
                       )}
+                  </TableCell>
+                </TableRow>
+
+
+                    {expandedRow?.beaconId === item.beaconId && (
+                      <ResultsTableRow
+                        item={expandedRow}
+                        handleRowClicked={handleRowClicked}
+                        handleOpenModal={() => handleOpenModal(expandedRow)}
+                      />
+                    )}
                   </React.Fragment>
                 );
               })}

@@ -63,6 +63,8 @@ export default function Search({
   useEffect(() => {
     const fetchEntryTypes = async () => {
       try {
+        await handleBeaconsInfo(); 
+
         const res = await fetch(`${config.apiUrl}/map`);
         const data = await res.json();
         const endpointSets = data.response.endpointSets || {};
@@ -91,11 +93,12 @@ export default function Search({
         if (sorted.length > 0) {
           setSelectedPathSegment(sorted[0].pathSegment);
         }
-        await handleBeaconsInfo();
+         console.log("we start!")
       } catch (err) {
         console.error("Error fetching entry types:", err);
       } finally {
         setLoading(false);
+        console.log("we finish!")
       }
     };
 
@@ -182,6 +185,13 @@ export default function Search({
   const primaryColor = config.ui.colors.primary;
   const primaryDarkColor = config.ui.colors.darkPrimary;
   const selectedBgColor = lighten(primaryDarkColor, 0.9);
+
+  const isReady =
+    !loading &&
+    entryTypes?.length > 0 &&
+    entryTypesConfig &&
+    Object.keys(entryTypesConfig).length > 0 &&
+    true;
 
   const entryTypeDescriptions = {
     analyses: "query analysis metadata (e.g. analysis pipelines, methods)",
@@ -410,7 +420,7 @@ export default function Search({
           </Box>
         )}
 
-        {loading ? (
+        {!isReady ? (
           <CircularProgress />
         ) : !isSingleEntryType ? (
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
