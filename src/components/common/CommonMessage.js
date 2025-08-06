@@ -7,6 +7,8 @@ export const COMMON_MESSAGES = {
   filteringResults: "Filtering results...",
   doubleFilter:
     "This filter is already in use. Choose another one to continue.",
+  doubleValue:
+    "This value is already in use. Please change it to a different one.",
   loadingData: "Loading data...",
   fillFields: "Please fill in all the fields",
   addFilter: "Please apply at least one filter to run this search.",

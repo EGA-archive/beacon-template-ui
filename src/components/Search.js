@@ -205,6 +205,7 @@ export default function Search({
 
   const handleClose = () => {
     setOpen(false);
+    setSelectedTool(null);
   };
 
   const renderInput = (type) => {
@@ -566,6 +567,8 @@ export default function Search({
                 <GenomicQueryBuilderDialog
                   open={open}
                   handleClose={handleClose}
+                  selectedFilter={selectedFilter}
+                  setSelectedFilter={setSelectedFilter}
                 />
               </>
             )}

@@ -1,5 +1,5 @@
 {
-  "beaconType": "singleBeacon",
+  "beaconType": "networkBeacon",
   "apiUrl": "https://beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
   "apiUrlNetwork": "https://beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
   "apiUrlSingle": "https://beacon-spain.ega-archive.org/api",

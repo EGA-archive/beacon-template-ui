@@ -16,6 +16,8 @@ import GenomicLocationBracket from "./querybuilder/GenomicLocationBracket";
 import DefinedVariationSequence from "./querybuilder/DefinedVariationSequence";
 import GenomicSubmitButton from "../genomic/GenomicSubmitButton";
 import { Formik, Form } from "formik";
+import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
+
 import {
   assemblyIdRequired,
   chromosomeValidator,
@@ -45,11 +47,18 @@ const genomicQueryTypes = [
   "Genomic Allele Query (HGVS)",
 ];
 
-export default function GenomicQueryBuilderDialog({ open, handleClose }) {
+export default function GenomicQueryBuilderDialog({
+  open,
+  handleClose,
+  selectedFilter,
+  setSelectedFilter,
+}) {
   // This selectes on load the first query type, without user's interaction
   const [selectedQueryType, setSelectedQueryType] = useState(
     genomicQueryTypes[0]
   );
+  const [selectedInput, setSelectedInput] = useState("variationType");
+  const [duplicateMessage, setDuplicateMessage] = useState("");
 
   // This map links each query type label to the corresponding form component
   // It tells the app which form to display based on the user's selection
@@ -62,15 +71,24 @@ export default function GenomicQueryBuilderDialog({ open, handleClose }) {
   };
 
   // The rules of the validation schema can be checked in the component: genomicQueryBuilderValidator
+  // Validation rules for each query type form
+  // Each type has its own schema to check if required fields are filled
   const validationSchemaMap = {
     GeneID: Yup.object({
+      // Gene ID is required
       geneId,
+
+      // These are optional and validated if present
       refBases: refBasesValidator,
       altBases: altBasesValidator,
       refAa: refAaValidator,
       altAa: altAaValidator,
       aaPosition: aaPositionValidator,
+
+      // Assembly ID is optional in this form
       assemblyId: assemblyIdOptional,
+
+      // Start and end must be numbers and integers if provided
       start: Yup.number()
         .typeError("Start must be a number")
         .integer("Start must be an integer")
@@ -78,6 +96,7 @@ export default function GenomicQueryBuilderDialog({ open, handleClose }) {
       end: Yup.number()
         .typeError("End must be a number")
         .integer("End must be an integer")
+        // If start is filled, end must be >= start
         .when("start", (start, schema) =>
           start
             ? schema.min(start, "End must be greater than or equal to Start")
@@ -85,6 +104,8 @@ export default function GenomicQueryBuilderDialog({ open, handleClose }) {
         )
         .optional(),
     }),
+
+    // This form requires more positional data and variation info
     "Genetic location (Range)": Yup.object({
       assemblyId: assemblyIdRequired,
       chromosome: chromosomeValidator.required("Chromosome is required"),
@@ -98,6 +119,8 @@ export default function GenomicQueryBuilderDialog({ open, handleClose }) {
       minVariantLength,
       maxVariantLength,
     }),
+
+    // Bracket query uses a simpler schema, just needs the chromosome + location range
     "Genetic location aprox (Bracket)": Yup.object({
       assemblyId: assemblyIdRequired,
       chromosome: chromosomeValidator.required("Chromosome is required"),
@@ -105,6 +128,7 @@ export default function GenomicQueryBuilderDialog({ open, handleClose }) {
       end: createEndValidator("End braket", "Start braket"),
     }),
 
+    // This query uses defined start + reference and alternate bases
     "Defined short variation (Sequence)": Yup.object({
       assemblyId: assemblyIdOptional,
       chromosome: chromosomeValidator.required("Chromosome is required"),
@@ -113,6 +137,7 @@ export default function GenomicQueryBuilderDialog({ open, handleClose }) {
       altBases: requiredAltBases,
     }),
 
+    // This is a shortcut query type using HGVS format
     "Genomic Allele Query (HGVS)": Yup.object({
       genomicHGVSshortForm,
     }),
@@ -190,9 +215,71 @@ export default function GenomicQueryBuilderDialog({ open, handleClose }) {
             genomicHGVSshortForm: "",
           }}
           validationSchema={validationSchemaMap[selectedQueryType]}
-          // This handles the form submission
           onSubmit={(values) => {
-            console.log("Form submitted:", values);
+            // These are fields that cannot exist together
+            // If one is filled, the others should be ignored
+            const mutuallyExclusiveGroups = {
+              variationType: ["variationType"],
+              basesChange: ["basesChange", "refBases", "altBases"],
+              aminoacidChange: [
+                "aminoacidChange",
+                "refAa",
+                "altAa",
+                "aaPosition",
+              ],
+            };
+
+            // This is a full list of all exclusive field names
+            const allExclusiveKeys = Object.values(
+              mutuallyExclusiveGroups
+            ).flat();
+
+            // This keeps only the exclusive fields that match the last selected input
+            const allowedExclusiveKeys =
+              mutuallyExclusiveGroups[selectedInput] || [];
+
+            // Go through the form values and filter what should be included
+            const filters = Object.entries(values)
+              .filter(([key, value]) => {
+                if (!value || value.trim() === "") return false;
+
+                // If the field is exclusive, only keep it if it belongs to the selected input group
+                if (allExclusiveKeys.includes(key)) {
+                  return allowedExclusiveKeys.includes(key);
+                }
+
+                // Always include non-exclusive fields (like geneId, chromosome, etc.)
+                return true;
+              })
+
+              // Convert the valid entries into a filter object to be shown in the UI
+              .map(([key, value]) => ({
+                key,
+                id: `${key}-${value}`,
+                label: `${value}`,
+                scope: "genomicQuery",
+                bgColor: "genomic",
+              }));
+
+            // Check for duplicates before saving
+            const existingIds = new Set(selectedFilter.map((f) => f.id));
+            const duplicate = filters.find((f) => existingIds.has(f.id));
+
+            if (duplicate) {
+              setDuplicateMessage(COMMON_MESSAGES.doubleValue);
+
+              // Clear after 5 seconds
+              setTimeout(() => {
+                setDuplicateMessage("");
+              }, 5000);
+
+              return; // prevent submission
+            }
+
+            // No duplicates found – update the filters
+            setSelectedFilter((prev) => [...prev, ...filters]);
+            setDuplicateMessage(""); // clear any previous error
+            handleClose();
           }}
         >
           {({ resetForm, isValid, dirty }) => (
@@ -214,7 +301,17 @@ export default function GenomicQueryBuilderDialog({ open, handleClose }) {
               </Box>
               {/* Render the selected form based on the current query type based on user's selection */}
               <Box sx={{ mt: 4 }}>
-                {SelectedFormComponent && <SelectedFormComponent />}
+                {SelectedFormComponent && (
+                  <SelectedFormComponent
+                    selectedInput={selectedInput}
+                    setSelectedInput={setSelectedInput}
+                  />
+                )}
+              </Box>
+              <Box sx={{ mt: 2, mb: 0 }}>
+                {duplicateMessage && (
+                  <CommonMessage text={duplicateMessage} type="error" />
+                )}
               </Box>
               {/* Submit button is shown at the bottom right of all the query types and is disabled if the form is invalid or untouched */}
               <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
