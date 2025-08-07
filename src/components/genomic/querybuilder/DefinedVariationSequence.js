@@ -3,9 +3,12 @@ import config from "../../../config/config.json";
 import GenomicInputBox from "../GenomicInputBox";
 import { mainBoxTypography } from "../styling/genomicInputBoxStyling";
 
+// This form is used when the user selects "Defined short variation (Sequence)"
+// It collects basic info to describe a variation at a specific position on the genome
 export default function DefinedVariationSequence() {
   return (
     <Box>
+      {/* Wrapper Box for layout spacing */}
       <Box
         sx={{
           mt: 2,
@@ -15,28 +18,18 @@ export default function DefinedVariationSequence() {
           width: "100%",
         }}
       >
+        {/* Section title and explanation */}
         <Typography
           variant="h6"
-          sx={{
-            ...mainBoxTypography,
-            mt: 0,
-            fontWeight: 700,
-            fontSize: "14px",
-          }}
+          sx={{ ...mainBoxTypography, fontWeight: 700, fontSize: "14px" }}
         >
           Main Parameters
         </Typography>
-        <Typography
-          sx={{
-            ...mainBoxTypography,
-            mt: 0,
-            mb: 0,
-          }}
-        >
+        <Typography sx={mainBoxTypography}>
           You need to fill in the fields with a (*)
         </Typography>
 
-        {/* Grid layout for fields */}
+        {/* Inputs are shown in a responsive grid (1 column on mobile, 2 on larger screens) */}
         <Box
           sx={{
             display: "grid",
@@ -48,6 +41,7 @@ export default function DefinedVariationSequence() {
             width: "100%",
           }}
         >
+          {/* Optional: Assembly ID from config */}
           <GenomicInputBox
             name="assemblyId"
             label="Assembly ID"
@@ -56,6 +50,7 @@ export default function DefinedVariationSequence() {
             options={config.assemblyId}
             required={false}
           />
+          {/* Required: Chromosome where the variation occurs */}
           <GenomicInputBox
             name="chromosome"
             label="Chromosome"
@@ -63,6 +58,7 @@ export default function DefinedVariationSequence() {
             description={"Select the reference value:"}
             required={true}
           />
+          {/* Required: Start position of the variation */}
           <GenomicInputBox
             name="start"
             label="Start"
@@ -70,6 +66,7 @@ export default function DefinedVariationSequence() {
             placeholder="ex. 7572837"
             required={true}
           />
+          {/* Required: Change in DNA bases, shown as two fields (ref and alt) */}
           <GenomicInputBox
             name="basesChange"
             label="Bases Change"

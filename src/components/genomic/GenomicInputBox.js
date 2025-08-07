@@ -11,6 +11,11 @@ import {
 import AminoAcidChangeFields from "./sharedFields/AminoAcidChangeFields";
 import BasesChangeFields from "./sharedFields/BasesChangeFields";
 
+/**
+ * This is a reusable input component tailored for genomic query building.
+ * Dynamically renders a TextField, Select, or customized components
+ * like `BasesChangeFields` or `AminoAcidChangeFields` based on the `name` or passed props.
+ **/
 export default function GenomicInputBox({
   name,
   label,
@@ -28,12 +33,18 @@ export default function GenomicInputBox({
   customAltPlaceholder,
   customPaddingTop,
 }) {
+  // Connect this field to Formik (value, error, helpers)
   const [field, meta, helpers] = useField(name);
+  // Show error only if user touched the field
   const error = meta.touched && meta.error;
+  // Main color imported from the config.file
   const primaryDarkColor = config.ui.colors.darkPrimary;
+  // Disable input if it's selectable but not the active one
   const isDisabled = isSelectable && !isSelected;
 
+  // This function returns different field types based on input name or options
   const renderFieldByType = () => {
+    // Show custom fields if name is "basesChange"
     if (name === "basesChange") {
       return (
         <BasesChangeFields
@@ -46,8 +57,10 @@ export default function GenomicInputBox({
         />
       );
     }
+    // Show custom fields if name is "aminoacidChange"
     if (name === "aminoacidChange")
       return <AminoAcidChangeFields isDisabled={isDisabled} />;
+    // If the input requires options, then it renders a dropdown menu
     if (options.length > 0) {
       return (
         <Select
@@ -55,7 +68,7 @@ export default function GenomicInputBox({
           IconComponent={KeyboardArrowDownIcon}
           displayEmpty
           {...field}
-          onChange={(e) => helpers.setValue(e.target.value)}
+          onChange={(e) => helpers.setValue(e.target.value)} // Update Formik value
           error={!!error}
           disabled={isDisabled}
           sx={{
@@ -94,6 +107,8 @@ export default function GenomicInputBox({
         </Select>
       );
     }
+
+    // Default case: render a standard text field
     return (
       <TextField
         fullWidth
@@ -121,6 +136,7 @@ export default function GenomicInputBox({
     );
   };
 
+  // Final return: wrapper box with label and dynamic input
   return (
     <Box
       sx={{
@@ -131,6 +147,7 @@ export default function GenomicInputBox({
         opacity: isDisabled ? 0.5 : 1,
       }}
     >
+      {/* Top label + optional select logic */}
       <FieldHeader
         label={label}
         required={required}
@@ -138,7 +155,9 @@ export default function GenomicInputBox({
         isSelected={isSelected}
         onSelect={onSelect}
       />
+      {/* Optional description */}
       {description && <FieldLabel>{description}</FieldLabel>}
+      {/* Render the correct input */}
       {renderFieldByType()}
     </Box>
   );

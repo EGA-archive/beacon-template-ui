@@ -1,14 +1,18 @@
-import { useState } from "react";
 import { Box, Typography } from "@mui/material";
 import config from "../../../config/config.json";
 import GenomicInputBox from "../GenomicInputBox";
 import { mainBoxTypography } from "../styling/genomicInputBoxStyling";
 
-export default function GenomicLocationRage() {
-  const [selectedInput, setSelectedInput] = useState("variationType");
-
+// This component renders the "Genetic Location (Range)" form
+// It is used inside the Genomic Query Builder dialog
+// It receives the currently selected optional input from the parent component
+export default function GenomicLocationRage({
+  selectedInput,
+  setSelectedInput,
+}) {
   return (
     <Box>
+      {/* Main container split in two sections: Main and Optional parameters */}
       <Box
         sx={{
           mt: 2,
@@ -17,7 +21,9 @@ export default function GenomicLocationRage() {
           width: "100%",
         }}
       >
+        {/* Left side - Main Parameters (required inputs) */}
         <Box sx={{ width: "30%" }}>
+          {/* Title and helper text */}
           <Typography
             variant="h6"
             sx={{
@@ -29,14 +35,11 @@ export default function GenomicLocationRage() {
           >
             Main Parameters
           </Typography>
-          <Typography
-            sx={{
-              ...mainBoxTypography,
-              mt: 0,
-            }}
-          >
+          <Typography sx={{ ...mainBoxTypography, mt: 0 }}>
             You need to fill in the fields with a (*)
           </Typography>
+
+          {/* Required fields like assemblyId, chromosome, start and end */}
           <Box
             sx={{
               display: "flex",
@@ -45,6 +48,7 @@ export default function GenomicLocationRage() {
               width: "100%",
             }}
           >
+            {/* Dropdown for Assembly ID */}
             <GenomicInputBox
               name="assemblyId"
               label="Assembly ID"
@@ -52,13 +56,16 @@ export default function GenomicLocationRage() {
               options={config.assemblyId}
               required={true}
             />
+
+            {/* Text input for Chromosome */}
             <GenomicInputBox
-              // In the range context chromosome is also reference name
               name="chromosome"
               label="Chromosome"
               placeholder="ex. Chr 1 (NC_000001.11)"
               required={true}
             />
+
+            {/* Start and End fields rendered side-by-side */}
             <Box
               sx={{
                 display: "flex",
@@ -88,6 +95,7 @@ export default function GenomicLocationRage() {
           </Box>
         </Box>
 
+        {/* Right side - Optional Parameters (select only one of the three mutually exclusive ones) */}
         <Box sx={{ width: "70%" }}>
           <Typography
             variant="h6"
@@ -100,16 +108,11 @@ export default function GenomicLocationRage() {
           >
             Optional parameters
           </Typography>
-          <Typography
-            sx={{
-              ...mainBoxTypography,
-              mt: 0,
-            }}
-          >
+          <Typography sx={{ ...mainBoxTypography, mt: 0 }}>
             Please select one:
           </Typography>
 
-          {/* Optional Input Row */}
+          {/* Optional inputs: only one should be selected at a time */}
           <Box
             sx={{
               display: "flex",
@@ -120,6 +123,7 @@ export default function GenomicLocationRage() {
               borderRadius: "10px",
             }}
           >
+            {/* Variation Type dropdown */}
             <Box sx={{ flex: 1 }}>
               <GenomicInputBox
                 name="variationType"
@@ -133,6 +137,7 @@ export default function GenomicLocationRage() {
               />
             </Box>
 
+            {/* Bases Change text input */}
             <Box sx={{ flex: 1 }}>
               <GenomicInputBox
                 name="basesChange"
@@ -144,6 +149,7 @@ export default function GenomicLocationRage() {
               />
             </Box>
 
+            {/* Aminoacid Change text input */}
             <Box sx={{ flex: 1 }}>
               <GenomicInputBox
                 name="aminoacidChange"
@@ -156,11 +162,11 @@ export default function GenomicLocationRage() {
             </Box>
           </Box>
 
+          {/* Min and Max variant length are not exclusive, both can be filled */}
           <Typography sx={mainBoxTypography}>
             You can add the Variant Length
           </Typography>
 
-          {/* Genomic Location Row */}
           <Box
             sx={{
               display: "flex",

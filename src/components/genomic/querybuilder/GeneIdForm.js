@@ -1,11 +1,9 @@
-import { useState } from "react";
 import { Box, Typography } from "@mui/material";
 import config from "../../../config/config.json";
 import GenomicInputBox from "../GenomicInputBox";
 import { mainBoxTypography } from "../styling/genomicInputBoxStyling";
 
-export default function GeneIdForm() {
-  const [selectedInput, setSelectedInput] = useState("variationType");
+export default function GeneIdForm({ selectedInput, setSelectedInput }) {
   return (
     <Box>
       <Box
@@ -16,6 +14,7 @@ export default function GeneIdForm() {
           width: "100%",
         }}
       >
+        {/* Left panel: Gene ID */}
         <Box sx={{ width: "30%" }}>
           <Typography
             variant="h6"
@@ -28,22 +27,18 @@ export default function GeneIdForm() {
           >
             Main Parameters
           </Typography>
-          <Typography
-            sx={{
-              ...mainBoxTypography,
-              mt: 0,
-            }}
-          >
+          <Typography sx={mainBoxTypography}>
             You need to fill in the fields with a (*)
           </Typography>
           <GenomicInputBox
             name="geneId"
             label="Gene ID"
             placeholder="ex. BRAF"
-            required={true}
+            required
           />
         </Box>
 
+        {/* Right panel: Optional mutually exclusive inputs */}
         <Box sx={{ width: "70%" }}>
           <Typography
             variant="h6"
@@ -56,16 +51,9 @@ export default function GeneIdForm() {
           >
             Optional parameters
           </Typography>
-          <Typography
-            sx={{
-              ...mainBoxTypography,
-              mt: 0,
-            }}
-          >
-            Please select one:
-          </Typography>
+          <Typography sx={mainBoxTypography}>Please select one:</Typography>
 
-          {/* Optional Input Row */}
+          {/* Mutually exclusive inputs */}
           <Box
             sx={{
               display: "flex",
@@ -114,7 +102,7 @@ export default function GeneIdForm() {
             You can add the Genomic Location
           </Typography>
 
-          {/* Genomic Location Row */}
+          {/* Genomic location */}
           <Box
             sx={{
               display: "flex",

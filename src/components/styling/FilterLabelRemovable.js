@@ -76,9 +76,9 @@ export default function FilterLabelRemovable({
       sx={{
         display: isSimple ? "inline-flex" : "flex",
         flexDirection: isSimple ? "row" : "column",
+        flexWrap: "wrap",
         alignItems: isSimple ? "center" : "flex-start",
         justifyContent: isSimple ? "center" : "flex-start",
-        height: isSimple ? 32 : "auto",
         padding: isSimple ? "4px 12px" : isExpanded ? "9px 12px" : "4px 12px",
         borderRadius: "8px",
         border: "1px solid black",
@@ -91,7 +91,7 @@ export default function FilterLabelRemovable({
           backgroundColor: `${hoverColor} !important`,
         },
         maxWidth: isExpanded ? "400px" : "auto",
-        maxHeight: isExpanded ? "auto" : 32,
+        height: isExpanded ? "auto" : "fit-content",
       }}
       onClick={() => {
         if (isSimple && typeof onClick === "function") {
