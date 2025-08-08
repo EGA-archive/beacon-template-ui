@@ -1,6 +1,7 @@
 import Alert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
 
+// Reusable messages used across the app
 export const COMMON_MESSAGES = {
   noMatch: "No match found. Try another filter.",
   loadingTerms: "Loading filtering terms...",
@@ -14,7 +15,9 @@ export const COMMON_MESSAGES = {
   addFilter: "Please apply at least one filter to run this search.",
 };
 
+// Reusable component to display messages (error or success)
 export default function CommonMessage({ text, type }) {
+  // Determine alert style based on message type
   const severity = type === "error" ? "error" : "success";
 
   return (

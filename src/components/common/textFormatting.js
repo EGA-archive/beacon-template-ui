@@ -1,7 +1,12 @@
+/* Contains helpers and fixed values used in the app for data formatting and validation of certain biological codes.
+ */
+
+// Capitalizes the first letter of a word and makes the rest lowercase
 export function capitalize(word) {
   return word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
 }
 
+// Maps URL path segments to their corresponding entry type IDs
 export const PATH_SEGMENT_TO_ENTRY_ID = {
   individuals: "individual",
   biosamples: "biosample",
@@ -12,6 +17,7 @@ export const PATH_SEGMENT_TO_ENTRY_ID = {
   runs: "run",
 };
 
+// List of valid single-letter amino acid codes (plus "*" for stop)
 export const VALID_SINGLE_CODES = [
   "A",
   "C",
@@ -37,6 +43,7 @@ export const VALID_SINGLE_CODES = [
   "*",
 ];
 
+// List of valid three-letter amino acid codes
 export const VALID_THREE_LETTER = [
   "Ala",
   "Cys",

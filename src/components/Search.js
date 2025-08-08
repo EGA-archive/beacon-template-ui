@@ -27,14 +27,32 @@ export default function Search({
   selectedTool,
   setSelectedTool,
 }) {
-  const { entryTypes, setEntryTypes, setBeaconsInfo } = useSelectedEntry();
-  const { entryTypesConfig, setEntryTypesConfig } = useSelectedEntry();
-  const { selectedFilter, setSelectedFilter } = useSelectedEntry();
-  const { extraFilter, hasSearchResults } = useSelectedEntry();
+  const {
+    // entry types + config
+    entryTypes,
+    setEntryTypes,
+    entryTypesConfig,
+    setEntryTypesConfig,
+
+    // filters
+    selectedFilter,
+    setSelectedFilter,
+    extraFilter,
+
+    // where results go
+    setBeaconsInfo,
+
+    // selected tab
+    selectedPathSegment,
+    setSelectedPathSegment,
+
+    // the text staged for the left genomic input
+    genomicDraft,
+    setGenomicDraft,
+  } = useSelectedEntry();
   const [loading, setLoading] = useState(true);
   const [activeInput, setActiveInput] = useState(null);
   const [searchInput, setSearchInput] = useState("");
-  const { selectedPathSegment, setSelectedPathSegment } = useSelectedEntry();
   const [assembly, setAssembly] = useState(config.assemblyId[0]);
   const [open, setOpen] = useState(false);
   const searchRef = useRef(null);
@@ -208,68 +226,128 @@ export default function Search({
     setSelectedTool(null);
   };
 
+  // Adds the current genomicDraft as a label and clears the input
+  const commitGenomicDraft = () => {
+    const val = (genomicDraft || "").trim();
+    if (!val) return;
+
+    // Create a unique id every time so deletion only removes the correct chip
+    const uniqueId = `genomic-free-${Date.now().toString(36)}-${Math.random()
+      .toString(36)
+      .slice(2, 7)}`;
+
+    const newGenomicFilter = {
+      id: uniqueId,
+      key: uniqueId,
+      label: val,
+      scope: "genomicQuery",
+      bgColor: "genomic",
+    };
+
+    // Optional: prevent adding the same label twice
+    const isDuplicate = selectedFilter.some(
+      (f) => f.key === uniqueId && f.label === val
+    );
+    if (!isDuplicate) {
+      setSelectedFilter((prev) => [...prev, newGenomicFilter]);
+    }
+
+    setGenomicDraft(""); // clear the input after adding
+  };
+
   const renderInput = (type) => {
     if (type === "genomic") {
       return (
         <Box
-          onClick={() => setActiveInput(type)}
           sx={{
-            flex: activeInput === type ? 1 : 0.3,
             display: "flex",
-            alignItems: "center",
-            border: `1.5px solid ${primaryDarkColor}`,
-            borderRadius: "999px",
-            backgroundColor: "#fff",
-            transition: "flex 0.3s ease",
+            flexDirection: "column",
+            gap: 1,
+            flex: activeInput === type ? 1 : 0.3,
           }}
         >
-          {activeInput === "genomic" && (
-            <Select
-              value={assembly}
-              onChange={(e) => setAssembly(e.target.value)}
-              variant="standard"
-              disableUnderline
-              IconComponent={KeyboardArrowDownIcon}
-              sx={{
-                backgroundColor: "black",
-                color: "#fff",
-                fontSize: "12px",
-                fontWeight: 700,
-                fontFamily: '"Open Sans", sans-serif',
-                pl: 3,
-                pr: 2,
-                py: 0,
-                height: "47px",
-                borderTopLeftRadius: "999px",
-                borderBottomLeftRadius: "999px",
-                ".MuiSelect-icon": {
+          {/* Genomic input row */}
+          <Box
+            onClick={() => setActiveInput(type)}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              border: `1.5px solid ${primaryDarkColor}`,
+              borderRadius: "999px",
+              backgroundColor: "#fff",
+              transition: "flex 0.3s ease",
+            }}
+          >
+            {activeInput === "genomic" && (
+              <Select
+                value={assembly}
+                onChange={(e) => setAssembly(e.target.value)}
+                variant="standard"
+                disableUnderline
+                IconComponent={KeyboardArrowDownIcon}
+                sx={{
+                  backgroundColor: "black",
                   color: "#fff",
-                  mr: 1,
-                },
-              }}
-            >
-              {config.assemblyId.map((id) => (
-                <MenuItem key={id} value={id} sx={{ fontSize: "12px" }}>
-                  {id}
-                </MenuItem>
-              ))}
-            </Select>
-          )}
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  fontFamily: '"Open Sans", sans-serif',
+                  pl: 3,
+                  pr: 2,
+                  py: 0,
+                  height: "47px",
+                  borderTopLeftRadius: "999px",
+                  borderBottomLeftRadius: "999px",
+                  ".MuiSelect-icon": { color: "#fff", mr: 1 },
+                }}
+              >
+                {config.assemblyId.map((id) => (
+                  <MenuItem key={id} value={id} sx={{ fontSize: "12px" }}>
+                    {id}
+                  </MenuItem>
+                ))}
+              </Select>
+            )}
 
-          <Box sx={{ px: 1, color: primaryDarkColor }}>
-            <SearchIcon />
+            <Box sx={{ px: 1, color: primaryDarkColor }}>
+              <SearchIcon />
+            </Box>
+
+            <InputBase
+              placeholder="Search by Genomic Query"
+              fullWidth
+              value={genomicDraft}
+              onChange={(e) => setGenomicDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitGenomicDraft();
+              }}
+              sx={{
+                fontFamily: '"Open Sans", sans-serif',
+                fontSize: "14px",
+                pr: 2,
+                height: "47px",
+              }}
+            />
           </Box>
 
-          <InputBase
-            placeholder="Search by Genomic Query"
-            fullWidth
-            sx={{
-              fontFamily: '"Open Sans", sans-serif',
-              fontSize: "14px",
-              pr: 2,
-              height: "47px",
-            }}
-          />
+          {/* Staging bar (appears only when there's text) */}
+          {genomicDraft?.trim() && (
+            <Box
+              role="button"
+              onClick={commitGenomicDraft}
+              sx={{
+                border: `1px solid ${primaryDarkColor}`,
+                borderRadius: "999px",
+                backgroundColor: "#fff",
+                px: 2,
+                py: 1,
+                cursor: "pointer",
+                fontFamily: '"Open Sans", sans-serif',
+                fontSize: "12px",
+              }}
+            >
+              Add the genomic query: <b>{genomicDraft}</b>
+            </Box>
+          )}
         </Box>
       );
     }
@@ -289,6 +367,7 @@ export default function Search({
           position: "relative", // anchors dropdown here
           px: 2,
           py: 1,
+          height: "47px",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center" }}>
