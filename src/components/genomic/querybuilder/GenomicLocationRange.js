@@ -19,10 +19,20 @@ export default function GenomicLocationRage({
           display: "flex",
           gap: 6,
           width: "100%",
+          "@media (max-width:1095px)": {
+            flexDirection: "column",
+          },
         }}
       >
         {/* Left side - Main Parameters (required inputs) */}
-        <Box sx={{ width: "30%" }}>
+        <Box
+          sx={{
+            width: "30%",
+            "@media (max-width:1095px)": {
+              width: "100%",
+            },
+          }}
+        >
           {/* Title and helper text */}
           <Typography
             variant="h6"
@@ -96,7 +106,14 @@ export default function GenomicLocationRage({
         </Box>
 
         {/* Right side - Optional Parameters (select only one of the three mutually exclusive ones) */}
-        <Box sx={{ width: "70%" }}>
+        <Box
+          sx={{
+            width: "70%",
+            "@media (max-width:1095px)": {
+              width: "100%",
+            },
+          }}
+        >
           <Typography
             variant="h6"
             sx={{
@@ -119,12 +136,12 @@ export default function GenomicLocationRage({
               flexDirection: "row",
               gap: 2,
               width: "100%",
-              justifyContent: "space-between",
+              flexWrap: "wrap",
               borderRadius: "10px",
             }}
           >
             {/* Variation Type dropdown */}
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: "1 1 200px" }}>
               <GenomicInputBox
                 name="variationType"
                 label="Variation Type"
@@ -138,7 +155,7 @@ export default function GenomicLocationRage({
             </Box>
 
             {/* Bases Change text input */}
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: "1 1 200px" }}>
               <GenomicInputBox
                 name="basesChange"
                 label="Bases Change"
@@ -150,7 +167,7 @@ export default function GenomicLocationRage({
             </Box>
 
             {/* Aminoacid Change text input */}
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: "1 1 200px" }}>
               <GenomicInputBox
                 name="aminoacidChange"
                 label="Aminoacid Change"
@@ -173,11 +190,11 @@ export default function GenomicLocationRage({
               flexDirection: "row",
               gap: 2,
               width: "100%",
-              justifyContent: "space-between",
+              flexWrap: "wrap",
               borderRadius: "10px",
             }}
           >
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: "1 1 200px" }}>
               <GenomicInputBox
                 name="minVariantLength"
                 label="Min Variant Length"
@@ -187,7 +204,7 @@ export default function GenomicLocationRage({
               />
             </Box>
 
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: "1 1 200px" }}>
               <GenomicInputBox
                 name="maxVariantLength"
                 label="Max Variant Length"

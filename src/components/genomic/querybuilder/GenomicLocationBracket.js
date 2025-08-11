@@ -15,18 +15,38 @@ export default function GenomicLocationBracket() {
           display: "flex",
           gap: 6,
           width: "100%",
+          "@media (max-width: 734px)": {
+            flexDirection: "column",
+          },
         }}
       >
         {/* LEFT COLUMN: Required Fields */}
-        <Box sx={{ width: "60%" }}>
+        <Box
+          sx={{
+            width: "60%",
+            "@media (max-width: 734px)": {
+              width: "100%",
+            },
+          }}
+        >
           {/* Section title and guidance text */}
           <Typography
             variant="h6"
-            sx={{ ...mainBoxTypography, fontWeight: 700, fontSize: "14px" }}
+            sx={{
+              ...mainBoxTypography,
+              mt: 0,
+              fontWeight: 700,
+              fontSize: "14px",
+            }}
           >
             Main Parameters
           </Typography>
-          <Typography sx={mainBoxTypography}>
+          <Typography
+            sx={{
+              ...mainBoxTypography,
+              mt: 0,
+            }}
+          >
             You need to fill in the fields with a (*)
           </Typography>
 
@@ -72,14 +92,31 @@ export default function GenomicLocationBracket() {
         </Box>
 
         {/* RIGHT COLUMN: Optional Fields */}
-        <Box sx={{ width: "40%" }}>
+        <Box
+          sx={{
+            width: "40%",
+            "@media (max-width: 734px)": {
+              width: "100%",
+            },
+          }}
+        >
           <Typography
             variant="h6"
-            sx={{ ...mainBoxTypography, fontWeight: 700, fontSize: "14px" }}
+            sx={{
+              ...mainBoxTypography,
+              mt: 0,
+              fontWeight: 700,
+              fontSize: "14px",
+            }}
           >
             Optional parameters
           </Typography>
-          <Typography sx={mainBoxTypography}>
+          <Typography
+            sx={{
+              ...mainBoxTypography,
+              mt: 0,
+            }}
+          >
             You can add the Variant Length
           </Typography>
 

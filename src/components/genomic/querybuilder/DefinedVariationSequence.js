@@ -14,18 +14,28 @@ export default function DefinedVariationSequence() {
           mt: 2,
           display: "flex",
           flexDirection: "column",
-          gap: 2,
           width: "100%",
         }}
       >
         {/* Section title and explanation */}
         <Typography
           variant="h6"
-          sx={{ ...mainBoxTypography, fontWeight: 700, fontSize: "14px" }}
+          sx={{
+            ...mainBoxTypography,
+            mt: 0,
+            fontWeight: 700,
+            fontSize: "14px",
+          }}
         >
           Main Parameters
         </Typography>
-        <Typography sx={mainBoxTypography}>
+
+        <Typography
+          sx={{
+            ...mainBoxTypography,
+            mt: 0,
+          }}
+        >
           You need to fill in the fields with a (*)
         </Typography>
 
@@ -33,9 +43,9 @@ export default function DefinedVariationSequence() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr",
-              sm: "1fr 1fr",
+            gridTemplateColumns: "1fr", // default: 1 col
+            "@media (min-width:670px)": {
+              gridTemplateColumns: "1fr 1fr", // two cols from 670px+
             },
             gap: 2,
             width: "100%",

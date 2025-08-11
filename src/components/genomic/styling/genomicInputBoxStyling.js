@@ -22,6 +22,10 @@ export const mainBoxTypography = {
   fontWeight: 400,
   fontSize: "12px",
   color: primaryDarkColor,
+  whiteSpace: "normal",
+  "@media (min-width:750px)": {
+    whiteSpace: "nowrap",
+  },
 };
 
 export const textFieldStyle = {

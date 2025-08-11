@@ -10,7 +10,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import StyledGenomicLabels from "./styling/StyledGenomicLabels";
 import GeneIdForm from "./querybuilder/GeneIdForm";
-import GenomicLocationRage from "./querybuilder/GenomicLocationRage";
+import GenomicLocationRage from "./querybuilder/GenomicLocationRange";
 import GenomicAlleleQuery from "./querybuilder/GenomicAlleleQuery";
 import GenomicLocationBracket from "./querybuilder/GenomicLocationBracket";
 import DefinedVariationSequence from "./querybuilder/DefinedVariationSequence";
@@ -152,6 +152,9 @@ export default function GenomicQueryBuilderDialog({
     <Dialog
       open={open}
       onClose={handleClose}
+      disablePortal={false}
+      disableAutoFocus={false}
+      disableEnforceFocus={false}
       maxWidth="xl"
       fullWidth
       PaperProps={{
@@ -192,7 +195,11 @@ export default function GenomicQueryBuilderDialog({
       </Box>
 
       {/*The dyamic content of the dialog starts here */}
-      <DialogContent sx={{ pt: 1 }}>
+      <DialogContent
+        sx={{
+          pt: 1,
+        }}
+      >
         {/* This is the form wrapper that controls validation and submission, 
         it uses dynamic initial values as empty and validation schemas based on the
         selected query type */}
