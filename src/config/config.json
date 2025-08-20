@@ -20,7 +20,8 @@
       "runs",
       "analyses",
       "cohorts",
-      "datasets"
+      "datasets",
+      ""
     ],
     "showExternalNavBarLink": true,
     "externalNavBarLink": [

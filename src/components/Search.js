@@ -84,31 +84,43 @@ export default function Search({
         const res = await fetch(`${config.apiUrl}/map`);
         const data = await res.json();
         const endpointSets = data.response.endpointSets || {};
-
+        console.log(
+          "🔎 Raw entryTypes before deduplication:",
+          Object.entries(endpointSets)
+            .filter(([key]) => !key.includes("Endpoints"))
+            .map(([key, value]) => value)
+        );
+        const seen = new Set();
         const entries = Object.entries(endpointSets)
-          .filter(
-            ([key, value]) =>
-              !key.includes("Endpoints") && !key.includes("genomicVariation")
-          )
+
+          .filter(([key]) => !key.includes("Endpoints"))
           .map(([key, value]) => {
             const originalSegment = value.rootUrl?.split("/").pop();
             const normalizedSegment =
               originalSegment === "genomicVariations"
                 ? "g_variants"
                 : originalSegment;
+
             return {
               id: key,
               pathSegment: normalizedSegment,
               originalPathSegment: originalSegment,
             };
+          })
+
+          .filter((entry) => {
+            if (seen.has(entry.pathSegment)) return false;
+            seen.add(entry.pathSegment);
+            return true;
           });
 
         const sorted = sortEntries(entries);
         setEntryTypes(sorted);
-
+        console.log("✅ Final entryTypes:", sorted);
         if (sorted.length > 0) {
           setSelectedPathSegment(sorted[0].pathSegment);
         }
+
         await handleBeaconsInfo();
       } catch (err) {
         console.error("Error fetching entry types:", err);
@@ -124,7 +136,9 @@ export default function Search({
     try {
       const res = await fetch(`${config.apiUrl}/configuration`);
       const data = await res.json();
-      setEntryTypesConfig(data.response.entryTypes || {});
+      const entryTypeConfig =
+        data.response?.entryTypes || data.entryTypes || {};
+      setEntryTypesConfig(entryTypeConfig);
     } catch (err) {
       console.error("Error fetching configuration:", err);
     }

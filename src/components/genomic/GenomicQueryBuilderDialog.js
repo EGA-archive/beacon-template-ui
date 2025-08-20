@@ -267,13 +267,43 @@ export default function GenomicQueryBuilderDialog({
             );
 
             // Generate display label from valid entries
-            const labelParts = validEntries.map(
-              ([key, value]) => `${key}: ${value}`
+
+            // Option 1: Keys and values displayed
+            // const labelParts = validEntries.map(
+            //   ([key, value]) => `${key}: ${value}`
+            // );
+
+            // Option 3: only straight values from the form
+            // const labelParts = validEntries.map(([value]) => ` ${value}`);
+
+            // const combinedLabel = `${labelParts.join(" | ")}`;
+
+            // const newFilter = {
+            //   id: `genomic-${combinedLabel}`,
+            //   label: combinedLabel,
+            //   key: selectedQueryType,
+            //   scope: "genomicQuery",
+            //   bgColor: "genomic",
+            // };
+
+            // Option 2: Keys and values displayed, but with bold key
+            const idLabel = validEntries
+              .map(([key, value]) => `${key}:${value}`)
+              .join("-");
+
+            const combinedLabel = (
+              <>
+                {validEntries.map(([key, value], i) => (
+                  <span key={key}>
+                    <strong>{key}</strong>: {value}
+                    {i < validEntries.length - 1 && " | "}
+                  </span>
+                ))}
+              </>
             );
-            const combinedLabel = `${labelParts.join(" | ")}`;
 
             const newFilter = {
-              id: `genomic-${combinedLabel}`,
+              id: `genomic-${selectedQueryType}-${idLabel}`,
               label: combinedLabel,
               key: selectedQueryType,
               scope: "genomicQuery",
