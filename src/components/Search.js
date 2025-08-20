@@ -21,6 +21,9 @@ import FilteringTermsDropdownResults from "./filters/FilteringTermsDropdownResul
 import QueryApplied from "./search/QueryApplied";
 import SearchButton from "./search/SearchButton";
 import FilterTermsExtra from "./search/FilterTemsExtra";
+import CommonMessage, {
+  COMMON_MESSAGES,
+} from "../components/common/CommonMessage";
 
 export default function Search({
   onHeightChange,
@@ -55,6 +58,7 @@ export default function Search({
   const [searchInput, setSearchInput] = useState("");
   const [assembly, setAssembly] = useState(config.assemblyId[0]);
   const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState(null);
   const searchRef = useRef(null);
 
   useEffect(() => {
@@ -245,6 +249,17 @@ export default function Search({
     const val = (genomicDraft || "").trim();
     if (!val) return;
 
+    // Check if the label is already present in the selectedFilter
+    const isDuplicate = selectedFilter.some(
+      (f) => f.label.trim().toLowerCase() === val.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      setMessage(COMMON_MESSAGES.doubleValue);
+      setTimeout(() => setMessage(null), 3000);
+      return;
+    }
+
     // Create a unique id every time so deletion only removes the correct chip
     const uniqueId = `genomic-free-${Date.now().toString(36)}-${Math.random()
       .toString(36)
@@ -258,14 +273,7 @@ export default function Search({
       bgColor: "genomic",
     };
 
-    // Optional: prevent adding the same label twice
-    const isDuplicate = selectedFilter.some(
-      (f) => f.key === uniqueId && f.label === val
-    );
-    if (!isDuplicate) {
-      setSelectedFilter((prev) => [...prev, newGenomicFilter]);
-    }
-
+    setSelectedFilter((prev) => [...prev, newGenomicFilter]);
     setGenomicDraft(""); // clear the input after adding
   };
 
@@ -345,21 +353,28 @@ export default function Search({
 
           {/* Staging bar (appears only when there's text) */}
           {genomicDraft?.trim() && (
-            <Box
-              role="button"
-              onClick={commitGenomicDraft}
-              sx={{
-                border: `1px solid ${primaryDarkColor}`,
-                borderRadius: "999px",
-                backgroundColor: "#fff",
-                px: 2,
-                py: 1,
-                cursor: "pointer",
-                fontFamily: '"Open Sans", sans-serif',
-                fontSize: "12px",
-              }}
-            >
-              Add the genomic query: <b>{genomicDraft}</b>
+            <Box>
+              <Box
+                role="button"
+                onClick={commitGenomicDraft}
+                sx={{
+                  border: `1px solid ${primaryDarkColor}`,
+                  borderRadius: "999px",
+                  backgroundColor: "#fff",
+                  px: 2,
+                  py: 1,
+                  cursor: "pointer",
+                  fontFamily: '"Open Sans", sans-serif',
+                  fontSize: "12px",
+                }}
+              >
+                Add the genomic query: <b>{genomicDraft}</b>
+              </Box>
+
+              {/* Only show this if the filter is a duplicate */}
+              {message === COMMON_MESSAGES.doubleValue && (
+                <CommonMessage text={message} type="error" />
+              )}
             </Box>
           )}
         </Box>

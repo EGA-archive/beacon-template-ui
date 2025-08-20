@@ -35,6 +35,8 @@ export default function GenomicAnnotations() {
     setLoadingData,
     setResultData,
     setHasSearchResult,
+    genomicDraft,
+    setGenomicDraft,
   } = useSelectedEntry();
 
   // Read from config which genomic categories should be shown in the UI
@@ -170,26 +172,41 @@ export default function GenomicAnnotations() {
   };
 
   // Logic when the user clicks a genomic annotation chip
+  // const handleGenomicFilterChange = (item) => {
+  //   setLoadingData(false);
+  //   setResultData([]);
+  //   setHasSearchResult(false);
+
+  //   // Update selected filters to avoid duplicates
+  //   setSelectedFilter((prevGenomicAnnotation) => {
+  //     const isDuplicate = prevGenomicAnnotation.some(
+  //       (genAnnotation) => genAnnotation.id === item.id
+  //     );
+
+  //     if (isDuplicate) {
+  //       // Show message if the filter was already selected
+  //       setMessage(COMMON_MESSAGES.doubleFilter);
+  //       setTimeout(() => setMessage(null), 3000);
+  //       return prevGenomicAnnotation;
+  //     }
+  //     console.log("prevGenomicAnnotation", prevGenomicAnnotation);
+  //     // Add the new filter
+  //     return [...prevGenomicAnnotation, item];
+  //   });
+  //   console.log("item", item);
+  // };
+
   const handleGenomicFilterChange = (item) => {
-    setLoadingData(false);
-    setResultData([]);
-    setHasSearchResult(false);
+    const value = (item.label || item.id)?.trim();
 
-    // Update selected filters to avoid duplicates
-    setSelectedFilter((prevGenomicAnnotation) => {
-      const isDuplicate = prevGenomicAnnotation.some(
-        (genAnnotation) => genAnnotation.id === item.id
-      );
+    if ((genomicDraft || "").trim() === value) {
+      setMessage(COMMON_MESSAGES.doubleFilter);
+      setTimeout(() => setMessage(null), 3000);
+      return;
+    }
 
-      if (isDuplicate) {
-        // Show message if the filter was already selected
-        setMessage(COMMON_MESSAGES.doubleFilter);
-        setTimeout(() => setMessage(null), 3000);
-        return prevGenomicAnnotation;
-      }
-      // Add the new filter
-      return [...prevGenomicAnnotation, item];
-    });
+    setGenomicDraft(value);
+    setActiveInput("genomic");
   };
 
   return (

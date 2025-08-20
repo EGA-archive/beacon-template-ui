@@ -79,7 +79,9 @@ export default function App() {
                   />
                 }
               />
-              <Route path="/network-members" element={<NetworkMembers />} />
+              {config.beaconType === "networkBeacon" && (
+                <Route path="/network-members" element={<NetworkMembers />} />
+              )}
               {config.ui.showAboutPage && (
                 <Route path="/about" element={<About />} />
               )}
