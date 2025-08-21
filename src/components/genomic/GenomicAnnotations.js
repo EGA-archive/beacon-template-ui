@@ -14,7 +14,7 @@ import { useState } from "react";
 import config from "../../config/config.json";
 import { useSelectedEntry } from "./../context/SelectedEntryContext";
 import FilterLabelRemovable from "../styling/FilterLabelRemovable";
-export default function GenomicAnnotations() {
+export default function GenomicAnnotations({ setActiveInput }) {
   const [message, setMessage] = useState(null);
 
   // Full list of all genomic filter categories
@@ -30,14 +30,7 @@ export default function GenomicAnnotations() {
   // - setLoadingData: marks whether data is being fetched
   // - setResultData: stores the results from a query
   // - setHasSearchResult: marks whether results are available
-  const {
-    setSelectedFilter,
-    setLoadingData,
-    setResultData,
-    setHasSearchResult,
-    genomicDraft,
-    setGenomicDraft,
-  } = useSelectedEntry();
+  const { genomicDraft, setGenomicDraft } = useSelectedEntry();
 
   // Read from config which genomic categories should be shown in the UI
   const genomicVisibleCategories =
@@ -139,8 +132,10 @@ export default function GenomicAnnotations() {
     // Expand the first category with valid labels
     allGenomicCategories.forEach((topic) => {
       const validLabels =
-        filterLabels[topic]?.filter((label) => label.label.trim() !== "") || [];
-
+        filterLabels[topic]?.filter(
+          (label) =>
+            typeof label.label === "string" && label.label.trim() !== ""
+        ) || [];
       if (validLabels.length > 0 && !firstSet) {
         initialState[topic] = true;
         firstSet = true;

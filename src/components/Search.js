@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+
 import {
   Box,
   Typography,
@@ -6,6 +7,7 @@ import {
   Button,
   CircularProgress,
   InputBase,
+  Autocomplete,
   Select,
   MenuItem,
 } from "@mui/material";
@@ -26,6 +28,8 @@ import CommonMessage, {
 } from "../components/common/CommonMessage";
 
 export default function Search({
+  activeInput,
+  setActiveInput,
   onHeightChange,
   selectedTool,
   setSelectedTool,
@@ -53,13 +57,21 @@ export default function Search({
     genomicDraft,
     setGenomicDraft,
   } = useSelectedEntry();
+
   const [loading, setLoading] = useState(true);
-  const [activeInput, setActiveInput] = useState(null);
   const [searchInput, setSearchInput] = useState("");
   const [assembly, setAssembly] = useState(config.assemblyId[0]);
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState(null);
   const searchRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (activeInput === "genomic" && inputRef.current) {
+      inputRef.current.focus();
+      setActiveInput(null);
+    }
+  }, [activeInput, setActiveInput]);
 
   useEffect(() => {
     if (searchRef.current && onHeightChange) {

@@ -31,6 +31,8 @@ export default function HomePage({ selectedTool, setSelectedTool }) {
     !!config.ui?.commonFilters?.filterLabels &&
     Object.keys(config.ui.commonFilters.filterLabels).length > 0;
 
+  const [activeInput, setActiveInput] = useState(null);
+
   // If at least one group of filters is configured, show the filters sidebar
   const shouldShowFilters =
     hasGenomicAnnotationsConfig || hasCommonFiltersConfig;
@@ -70,6 +72,8 @@ export default function HomePage({ selectedTool, setSelectedTool }) {
             onHeightChange={setSearchHeight} // Updates the height of the search box
             selectedTool={selectedTool}
             setSelectedTool={setSelectedTool}
+            activeInput={activeInput}
+            setActiveInput={setActiveInput}
           />
         </Box>
 
@@ -100,6 +104,7 @@ export default function HomePage({ selectedTool, setSelectedTool }) {
               searchHeight={searchHeight}
               hasCommonFiltersConfig={hasCommonFiltersConfig}
               hasGenomicAnnotationsConfig={hasGenomicAnnotationsConfig}
+              setActiveInput={setActiveInput}
             />
           </Box>
         )}

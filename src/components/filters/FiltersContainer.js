@@ -27,6 +27,7 @@ function TabPanel(props) {
 
 // Main container that decides whether to show "Common Filters" and/or "Genomic Annotations"
 export default function FiltersContainer({
+  setActiveInput,
   searchHeight, // height of the filter box (passed as prop)
   hasGenomicAnnotationsConfig, // boolean: should show Genomic Annotations?
   hasCommonFiltersConfig, // boolean: should show Common Filters?
@@ -60,7 +61,7 @@ export default function FiltersContainer({
     if (hasGenomicAnnotationsConfig)
       tabs.push({
         label: "Genomic Annotations", // tab title shown in UI
-        component: <GenomicAnnotations />, // actual component to render
+        component: <GenomicAnnotations setActiveInput={setActiveInput} />, // actual component to render
         title: "Genomic Annotations", // heading inside the panel
       });
 
@@ -86,7 +87,7 @@ export default function FiltersContainer({
     if (hasGenomic && hasGenomicAnnotationsConfig)
       tabs.push({
         label: "Genomic Annotations",
-        component: <GenomicAnnotations />,
+        component: <GenomicAnnotations setActiveInput={setActiveInput} />,
         title: "Genomic Annotations",
       });
   }
