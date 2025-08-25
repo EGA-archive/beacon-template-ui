@@ -10,12 +10,11 @@ export default function Founders() {
     // Outer container for the founders section
     <Box
       sx={{
-        p: 3, // padding
+        py: 3, // padding
         display: "flex", // flex layout
         alignItems: "center", // vertically center items
         flexWrap: "wrap", // allow wrapping on smaller screens
         gap: 3, // spacing between child elements
-        px: 5, // horizontal padding
         maxWidth: "992px", // limit the section width
       }}
     >
