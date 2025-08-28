@@ -32,6 +32,12 @@
     ],
     "showAboutPage": true,
     "showContactPage": true,
+    "contact": {
+      "to": "giulia.cellerino@crg.eu",
+      "from": "no-reply@beacon-contact.com",
+      "subject": "New contact form submission",
+      "enabled": true
+    },
     "colors": {
       "primary": "#3176B1",
       "darkPrimary": "#173D5D",

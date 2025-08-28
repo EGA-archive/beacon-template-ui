@@ -1,7 +1,8 @@
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import About from "./components/pages/About";
-import Contact from "./components/pages/Contact";
+import Contact from "./components/pages/contact/ContactForm";
+import ContactSuccess from "./components/pages/contact/ContactSuccess";
 import NetworkMembers from "./components/pages/NetworkMembers";
 import Login from "./components/pages/Login";
 import HomePage from "./components/pages/HomePage";
@@ -86,7 +87,10 @@ export default function App() {
                 <Route path="/about" element={<About />} />
               )}
               {config.ui.showContactPage && (
-                <Route path="/contact" element={<Contact />} />
+                <>
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/contact-success" element={<ContactSuccess />} />
+                </>
               )}
               <Route path="/login" element={<Login />} />
               <Route path="*" element={<Navigate to="/" />} />

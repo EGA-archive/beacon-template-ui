@@ -48,7 +48,7 @@ export const FieldLabel = ({ children }) => (
       fontFamily: '"Open Sans", sans-serif',
       fontWeight: 400,
       fontSize: "12px",
-      color: primaryDarkColor,
+      color: "primaryDarkColor",
       mb: 1,
       mt: "-4px",
       whiteSpace: { xs: "normal", sm: "nowrap" },
