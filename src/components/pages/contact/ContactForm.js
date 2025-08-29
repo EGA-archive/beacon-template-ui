@@ -1,9 +1,8 @@
+// Formik handles form state and validation
 import { useFormik } from "formik";
 import {
   Box,
   Typography,
-  TextField,
-  Button,
   Checkbox,
   FormControlLabel,
   Grid,
@@ -11,16 +10,17 @@ import {
 import SendIcon from "@mui/icons-material/Send";
 import { alpha } from "@mui/material/styles";
 import Founders from "../../Founders";
-import validationSchema from "./contactValidation";
+import contactValidation from "./contactValidation";
 import config from "../../../config/config.json";
 import { useNavigate } from "react-router-dom";
+import FormTextField from "./FormTextField"; // Reusable input wrapper
+import StyledButton from "../../styling/StyledButtons";
 
-/**
- * Contact form page for Beacon Template UI.
- * Uses MUI Grid v2 with responsive sizing.
- */
+// Contact form component using MUI + Formik
 export default function ContactForm() {
   const navigate = useNavigate();
+
+  // Formik setup: field defaults, validation, spam checks, submit handler
   const formik = useFormik({
     initialValues: {
       firstName: "",
@@ -30,46 +30,27 @@ export default function ContactForm() {
       institution: "",
       comment: "",
       privacy: false,
-      website: "",
-      startedAt: Date.now(),
+      website: "", // Honeypot: if filled, it's a bot
+      startedAt: Date.now(), // Anti-bot: block too-fast submits
     },
-    validationSchema,
-    onSubmit: async (values, { resetForm }) => {
+    contactValidation,
+    onSubmit: (values, { resetForm }) => {
       const tooFast = Date.now() - Number(values.startedAt) < 3000;
-      if (values.website || tooFast) {
-        return;
-      }
-
-      try {
-        await fetch("/api/send-email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(values),
-        });
-        resetForm();
-        navigate("/contact-success");
-      } catch (error) {
-        console.error("Error sending email:", error);
-        alert("Oops! Something went wrong, please try again later.");
-      }
+      if (values.website || tooFast) return;
+      console.log("Contact form submitted:", values); // This will get replaced once we agree on the way to send email
+      resetForm();
+      navigate("/contact-success");
     },
   });
 
+  // Custom styling for input background and borders
   const bgColor = alpha(config.ui.colors.primary, 0.05);
-
   const textFieldStyles = {
     backgroundColor: bgColor,
     borderRadius: "7px",
-    "& .MuiInputBase-input": {
-      padding: "12px",
-      fontSize: "14px",
-    },
-    "& .MuiInputBase-input::placeholder": {
-      fontSize: "14px",
-    },
-    "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: bgColor,
-    },
+    "& .MuiInputBase-input": { padding: "12px", fontSize: "14px" },
+    "& .MuiInputBase-input::placeholder": { fontSize: "14px" },
+    "& .MuiOutlinedInput-notchedOutline": { borderColor: bgColor },
     "&:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: config.ui.colors.primary,
     },
@@ -84,10 +65,13 @@ export default function ContactForm() {
     },
   };
 
-  // Disable the button until:
-  // - form is valid
-  // - privacy is checked
-  // - and the user has changed something (dirty)
+  const inputTitleStyle = {
+    fontSize: "14px",
+    fontWeight: 700,
+    color: config.ui.colors.primary,
+  };
+
+  // Disable submit button unless form is valid, changed, and privacy checked
   const isSubmitDisabled =
     !formik.isValid ||
     !formik.values.privacy ||
@@ -96,14 +80,12 @@ export default function ContactForm() {
 
   return (
     <>
+      {/* Section showing project founders (optional info/header) */}
       <Founders />
-      <Box
-        sx={{
-          pb: "2rem",
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
+
+      {/* Outer container for centering the form on the page */}
+      <Box sx={{ pb: "2rem", display: "flex", justifyContent: "center" }}>
+        {/* Card-like box with padding, shadow, border radius */}
         <Box
           sx={{
             p: 3,
@@ -114,7 +96,7 @@ export default function ContactForm() {
             mt: 2,
           }}
         >
-          {/* Title */}
+          {/* Main heading of the contact form */}
           <Typography
             variant="h5"
             sx={{
@@ -127,24 +109,21 @@ export default function ContactForm() {
             Contact Form
           </Typography>
 
-          {/* Subtitle */}
+          {/* Introductory message for users filling the form */}
           <Typography
             variant="body2"
-            sx={{
-              mb: 3,
-              fontSize: "12px",
-              fontWeight: 400,
-              color: "#203241",
-            }}
+            sx={{ mb: 3, fontSize: "12px", fontWeight: 400, color: "#203241" }}
           >
             If you have any questions about how the Beacon Network search
             website works, please fill out this form and we will get back to
             you.
           </Typography>
 
-          {/* Form */}
+          {/* Main form logic handled by Formik */}
           <form onSubmit={formik.handleSubmit}>
+            {/* Responsive layout using MUI Grid system */}
             <Grid container spacing={2}>
+              {/* Honeypot field to trap bots (hidden input) */}
               <input
                 type="text"
                 name="website"
@@ -153,227 +132,83 @@ export default function ContactForm() {
                 autoComplete="off"
                 style={{ display: "none" }}
               />
+
+              {/* Timestamp to detect fast (automated) submissions */}
               <input
                 type="hidden"
                 name="startedAt"
                 value={formik.values.startedAt}
               />
 
-              {/* First Name */}
+              {/* First Name field */}
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "4px",
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      color: config.ui.colors.primary,
-                    }}
-                  >
-                    First Name *
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    name="firstName"
-                    placeholder="First Name"
-                    value={formik.values.firstName}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.firstName &&
-                      Boolean(formik.errors.firstName)
-                    }
-                    helperText={
-                      formik.touched.firstName && formik.errors.firstName
-                    }
-                    sx={textFieldStyles}
-                  />
-                </Box>
+                <FormTextField
+                  label="First Name *"
+                  name="firstName"
+                  placeholder="First Name"
+                  formik={formik}
+                  sx={{ textField: textFieldStyles, label: inputTitleStyle }}
+                />
               </Grid>
 
-              {/* Last Name */}
+              {/* Last Name field */}
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "4px",
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      color: config.ui.colors.primary,
-                    }}
-                  >
-                    Last Name *
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    name="lastName"
-                    placeholder="Last Name"
-                    value={formik.values.lastName}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.lastName && Boolean(formik.errors.lastName)
-                    }
-                    helperText={
-                      formik.touched.lastName && formik.errors.lastName
-                    }
-                    sx={textFieldStyles}
-                  />
-                </Box>
+                <FormTextField
+                  label="Last Name *"
+                  name="lastName"
+                  placeholder="Last Name"
+                  formik={formik}
+                  sx={{ textField: textFieldStyles, label: inputTitleStyle }}
+                />
               </Grid>
 
-              {/* Email */}
+              {/* Email address */}
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "4px",
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      color: config.ui.colors.primary,
-                    }}
-                  >
-                    Business Email Address *
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    name="email"
-                    placeholder="Email"
-                    value={formik.values.email}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.email && Boolean(formik.errors.email)}
-                    helperText={formik.touched.email && formik.errors.email}
-                    sx={textFieldStyles}
-                  />
-                </Box>
+                <FormTextField
+                  label="Business Email Address *"
+                  name="email"
+                  placeholder="Email"
+                  formik={formik}
+                  sx={{ textField: textFieldStyles, label: inputTitleStyle }}
+                />
               </Grid>
 
-              {/* Job Title */}
+              {/* Job title */}
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "4px",
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      color: config.ui.colors.primary,
-                    }}
-                  >
-                    Job Title *
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    name="jobTitle"
-                    placeholder="Title"
-                    value={formik.values.jobTitle}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.jobTitle && Boolean(formik.errors.jobTitle)
-                    }
-                    helperText={
-                      formik.touched.jobTitle && formik.errors.jobTitle
-                    }
-                    sx={textFieldStyles}
-                  />
-                </Box>
+                <FormTextField
+                  label="Job Title *"
+                  name="jobTitle"
+                  placeholder="Title"
+                  formik={formik}
+                  sx={{ textField: textFieldStyles, label: inputTitleStyle }}
+                />
               </Grid>
 
-              {/* Institution */}
+              {/* Institution name */}
               <Grid size={{ xs: 12 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "4px",
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      color: config.ui.colors.primary,
-                    }}
-                  >
-                    Institution *
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    name="institution"
-                    placeholder="Institution Name"
-                    value={formik.values.institution}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.institution &&
-                      Boolean(formik.errors.institution)
-                    }
-                    helperText={
-                      formik.touched.institution && formik.errors.institution
-                    }
-                    sx={textFieldStyles}
-                  />
-                </Box>
+                <FormTextField
+                  label="Institution *"
+                  name="institution"
+                  placeholder="Institution Name"
+                  formik={formik}
+                  sx={{ textField: textFieldStyles, label: inputTitleStyle }}
+                />
               </Grid>
 
-              {/* Comment */}
+              {/* Main comment textarea */}
               <Grid size={{ xs: 12 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "4px",
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      color: config.ui.colors.primary,
-                    }}
-                  >
-                    How can we help you? *
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    name="comment"
-                    placeholder="Comment"
-                    multiline
-                    minRows={4}
-                    value={formik.values.comment}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.comment && Boolean(formik.errors.comment)
-                    }
-                    helperText={formik.touched.comment && formik.errors.comment}
-                    sx={textFieldStyles}
-                  />
-                </Box>
+                <FormTextField
+                  label="How can we help you? *"
+                  name="comment"
+                  placeholder="Comment"
+                  multiline
+                  minRows={4}
+                  formik={formik}
+                  sx={{ textField: textFieldStyles, label: inputTitleStyle }}
+                />
               </Grid>
 
-              {/* Privacy */}
+              {/* Privacy policy consent checkbox */}
               <Grid size={{ xs: 12 }}>
                 <FormControlLabel
                   control={
@@ -396,6 +231,7 @@ export default function ContactForm() {
                     },
                   }}
                 />
+                {/* Show error if checkbox is required and not checked */}
                 {formik.touched.privacy && formik.errors.privacy && (
                   <Typography color="error" variant="caption">
                     {formik.errors.privacy}
@@ -403,35 +239,15 @@ export default function ContactForm() {
                 )}
               </Grid>
 
-              {/* Submit Button */}
+              {/* Submit button: disabled unless all conditions are valid */}
               <Grid size={{ xs: 12 }} sx={{ textAlign: "right" }}>
-                <Button
-                  variant="contained"
+                <StyledButton
+                  icon={<SendIcon />}
+                  label="Send"
                   type="submit"
-                  startIcon={<SendIcon />}
+                  variant="contained"
                   disabled={isSubmitDisabled}
-                  sx={{
-                    borderRadius: "999px",
-                    textTransform: "none",
-                    fontSize: "14px",
-                    backgroundColor: config.ui.colors.primary,
-                    border: `1px solid ${config.ui.colors.primary}`,
-                    boxShadow: "none",
-                    "&:hover": {
-                      backgroundColor: "white",
-                      border: `1px solid ${config.ui.colors.primary}`,
-                      color: config.ui.colors.primary,
-                    },
-
-                    "&.Mui-disabled": {
-                      backgroundColor: "#F2F4F7",
-                      borderColor: "#F2F4F7",
-                      color: "#98A2B3",
-                    },
-                  }}
-                >
-                  Send
-                </Button>
+                />
               </Grid>
             </Grid>
           </form>

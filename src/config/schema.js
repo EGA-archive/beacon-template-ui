@@ -87,25 +87,6 @@ const schema = Joi.object({
   }).required(),
   showAboutPage: Joi.boolean().optional(),
   showContactPage: Joi.boolean().optional(),
-
-  contact: Joi.alternatives().conditional("showContactPage", {
-    is: true,
-    then: Joi.object({
-      to: Joi.string().email().required().messages({
-        "string.email": "Contact 'to' must be a valid email address",
-        "any.required": "Contact 'to' email is required",
-      }),
-      from: Joi.string().email().required().messages({
-        "string.email": "Contact 'from' must be a valid email address",
-        "any.required": "Contact 'from' email is required",
-      }),
-      subject: Joi.string().min(3).max(100).required().messages({
-        "any.required": "Contact email subject is required",
-      }),
-      enabled: Joi.boolean().default(false),
-    }).required(),
-    otherwise: Joi.forbidden(), // If showContactPage is false → block contact config
-  }),
   colors: Joi.object({
     primary: hexColor.required(),
     darkPrimary: hexColor.required(),

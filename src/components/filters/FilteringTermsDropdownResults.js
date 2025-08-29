@@ -1,3 +1,15 @@
+/**
+ * This component shows a dropdown list of filtering terms
+ * that match the user’s search input. It’s triggered when the user
+ * types in the search field and dynamically filters the results.
+ * It supports both regular filters and numeric/alphanumeric filters (handled differently).
+ *
+ * Shared hooks and logic:
+ * - Uses context to update selected filters
+ * - Uses `useFilteringTerms()` hook to access all available terms
+ * - Reuses filtering logic from filteringTermsHelpers
+ */
+
 import React, { useEffect, useRef, useState } from "react";
 import { Paper, List, ListItem, Box } from "@mui/material";
 import config from "../../config/config.json";
@@ -5,6 +17,8 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import useFilteringTerms from "../../hooks/useFilteringTerms";
 import Loader from "../common/Loader";
+
+// Helper functions for filtering/searching terms
 import {
   searchFilteringTerms,
   handleFilterSelection,
@@ -12,16 +26,21 @@ import {
 } from "../common/filteringTermsHelpers";
 
 const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
+  // Access setters from global context to update filters
   const { setExtraFilter, setSelectedFilter } = useSelectedEntry();
-  const [message, setMessage] = useState(null);
-  const [filteredTerms, setFilteredTerms] = useState([]);
-  const [filtering, setFiltering] = useState(false);
 
+  const [message, setMessage] = useState(null); // For validation or feedback
+  const [filteredTerms, setFilteredTerms] = useState([]); // Search result terms
+  const [filtering, setFiltering] = useState(false); // Loading state
+
+  // Get all filtering terms from API or local state
   const { filteringTerms } = useFilteringTerms();
   const { selectedPathSegment: selectedEntryType } = useSelectedEntry();
 
+  // Ref for detecting outside clicks (to close dropdown)
   const containerRef = useRef();
 
+  // Close dropdown if user clicks outside the dropdown box
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -40,9 +59,12 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
 
   const primaryDarkColor = config.ui.colors.darkPrimary;
 
+  // Filter terms based on user input
   useEffect(() => {
     if (searchInput.length > 0 && filteringTerms.length > 0) {
       setFiltering(true);
+
+      // Add delay before applying search
       const timeout = setTimeout(() => {
         const results = searchFilteringTerms(filteringTerms, searchInput);
         setFilteredTerms(results);
@@ -55,6 +77,7 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
     }
   }, [searchInput, filteringTerms]);
 
+  // Don't render anything if input is empty
   if (searchInput.trim().length === 0) return null;
 
   return (
@@ -79,13 +102,16 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
           border: `1px solid ${primaryDarkColor}`,
         }}
       >
+        {/* Show error message if present */}
         {message && (
           <Box sx={{ mb: 2, mt: 2 }}>
             <CommonMessage text={message} type="error" />
           </Box>
         )}
+
         <List disablePadding>
           {filtering ? (
+            // Show loader while filtering
             <Box sx={{ p: 3, pt: 0 }}>
               <Loader
                 message={COMMON_MESSAGES.filteringResults}
@@ -93,6 +119,7 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
               />
             </Box>
           ) : filteredTerms.length > 0 ? (
+            // Show filtered results
             filteredTerms.map((term, index) => {
               const { displayLabel, selectedScope, allScopes } =
                 getDisplayLabelAndScope(term, selectedEntryType);
@@ -109,12 +136,14 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
                 <ListItem
                   key={term.id}
                   onClick={() => {
+                    // Handle numeric/alphanumeric filters separately
                     if (item.type === "alphanumeric") {
                       setExtraFilter(item);
                       onCloseDropdown();
                       return;
                     }
 
+                    // Add term to selected filters using helper
                     setSelectedFilter((prev) =>
                       handleFilterSelection({
                         item,
@@ -137,6 +166,7 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
                     cursor: "pointer",
                   }}
                 >
+                  {/* Show display label on the left */}
                   <Box
                     sx={{
                       fontSize: "12px",
@@ -146,6 +176,8 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
                   >
                     {displayLabel}
                   </Box>
+
+                  {/* Show term ID on the right */}
                   <Box
                     sx={{
                       fontSize: "12px",
@@ -159,6 +191,7 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
               );
             })
           ) : (
+            // No matching results
             <Box sx={{ p: 2 }}>
               <CommonMessage text={COMMON_MESSAGES.noMatch} type="error" />
             </Box>
