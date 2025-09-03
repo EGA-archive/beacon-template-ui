@@ -3,7 +3,7 @@ import { alpha } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import Founders from "../../Founders";
 import config from "../../../config/config.json";
-import contactSuccessImg from "../../../assets/contact-success.svg";
+import contactSuccessImg from "../../../assets/logos/contact-success.svg";
 
 /**
  * Contact success page for Beacon Template UI.
@@ -16,6 +16,7 @@ export default function ContactSuccess() {
   return (
     <>
       <Founders />
+      {/* Centered wrapper for the whole page content */}
       <Box
         sx={{
           pb: "2rem",
@@ -23,6 +24,7 @@ export default function ContactSuccess() {
           justifyContent: "center",
         }}
       >
+        {/* Main card container */}
         <Box
           sx={{
             p: 3,
@@ -33,6 +35,7 @@ export default function ContactSuccess() {
             mt: 2,
           }}
         >
+          {/* Image section */}
           <Box
             sx={{
               pb: "2rem",
@@ -42,6 +45,7 @@ export default function ContactSuccess() {
           >
             <img src={contactSuccessImg} />
           </Box>
+          {/* Text messages and thanks */}
           <Box
             sx={{
               pb: "2rem",
@@ -53,7 +57,7 @@ export default function ContactSuccess() {
               p: 3,
             }}
           >
-            {/* Title */}
+            {/* Heading */}
             <Typography
               variant="h5"
               sx={{
@@ -65,6 +69,7 @@ export default function ContactSuccess() {
             >
               Thank you for contacting us!
             </Typography>
+            {/* Additional messages for clarity */}
             <Typography
               sx={{
                 fontWeight: 400,
@@ -84,7 +89,7 @@ export default function ContactSuccess() {
               We will respond as soon as possible.
             </Typography>
           </Box>
-          {/* Back Button */}
+          {/* Button to return to homepage */}
           <Box
             sx={{
               pb: "2rem",

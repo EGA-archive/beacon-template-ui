@@ -1,5 +1,6 @@
 import { Typography, Box, Radio } from "@mui/material";
 import config from "../../../config/config.json";
+import { alpha } from "@mui/material/styles";
 
 /*
  * This file defines shared styles and small UI components used across input forms.
@@ -11,10 +12,11 @@ import config from "../../../config/config.json";
 
 // Main color for text and borders (dark primary theme color)
 const primaryDarkColor = config.ui.colors.darkPrimary;
+const lighterColor = alpha(config.ui.colors.primary, 0.05);
 
 // Styles for dropdown select inputs
 export const selectStyle = {
-  backgroundColor: "#F5FAFE",
+  backgroundColor: lighterColor,
   borderRadius: "10px",
   "& .MuiOutlinedInput-notchedOutline": { border: "none" },
   "& .MuiSelect-select": {
@@ -41,7 +43,7 @@ export const mainBoxTypography = {
 
 // Style for text input fields
 export const textFieldStyle = {
-  backgroundColor: "#F5FAFE",
+  backgroundColor: lighterColor,
   borderRadius: "10px",
   "& .MuiOutlinedInput-root": {
     "& fieldset": { border: "none" },

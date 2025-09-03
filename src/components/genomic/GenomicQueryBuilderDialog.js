@@ -291,22 +291,26 @@ export default function GenomicQueryBuilderDialog({
               .map(([key, value]) => `${key}:${value}`)
               .join("-");
 
-            const combinedLabel = (
-              <>
-                {validEntries.map(([key, value], i) => (
-                  <span key={key}>
-                    <strong>{key}</strong>: {value}
-                    {i < validEntries.length - 1 && " | "}
-                  </span>
-                ))}
-              </>
-            );
+            // const combinedLabel = (
+            //   <>
+            //     {validEntries.map(([key, value], i) => (
+            //       <span key={key}>
+            //         <strong>{key}</strong>: {value}
+            //         {i < validEntries.length - 1 && " | "}
+            //       </span>
+            //     ))}
+            //   </>
+            // );
+
+            const combinedLabel = validEntries
+              .map(([key, value]) => `${key}: ${value}`)
+              .join(" | ");
 
             const newFilter = {
               id: `genomic-${selectedQueryType}-${idLabel}`,
               label: combinedLabel,
               key: selectedQueryType,
-              scope: "genomicQuery",
+              scope: "genomicQueryBuilder",
               bgColor: "genomic",
             };
 
@@ -322,6 +326,8 @@ export default function GenomicQueryBuilderDialog({
             setSelectedFilter((prev) => [...prev, newFilter]);
             setDuplicateMessage("");
             handleClose();
+
+            console.log("select", selectedFilter);
           }}
         >
           {({ resetForm, isValid, dirty }) => (

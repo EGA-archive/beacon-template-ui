@@ -115,7 +115,20 @@ export default function FilterLabelRemovable({
     >
       {/* Top part of the label: shows text and delete icon if removable */}
       <Box display="flex" alignItems="center" gap={1}>
-        <Typography sx={{ fontSize: "14px" }}>{labelToShow}</Typography>
+        <Typography sx={{ fontSize: "14px" }}>
+          {scope === "genomicQueryBuilder" && typeof label === "string"
+            ? label.split(" | ").map((part, i, arr) => {
+                const [key, ...valueParts] = part.split(":");
+                const value = valueParts.join(":");
+                return (
+                  <span key={i}>
+                    <strong>{key}:</strong> {value}
+                    {i < arr.length - 1 && " | "}
+                  </span>
+                );
+              })
+            : labelToShow}
+        </Typography>
         {isRemovable && (
           <ClearIcon
             onClick={(e) => {

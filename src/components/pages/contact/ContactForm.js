@@ -33,7 +33,7 @@ export default function ContactForm() {
       website: "", // Honeypot: if filled, it's a bot
       startedAt: Date.now(), // Anti-bot: block too-fast submits
     },
-    contactValidation,
+    validationSchema: contactValidation,
     onSubmit: (values, { resetForm }) => {
       const tooFast = Date.now() - Number(values.startedAt) < 3000;
       if (values.website || tooFast) return;

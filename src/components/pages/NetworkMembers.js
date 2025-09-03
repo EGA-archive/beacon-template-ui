@@ -22,7 +22,7 @@ import Founders from "../Founders";
 
 export default function NetworkMembers() {
   const [beacons, setBeacons] = useState([]);
-  const [networkLogoUrl, setNetworkLogoUrl] = useState(null); // <-- network logo from API
+  const [networkLogoUrl, setNetworkLogoUrl] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Utility: remove unwanted HTML tags from descriptions
@@ -155,7 +155,7 @@ export default function NetworkMembers() {
                           sx={{
                             width: 100,
                             height: "auto",
-                            objectFit: "contain", // <-- fixed typo
+                            objectFit: "contain",
                           }}
                         />
                       ) : (
@@ -280,6 +280,7 @@ export default function NetworkMembers() {
                               color: config.ui.colors.primary,
                               border: `1px solid ${config.ui.colors.primary}`,
                               boxShadow: "none",
+                              marginLeft: "0px !important",
                               "&:hover": {
                                 backgroundColor: darken("#FFFFFF", 0.05),
                               },

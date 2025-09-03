@@ -26,7 +26,7 @@ export default function App() {
     ...(config.ui.showContactPage
       ? [{ label: "Contact", url: "/contact" }]
       : []),
-    { label: "Log in", url: "/login" },
+    ...(config.ui.showLogin ? [{ label: "Log in", url: "/login" }] : []),
   ];
 
   const filteredBaseItems =
@@ -92,7 +92,11 @@ export default function App() {
                   <Route path="/contact-success" element={<ContactSuccess />} />
                 </>
               )}
-              <Route path="/login" element={<Login />} />
+              {config.ui.showLogin && (
+                <>
+                  <Route path="/login" element={<Login />} />
+                </>
+              )}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </Box>

@@ -63,21 +63,16 @@ export default function QueryAppliedItems({
         }}
       >
         {selectedFilter.map((filter) => {
+          const isGenomic = filter.scope === "genomicQueryBuilder";
+
           // Unique key for identifying and expanding a label
-          const keyValue =
-            filter.key && filter.scope
-              ? `${filter.key}__${filter.scope}`
-              : `${filter.id || filter.label || Math.random()}__${
-                  filter.bgColor || "common"
-                }`;
+          const keyValue = isGenomic
+            ? filter.id // use unique id for genomicQueryBuilder
+            : `${filter.key}__${filter.scope}`;
 
           return (
             <FilterLabelRemovable
-              key={
-                filter.key
-                  ? `${filter.key}__${filter.scope}`
-                  : `${filter.id}__${filter.label}__genomic`
-              }
+              key={isGenomic ? filter.id : `${filter.key}__${filter.scope}`}
               keyValue={keyValue}
               label={filter.label}
               scope={filter.scope}

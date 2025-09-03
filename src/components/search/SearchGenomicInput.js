@@ -36,7 +36,10 @@ export default function SearchGenomicInput({
   // Function to add the current genomicDraft to the selected filters
   const commitGenomicDraft = () => {
     const val = (genomicDraft || "").trim(); // Clean up the input
+    console.log("💡 Genomic draft submitted:", val);
     if (!val) return; // Don't do anything if it's empty
+
+    console.log("🧪 Current selectedFilter array:", selectedFilter);
 
     // Check if this exact value already exists in the filters
     const isDuplicate = selectedFilter.some(
@@ -64,6 +67,7 @@ export default function SearchGenomicInput({
       bgColor: "genomic",
     };
 
+    console.log("✅ Adding new genomic filter:", newGenomicFilter);
     // Add the new filter to the list
     setSelectedFilter((prev) => [...prev, newGenomicFilter]);
     setGenomicDraft(""); // Clear the input field

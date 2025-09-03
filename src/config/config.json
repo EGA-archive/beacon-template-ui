@@ -32,6 +32,7 @@
     ],
     "showAboutPage": true,
     "showContactPage": true,
+    "showLogin": false,
 
     "colors": {
       "primary": "#3176B1",
