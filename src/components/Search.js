@@ -93,12 +93,10 @@ export default function Search({
         if (sorted.length > 0) {
           setSelectedPathSegment(sorted[0].pathSegment);
         }
-         console.log("we start!")
       } catch (err) {
         console.error("Error fetching entry types:", err);
       } finally {
         setLoading(false);
-        console.log("we finish!")
       }
     };
 
