@@ -1,43 +1,43 @@
-describe("Navbar", () => {
-  const internalLabel = "About";
-  const externalLabel = "EGA";
+import config from "../../../src/config/config.json";
 
-  const navItems = [
-    { label: internalLabel, url: "/about" },
-    { label: externalLabel, url: "https://ega-archive.org" },
-  ];
-
+describe("Navbar (config-driven)", () => {
   beforeEach(() => {
-    cy.visit("/"); // assicurati che la navbar venga montata qui
+    cy.visit("/");
   });
 
-  it("renders the title", () => {
-    cy.contains("EGA Allele Frequency Browser").should("be.visible");
+  it("renders the title from config", () => {
+    cy.get('[data-cy="navbar-title"]')
+      .should("be.visible")
+      .and("contain.text", config.ui.title);
   });
 
-  it("renders the logo image", () => {
-    cy.get("img.logo-small").should("be.visible");
+  it("renders the logo from config", () => {
+    cy.get('[data-cy="navbar-logo"]')
+      .should("be.visible")
+      .and("have.attr", "src", config.ui.logos.main);
   });
 
-  it("renders internal and external nav links (desktop)", () => {
-    cy.viewport(1280, 720); // for desktop view
-    cy.get(".nav-items-box").should("be.visible");
-    cy.contains(internalLabel).should("exist");
-    cy.contains(externalLabel).should("exist");
-  });
+  if (config.ui.externalNavBarLink?.length > 0) {
+    it("renders external navbar links from config", () => {
+      config.ui.externalNavBarLink.forEach((item) => {
+        const id = item.label.toLowerCase().replace(/\s+/g, "-");
+        cy.get(`[data-cy="nav-link-external-${id}"]`)
+          .should("be.visible")
+          .and("have.attr", "href", item.url)
+          .and("have.attr", "target", "_blank");
+      });
+    });
+  }
 
-  it("opens the mobile drawer and shows nav links", () => {
-    cy.viewport(375, 720); // simulate mobile
-    cy.get(
-      'button[aria-label="Open navigation menu"], .MuiIconButton-root'
-    ).click();
-    cy.contains(internalLabel).should("be.visible");
-    cy.contains(externalLabel).should("be.visible");
-  });
+  it("opens mobile drawer and shows links from config", () => {
+    cy.viewport(375, 720);
+    cy.get('[data-cy="burger-menu"]').click();
+    cy.get('[data-cy="navbar-drawer"]').should("be.visible");
+    cy.get('[data-cy="navbar-drawer"]').contains(config.ui.title);
 
-  it("external link opens in new tab", () => {
-    cy.contains(externalLabel)
-      .should("have.attr", "href", "https://ega-archive.org")
-      .and("have.attr", "target", "_blank");
+    config.ui.externalNavBarLink.forEach((item) => {
+      const id = item.label.toLowerCase().replace(/\s+/g, "-");
+      cy.get(`[data-cy="nav-link-external-${id}"]`).should("exist");
+    });
   });
 });

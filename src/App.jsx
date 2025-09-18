@@ -23,7 +23,7 @@ export default function App() {
   const baseNavItems = [
     { label: "Network Members", url: "/network-members" },
     ...(config.ui.showAboutPage ? [{ label: "About", url: "/about" }] : []),
-    ...(config.ui.showContactPage
+    ...(config.ui.contact?.showContactPage
       ? [{ label: "Contact", url: "/contact" }]
       : []),
     ...(config.ui.showLogin ? [{ label: "Log in", url: "/login" }] : []),
@@ -86,7 +86,7 @@ export default function App() {
               {config.ui.showAboutPage && (
                 <Route path="/about" element={<About />} />
               )}
-              {config.ui.showContactPage && (
+              {config.ui.contact?.showContactPage && (
                 <>
                   <Route path="/contact" element={<ContactForm />} />
                   <Route path="/contact-success" element={<ContactSuccess />} />

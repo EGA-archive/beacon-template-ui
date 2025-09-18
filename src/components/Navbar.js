@@ -88,11 +88,13 @@ export default function Navbar({ title, main, navItems }) {
                 src={main}
                 alt="Logo"
                 className="w-logo-w h-logo-h object-contain logo-small"
+                data-cy="navbar-logo"
               />
             </Box>
 
             {/* Title text linking to homepage */}
             <Typography
+              data-cy="navbar-title"
               className="font-sans"
               component={Link}
               to="/"
@@ -122,6 +124,7 @@ export default function Navbar({ title, main, navItems }) {
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             {/* Burger menu icon (only visible on small screens) */}
             <IconButton
+              data-cy="burger-menu"
               color="inherit"
               edge="start"
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -135,6 +138,7 @@ export default function Navbar({ title, main, navItems }) {
 
             {/* Navigation links (hidden on small screens) */}
             <Box
+              data-cy="navbar-links"
               className="nav-items-box"
               sx={{
                 display: {
@@ -155,6 +159,9 @@ export default function Navbar({ title, main, navItems }) {
                     // External links
                     <Button
                       key={item.label}
+                      data-cy={`nav-link-external-${item.label
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")}`}
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -169,6 +176,9 @@ export default function Navbar({ title, main, navItems }) {
                     // Internal links using react-router
                     <Button
                       key={item.label}
+                      data-cy={`nav-link-internal-${item.label
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")}`}
                       component={Link}
                       to={item.url}
                       sx={{
@@ -187,6 +197,7 @@ export default function Navbar({ title, main, navItems }) {
 
       {/* Drawer that slides in for mobile view */}
       <Drawer
+        data-cy="navbar-drawer"
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
         sx={{ display: { md: "none" } }}

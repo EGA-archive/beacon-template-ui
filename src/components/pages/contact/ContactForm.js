@@ -34,12 +34,34 @@ export default function ContactForm() {
       startedAt: Date.now(), // Anti-bot: block too-fast submits
     },
     validationSchema: contactValidation,
-    onSubmit: (values, { resetForm }) => {
-      const tooFast = Date.now() - Number(values.startedAt) < 3000;
+    onSubmit: async (values, { resetForm }) => {
+      const tooFast = Date.now() - Number(values.startedAt) < 3000; // Prevents bots/scripts submitting too quickly
       if (values.website || tooFast) return;
-      console.log("Contact form submitted:", values); // This will get replaced once we agree on the way to send email
-      resetForm();
-      navigate("/contact-success");
+
+      try {
+        const response = await fetch(config.ui.contact.apiPath, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          // Sends this payload to the backend
+          body: JSON.stringify({
+            name: `${values.firstName} ${values.lastName} (${values.jobTitle})`,
+            email: values.email,
+            subject: "Contact Form Submission",
+            message: values.comment,
+            recipientKey: config.ui.contact.recipientKey, // Maps to real email via backend config
+          }),
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          resetForm(); // Reset the form
+          navigate("/contact-success"); // Redirect on success
+        } else {
+          alert("Error: " + (result.error || "Unknown error")); // Show backend error
+        }
+      } catch (err) {
+        alert("Failed to send message");
+      }
     },
   });
 

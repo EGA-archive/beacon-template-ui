@@ -26,6 +26,31 @@ export default function SearchGenomicInput({
 }) {
   const inputRef = useRef(null); // For managing focus on the input field
 
+  // Detects and cleans dirty variant notation
+  const detectAndCleanVariant = (input = "") => {
+    const cleaned = input
+      .trim()
+      .replace(/\./g, "") // remove dots
+      .replace(/\s+/g, "-") // replace all space/tab/newlines with hyphens
+      .replace(/\t+/g, "-") // tabs to hyphens
+      .replace(/-+/g, "-") // collapse multiple hyphens
+      .replace(/^-|-$/g, ""); // trim starting/ending hyphens
+
+    const variantRegex = /^(chr)?(\d+|X|Y|MT)-\d+-[ACGT]+-[ACGT]+$/i;
+
+    if (variantRegex.test(cleaned)) {
+      return {
+        isVariant: true,
+        cleanedValue: cleaned.toUpperCase(), // normalize alleles
+      };
+    }
+
+    return {
+      isVariant: false,
+      cleanedValue: input.trim(),
+    };
+  };
+
   // Automatically focuses the input when genomic input becomes active
   useEffect(() => {
     if (activeInput === "genomic" && inputRef.current) {
@@ -33,44 +58,46 @@ export default function SearchGenomicInput({
     }
   }, [activeInput]);
 
-  // Function to add the current genomicDraft to the selected filters
+  // Live detection of current input state
+  const { isVariant, cleanedValue } = detectAndCleanVariant(genomicDraft);
+
+  // This function is called when the user presses Enter or clicks "Add"
+  // It detects if the input is a genomic variant, cleans it if needed, checks for duplicates,
+  // and then adds it to the selected filters list.
   const commitGenomicDraft = () => {
-    const val = (genomicDraft || "").trim(); // Clean up the input
-    console.log("💡 Genomic draft submitted:", val);
-    if (!val) return; // Don't do anything if it's empty
+    // Step 1: Check if the input looks like a variant and clean it
+    const { isVariant, cleanedValue } = detectAndCleanVariant(genomicDraft);
+    if (!cleanedValue) return;
 
-    console.log("🧪 Current selectedFilter array:", selectedFilter);
+    // console.log("🧬 Submitted:", cleanedValue, "| Variant:", isVariant);
 
-    // Check if this exact value already exists in the filters
+    // Step 2: Check if this cleaned value is already in the selected filters and shows an error if it is a duplicate
     const isDuplicate = selectedFilter.some(
-      (f) => f.label.trim().toLowerCase() === val.toLowerCase()
+      (f) => f.label.trim().toLowerCase() === cleanedValue.toLowerCase()
     );
-
-    // If it's a duplicate, show an error message and return
     if (isDuplicate) {
       setMessage(COMMON_MESSAGES.doubleValue);
       setTimeout(() => setMessage(null), 3000);
       return;
     }
 
-    // Generate a unique ID for the new filter
+    // Step 3: Create a unique ID for this new filter item
     const uniqueId = `genomic-free-${Date.now().toString(36)}-${Math.random()
       .toString(36)
       .slice(2, 7)}`;
 
-    // Create the new filter object
+    // Step 4: Build the new filter object
     const newGenomicFilter = {
       id: uniqueId,
       key: uniqueId,
-      label: val,
-      scope: "genomicQuery",
+      label: cleanedValue,
+      scope: isVariant ? "genomicVariant" : "genomicQuery",
       bgColor: "genomic",
     };
 
-    console.log("✅ Adding new genomic filter:", newGenomicFilter);
-    // Add the new filter to the list
+    // Step 5: Add it to the filter list and reset the input
     setSelectedFilter((prev) => [...prev, newGenomicFilter]);
-    setGenomicDraft(""); // Clear the input field
+    setGenomicDraft("");
   };
 
   return (
@@ -196,7 +223,15 @@ export default function SearchGenomicInput({
               fontSize: "12px",
             }}
           >
-            Add the genomic query: <b>{genomicDraft}</b>
+            {isVariant ? (
+              <>
+                Add <b>genomic variant:</b> <code>{cleanedValue}</code>
+              </>
+            ) : (
+              <>
+                Add <b>genomic query:</b> <code>{genomicDraft}</code>
+              </>
+            )}
           </Box>
 
           {/* Show duplicate error message if necessary */}
