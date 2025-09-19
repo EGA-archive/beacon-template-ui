@@ -5,6 +5,7 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
+// Reusable component to display error or info messages
 import CommonMessage, {
   COMMON_MESSAGES,
 } from "../../components/common/CommonMessage";
@@ -13,8 +14,10 @@ import { useState } from "react";
 import config from "../../config/config.json";
 import { useSelectedEntry } from "./../context/SelectedEntryContext";
 import FilterLabelRemovable from "../styling/FilterLabelRemovable";
-export default function GenomicAnnotations() {
+export default function GenomicAnnotations({ setActiveInput }) {
   const [message, setMessage] = useState(null);
+
+  // Full list of all genomic filter categories
   const allGenomicCategories = [
     "SNP Examples",
     "CNV Examples",
@@ -22,21 +25,23 @@ export default function GenomicAnnotations() {
     "Molecular Effect",
   ];
 
-  const {
-    setSelectedFilter,
-    setExtraFilter,
-    setLoadingData,
-    setResultData,
-    setHasSearchResult,
-  } = useSelectedEntry();
+  // Get functions from context to update selected filters and control search result state
+  // - setSelectedFilter: adds a selected filter to the context
+  // - setLoadingData: marks whether data is being fetched
+  // - setResultData: stores the results from a query
+  // - setHasSearchResult: marks whether results are available
+  const { genomicDraft, setGenomicDraft } = useSelectedEntry();
 
+  // Read from config which genomic categories should be shown in the UI
   const genomicVisibleCategories =
     config.ui.genomicAnnotations?.visibleGenomicCategories || [];
 
+  // Keep only the categories that are allowed in config
   const filterCategories = allGenomicCategories.filter((cat) =>
     genomicVisibleCategories.includes(cat)
   );
 
+  // Static mapping of each category to an array of example filter labels
   const filterLabels = {
     "SNP Examples": [
       { key: "TP53", id: "TP53", label: "TP53" },
@@ -119,14 +124,18 @@ export default function GenomicAnnotations() {
     ],
   };
 
+  // Manage which accordion panel is open initially
   const [expanded, setExpanded] = useState(() => {
     const initialState = {};
     let firstSet = false;
 
+    // Expand the first category with valid labels
     allGenomicCategories.forEach((topic) => {
       const validLabels =
-        filterLabels[topic]?.filter((label) => label.label.trim() !== "") || [];
-
+        filterLabels[topic]?.filter(
+          (label) =>
+            typeof label.label === "string" && label.label.trim() !== ""
+        ) || [];
       if (validLabels.length > 0 && !firstSet) {
         initialState[topic] = true;
         firstSet = true;
@@ -137,10 +146,12 @@ export default function GenomicAnnotations() {
     return initialState;
   });
 
+  // Logic that handles the accourdation toggle
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded({ [panel]: isExpanded });
   };
 
+  // This overrides the regular MUI styling in order to align it to our design
   const summarySx = {
     px: 0,
     "& .MuiAccordionSummary-expandIconWrapper": {
@@ -155,32 +166,53 @@ export default function GenomicAnnotations() {
     },
   };
 
+  // Logic when the user clicks a genomic annotation chip
+  // const handleGenomicFilterChange = (item) => {
+  //   setLoadingData(false);
+  //   setResultData([]);
+  //   setHasSearchResult(false);
+
+  //   // Update selected filters to avoid duplicates
+  //   setSelectedFilter((prevGenomicAnnotation) => {
+  //     const isDuplicate = prevGenomicAnnotation.some(
+  //       (genAnnotation) => genAnnotation.id === item.id
+  //     );
+
+  //     if (isDuplicate) {
+  //       // Show message if the filter was already selected
+  //       setMessage(COMMON_MESSAGES.doubleFilter);
+  //       setTimeout(() => setMessage(null), 3000);
+  //       return prevGenomicAnnotation;
+  //     }
+  //     console.log("prevGenomicAnnotation", prevGenomicAnnotation);
+  //     // Add the new filter
+  //     return [...prevGenomicAnnotation, item];
+  //   });
+  //   console.log("item", item);
+  // };
+
   const handleGenomicFilterChange = (item) => {
-    setLoadingData(false);
-    setResultData([]);
-    setHasSearchResult(false);
+    const value = (item.label || item.id)?.trim();
 
-    setSelectedFilter((prevGenomicAnnotation) => {
-      const isDuplicate = prevGenomicAnnotation.some(
-        (genAnnotation) => genAnnotation.id === item.id
-      );
+    if ((genomicDraft || "").trim() === value) {
+      setMessage(COMMON_MESSAGES.doubleFilter);
+      setTimeout(() => setMessage(null), 3000);
+      return;
+    }
 
-      if (isDuplicate) {
-        setMessage(COMMON_MESSAGES.doubleFilter);
-        setTimeout(() => setMessage(null), 3000);
-        return prevGenomicAnnotation;
-      }
-      return [...prevGenomicAnnotation, item];
-    });
+    setGenomicDraft(value);
+    setActiveInput("genomic");
   };
 
   return (
     <Box>
+      {/* Display error message if any */}
       {message && (
         <Box sx={{ mt: 2 }}>
           <CommonMessage text={message} type="error" />
         </Box>
       )}
+      {/* Render each visible filter category */}
       {filterCategories.map((topic) => {
         const validLabels = filterLabels[topic]?.filter(
           (label) => label.label.trim() !== ""
@@ -201,6 +233,7 @@ export default function GenomicAnnotations() {
               "&::before": { display: "none" },
             }}
           >
+            {/* Accordion header */}
             <AccordionSummary
               expandIcon={<KeyboardArrowRightIcon />}
               sx={summarySx}
@@ -212,6 +245,8 @@ export default function GenomicAnnotations() {
                 {topic}
               </Typography>
             </AccordionSummary>
+
+            {/* Accordion body with filter chips */}
             <AccordionDetails sx={{ px: 0, pt: 0 }}>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                 {validLabels.map((item) => (

@@ -15,9 +15,17 @@ import PropTypes from "prop-types";
 import config from "../config/config.json";
 import { Link } from "react-router-dom";
 
+/**
+ * Displays a responsive navigation bar with a title, logo, and links.
+ * On small screens, it shows a burger menu that opens a drawer.
+ * On larger screens, links are shown directly in the toolbar.
+ */
+
 export default function Navbar({ title, main, navItems }) {
+  // State to control mobile drawer open/close
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Common text style used for all nav links
   const textStyle = {
     fontFamily: '"Open Sans", sans-serif',
     fontWeight: 400,
@@ -32,6 +40,7 @@ export default function Navbar({ title, main, navItems }) {
 
   return (
     <>
+      {/* Top fixed app bar with toolbar */}
       <AppBar
         position="fixed"
         elevation={0}
@@ -50,6 +59,7 @@ export default function Navbar({ title, main, navItems }) {
             minHeight: "68px",
           }}
         >
+          {/* Left section: logo + title */}
           <Box
             sx={{
               display: "flex",
@@ -62,7 +72,7 @@ export default function Navbar({ title, main, navItems }) {
               },
             }}
           >
-            {/* Logo in Navbar only if width >= 386px */}
+            {/* Hide logo if screen too small */}
             <Box
               component="span"
               sx={{
@@ -78,10 +88,13 @@ export default function Navbar({ title, main, navItems }) {
                 src={main}
                 alt="Logo"
                 className="w-logo-w h-logo-h object-contain logo-small"
+                data-cy="navbar-logo"
               />
             </Box>
 
+            {/* Title text linking to homepage */}
             <Typography
+              data-cy="navbar-title"
               className="font-sans"
               component={Link}
               to="/"
@@ -107,8 +120,11 @@ export default function Navbar({ title, main, navItems }) {
             </Typography>
           </Box>
 
+          {/* Right section: nav links + burger menu */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            {/* Burger menu icon (only visible on small screens) */}
             <IconButton
+              data-cy="burger-menu"
               color="inherit"
               edge="start"
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -120,7 +136,9 @@ export default function Navbar({ title, main, navItems }) {
               <MenuIcon />
             </IconButton>
 
+            {/* Navigation links (hidden on small screens) */}
             <Box
+              data-cy="navbar-links"
               className="nav-items-box"
               sx={{
                 display: {
@@ -138,8 +156,12 @@ export default function Navbar({ title, main, navItems }) {
                 .filter((item) => item.label && item.label.trim() !== "")
                 .map((item) =>
                   item.url && item.url.startsWith("http") ? (
+                    // External links
                     <Button
                       key={item.label}
+                      data-cy={`nav-link-external-${item.label
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")}`}
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -151,8 +173,12 @@ export default function Navbar({ title, main, navItems }) {
                       {item.label}
                     </Button>
                   ) : (
+                    // Internal links using react-router
                     <Button
                       key={item.label}
+                      data-cy={`nav-link-internal-${item.label
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")}`}
                       component={Link}
                       to={item.url}
                       sx={{
@@ -169,12 +195,15 @@ export default function Navbar({ title, main, navItems }) {
         </Toolbar>
       </AppBar>
 
+      {/* Drawer that slides in for mobile view */}
       <Drawer
+        data-cy="navbar-drawer"
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
         sx={{ display: { md: "none" } }}
       >
         <List sx={{ width: 240, pt: 3 }}>
+          {/* Title at the top of the drawer */}
           <ListItem
             sx={{
               px: 3,
@@ -190,6 +219,7 @@ export default function Navbar({ title, main, navItems }) {
             {title}
           </ListItem>
 
+          {/* Drawer nav links (external and internal) */}
           {navItems
             .filter((item) => item.label && item.label.trim() !== "")
             .map((item) => (
@@ -240,6 +270,7 @@ export default function Navbar({ title, main, navItems }) {
   );
 }
 
+// Define expected props and their types
 Navbar.propTypes = {
   title: PropTypes.string.isRequired,
   main: PropTypes.string.isRequired,

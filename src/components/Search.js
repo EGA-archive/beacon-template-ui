@@ -5,39 +5,69 @@ import {
   Tooltip,
   Button,
   CircularProgress,
-  InputBase,
-  Select,
-  MenuItem,
 } from "@mui/material";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import config from "../config/config.json";
 import { darken, lighten } from "@mui/system";
-import SearchIcon from "@mui/icons-material/Search";
 import { useSelectedEntry } from "./context/SelectedEntryContext";
 import GenomicQueryBuilderButton from "./genomic/GenomicQueryBuilderButton";
 import GenomicQueryBuilderDialog from "./genomic/GenomicQueryBuilderDialog";
 import AllFilteringTermsButton from "./filters/AllFilteringTermsButton";
-import FilteringTermsDropdownResults from "./filters/FilteringTermsDropdownResults";
 import QueryApplied from "./search/QueryApplied";
 import SearchButton from "./search/SearchButton";
 import FilterTermsExtra from "./search/FilterTemsExtra";
+import SearchFiltersInput from "../components/search/SearchFiltersInput";
+import SearchGenomicInput from "../components/search/SearchGenomicInput";
+import {
+  formatEntryLabel,
+  sortEntries,
+  singleEntryCustomLabels,
+  entryTypeDescriptions,
+} from "../components/common/textFormatting";
 
 export default function Search({
+  activeInput,
+  setActiveInput,
   onHeightChange,
   selectedTool,
   setSelectedTool,
 }) {
-  const { entryTypes, setEntryTypes, setBeaconsInfo } = useSelectedEntry();
-  const { entryTypesConfig, setEntryTypesConfig } = useSelectedEntry();
-  const { selectedFilter, setSelectedFilter } = useSelectedEntry();
-  const { extraFilter, hasSearchResults } = useSelectedEntry();
+  const {
+    // entry types + config
+    entryTypes,
+    setEntryTypes,
+    entryTypesConfig,
+    setEntryTypesConfig,
+
+    // filters
+    selectedFilter,
+    setSelectedFilter,
+    extraFilter,
+
+    // where results go
+    setBeaconsInfo,
+
+    // selected tab
+    selectedPathSegment,
+    setSelectedPathSegment,
+
+    // the text staged for the left genomic input
+    genomicDraft,
+    setGenomicDraft,
+  } = useSelectedEntry();
+
   const [loading, setLoading] = useState(true);
-  const [activeInput, setActiveInput] = useState(null);
-  const [searchInput, setSearchInput] = useState("");
-  const { selectedPathSegment, setSelectedPathSegment } = useSelectedEntry();
   const [assembly, setAssembly] = useState(config.assemblyId[0]);
   const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState(null);
   const searchRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (activeInput === "genomic" && inputRef.current) {
+      inputRef.current.focus();
+      setActiveInput(null);
+    }
+  }, [activeInput, setActiveInput]);
 
   useEffect(() => {
     if (searchRef.current && onHeightChange) {
@@ -51,14 +81,6 @@ export default function Search({
   }, [onHeightChange]);
 
   const configuredOrder = config.ui.entryTypesOrder;
-  const sortEntries = (entries) =>
-    configuredOrder?.length > 0 && entries.length > 1
-      ? [...entries].sort(
-          (a, b) =>
-            configuredOrder.indexOf(a.pathSegment) -
-            configuredOrder.indexOf(b.pathSegment)
-        )
-      : entries;
 
   useEffect(() => {
     const fetchEntryTypes = async () => {
@@ -66,31 +88,36 @@ export default function Search({
         const res = await fetch(`${config.apiUrl}/map`);
         const data = await res.json();
         const endpointSets = data.response.endpointSets || {};
-
+        const seen = new Set();
         const entries = Object.entries(endpointSets)
-          .filter(
-            ([key, value]) =>
-              !key.includes("Endpoints") && !key.includes("genomicVariation")
-          )
+
+          .filter(([key]) => !key.includes("Endpoints"))
           .map(([key, value]) => {
             const originalSegment = value.rootUrl?.split("/").pop();
             const normalizedSegment =
               originalSegment === "genomicVariations"
                 ? "g_variants"
                 : originalSegment;
+
             return {
               id: key,
               pathSegment: normalizedSegment,
               originalPathSegment: originalSegment,
             };
+          })
+
+          .filter((entry) => {
+            if (seen.has(entry.pathSegment)) return false;
+            seen.add(entry.pathSegment);
+            return true;
           });
 
-        const sorted = sortEntries(entries);
+        const sorted = sortEntries(entries, configuredOrder);
         setEntryTypes(sorted);
-
         if (sorted.length > 0) {
           setSelectedPathSegment(sorted[0].pathSegment);
         }
+
         await handleBeaconsInfo();
       } catch (err) {
         console.error("Error fetching entry types:", err);
@@ -106,7 +133,9 @@ export default function Search({
     try {
       const res = await fetch(`${config.apiUrl}/configuration`);
       const data = await res.json();
-      setEntryTypesConfig(data.response.entryTypes || {});
+      const entryTypeConfig =
+        data.response?.entryTypes || data.entryTypes || {};
+      setEntryTypesConfig(entryTypeConfig);
     } catch (err) {
       console.error("Error fetching configuration:", err);
     }
@@ -155,16 +184,6 @@ export default function Search({
   const isSingleNonGenomic =
     isSingleEntryType && onlyEntryPath !== "g_variants";
 
-  const singleEntryCustomLabels = {
-    g_variants: "Genomic Variants",
-    individuals: "Individual Level Data",
-    biosamples: "Biosamples",
-    runs: "Runs",
-    analyses: "Analysis",
-    cohorts: "Cohorts",
-    datasets: "Datasets",
-  };
-
   const hasGenomic = entryTypes.some((e) => e.pathSegment === "g_variants");
 
   const isGenomicFirstOrOnly =
@@ -172,26 +191,9 @@ export default function Search({
     entryTypes[0]?.pathSegment === "g_variants" ||
     selectedPathSegment === "g_variants";
 
-  const formatEntryLabel = (segment) => {
-    if (!segment) return "Unknown";
-    return segment === "g_variants"
-      ? "Genomic Variants"
-      : segment.charAt(0).toUpperCase() + segment.slice(1);
-  };
-
   const primaryColor = config.ui.colors.primary;
   const primaryDarkColor = config.ui.colors.darkPrimary;
   const selectedBgColor = lighten(primaryDarkColor, 0.9);
-
-  const entryTypeDescriptions = {
-    analyses: "query analysis metadata (e.g. analysis pipelines, methods)",
-    biosamples: "query biosample data (e.g. histological samples)",
-    cohorts: "query cohort-level data (e.g. shared traits, study groups)",
-    datasets: "query datasets-level data (e.g. name, description)",
-    g_variants: "query genomic variants across individuals",
-    individuals: "query individual-level data (e.g. phenotypes, treatment)",
-    runs: "query sequencing run details (e.g. platform, run date)",
-  };
 
   const handleAllFilteringClick = () => {
     setSelectedTool((prev) =>
@@ -205,111 +207,7 @@ export default function Search({
 
   const handleClose = () => {
     setOpen(false);
-  };
-
-  const renderInput = (type) => {
-    if (type === "genomic") {
-      return (
-        <Box
-          onClick={() => setActiveInput(type)}
-          sx={{
-            flex: activeInput === type ? 1 : 0.3,
-            display: "flex",
-            alignItems: "center",
-            border: `1.5px solid ${primaryDarkColor}`,
-            borderRadius: "999px",
-            backgroundColor: "#fff",
-            transition: "flex 0.3s ease",
-          }}
-        >
-          {activeInput === "genomic" && (
-            <Select
-              value={assembly}
-              onChange={(e) => setAssembly(e.target.value)}
-              variant="standard"
-              disableUnderline
-              IconComponent={KeyboardArrowDownIcon}
-              sx={{
-                backgroundColor: "black",
-                color: "#fff",
-                fontSize: "12px",
-                fontWeight: 700,
-                fontFamily: '"Open Sans", sans-serif',
-                pl: 3,
-                pr: 2,
-                py: 0,
-                height: "47px",
-                borderTopLeftRadius: "999px",
-                borderBottomLeftRadius: "999px",
-                ".MuiSelect-icon": {
-                  color: "#fff",
-                  mr: 1,
-                },
-              }}
-            >
-              {config.assemblyId.map((id) => (
-                <MenuItem key={id} value={id} sx={{ fontSize: "12px" }}>
-                  {id}
-                </MenuItem>
-              ))}
-            </Select>
-          )}
-
-          <Box sx={{ px: 1, color: primaryDarkColor }}>
-            <SearchIcon />
-          </Box>
-
-          <InputBase
-            placeholder="Search by Genomic Query"
-            fullWidth
-            sx={{
-              fontFamily: '"Open Sans", sans-serif',
-              fontSize: "14px",
-              pr: 2,
-              height: "47px",
-            }}
-          />
-        </Box>
-      );
-    }
-
-    return (
-      <Box
-        onClick={() => setActiveInput(type)}
-        sx={{
-          flex: activeInput === type ? 1 : 0.3,
-          display: "flex",
-          flexDirection: "column", // Important: allow dropdown to appear below
-          alignItems: "stretch",
-          border: `1.5px solid ${primaryDarkColor}`,
-          borderRadius: "999px",
-          backgroundColor: "#fff",
-          transition: "flex 0.3s ease",
-          position: "relative", // anchors dropdown here
-          px: 2,
-          py: 1,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <SearchIcon sx={{ color: primaryDarkColor, mr: 1 }} />
-          <InputBase
-            placeholder="Search by Filtering Terms (min. 1 letter required)"
-            fullWidth
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            sx={{
-              fontFamily: '"Open Sans", sans-serif',
-              fontSize: "14px",
-            }}
-          />
-        </Box>
-
-        <FilteringTermsDropdownResults
-          searchInput={searchInput}
-          onCloseDropdown={() => setSearchInput("")}
-        />
-      </Box>
-    );
+    setSelectedTool(null);
   };
 
   return (
@@ -339,7 +237,6 @@ export default function Search({
               }`
             : "Search"}
         </Typography>
-
         {!isSingleEntryType && (
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
             <Typography
@@ -409,7 +306,6 @@ export default function Search({
             </Tooltip>
           </Box>
         )}
-
         {loading ? (
           <CircularProgress />
         ) : !isSingleEntryType ? (
@@ -452,7 +348,6 @@ export default function Search({
             ))}
           </Box>
         ) : null}
-
         <Box sx={{ display: "flex", alignItems: "center", mb: 2, mt: 4 }}>
           {isSingleNonGenomic ? (
             <Typography
@@ -478,7 +373,6 @@ export default function Search({
             </Typography>
           )}
         </Box>
-
         <Box
           sx={{
             display: "flex",
@@ -487,21 +381,57 @@ export default function Search({
           }}
         >
           {isSingleNonGenomic ? (
-            renderInput("filter")
+            <SearchFiltersInput
+              activeInput={activeInput}
+              setActiveInput={setActiveInput}
+            />
           ) : isGenomicFirstOrOnly ? (
             hasGenomic && (
               <>
-                {renderInput("genomic")}
-                {renderInput("filter")}
+                <SearchGenomicInput
+                  activeInput={activeInput}
+                  setActiveInput={setActiveInput}
+                  genomicDraft={genomicDraft}
+                  setGenomicDraft={setGenomicDraft}
+                  selectedFilter={selectedFilter}
+                  setSelectedFilter={setSelectedFilter}
+                  assembly={assembly}
+                  setAssembly={setAssembly}
+                  primaryDarkColor={primaryDarkColor}
+                  message={message}
+                  setMessage={setMessage}
+                />
+                <SearchFiltersInput
+                  activeInput={activeInput}
+                  setActiveInput={setActiveInput}
+                />
               </>
             )
           ) : hasGenomic ? (
             <>
-              {renderInput("filter")}
-              {renderInput("genomic")}
+              <SearchFiltersInput
+                activeInput={activeInput}
+                setActiveInput={setActiveInput}
+              />
+              <SearchGenomicInput
+                message={message}
+                activeInput={activeInput}
+                setActiveInput={setActiveInput}
+                genomicDraft={genomicDraft}
+                setGenomicDraft={setGenomicDraft}
+                selectedFilter={selectedFilter}
+                setSelectedFilter={setSelectedFilter}
+                assembly={assembly}
+                setAssembly={setAssembly}
+                primaryDarkColor={primaryDarkColor}
+                setMessage={setMessage}
+              />
             </>
           ) : (
-            renderInput("filter")
+            <SearchFiltersInput
+              activeInput={activeInput}
+              setActiveInput={setActiveInput}
+            />
           )}
         </Box>
         {extraFilter && <FilterTermsExtra />}
@@ -566,6 +496,8 @@ export default function Search({
                 <GenomicQueryBuilderDialog
                   open={open}
                   handleClose={handleClose}
+                  selectedFilter={selectedFilter}
+                  setSelectedFilter={setSelectedFilter}
                 />
               </>
             )}
@@ -574,7 +506,6 @@ export default function Search({
               selected={selectedTool === "allFilteringTerms"}
             />
           </Box>
-
           <Box>
             <SearchButton
               setSelectedTool={setSelectedTool}

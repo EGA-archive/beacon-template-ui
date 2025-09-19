@@ -13,21 +13,37 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import config from "../../config/config.json";
 
+// FilterTermsExtra allows users to add a custom numeric filter
+// It provides:
+// - a dropdown to select the operator (> = <)
+// - an input field to enter the value
+// - a "+" button to confirm and add the filter
+// - basic validation to prevent empty submissions
+
 export default function FilterTermsExtra() {
+  // Access global state and setters from context
   const { extraFilter, setExtraFilter, setSelectedFilter } = useSelectedEntry();
+
+  // Local state to hold operator, input value, and error message
   const [selectedOperator, setSelectedOperator] = useState(">");
   const [selectedValue, setSelectedValue] = useState("");
   const [error, setError] = useState("");
 
+  // Function to validate and add the new filter
   const handleAddFilter = () => {
     setError("");
+    // If the value is empty, show error and stop
     if (!selectedValue) {
       setError(COMMON_MESSAGES.fillFields);
     } else {
+      // Otherwise, try to add the custom filter
       setSelectedFilter((prevFilters) => {
+        // If the same key already exists, do not add again
         if (prevFilters.some((filter) => filter.key === extraFilter.key)) {
           return prevFilters;
         }
+
+        // Create a custom filter object
         const extraFilterCustom = {
           field: extraFilter.key,
           operator: selectedOperator,
@@ -37,9 +53,13 @@ export default function FilterTermsExtra() {
           scopes: extraFilter.scopes || [],
           type: extraFilter.type || "alphanumeric",
         };
+
+        // Reset local and global state for next input
         setExtraFilter(null);
         setSelectedOperator(">");
         setSelectedValue("");
+
+        // Add new filter to the list
         return [...prevFilters, extraFilterCustom];
       });
     }
@@ -56,6 +76,7 @@ export default function FilterTermsExtra() {
         flexWrap: "wrap",
       }}
     >
+      {/* Label */}
       <Box>
         <Typography
           sx={{
@@ -68,6 +89,8 @@ export default function FilterTermsExtra() {
           Insert value:
         </Typography>
       </Box>
+
+      {/* Operator selector */}
       <Box>
         <FormControl
           sx={{
@@ -106,6 +129,7 @@ export default function FilterTermsExtra() {
           </Select>
         </FormControl>
       </Box>
+      {/* Input field for numeric value */}
       <Box
         sx={{
           display: "flex",
@@ -129,6 +153,7 @@ export default function FilterTermsExtra() {
           }}
         />
       </Box>
+      {/* Add button */}
       <Box
         sx={{
           display: "flex",
@@ -164,6 +189,8 @@ export default function FilterTermsExtra() {
           <AddIcon fontSize="small" />
         </Button>
       </Box>
+
+      {/* Display error message if needed */}
       {error && <CommonMessage text={error} type="error" />}
     </Box>
   );

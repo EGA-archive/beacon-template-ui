@@ -11,12 +11,20 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import { searchFilteringTerms } from "../common/filteringTermsHelpers";
 
+// Component: Displays a searchable and paginated list of filtering terms
 export default function AllFilteringTermsComponent() {
+  // Store all filtering terms fetched from API with id, label, scope, scopes, type
   const [filteringTerms, setFilteringTerms] = useState([]);
+
+  // Track loading state during fetch
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const { selectedPathSegment } = useSelectedEntry();
+
+  // Filtered list of terms after applying search
   const [filteredTerms, setFilteredTerms] = useState([]);
+
+  // Pagination states
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -25,20 +33,24 @@ export default function AllFilteringTermsComponent() {
 
   const unselectedBorderColor = alpha(primaryColor, 0.15);
 
+  // Handle table pagination: page change
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
+  // Handle table pagination: rows per page change
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(event.target.value);
     setPage(0);
   };
 
+  // This hook loads the filtering terms from the backend once when the page loads, saves them in state, and updates a loading flag when finished.
+  //  Runs on components mount
   useEffect(() => {
     const fetchFilteringTerms = async () => {
       try {
-        const res = await fetch(`${config.apiUrl}/filtering_terms`);
-        //const res = await fetch("/api.json");
+        // const res = await fetch(`${config.apiUrl}/filtering_terms`);
+        const res = await fetch("/api.json");
         const data = await res.json();
         setFilteringTerms(data);
       } catch (err) {
@@ -51,6 +63,10 @@ export default function AllFilteringTermsComponent() {
     fetchFilteringTerms();
   }, []);
 
+  // This hook filters the terms based on what the user typed. If no search is entered, it shows all terms. If something is typed, it updates the list to only show matches.
+  // This useEffect runs every time either:
+  // searchQuery changes (user types in the search box), or
+  // filteringTerms changes.
   useEffect(() => {
     const allTerms = filteringTerms?.response?.filteringTerms ?? [];
     if (searchQuery.trim() === "") {
@@ -61,10 +77,11 @@ export default function AllFilteringTermsComponent() {
     }
   }, [searchQuery, filteringTerms]);
 
+  // UI: search bar + table of filtering terms
   return (
     <Box
+      // Outer container styling
       sx={{
-        mt: "-20px",
         width: "100%",
         height: "auto",
         gap: "16px",
@@ -76,6 +93,7 @@ export default function AllFilteringTermsComponent() {
         boxShadow: "0px 8px 11px 0px #9BA0AB24",
       }}
     >
+      {/* Section title */}
       <Typography
         sx={{
           color: "black",
@@ -85,22 +103,26 @@ export default function AllFilteringTermsComponent() {
       >
         Filtering Terms
       </Typography>
+
+      {/* Search bar aligned to the right */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>
         <TextField
           placeholder="Search Filtering Terms"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => setSearchQuery(e.target.value)} // Update state on input
           variant="outlined"
           InputProps={{
+            // Left side: search icon
             startAdornment: (
               <InputAdornment position="start">
                 <SearchIcon sx={{ color: primaryDarkColor, mr: 1 }} />
               </InputAdornment>
             ),
+            // Right side: clear button, only visible when query is not empty
             endAdornment: searchQuery && (
               <InputAdornment position="end">
                 <IconButton
-                  onClick={() => setSearchQuery("")}
+                  onClick={() => setSearchQuery("")} // Clear search
                   size="small"
                   sx={{ color: primaryDarkColor }}
                 >
@@ -109,6 +131,7 @@ export default function AllFilteringTermsComponent() {
               </InputAdornment>
             ),
           }}
+          // Styling for rounded search bar
           sx={{
             cursor: "text",
             mb: 3,
@@ -137,21 +160,22 @@ export default function AllFilteringTermsComponent() {
           }}
         />
       </Box>
+
+      {/* Table that lists filtering terms (paginated) */}
       <Box
         sx={{
           width: "100%",
           mb: 3,
           mt: 1,
-          width: "100%",
         }}
       >
         <FilteringTermsTable
-          filteringTerms={{ response: { filteringTerms: filteredTerms } }}
-          defaultScope={selectedPathSegment}
-          searchWasPerformed={searchQuery.trim().length > 0}
-          loading={loading}
-          handleChangePage={handleChangePage}
-          handleChangeRowsPerPage={handleChangeRowsPerPage}
+          filteringTerms={{ response: { filteringTerms: filteredTerms } }} // Pass filtered results
+          defaultScope={selectedPathSegment} // Scope comes from selected entry
+          searchWasPerformed={searchQuery.trim().length > 0} // Used for conditional rendering
+          loading={loading} // Show loader while fetching
+          handleChangePage={handleChangePage} // Pagination: change page
+          handleChangeRowsPerPage={handleChangeRowsPerPage} // Pagination: rows per page
           page={page}
           rowsPerPage={rowsPerPage}
         />

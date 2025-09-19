@@ -1,22 +1,31 @@
-import { useState } from "react";
 import { Box, Typography } from "@mui/material";
 import config from "../../../config/config.json";
 import GenomicInputBox from "../GenomicInputBox";
 import { mainBoxTypography } from "../styling/genomicInputBoxStyling";
 
-export default function GeneIdForm() {
-  const [selectedInput, setSelectedInput] = useState("variationType");
+export default function GeneIdForm({ selectedInput, setSelectedInput }) {
   return (
     <Box>
       <Box
         sx={{
           mt: 2,
           display: "flex",
+          "@media (max-width:1108px)": {
+            flexDirection: "column",
+          },
           gap: 6,
           width: "100%",
         }}
       >
-        <Box sx={{ width: "30%" }}>
+        {/* Left panel: Gene ID */}
+        <Box
+          sx={{
+            width: "30%",
+            "@media (max-width:1108px)": {
+              width: "100%",
+            },
+          }}
+        >
           <Typography
             variant="h6"
             sx={{
@@ -40,11 +49,19 @@ export default function GeneIdForm() {
             name="geneId"
             label="Gene ID"
             placeholder="ex. BRAF"
-            required={true}
+            required
           />
         </Box>
 
-        <Box sx={{ width: "70%" }}>
+        {/* Right panel: Optional mutually exclusive inputs */}
+        <Box
+          sx={{
+            width: "70%",
+            "@media (max-width:1108px)": {
+              width: "100%",
+            },
+          }}
+        >
           <Typography
             variant="h6"
             sx={{
@@ -65,18 +82,18 @@ export default function GeneIdForm() {
             Please select one:
           </Typography>
 
-          {/* Optional Input Row */}
+          {/* Mutually exclusive inputs */}
           <Box
             sx={{
               display: "flex",
               flexDirection: "row",
               gap: 2,
               width: "100%",
-              justifyContent: "space-between",
               borderRadius: "10px",
+              flexWrap: "wrap",
             }}
           >
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: "1 1 200px" }}>
               <GenomicInputBox
                 name="variationType"
                 label="Variation Type"
@@ -88,8 +105,7 @@ export default function GeneIdForm() {
                 onSelect={() => setSelectedInput("variationType")}
               />
             </Box>
-
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: "1 1 200px" }}>
               <GenomicInputBox
                 name="basesChange"
                 label="Bases Change"
@@ -98,8 +114,7 @@ export default function GeneIdForm() {
                 onSelect={() => setSelectedInput("basesChange")}
               />
             </Box>
-
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: "1 1 200px" }}>
               <GenomicInputBox
                 name="aminoacidChange"
                 label="Aminoacid Change"
@@ -114,18 +129,18 @@ export default function GeneIdForm() {
             You can add the Genomic Location
           </Typography>
 
-          {/* Genomic Location Row */}
+          {/* Genomic location */}
           <Box
             sx={{
               display: "flex",
               flexDirection: "row",
               gap: 2,
               width: "100%",
-              justifyContent: "space-between",
+              flexWrap: "wrap",
               borderRadius: "10px",
             }}
           >
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: "1 1 200px" }}>
               <GenomicInputBox
                 name="assemblyId"
                 label="Assembly ID"
@@ -134,7 +149,8 @@ export default function GeneIdForm() {
                 options={config.assemblyId}
               />
             </Box>
-            <Box sx={{ flex: 1 }}>
+
+            <Box sx={{ flex: "1 1 200px" }}>
               <GenomicInputBox
                 name="start"
                 label="Start"
@@ -143,7 +159,7 @@ export default function GeneIdForm() {
               />
             </Box>
 
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: "1 1 200px" }}>
               <GenomicInputBox
                 name="end"
                 label="End"

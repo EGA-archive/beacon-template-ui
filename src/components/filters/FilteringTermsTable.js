@@ -24,6 +24,8 @@ import {
 } from "../common/filteringTermsHelpers";
 import { getSelectableScopeStyles } from "../styling/selectableScopeStyles";
 
+// This component displays a table of filtering terms.
+// It also lets users select a scope (like individual or biosample) when a filtering term is linked to multiple scopes.
 export default function FilteringTermsTable({
   filteringTerms,
   defaultScope,
@@ -32,17 +34,22 @@ export default function FilteringTermsTable({
   handleChangePage,
   handleChangeRowsPerPage,
   page,
-  rowsPerPage
+  rowsPerPage,
 }) {
-
+  // State to keep track of which scope was selected per filtering term
   const [selectedScopes, setSelectedScopes] = useState({});
+
+  // Optional message to show errors to the user
   const [message, setMessage] = useState(null);
+
+  // Gets shared states and functions from the context
   const {
     setExtraFilter,
     setSelectedFilter,
     selectedPathSegment: selectedEntryType,
   } = useSelectedEntry();
 
+  // A mapping to make scope names more human-readable
   const scopeAlias = {
     individuals: "individual",
     biosamples: "biosample",
@@ -53,6 +60,8 @@ export default function FilteringTermsTable({
     genomicVariations: "Genomic Variation",
   };
 
+  // When the filtering terms or the default scope changes, this code figures out which scope should be selected by default for each filtering term, and then stores that in state.
+  // This useEffect runs automatically when detects changes
   useEffect(() => {
     const defaults = assignDefaultScopesToTerms(
       filteringTerms?.response?.filteringTerms ?? [],
@@ -62,10 +71,13 @@ export default function FilteringTermsTable({
     setSelectedScopes(defaults);
   }, [filteringTerms, defaultScope]);
 
+  // Lighten the primary color from config for table styling
   const bgPrimary = lighten(config.ui.colors.primary, 0.8);
 
+  // Make sure filteringTerms is not undefined
   const allFilteringTerms = filteringTerms?.response?.filteringTerms ?? [];
 
+  // Handle user click on a different scope for a filtering term
   const handleScopeClick = (termId, scope) => {
     setSelectedScopes((prev) => ({
       ...prev,
@@ -73,6 +85,7 @@ export default function FilteringTermsTable({
     }));
   };
 
+  // Show a loading spinner if the data is still loading
   if (loading) {
     return (
       <Box sx={{ p: 3 }}>
@@ -83,11 +96,14 @@ export default function FilteringTermsTable({
 
   return (
     <>
+      {/* Show an error message if needed */}
       {message && (
         <Box sx={{ mb: 2 }}>
           <CommonMessage text={message} type="error" />
         </Box>
       )}
+
+      {/* Table container */}
       <Paper
         sx={{
           width: "100%",
@@ -98,6 +114,7 @@ export default function FilteringTermsTable({
       >
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader aria-label="filtering terms table">
+            {/* Table header */}
             <TableHead>
               <TableRow>
                 {FILTERING_TERMS_COLUMNS.map((col) => (
@@ -116,6 +133,7 @@ export default function FilteringTermsTable({
               </TableRow>
             </TableHead>
             <TableBody>
+              {/* If search was done but no terms found */}
               {allFilteringTerms.length === 0 && searchWasPerformed ? (
                 <TableRow>
                   <TableCell colSpan={3} align="center">
@@ -126,37 +144,55 @@ export default function FilteringTermsTable({
                   </TableCell>
                 </TableRow>
               ) : (
+                // Loop through filtering terms and render rows
                 allFilteringTerms
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((term) => {
+                    // Get label and scopes from helper
                     const { displayLabel, selectedScope, allScopes } =
                       getDisplayLabelAndScope(term, selectedEntryType);
 
-                    const activeScope =
-                      selectedScopes[term.id] ||
-                      selectedScope ||
-                      allScopes?.[0] ||
-                      null;
+                    // Figure out which scope is selected
+                    // const activeScope =
+                    //   selectedScopes[term.id] ||
+                    //   selectedScope ||
+                    //   allScopes?.[0] ||
+                    //   null;
+
+                    // const item = {
+                    //   key: term.id,
+                    //   label: displayLabel?.trim()
+                    //     ? displayLabel
+                    //     : term.label || term.id,
+                    //   type: term.type,
+                    //   scope: activeScope,
+                    //   scopes: allScopes || [],
+                    // };
+
+                    const uniqueId = `common-free-${Date.now().toString(
+                      36
+                    )}-${Math.random().toString(36).slice(2, 7)}`;
 
                     const item = {
-                      key: term.id,
-                      label: displayLabel?.trim()
-                        ? displayLabel
-                        : term.label || term.id,
+                      id: uniqueId,
+                      key: uniqueId,
+                      bgColor: "common",
+                      label: displayLabel?.trim() ? displayLabel : term.id,
                       type: term.type,
-                      scope: activeScope,
+                      scope: selectedScope || null,
                       scopes: allScopes || [],
                     };
 
                     return (
                       <TableRow
                         key={term.id}
+                        // For alphanumeric terms, set as extra filter
                         onClick={() => {
                           if (item.type === "alphanumeric") {
                             setExtraFilter(item);
                             return;
                           }
-
+                          // Otherwise, add to selected filters directly
                           setSelectedFilter((prev) =>
                             handleFilterSelection({
                               item,
@@ -173,8 +209,11 @@ export default function FilteringTermsTable({
                           transition: "background-color 0.2s ease-in-out",
                         }}
                       >
+                        {/* Column 1: ID */}
                         <TableCell>{term.id}</TableCell>
+                        {/* Column 2: Label + Type */}
                         <TableCell>{`${item.label} (${item.type})`}</TableCell>
+                        {/* Column 3: Available scopes as selectable chips */}
                         <TableCell>
                           {item.scopes.length > 0 &&
                             item.scopes.map((scope, i) => {
@@ -184,10 +223,12 @@ export default function FilteringTermsTable({
                                 <Box
                                   key={i}
                                   component="span"
+                                  // When the user clicks this scope "pill"...
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleScopeClick(term.id, scope);
+                                    handleScopeClick(term.id, scope); // Update the selected scope for this term
                                   }}
+                                  // Apply dynamic styles based on whether this scope is selected or not
                                   sx={getSelectableScopeStyles(isSelected)}
                                 >
                                   {capitalize(scopeAlias[scope] || scope)}
@@ -202,6 +243,7 @@ export default function FilteringTermsTable({
             </TableBody>
           </Table>
         </TableContainer>
+        {/* Pagination controls */}
         <TablePagination
           rowsPerPageOptions={[5, 10, 20]}
           component="div"

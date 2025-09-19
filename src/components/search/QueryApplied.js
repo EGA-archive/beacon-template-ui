@@ -4,7 +4,10 @@ import QueryAppliedItems from "./QueryAppliedItems";
 import config from "../../config/config.json";
 import deleteIcon from "../../assets/logos/delete.svg";
 
+// This component shows a summary of filters the user has applied.
+// It allows them to remove individual filters or clear all at once.
 export default function QueryApplied({ variant }) {
+  // Get context functions to update filters and result states
   const {
     setSelectedFilter,
     setLoadingData,
@@ -12,19 +15,33 @@ export default function QueryApplied({ variant }) {
     setHasSearchResult,
   } = useSelectedEntry();
 
+  // Get the primary color from config file
   const primaryDarkColor = config.ui.colors.darkPrimary;
 
+  // Function to remove one specific filter
   const handleFilterRemove = (item) => {
-    // If something has change, reload filter
+    // If something has changed, reload filter
     setLoadingData(false);
     setResultData([]);
     setHasSearchResult(false);
+
+    // Only remove the filter with the exact id
     setSelectedFilter((prevFilters) =>
-      prevFilters.filter(
-        (filter) => !(filter.key === item.key && filter.scope === item.scope)
-      )
+      prevFilters.filter((filter) => filter.id !== item.id)
     );
   };
+
+  // const handleFilterRemove = (idToDelete) => {
+  //   setLoadingData(false);
+  //   setResultData([]);
+  //   setHasSearchResult(false);
+
+  //   setSelectedFilter((prevFilters) =>
+  //     prevFilters.filter((filter) => filter.id !== idToDelete)
+  //   );
+
+  //   console.log("🔥 Removed filter with id:", idToDelete);
+  // };
 
   return (
     <Box
@@ -41,6 +58,7 @@ export default function QueryApplied({ variant }) {
           padding: "5px 15px 15px",
         }}
       >
+        {/* Header: title and Clear All button */}
         <Box
           sx={{
             display: "flex",
@@ -49,6 +67,7 @@ export default function QueryApplied({ variant }) {
             paddingBottom: "1px",
           }}
         >
+          {/* Section title */}
           <Typography
             sx={{
               mb: 2,
@@ -65,8 +84,10 @@ export default function QueryApplied({ variant }) {
               color: config.ui.colors.primary,
             }}
           >
+            {/* Clear All button */}
             <Button
               onClick={() => {
+                // Clear all filters and reset result state
                 setSelectedFilter([]);
                 setResultData([]);
                 setLoadingData(false);
@@ -92,9 +113,11 @@ export default function QueryApplied({ variant }) {
             </Button>
           </Box>
         </Box>
+
+        {/* Render individual filter chips */}
         <QueryAppliedItems
-          handleFilterRemove={handleFilterRemove}
-          variant={variant}
+          handleFilterRemove={handleFilterRemove} // Pass handler to remove a single filter
+          variant={variant} // Used to distinguish between query types, if needed
         />
       </Box>
     </Box>

@@ -87,7 +87,7 @@ const schema = Joi.object({
   }).required(),
   showAboutPage: Joi.boolean().optional(),
   showContactPage: Joi.boolean().optional(),
-
+  showLogin: Joi.boolean().default(true),
   colors: Joi.object({
     primary: hexColor.required(),
     darkPrimary: hexColor.required(),
