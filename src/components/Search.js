@@ -85,6 +85,8 @@ export default function Search({
   useEffect(() => {
     const fetchEntryTypes = async () => {
       try {
+        await handleBeaconsInfo(); 
+
         const res = await fetch(`${config.apiUrl}/map`);
         const data = await res.json();
         const endpointSets = data.response.endpointSets || {};
@@ -194,6 +196,16 @@ export default function Search({
   const primaryColor = config.ui.colors.primary;
   const primaryDarkColor = config.ui.colors.darkPrimary;
   const selectedBgColor = lighten(primaryDarkColor, 0.9);
+
+  const entryTypeDescriptions = {
+    analyses: "query analysis metadata (e.g. analysis pipelines, methods)",
+    biosamples: "query biosample data (e.g. histological samples)",
+    cohorts: "query cohort-level data (e.g. shared traits, study groups)",
+    datasets: "query datasets-level data (e.g. name, description)",
+    g_variants: "query genomic variants across individuals",
+    individuals: "query individual-level data (e.g. phenotypes, treatment)",
+    runs: "query sequencing run details (e.g. platform, run date)",
+  };
 
   const handleAllFilteringClick = () => {
     setSelectedTool((prev) =>
@@ -306,7 +318,8 @@ export default function Search({
             </Tooltip>
           </Box>
         )}
-        {loading ? (
+
+        {!isReady ? (
           <CircularProgress />
         ) : !isSingleEntryType ? (
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>

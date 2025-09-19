@@ -33,7 +33,6 @@ export default function SearchButton({ setSelectedTool }) {
 
     // Block the search if filters are required but none are provided
     if (!nonFilteredAllowed && selectedFilter.length === 0) {
-      console.log("🚫 Search blocked - filters are required");
       setMessage(COMMON_MESSAGES.addFilter); // Show warning
       setResultData([]); // Clear any previous results
       setHasSearchResult(true);
@@ -52,13 +51,13 @@ export default function SearchButton({ setSelectedTool }) {
       let response;
       // If filters are selected, build a POST request
       if (selectedFilter.length > 0) {
-        const query = queryBuilder(selectedFilter);
+        const query = queryBuilder(selectedFilter, entryTypeId);
         const requestOptions = {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ query }),
+          body: JSON.stringify(query),
         };
         response = await fetch(url, requestOptions);
       } else {
@@ -133,7 +132,7 @@ export default function SearchButton({ setSelectedTool }) {
   };
 
   // Helper to build the Beacon API query object from the selected filters
-  const queryBuilder = (params) => {
+  const queryBuilder = (params, entryId) => {
     let filter = {
       meta: {
         apiVersion: "2.0",
@@ -163,7 +162,7 @@ export default function SearchButton({ setSelectedTool }) {
         // Simple filtering term
         return {
           id: item.key ?? item.id,
-          scope: selectedPathSegment,
+          scope: entryId,
         };
       }
     });

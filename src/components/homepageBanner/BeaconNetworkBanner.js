@@ -13,9 +13,8 @@ export default function BeaconNetworkBanner() {
     const fetchLogos = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${config.apiUrl}/`);
+        const res = await fetch(`${config.apiUrl}`);
         const data = await res.json();
-
         const entries = data.responses || [];
 
         // Remove duplicate logos and clean the data

@@ -152,14 +152,11 @@ export default function ResultsTable() {
                 return (
                   <React.Fragment key={index}>
                     <TableRow
-                      key={index}
                       onClick={() => handleRowClick(item)}
                       sx={{
                         fontWeight: "bold",
                         cursor: "pointer",
-                        "&:hover": {
-                          backgroundColor: selectedBgColor,
-                        },
+                        "&:hover": { backgroundColor: selectedBgColor },
                         "&.MuiTableRow-root": {
                           transition: "background-color 0.2s ease",
                         },
