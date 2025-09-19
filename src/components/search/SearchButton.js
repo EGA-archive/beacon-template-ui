@@ -33,7 +33,6 @@ export default function SearchButton({ setSelectedTool }) {
 
     // Block the search if filters are required but none are provided
     if (!nonFilteredAllowed && selectedFilter.length === 0) {
-      console.log("🚫 Search blocked - filters are required");
       setMessage(COMMON_MESSAGES.addFilter); // Show warning
       setResultData([]); // Clear any previous results
       setHasSearchResult(true);

@@ -155,7 +155,6 @@ export default function Search({
   const handleBeaconsInfo = async () => {
     try {
       let url = `${config.apiUrl}/info`;
-      console.log(url)
       let response = await fetch(url);
       const data = await response.json();
       let normalizedData = [];

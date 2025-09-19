@@ -112,7 +112,6 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
       try {
         setLoading(true);
         const url = `${config.apiUrl}/${selectedPathSegment}`;
-        console.log("table: ", url);
         setUrl(url);
         let query = queryBuilder(page, entryTypeId);
 
