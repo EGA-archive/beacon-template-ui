@@ -5,6 +5,7 @@ import GenomicAnnotations from "../genomic/GenomicAnnotations";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 
 function TabPanel(props) {
+  // TabPanel shows the content of each tab (only if active)
   const { children, value, index, ...other } = props;
 
   {
@@ -24,14 +25,20 @@ function TabPanel(props) {
   );
 }
 
+// Main container that decides whether to show "Common Filters" and/or "Genomic Annotations"
 export default function FiltersContainer({
-  searchHeight,
-  hasGenomicAnnotationsConfig,
-  hasCommonFiltersConfig,
+  setActiveInput,
+  searchHeight, // height of the filter box (passed as prop)
+  hasGenomicAnnotationsConfig, // boolean: should show Genomic Annotations?
+  hasCommonFiltersConfig, // boolean: should show Common Filters?
 }) {
+  // Grab the currently selected entry type and the list of all entry types from context
   const { selectedPathSegment, entryTypes } = useSelectedEntry();
+
+  // State to track which tab is active (0 = first tab, 1 = second, etc.)
   const [tabValue, setTabValue] = useState(0);
 
+  // Reset tabs when user switches entry type
   useEffect(() => {
     setTabValue(0);
   }, [selectedPathSegment]);
@@ -40,54 +47,53 @@ export default function FiltersContainer({
     setTabValue(newValue);
   };
 
+  // Detect if genomic entry type exists & is selected
   const hasGenomic = entryTypes.some(
     (entry) => entry.pathSegment === "g_variants"
   );
   const isGenomicSelected = selectedPathSegment === "g_variants";
 
-  let tabs = [];
+  let tabs = []; // start with an empty list of tabs
 
+  // Case 1: user is currently viewing "Genomic Variants"
   if (hasGenomic && isGenomicSelected) {
-    tabs = [
-      ...(hasGenomicAnnotationsConfig
-        ? [
-            {
-              label: "Genomic Annotations",
-              component: <GenomicAnnotations />,
-              title: "Genomic Annotations",
-            },
-          ]
-        : []),
-      ...(hasCommonFiltersConfig
-        ? [
-            {
-              label: "Common Filters",
-              component: <CommonFilters />,
-              title: "Most Common Filters",
-            },
-          ]
-        : []),
-    ];
-  } else {
-    tabs = [];
+    // If config allows Genomic Annotations → add this tab first
+    if (hasGenomicAnnotationsConfig)
+      tabs.push({
+        label: "Genomic Annotations", // tab title shown in UI
+        component: <GenomicAnnotations setActiveInput={setActiveInput} />, // actual component to render
+        title: "Genomic Annotations", // heading inside the panel
+      });
 
-    if (hasCommonFiltersConfig) {
+    // If config allows Common Filters → add this tab after Genomic Annotations
+    if (hasCommonFiltersConfig)
       tabs.push({
         label: "Common Filters",
         component: <CommonFilters />,
         title: "Most Common Filters",
       });
-    }
 
-    if (hasGenomic && hasGenomicAnnotationsConfig) {
+    // Case 2: user is on a different entry type (not "Genomic Variants")
+  } else {
+    // Add Common Filters first (if enabled in config)
+    if (hasCommonFiltersConfig)
+      tabs.push({
+        label: "Common Filters",
+        component: <CommonFilters />,
+        title: "Most Common Filters",
+      });
+
+    // Add Genomic Annotations second (but only if the beacon supports genomics)
+    if (hasGenomic && hasGenomicAnnotationsConfig)
       tabs.push({
         label: "Genomic Annotations",
-        component: <GenomicAnnotations />,
+        component: <GenomicAnnotations setActiveInput={setActiveInput} />,
         title: "Genomic Annotations",
       });
-    }
   }
-  if (tabs.length === 0) return null;
+
+  // If no tabs were added (both configs are false) → don't render anything
+  if (!tabs.length) return null;
 
   return (
     <Box>

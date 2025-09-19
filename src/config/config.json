@@ -20,7 +20,8 @@
       "runs",
       "analyses",
       "cohorts",
-      "datasets"
+      "datasets",
+      ""
     ],
     "showExternalNavBarLink": true,
     "externalNavBarLink": [
@@ -30,14 +31,19 @@
       }
     ],
     "showAboutPage": true,
-    "showContactPage": true,
+    "contact": {
+      "enabled": true,
+      "showContactPage": true,
+      "apiPath": "http://localhost:5000/api/contact",
+      "recipientKey": "beacon_support"
+    },
+    "showLogin": false,
     "colors": {
       "primary": "#3176B1",
       "darkPrimary": "#173D5D",
       "secondary": "#FFE4D4",
       "tertiary": "#B1AC31"
     },
-
     "logos": {
       "main": "/assets/logos/main.svg",
       "founders": [

@@ -1,9 +1,14 @@
 import { Box, Typography, Link as MuiLink } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
+
+// Logos of institutions providing the UI
 import maingrey from "../assets/logos/maingrey.svg";
 import crg from "../assets/logos/crg.svg";
 import bsc from "../assets/logos/bsc.svg";
 
+// Footer component for the Beacon UI
+// Displays logos and dynamic navigation links
+// Responsive layout handled with MUI's sx and media queries
 export default function Footer({ navItems }) {
   return (
     <Box
@@ -13,15 +18,15 @@ export default function Footer({ navItems }) {
         py: 2,
         px: 4,
         minHeight: "68px",
-        mt: "auto",
+        mt: "auto", // Push footer to bottom if using flex layout
       }}
     >
       <Box
         sx={{
           display: "flex",
-          flexDirection: { xs: "column", sm: "column", md: "row" },
+          flexDirection: { xs: "column", sm: "column", md: "row" }, // Stack on small screens
           "@media (max-width: 1044px) and (min-width: 900px)": {
-            flexDirection: "column",
+            flexDirection: "column", // Force column in awkward mid-breakpoint
           },
           justifyContent: "space-between",
           alignItems: "center",
@@ -29,6 +34,7 @@ export default function Footer({ navItems }) {
           mr: 1,
         }}
       >
+        {/* Left side: logos and credits */}
         <Box
           sx={{
             display: "flex",
@@ -57,6 +63,8 @@ export default function Footer({ navItems }) {
           >
             Beacon User Interface template provided by:
           </Typography>
+
+          {/* Logos with external links */}
           <MuiLink
             href="https://ega-archive.org/"
             target="_blank"
@@ -72,6 +80,7 @@ export default function Footer({ navItems }) {
           >
             <img src={crg} alt="CRG Logo" style={{ height: 34 }} />
           </MuiLink>
+
           <MuiLink
             href="https://www.bsc.es/"
             target="_blank"
@@ -81,11 +90,13 @@ export default function Footer({ navItems }) {
           </MuiLink>
         </Box>
 
+        {/* Right side: optional nav links (internal or external) */}
         <Box sx={{ display: "flex", gap: 2 }}>
           {navItems
-            .filter((item) => item.label && item.label.trim() !== "")
+            .filter((item) => item.label && item.label.trim() !== "") // Skip empty labels
             .map((item) =>
               item.url && item.url.startsWith("http") ? (
+                // External link
                 <MuiLink
                   key={item.label}
                   href={item.url}
@@ -105,6 +116,7 @@ export default function Footer({ navItems }) {
                   {item.label}
                 </MuiLink>
               ) : (
+                // Internal link using React Router
                 <MuiLink
                   key={item.label}
                   component={RouterLink}

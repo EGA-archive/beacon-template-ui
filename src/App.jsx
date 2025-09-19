@@ -1,7 +1,8 @@
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import About from "./components/pages/About";
-import Contact from "./components/pages/Contact";
+import ContactForm from "./components/pages/contact/ContactForm";
+import ContactSuccess from "./components/pages/contact/ContactSuccess";
 import NetworkMembers from "./components/pages/NetworkMembers";
 import Login from "./components/pages/Login";
 import HomePage from "./components/pages/HomePage";
@@ -22,10 +23,10 @@ export default function App() {
   const baseNavItems = [
     { label: "Network Members", url: "/network-members" },
     ...(config.ui.showAboutPage ? [{ label: "About", url: "/about" }] : []),
-    ...(config.ui.showContactPage
+    ...(config.ui.contact?.showContactPage
       ? [{ label: "Contact", url: "/contact" }]
       : []),
-    { label: "Log in", url: "/login" },
+    ...(config.ui.showLogin ? [{ label: "Log in", url: "/login" }] : []),
   ];
 
   const filteredBaseItems =
@@ -79,14 +80,23 @@ export default function App() {
                   />
                 }
               />
-              <Route path="/network-members" element={<NetworkMembers />} />
+              {config.beaconType === "networkBeacon" && (
+                <Route path="/network-members" element={<NetworkMembers />} />
+              )}
               {config.ui.showAboutPage && (
                 <Route path="/about" element={<About />} />
               )}
-              {config.ui.showContactPage && (
-                <Route path="/contact" element={<Contact />} />
+              {config.ui.contact?.showContactPage && (
+                <>
+                  <Route path="/contact" element={<ContactForm />} />
+                  <Route path="/contact-success" element={<ContactSuccess />} />
+                </>
               )}
-              <Route path="/login" element={<Login />} />
+              {config.ui.showLogin && (
+                <>
+                  <Route path="/login" element={<Login />} />
+                </>
+              )}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </Box>
