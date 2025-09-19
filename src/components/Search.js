@@ -88,12 +88,6 @@ export default function Search({
         const res = await fetch(`${config.apiUrl}/map`);
         const data = await res.json();
         const endpointSets = data.response.endpointSets || {};
-        console.log(
-          "🔎 Raw entryTypes before deduplication:",
-          Object.entries(endpointSets)
-            .filter(([key]) => !key.includes("Endpoints"))
-            .map(([key, value]) => value)
-        );
         const seen = new Set();
         const entries = Object.entries(endpointSets)
 
@@ -120,7 +114,6 @@ export default function Search({
 
         const sorted = sortEntries(entries, configuredOrder);
         setEntryTypes(sorted);
-        console.log("✅ Final entryTypes:", sorted);
         if (sorted.length > 0) {
           setSelectedPathSegment(sorted[0].pathSegment);
         }
@@ -216,10 +209,6 @@ export default function Search({
     setOpen(false);
     setSelectedTool(null);
   };
-
-  useEffect(() => {
-    console.log("📌 SelectedFilter updated in the Search:", selectedFilter);
-  }, [selectedFilter]);
 
   return (
     <>

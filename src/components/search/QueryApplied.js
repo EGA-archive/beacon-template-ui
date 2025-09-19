@@ -29,8 +29,6 @@ export default function QueryApplied({ variant }) {
     setSelectedFilter((prevFilters) =>
       prevFilters.filter((filter) => filter.id !== item.id)
     );
-
-    console.log("🔥 Removed filter:", item.keyValue);
   };
 
   // const handleFilterRemove = (idToDelete) => {

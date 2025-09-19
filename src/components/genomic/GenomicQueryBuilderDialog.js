@@ -326,8 +326,6 @@ export default function GenomicQueryBuilderDialog({
             setSelectedFilter((prev) => [...prev, newFilter]);
             setDuplicateMessage("");
             handleClose();
-
-            console.log("select", selectedFilter);
           }}
         >
           {({ resetForm, isValid, dirty }) => (

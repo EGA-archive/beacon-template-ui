@@ -106,7 +106,6 @@ export default function FilterLabelRemovable({
       }}
       onClick={() => {
         if (isSimple && typeof onClick === "function") {
-          console.log("👆 Label clicked:", { label, scope, keyValue, variant });
           onClick(); // for simple variant, trigger the provided onClick
         } else if (isExpandable && typeof setExpandedKey === "function") {
           // toggle expansion
@@ -134,13 +133,6 @@ export default function FilterLabelRemovable({
           <ClearIcon
             onClick={(e) => {
               e.stopPropagation(); // prevent triggering expand/collapse
-              console.log("🗑️ Delete clicked:", {
-                label,
-                scope,
-                keyValue,
-                scopes,
-                variant,
-              });
               onDelete?.(); // run the delete function
             }}
             sx={{

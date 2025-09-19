@@ -13,11 +13,6 @@ export default function QueryAppliedItems({
   // Get the current filters and setter from context
   const { selectedFilter, setSelectedFilter } = useSelectedEntry();
 
-  console.log(
-    "📌 SelectedFilter updated in the QueryAppliedItems:",
-    selectedFilter
-  );
-
   // Track which label is expanded (if any)
   const [expandedKey, setExpandedKey] = useState(false);
   // Error message if user tries to select the same scope twice
