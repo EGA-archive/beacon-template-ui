@@ -13,7 +13,7 @@ import { searchFilteringTerms } from "../common/filteringTermsHelpers";
 
 // Component: Displays a searchable and paginated list of filtering terms
 export default function AllFilteringTermsComponent() {
-  // Store all filtering terms fetched from API
+  // Store all filtering terms fetched from API with id, label, scope, scopes, type
   const [filteringTerms, setFilteringTerms] = useState([]);
 
   // Track loading state during fetch
@@ -49,8 +49,8 @@ export default function AllFilteringTermsComponent() {
   useEffect(() => {
     const fetchFilteringTerms = async () => {
       try {
-        const res = await fetch(`${config.apiUrl}/filtering_terms`);
-        // const res = await fetch("/api.json");
+        // const res = await fetch(`${config.apiUrl}/filtering_terms`);
+        const res = await fetch("/api.json");
         const data = await res.json();
         setFilteringTerms(data);
       } catch (err) {

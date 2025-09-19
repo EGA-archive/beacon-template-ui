@@ -153,19 +153,33 @@ export default function FilteringTermsTable({
                       getDisplayLabelAndScope(term, selectedEntryType);
 
                     // Figure out which scope is selected
-                    const activeScope =
-                      selectedScopes[term.id] ||
-                      selectedScope ||
-                      allScopes?.[0] ||
-                      null;
+                    // const activeScope =
+                    //   selectedScopes[term.id] ||
+                    //   selectedScope ||
+                    //   allScopes?.[0] ||
+                    //   null;
+
+                    // const item = {
+                    //   key: term.id,
+                    //   label: displayLabel?.trim()
+                    //     ? displayLabel
+                    //     : term.label || term.id,
+                    //   type: term.type,
+                    //   scope: activeScope,
+                    //   scopes: allScopes || [],
+                    // };
+
+                    const uniqueId = `common-free-${Date.now().toString(
+                      36
+                    )}-${Math.random().toString(36).slice(2, 7)}`;
 
                     const item = {
-                      key: term.id,
-                      label: displayLabel?.trim()
-                        ? displayLabel
-                        : term.label || term.id,
+                      id: uniqueId,
+                      key: uniqueId,
+                      bgColor: "common",
+                      label: displayLabel?.trim() ? displayLabel : term.id,
                       type: term.type,
-                      scope: activeScope,
+                      scope: selectedScope || null,
                       scopes: allScopes || [],
                     };
 

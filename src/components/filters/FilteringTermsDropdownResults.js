@@ -124,8 +124,14 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
               const { displayLabel, selectedScope, allScopes } =
                 getDisplayLabelAndScope(term, selectedEntryType);
 
+              const uniqueId = `common-free-${Date.now().toString(
+                36
+              )}-${Math.random().toString(36).slice(2, 7)}`;
+
               const item = {
-                key: term.id,
+                id: uniqueId,
+                key: uniqueId,
+                bgColor: "common",
                 label: displayLabel?.trim() ? displayLabel : term.id,
                 type: term.type,
                 scope: selectedScope || null,

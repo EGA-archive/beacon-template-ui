@@ -217,6 +217,10 @@ export default function Search({
     setSelectedTool(null);
   };
 
+  useEffect(() => {
+    console.log("📌 SelectedFilter updated in the Search:", selectedFilter);
+  }, [selectedFilter]);
+
   return (
     <>
       <Box
@@ -244,7 +248,6 @@ export default function Search({
               }`
             : "Search"}
         </Typography>
-
         {!isSingleEntryType && (
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
             <Typography
@@ -314,7 +317,6 @@ export default function Search({
             </Tooltip>
           </Box>
         )}
-
         {loading ? (
           <CircularProgress />
         ) : !isSingleEntryType ? (
@@ -357,7 +359,6 @@ export default function Search({
             ))}
           </Box>
         ) : null}
-
         <Box sx={{ display: "flex", alignItems: "center", mb: 2, mt: 4 }}>
           {isSingleNonGenomic ? (
             <Typography
@@ -383,7 +384,6 @@ export default function Search({
             </Typography>
           )}
         </Box>
-
         <Box
           sx={{
             display: "flex",

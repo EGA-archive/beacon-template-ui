@@ -29,7 +29,22 @@ export default function QueryApplied({ variant }) {
     setSelectedFilter((prevFilters) =>
       prevFilters.filter((filter) => filter.id !== item.id)
     );
+
+    console.log("🔥 Removed filter:", item.keyValue);
   };
+
+  // const handleFilterRemove = (idToDelete) => {
+  //   setLoadingData(false);
+  //   setResultData([]);
+  //   setHasSearchResult(false);
+
+  //   setSelectedFilter((prevFilters) =>
+  //     prevFilters.filter((filter) => filter.id !== idToDelete)
+  //   );
+
+  //   console.log("🔥 Removed filter with id:", idToDelete);
+  // };
+
   return (
     <Box
       sx={{
