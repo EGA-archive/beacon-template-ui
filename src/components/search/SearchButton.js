@@ -39,13 +39,13 @@ export default function SearchButton({ setSelectedTool }) {
       const url = `${config.apiUrl}/${selectedPathSegment}`;
       let response;
       if (selectedFilter.length > 0) {
-        const query = queryBuilder(selectedFilter);
+        const query = queryBuilder(selectedFilter, entryTypeId);
         const requestOptions = {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ query }),
+          body: JSON.stringify(query),
         };
         response = await fetch(url, requestOptions);
       } else {
@@ -108,7 +108,7 @@ export default function SearchButton({ setSelectedTool }) {
     }
   };
 
-  const queryBuilder = (params) => {
+  const queryBuilder = (params, entryId) => {
     let filter = {
       meta: {
         apiVersion: "2.0",
@@ -135,7 +135,7 @@ export default function SearchButton({ setSelectedTool }) {
       } else {
         return {
           id: item.key ?? item.id,
-          scope: selectedPathSegment,
+          scope: entryId,
         };
       }
     });

@@ -12,6 +12,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import { InputAdornment, IconButton } from "@mui/material";
 import { useSelectedEntry } from "../../context/SelectedEntryContext";
 import Loader from "../../common/Loader";
+import { PATH_SEGMENT_TO_ENTRY_ID } from "../../common/textFormatting";
+
 
 const style = {
   position: 'absolute',
@@ -35,6 +37,7 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [dataTable, setDataTable] = useState([]);
   const [url, setUrl] = useState("");
+  const entryTypeId = PATH_SEGMENT_TO_ENTRY_ID[selectedPathSegment];
 
   const parseType = (item) => {
     switch(item) {
@@ -63,23 +66,24 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
     onClose();
   };
 
-  const queryBuilder = (page) => {
+  const queryBuilder = (page, entryTypeId) => {
     let skipItems = page * rowsPerPage;
+    
     let filter = {
-      "meta": {
-        "apiVersion": "2.0"
+      meta: {
+        apiVersion: "2.0",
       },
-      "query": {
-        "filters": [],
-        "includeResultsetResponses": "HIT",
-        "testMode": false,
-        "requestedGranularity": "record",
-        "pagination": {
-          "skip": parseInt(`${(skipItems)}`),
-          "limit": parseInt(`${(rowsPerPage)}`)
+      query: {
+        filters: [],
+        includeResultsetResponses: "HIT",
+        pagination: {
+          skip: parseInt(`${(skipItems)}`),
+          limit: parseInt(`${(rowsPerPage)}`),
         },
-      }
-    }
+        testMode: false,
+        requestedGranularity: "record",
+      },
+    };
 
     if(selectedFilter.length > 0) {
       let filterData = selectedFilter.map((item) =>
@@ -93,7 +97,7 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
           } else {
             return {
               id: item.key ?? item.id,
-              scope: selectedPathSegment
+              scope: entryTypeId
             }
           }
         }
@@ -107,18 +111,17 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
     const fetchTableItems = async () => {
       try {
         setLoading(true);
-        const url = `${config.apiUrl}/${tableType}/${subRow.id}/${selectedPathSegment}`;
+        const url = `${config.apiUrl}/${selectedPathSegment}`;
+        console.log("table: ", url);
         setUrl(url);
-        let query = queryBuilder(page);
+        let query = queryBuilder(page, entryTypeId);
 
         const requestOptions = {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            query
-          })
+          body: JSON.stringify(query)
         };
 
         const response = await fetch(url, requestOptions);
