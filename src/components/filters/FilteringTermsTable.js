@@ -153,11 +153,11 @@ export default function FilteringTermsTable({
                       getDisplayLabelAndScope(term, selectedEntryType);
 
                     // Figure out which scope is selected
-                    // const activeScope =
-                    //   selectedScopes[term.id] ||
-                    //   selectedScope ||
-                    //   allScopes?.[0] ||
-                    //   null;
+                    const activeScope =
+                      selectedScopes[term.id] ||
+                      selectedScope ||
+                      allScopes?.[0] ||
+                      null;
 
                     // const item = {
                     //   key: term.id,
@@ -179,7 +179,7 @@ export default function FilteringTermsTable({
                       bgColor: "common",
                       label: displayLabel?.trim() ? displayLabel : term.id,
                       type: term.type,
-                      scope: selectedScope || null,
+                      scope: activeScope,
                       scopes: allScopes || [],
                     };
 
