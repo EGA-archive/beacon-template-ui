@@ -62,6 +62,7 @@ export default function Search({
   const [message, setMessage] = useState(null);
   const searchRef = useRef(null);
   const inputRef = useRef(null);
+  const { isLoaded, setIsLoaded } = useSelectedEntry();
 
   useEffect(() => {
     if (activeInput === "genomic" && inputRef.current) {
@@ -92,6 +93,9 @@ export default function Search({
         const data = await res.json();
         const endpointSets = data.response.endpointSets || {};
         const seen = new Set();
+
+        setIsLoaded(false);
+
         const entries = Object.entries(endpointSets)
 
           .filter(([key]) => !key.includes("Endpoints"))
@@ -122,6 +126,9 @@ export default function Search({
         }
 
         await handleBeaconsInfo();
+
+        setIsLoaded(true);
+
       } catch (err) {
         console.error("Error fetching entry types:", err);
       } finally {
@@ -320,7 +327,7 @@ export default function Search({
           </Box>
         )}
 
-        {!isReady ? (
+        {loading || !isLoaded ? (
           <CircularProgress />
         ) : !isSingleEntryType ? (
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>

@@ -46,6 +46,8 @@ export const SelectedEntryProvider = ({ children }) => {
   // Temporary storage for genomic builder inputs before submitting
   const [genomicDraft, setGenomicDraft] = useState("");
 
+  const [isLoaded, setIsLoaded] = useState(false);
+  
   // Provide all state variables and their updaters to children
   return (
     <SelectedEntryContext.Provider
@@ -74,6 +76,8 @@ export const SelectedEntryProvider = ({ children }) => {
         setHasSearchBeenTriggered,
         genomicDraft,
         setGenomicDraft,
+        isLoaded,
+        setIsLoaded
       }}
     >
       {children}
