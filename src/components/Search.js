@@ -55,8 +55,7 @@ export default function Search({
     setGenomicDraft,
   } = useSelectedEntry();
 
-  // const [loading, setLoading] = useState(true);
-  const [isReady, setIsReady] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [assembly, setAssembly] = useState(config.assemblyId[0]);
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState(null);
@@ -128,11 +127,10 @@ export default function Search({
         await handleBeaconsInfo();
 
         setIsLoaded(true);
-
       } catch (err) {
         console.error("Error fetching entry types:", err);
       } finally {
-        setIsReady(true);
+        setLoading(false);
       }
     };
 
@@ -154,7 +152,7 @@ export default function Search({
   useEffect(() => {
     const fetchAll = async () => {
       await fetchConfiguration();
-      setIsReady(true);
+      setLoading(false);
     };
 
     fetchAll();

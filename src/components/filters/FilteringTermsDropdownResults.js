@@ -149,15 +149,27 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
                       return;
                     }
 
-                    // Add term to selected filters using helper
-                    setSelectedFilter((prev) =>
-                      handleFilterSelection({
+                    setSelectedFilter((prev) => {
+                      const isDuplicate = prev.some(
+                        (filter) =>
+                          filter.label === item.label &&
+                          filter.scope === item.scope
+                      );
+
+                      if (isDuplicate) {
+                        setMessage(COMMON_MESSAGES.doubleFilter);
+                        setTimeout(() => setMessage(null), 3000);
+                        return prev; // return unchanged
+                      }
+
+                      // Otherwise, add filter
+                      return handleFilterSelection({
                         item,
                         prevFilters: prev,
                         setMessage,
                         onSuccess: onCloseDropdown,
-                      })
-                    );
+                      });
+                    });
                   }}
                   sx={{
                     display: "flex",

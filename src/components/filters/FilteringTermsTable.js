@@ -192,14 +192,26 @@ export default function FilteringTermsTable({
                             setExtraFilter(item);
                             return;
                           }
-                          // Otherwise, add to selected filters directly
-                          setSelectedFilter((prev) =>
-                            handleFilterSelection({
+                          setSelectedFilter((prev) => {
+                            const isDuplicate = prev.some(
+                              (filter) =>
+                                filter.label === item.label &&
+                                filter.scope === item.scope
+                            );
+
+                            if (isDuplicate) {
+                              setMessage(COMMON_MESSAGES.doubleFilter);
+                              setTimeout(() => setMessage(null), 3000);
+                              return prev; // return unchanged
+                            }
+
+                            // Otherwise, add normally
+                            return handleFilterSelection({
                               item,
                               prevFilters: prev,
                               setMessage,
-                            })
-                          );
+                            });
+                          });
                         }}
                         sx={{
                           cursor: "pointer",

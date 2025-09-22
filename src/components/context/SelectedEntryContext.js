@@ -47,7 +47,7 @@ export const SelectedEntryProvider = ({ children }) => {
   const [genomicDraft, setGenomicDraft] = useState("");
 
   const [isLoaded, setIsLoaded] = useState(false);
-  
+
   // Provide all state variables and their updaters to children
   return (
     <SelectedEntryContext.Provider
@@ -77,7 +77,7 @@ export const SelectedEntryProvider = ({ children }) => {
         genomicDraft,
         setGenomicDraft,
         isLoaded,
-        setIsLoaded
+        setIsLoaded,
       }}
     >
       {children}
