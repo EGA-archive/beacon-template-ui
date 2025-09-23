@@ -22,9 +22,15 @@ export default function QueryAppliedItems({
   const handleScopeChange = (keyValue, newScope) => {
     const [baseKey, prevScope] = keyValue.split("__");
 
-    // Prevent duplicates: if the same key + new scope already exists
+    // Find the filter being changed
+    const target = selectedFilter.find(
+      (filter) => filter.key === baseKey && filter.scope === prevScope
+    );
+    if (!target) return;
+
+    // Prevent duplicates: same label + new scope already exists
     const isDuplicate = selectedFilter.some(
-      (filter) => filter.key === baseKey && filter.scope === newScope
+      (filter) => filter.label === target.label && filter.scope === newScope
     );
 
     if (isDuplicate) {
@@ -33,7 +39,7 @@ export default function QueryAppliedItems({
       return;
     }
 
-    // Replace the scope of the matching filter
+    // Otherwise update the scope
     setSelectedFilter((prevFilters) =>
       prevFilters.map((filter) =>
         filter.key === baseKey && filter.scope === prevScope
@@ -42,7 +48,7 @@ export default function QueryAppliedItems({
       )
     );
 
-    setExpandedKey(null); // Close the expanded label
+    setExpandedKey(null);
   };
 
   return (

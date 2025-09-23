@@ -129,7 +129,7 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
               )}-${Math.random().toString(36).slice(2, 7)}`;
 
               const item = {
-                id: uniqueId,
+                id: term.id,
                 key: uniqueId,
                 bgColor: "common",
                 label: displayLabel?.trim() ? displayLabel : term.id,
@@ -140,7 +140,7 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
 
               return (
                 <ListItem
-                  key={term.id}
+                  key={item.key}
                   onClick={() => {
                     // Handle numeric/alphanumeric filters separately
                     if (item.type === "alphanumeric") {

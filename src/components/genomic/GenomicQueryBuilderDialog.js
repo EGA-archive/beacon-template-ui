@@ -17,6 +17,7 @@ import DefinedVariationSequence from "./querybuilder/DefinedVariationSequence";
 import GenomicSubmitButton from "../genomic/GenomicSubmitButton";
 import { Formik, Form } from "formik";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
+import { GENOMIC_LABELS_MAP } from "../genomic/genomicLabelHelper";
 
 import {
   assemblyIdRequired,
@@ -291,6 +292,9 @@ export default function GenomicQueryBuilderDialog({
               .map(([key, value]) => `${key}:${value}`)
               .join("-");
 
+            console.log("idLabel", idLabel);
+            console.log("valid", validEntries);
+
             // const combinedLabel = (
             //   <>
             //     {validEntries.map(([key, value], i) => (
@@ -301,9 +305,11 @@ export default function GenomicQueryBuilderDialog({
             //     ))}
             //   </>
             // );
-
             const combinedLabel = validEntries
-              .map(([key, value]) => `${key}: ${value}`)
+              .map(([key, value]) => {
+                const displayKey = GENOMIC_LABELS_MAP[key] || key; // fallback to raw key
+                return `${displayKey}: ${value}`;
+              })
               .join(" | ");
 
             const newFilter = {

@@ -161,8 +161,8 @@ export default function SearchButton({ setSelectedTool }) {
       } else {
         // Simple filtering term
         return {
-          id: item.key ?? item.id,
-          scope: entryId,
+          id: item.id,
+          ...(item.scope ? { scope: item.scope } : {}),
         };
       }
     });

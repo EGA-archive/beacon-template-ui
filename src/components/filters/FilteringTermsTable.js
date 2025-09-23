@@ -174,7 +174,7 @@ export default function FilteringTermsTable({
                     )}-${Math.random().toString(36).slice(2, 7)}`;
 
                     const item = {
-                      id: uniqueId,
+                      id: term.id,
                       key: uniqueId,
                       bgColor: "common",
                       label: displayLabel?.trim() ? displayLabel : term.id,
@@ -185,7 +185,7 @@ export default function FilteringTermsTable({
 
                     return (
                       <TableRow
-                        key={term.id}
+                        key={item.key}
                         // For alphanumeric terms, set as extra filter
                         onClick={() => {
                           if (item.type === "alphanumeric") {

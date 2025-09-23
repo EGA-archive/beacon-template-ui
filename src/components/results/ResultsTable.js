@@ -176,7 +176,7 @@ export default function ResultsTable() {
                           alignItems="center"
                           gap={1}
                         >
-                          {item.info && (
+                          {item.info?.error && (
                             <Tooltip title={getErrors(item.info)}>
                               <IconButton>
                                 <ReportProblemIcon sx={{ color: "#FF8A8A" }} />
