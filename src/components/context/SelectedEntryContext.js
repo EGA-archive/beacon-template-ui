@@ -18,6 +18,7 @@ export const SelectedEntryProvider = ({ children }) => {
 
   // Filters currently selected by the user
   const [selectedFilter, setSelectedFilter] = useState([]);
+  console.log("selectedFilter", selectedFilter);
 
   // Optional extra filter (e.g., numeric value with operator)
   const [extraFilter, setExtraFilter] = useState(null);
@@ -47,7 +48,7 @@ export const SelectedEntryProvider = ({ children }) => {
   const [genomicDraft, setGenomicDraft] = useState("");
 
   const [isLoaded, setIsLoaded] = useState(false);
-  
+
   // Provide all state variables and their updaters to children
   return (
     <SelectedEntryContext.Provider
@@ -77,7 +78,7 @@ export const SelectedEntryProvider = ({ children }) => {
         genomicDraft,
         setGenomicDraft,
         isLoaded,
-        setIsLoaded
+        setIsLoaded,
       }}
     >
       {children}

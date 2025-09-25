@@ -11,6 +11,7 @@ import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 // It includes a dropdown for selecting the genome assembly coming from the config
 // a search input field, a "clear" icon to reset input, and a button to add the query.
 // When the user presses Enter or clicks the "Add" button, the query is added to the filters.
+// There is also a functionlaity that auto-detects the assmebly ID in the input
 export default function SearchGenomicInput({
   activeInput,
   setActiveInput,
@@ -26,28 +27,66 @@ export default function SearchGenomicInput({
 }) {
   const inputRef = useRef(null); // For managing focus on the input field
 
-  // Detects and cleans dirty variant notation
-  const detectAndCleanVariant = (input = "") => {
-    const cleaned = input
-      .trim()
-      .replace(/\./g, "") // remove dots
-      .replace(/\s+/g, "-") // replace all space/tab/newlines with hyphens
-      .replace(/\t+/g, "-") // tabs to hyphens
-      .replace(/-+/g, "-") // collapse multiple hyphens
-      .replace(/^-|-$/g, ""); // trim starting/ending hyphens
+  // This function checks if the input is a valid variant
+  // It also looks for an assembly ID  either at the start or end of the input
+  const detectAndCleanVariant = (input = "", assemblies = []) => {
+    if (!input)
+      return { isVariant: false, cleanedValue: "", detectedAssembly: null };
 
-    const variantRegex = /^(chr)?(\d+|X|Y|MT)-\d+-[ACGT]+-[ACGT]+$/i;
+    let raw = input.trim();
+
+    // Split input by spaces/tabs
+    const tokens = raw.split(/\s+/);
+    let detectedAssembly = null;
+
+    if (tokens.length > 1) {
+      const assembliesLower = assemblies.map((a) => a.toLowerCase());
+
+      // Check first token
+      const firstToken = tokens[0].replace(/[,\s;:]+$/g, "");
+      if (assembliesLower.includes(firstToken.toLowerCase())) {
+        detectedAssembly =
+          assemblies[assembliesLower.indexOf(firstToken.toLowerCase())];
+        tokens.shift(); // remove assembly from beginning
+        raw = tokens.join(" ");
+      }
+
+      // If no assembly found at start, check last token
+      if (!detectedAssembly) {
+        const lastToken = tokens[tokens.length - 1].replace(/[,\s;:]+$/g, "");
+        if (assembliesLower.includes(lastToken.toLowerCase())) {
+          detectedAssembly =
+            assemblies[assembliesLower.indexOf(lastToken.toLowerCase())];
+          tokens.pop(); // remove assembly from end
+          raw = tokens.join(" ");
+        }
+      }
+    }
+
+    // Clean the input into standard format
+    const cleaned = raw
+      .replace(/\./g, "") // remove dots
+      .replace(/\s+/g, "-") // spaces to hyphens
+      .replace(/\t+/g, "-")
+      .replace(/-+/g, "-") // collapse multiple hyphens
+      .replace(/^-|-$/g, ""); // remove hyphens at start/end
+
+    // Regex to check if it looks like a genomic variant
+    const variantRegex =
+      /^(?:chr)?(?:[1-9]|1\d|2[0-2]|X|Y|MT)-\d+-[ACGT]+-[ACGT]+$/i;
 
     if (variantRegex.test(cleaned)) {
       return {
         isVariant: true,
-        cleanedValue: cleaned.toUpperCase(), // normalize alleles
+        cleanedValue: cleaned.toUpperCase(), // cleaned variant (no assembly)
+        detectedAssembly,
       };
     }
 
     return {
       isVariant: false,
-      cleanedValue: input.trim(),
+      cleanedValue: raw.trim(), // just plain query (not a variant)
+      detectedAssembly,
     };
   };
 
@@ -58,22 +97,41 @@ export default function SearchGenomicInput({
     }
   }, [activeInput]);
 
-  // Live detection of current input state
-  const { isVariant, cleanedValue } = detectAndCleanVariant(genomicDraft);
+  // Live detection
+  const { isVariant, cleanedValue, detectedAssembly } = detectAndCleanVariant(
+    genomicDraft,
+    config?.assemblyId ?? []
+  );
+
+  // Keep the dropdown synced if user typed it
+  useEffect(() => {
+    if (detectedAssembly && detectedAssembly !== assembly) {
+      setAssembly(detectedAssembly);
+    }
+  }, [detectedAssembly, assembly, setAssembly]);
 
   // This function is called when the user presses Enter or clicks "Add"
   // It detects if the input is a genomic variant, cleans it if needed, checks for duplicates,
   // and then adds it to the selected filters list.
   const commitGenomicDraft = () => {
-    // Step 1: Check if the input looks like a variant and clean it
-    const { isVariant, cleanedValue } = detectAndCleanVariant(genomicDraft);
+    const { isVariant, cleanedValue, detectedAssembly } = detectAndCleanVariant(
+      genomicDraft,
+      config?.assemblyId ?? []
+    );
     if (!cleanedValue) return;
 
-    // console.log("🧬 Submitted:", cleanedValue, "| Variant:", isVariant);
+    // If user typed an assembly, sync it with dropdown
+    if (detectedAssembly && detectedAssembly !== assembly) {
+      setAssembly(detectedAssembly);
+    }
 
-    // Step 2: Check if this cleaned value is already in the selected filters and shows an error if it is a duplicate
+    // Use typed assembly or fallback to current dropdown
+    const finalAssembly = detectedAssembly || assembly;
+
+    // Avoid duplicates
+    const labelForCheck = `${finalAssembly} | ${cleanedValue}`;
     const isDuplicate = selectedFilter.some(
-      (f) => f.label.trim().toLowerCase() === cleanedValue.toLowerCase()
+      (f) => f.label.trim().toLowerCase() === labelForCheck.toLowerCase()
     );
     if (isDuplicate) {
       setMessage(COMMON_MESSAGES.doubleValue);
@@ -81,21 +139,21 @@ export default function SearchGenomicInput({
       return;
     }
 
-    // Step 3: Create a unique ID for this new filter item
+    // Create unique ID for this new filter
     const uniqueId = `genomic-free-${Date.now().toString(36)}-${Math.random()
       .toString(36)
       .slice(2, 7)}`;
 
-    // Step 4: Build the new filter object
+    // Build new filter item with final label
     const newGenomicFilter = {
       id: uniqueId,
       key: uniqueId,
-      label: cleanedValue,
+      label: labelForCheck,
       scope: isVariant ? "genomicVariant" : "genomicQuery",
       bgColor: "genomic",
     };
 
-    // Step 5: Add it to the filter list and reset the input
+    // Add to list and clear input
     setSelectedFilter((prev) => [...prev, newGenomicFilter]);
     setGenomicDraft("");
   };

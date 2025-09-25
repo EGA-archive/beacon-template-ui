@@ -129,7 +129,7 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
               )}-${Math.random().toString(36).slice(2, 7)}`;
 
               const item = {
-                id: uniqueId,
+                id: term.id,
                 key: uniqueId,
                 bgColor: "common",
                 label: displayLabel?.trim() ? displayLabel : term.id,
@@ -140,7 +140,7 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
 
               return (
                 <ListItem
-                  key={term.id}
+                  key={item.key}
                   onClick={() => {
                     // Handle numeric/alphanumeric filters separately
                     if (item.type === "alphanumeric") {
@@ -149,15 +149,27 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
                       return;
                     }
 
-                    // Add term to selected filters using helper
-                    setSelectedFilter((prev) =>
-                      handleFilterSelection({
+                    setSelectedFilter((prev) => {
+                      const isDuplicate = prev.some(
+                        (filter) =>
+                          filter.label === item.label &&
+                          filter.scope === item.scope
+                      );
+
+                      if (isDuplicate) {
+                        setMessage(COMMON_MESSAGES.doubleFilter);
+                        setTimeout(() => setMessage(null), 3000);
+                        return prev; // return unchanged
+                      }
+
+                      // Otherwise, add filter
+                      return handleFilterSelection({
                         item,
                         prevFilters: prev,
                         setMessage,
                         onSuccess: onCloseDropdown,
-                      })
-                    );
+                      });
+                    });
                   }}
                   sx={{
                     display: "flex",

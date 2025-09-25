@@ -153,11 +153,11 @@ export default function FilteringTermsTable({
                       getDisplayLabelAndScope(term, selectedEntryType);
 
                     // Figure out which scope is selected
-                    // const activeScope =
-                    //   selectedScopes[term.id] ||
-                    //   selectedScope ||
-                    //   allScopes?.[0] ||
-                    //   null;
+                    const activeScope =
+                      selectedScopes[term.id] ||
+                      selectedScope ||
+                      allScopes?.[0] ||
+                      null;
 
                     // const item = {
                     //   key: term.id,
@@ -174,32 +174,44 @@ export default function FilteringTermsTable({
                     )}-${Math.random().toString(36).slice(2, 7)}`;
 
                     const item = {
-                      id: uniqueId,
+                      id: term.id,
                       key: uniqueId,
                       bgColor: "common",
                       label: displayLabel?.trim() ? displayLabel : term.id,
                       type: term.type,
-                      scope: selectedScope || null,
+                      scope: activeScope,
                       scopes: allScopes || [],
                     };
 
                     return (
                       <TableRow
-                        key={term.id}
+                        key={item.key}
                         // For alphanumeric terms, set as extra filter
                         onClick={() => {
                           if (item.type === "alphanumeric") {
                             setExtraFilter(item);
                             return;
                           }
-                          // Otherwise, add to selected filters directly
-                          setSelectedFilter((prev) =>
-                            handleFilterSelection({
+                          setSelectedFilter((prev) => {
+                            const isDuplicate = prev.some(
+                              (filter) =>
+                                filter.label === item.label &&
+                                filter.scope === item.scope
+                            );
+
+                            if (isDuplicate) {
+                              setMessage(COMMON_MESSAGES.doubleFilter);
+                              setTimeout(() => setMessage(null), 3000);
+                              return prev; // return unchanged
+                            }
+
+                            // Otherwise, add normally
+                            return handleFilterSelection({
                               item,
                               prevFilters: prev,
                               setMessage,
-                            })
-                          );
+                            });
+                          });
                         }}
                         sx={{
                           cursor: "pointer",

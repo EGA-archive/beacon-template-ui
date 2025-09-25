@@ -86,7 +86,7 @@ export default function Search({
   useEffect(() => {
     const fetchEntryTypes = async () => {
       try {
-        await handleBeaconsInfo(); 
+        await handleBeaconsInfo();
 
         const res = await fetch(`${config.apiUrl}/map`);
         const data = await res.json();
@@ -127,7 +127,6 @@ export default function Search({
         await handleBeaconsInfo();
 
         setIsLoaded(true);
-
       } catch (err) {
         console.error("Error fetching entry types:", err);
       } finally {

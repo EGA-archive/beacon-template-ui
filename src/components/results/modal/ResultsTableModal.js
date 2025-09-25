@@ -1,31 +1,26 @@
-import { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Link
-} from "@mui/material";
-import Modal from '@mui/material/Modal';
-import Fade from '@mui/material/Fade';
-import ResultsTableModalBody from './ResultsTableModalBody';
-import config from '../../../config/config.json';
+import { useState, useEffect } from "react";
+import { Box, Typography, Link } from "@mui/material";
+import Modal from "@mui/material/Modal";
+import Fade from "@mui/material/Fade";
+import ResultsTableModalBody from "./ResultsTableModalBody";
+import config from "../../../config/config.json";
 import CloseIcon from "@mui/icons-material/Close";
 import { InputAdornment, IconButton } from "@mui/material";
 import { useSelectedEntry } from "../../context/SelectedEntryContext";
 import Loader from "../../common/Loader";
 import { PATH_SEGMENT_TO_ENTRY_ID } from "../../common/textFormatting";
 
-
 const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
   width: 1200,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
+  bgcolor: "background.paper",
+  border: "2px solid #000",
   boxShadow: 24,
   p: 4,
-  pt: '15px',
+  pt: "15px",
 };
 
 const ResultsTableModal = ({ open, subRow, onClose }) => {
@@ -40,23 +35,23 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
   const entryTypeId = PATH_SEGMENT_TO_ENTRY_ID[selectedPathSegment];
 
   const parseType = (item) => {
-    switch(item) {
-      case 'dataset':
-        return 'datasets';
+    switch (item) {
+      case "dataset":
+        return "datasets";
       default:
         return null;
     }
-  }
+  };
 
   const tableType = parseType(subRow.setType);
 
   const handleChangePage = (event, newPage) => {
-    setPage(newPage)
-  }
+    setPage(newPage);
+  };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-  }
+  };
 
   const handleClose = () => {
     setPage(0);
@@ -68,7 +63,7 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
 
   const queryBuilder = (page, entryTypeId) => {
     let skipItems = page * rowsPerPage;
-    
+
     let filter = {
       meta: {
         apiVersion: "2.0",
@@ -77,35 +72,33 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
         filters: [],
         includeResultsetResponses: "HIT",
         pagination: {
-          skip: parseInt(`${(skipItems)}`),
-          limit: parseInt(`${(rowsPerPage)}`),
+          skip: parseInt(`${skipItems}`),
+          limit: parseInt(`${rowsPerPage}`),
         },
         testMode: false,
         requestedGranularity: "record",
       },
     };
 
-    if(selectedFilter.length > 0) {
-      let filterData = selectedFilter.map((item) =>
-      {
-          if(item.operator) {
-            return {
-              id: item.field,
-              operator: item.operator,
-              value: item.value
-            }
-          } else {
-            return {
-              id: item.key ?? item.id,
-              scope: entryTypeId
-            }
-          }
+    if (selectedFilter.length > 0) {
+      let filterData = selectedFilter.map((item) => {
+        if (item.operator) {
+          return {
+            id: item.field,
+            operator: item.operator,
+            value: item.value,
+          };
+        } else {
+          return {
+            id: item.id,
+            ...(item.scope ? { scope: item.scope } : {}),
+          };
         }
-      );
+      });
       filter.query.filters = filterData;
     }
     return filter;
-  }
+  };
 
   useEffect(() => {
     const fetchTableItems = async () => {
@@ -116,11 +109,11 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
         let query = queryBuilder(page, entryTypeId);
 
         const requestOptions = {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(query)
+          body: JSON.stringify(query),
         };
 
         const response = await fetch(url, requestOptions);
@@ -134,33 +127,35 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
         });
 
         const totalDatasetsPages = Math.ceil(beacon.resultsCount / rowsPerPage);
-        
+
         setTotalItems(beacon.resultsCount);
-        setTotalPages(totalDatasetsPages)
+        setTotalPages(totalDatasetsPages);
         setDataTable(beacon.results);
       } catch (err) {
         console.error("Failed to fetch modal table", err);
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchTableItems();
   }, [subRow, page, rowsPerPage]);
 
   return (
     <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
+      open={open}
+      onClose={handleClose}
+      aria-labelledby="modal-modal-title"
+      aria-describedby="modal-modal-description"
+    >
       <Fade in={open}>
         <Box sx={style}>
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'flex-end'
-          }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+          >
             <InputAdornment position="end">
               <IconButton
                 onClick={() => handleClose()}
@@ -172,84 +167,104 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
             </InputAdornment>
           </Box>
           <Box>
-            <Typography id="modal-modal-title" 
-              sx={{ 
+            <Typography
+              id="modal-modal-title"
+              sx={{
                 fontWeight: "bold",
                 fontSize: "17px",
                 paddingBottom: "10px",
-                color: `${ config.ui.colors.darkPrimary }`
-              }}>
+                color: `${config.ui.colors.darkPrimary}`,
+              }}
+            >
               Results detailed table
             </Typography>
           </Box>
           <Box>
             <Box>
               <Box>
-                { subRow.beaconId  && (
+                {subRow.beaconId && (
                   <Box
                     sx={{
-                      display: "flex"
-                    }}>
-                    <Typography sx={{
-                      color: "black",
-                      fontSize: "15px",
-                      paddingRight: "10px",
-                      color: `${ config.ui.colors.darkPrimary }`
-                    }}>
+                      display: "flex",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        color: "black",
+                        fontSize: "15px",
+                        paddingRight: "10px",
+                        color: `${config.ui.colors.darkPrimary}`,
+                      }}
+                    >
                       Beacon:
                     </Typography>
-                    <Typography sx={{
-                      color: "black",
-                      fontWeight: 700,
-                      fontSize: "15px",
-                      color: `${ config.ui.colors.darkPrimary }`
-                    }}>
-                      { subRow.beaconId }
+                    <Typography
+                      sx={{
+                        color: "black",
+                        fontWeight: 700,
+                        fontSize: "15px",
+                        color: `${config.ui.colors.darkPrimary}`,
+                      }}
+                    >
+                      {subRow.beaconId}
                     </Typography>
                   </Box>
                 )}
-                { subRow.id  && (
+                {subRow.id && (
                   <Box
                     sx={{
                       display: "flex",
                       paddingTop: "1px",
-                      paddingBottom: "10px"
-                    }}>
-                    <Typography sx={{
-                      color: `${ config.ui.colors.darkPrimary }`,
-                      fontSize: "15px",
-                      paddingRight: "10px",
-                    }}>
+                      paddingBottom: "10px",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        color: `${config.ui.colors.darkPrimary}`,
+                        fontSize: "15px",
+                        paddingRight: "10px",
+                      }}
+                    >
                       Dataset:
                     </Typography>
-                    <Typography sx={{
-                      color: `${ config.ui.colors.darkPrimary }`,
-                      fontWeight: 700,
-                      fontSize: "15px",
-                    }}>
-                      { subRow.id }
+                    <Typography
+                      sx={{
+                        color: `${config.ui.colors.darkPrimary}`,
+                        fontWeight: 700,
+                        fontSize: "15px",
+                      }}
+                    >
+                      {subRow.id}
                     </Typography>
                   </Box>
                 )}
               </Box>
               <Box sx={{ paddingBottom: "15px" }}>
-                <Typography sx={{
-                  color: `${ config.ui.colors.darkPrimary }`,
-                  fontWeight: 700,
-                  fontSize: "13px",
-                  fontStyle: "italic"
-                }}>
-                  <Link href={url} color="inherit" underline="hover" target="_blank" rel="noopener noreferrer">
-                    { url }
+                <Typography
+                  sx={{
+                    color: `${config.ui.colors.darkPrimary}`,
+                    fontWeight: 700,
+                    fontSize: "13px",
+                    fontStyle: "italic",
+                  }}
+                >
+                  <Link
+                    href={url}
+                    color="inherit"
+                    underline="hover"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {url}
                   </Link>
                 </Typography>
               </Box>
             </Box>
             <Box>
-              { loading && (<Loader message="Loading data..." />)}
-              { !loading && dataTable.length>0 && (
+              {loading && <Loader message="Loading data..." />}
+              {!loading && dataTable.length > 0 && (
                 <>
-                  <ResultsTableModalBody 
+                  <ResultsTableModalBody
                     dataTable={dataTable}
                     totalItems={totalItems}
                     page={page}
@@ -257,18 +272,17 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
                     totalPages={totalPages}
                     handleChangePage={handleChangePage}
                     handleChangeRowsPerPage={handleChangeRowsPerPage}
-                    primary={ config.ui.colors.primary }
+                    primary={config.ui.colors.primary}
                   />
                 </>
               )}
             </Box>
-            <Box>
-            </Box>
+            <Box></Box>
           </Box>
         </Box>
       </Fade>
     </Modal>
-  )
-}
+  );
+};
 
 export default ResultsTableModal;
