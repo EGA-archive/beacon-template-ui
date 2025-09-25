@@ -29,21 +29,53 @@ export default function FilterTermsExtra() {
   const [selectedValue, setSelectedValue] = useState("");
   const [error, setError] = useState("");
 
+  // // Function to validate and add the new filter
+  // const handleAddFilter = () => {
+  //   setError("");
+  //   // If the value is empty, show error and stop
+  //   if (!selectedValue) {
+  //     setError(COMMON_MESSAGES.fillFields);
+  //   } else {
+  //     // Otherwise, try to add the custom filter
+  //     setSelectedFilter((prevFilters) => {
+  //       // If the same key already exists, do not add again
+  //       if (prevFilters.some((filter) => filter.key === extraFilter.key)) {
+  //         return prevFilters;
+  //       }
+
+  //       // Create a custom filter object
+  //       const extraFilterCustom = {
+  //         field: extraFilter.key,
+  //         operator: selectedOperator,
+  //         value: selectedValue,
+  //         label: `${extraFilter.label} ${selectedOperator} ${selectedValue}`,
+  //         scope: extraFilter.scope || null,
+  //         scopes: extraFilter.scopes || [],
+  //         type: extraFilter.type || "alphanumeric",
+  //       };
+
+  //       // Reset local and global state for next input
+  //       setExtraFilter(null);
+  //       setSelectedOperator(">");
+  //       setSelectedValue("");
+
+  //       // Add new filter to the list
+  //       return [...prevFilters, extraFilterCustom];
+  //     });
+  //   }
+  // };
+
   // Function to validate and add the new filter
   const handleAddFilter = () => {
     setError("");
-    // If the value is empty, show error and stop
     if (!selectedValue) {
       setError(COMMON_MESSAGES.fillFields);
     } else {
-      // Otherwise, try to add the custom filter
       setSelectedFilter((prevFilters) => {
-        // If the same key already exists, do not add again
         if (prevFilters.some((filter) => filter.key === extraFilter.key)) {
           return prevFilters;
         }
 
-        // Create a custom filter object
         const extraFilterCustom = {
           field: extraFilter.key,
           operator: selectedOperator,
@@ -54,12 +86,31 @@ export default function FilterTermsExtra() {
           type: extraFilter.type || "alphanumeric",
         };
 
-        // Reset local and global state for next input
+        const newKey = `${extraFilter.id || extraFilter.key}-${
+          extraFilter.scope || "noScope"
+        }`;
+
+        if (extraFilter.setAddedFilters) {
+          extraFilter.setAddedFilters((prevSet) => {
+            const newSet = new Set(prevSet);
+            newSet.add(newKey);
+
+            setTimeout(() => {
+              extraFilter.setAddedFilters((current) => {
+                const updated = new Set(current);
+                updated.delete(newKey);
+                return updated;
+              });
+            }, 3000);
+
+            return newSet;
+          });
+        }
+
         setExtraFilter(null);
         setSelectedOperator(">");
         setSelectedValue("");
 
-        // Add new filter to the list
         return [...prevFilters, extraFilterCustom];
       });
     }

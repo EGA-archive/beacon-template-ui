@@ -4,7 +4,7 @@ import About from "./components/pages/About";
 import ContactForm from "./components/pages/contact/ContactForm";
 import ContactSuccess from "./components/pages/contact/ContactSuccess";
 import NetworkMembers from "./components/pages/NetworkMembers";
-import Login from "./components/pages/Login";
+import Login from "./components/pages/login/Login";
 import HomePage from "./components/pages/HomePage";
 import { CssBaseline, Box } from "@mui/material";
 import config from "./config/config.json";

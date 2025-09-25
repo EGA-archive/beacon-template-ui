@@ -1,0 +1,5 @@
+{
+  "API_URL": "https://beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
+  "REDIRECT_URL": "http://localhost:3000/",
+  "KEYCLOAK_URL": "http://localhost:3000/"
+}

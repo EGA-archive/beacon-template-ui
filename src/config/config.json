@@ -37,7 +37,7 @@
       "apiPath": "http://localhost:5000/api/contact",
       "recipientKey": "beacon_support"
     },
-    "showLogin": false,
+    "showLogin": true,
     "colors": {
       "primary": "#3176B1",
       "darkPrimary": "#173D5D",

@@ -91,6 +91,8 @@ export default function AllFilteringTermsComponent() {
         pb: "48px",
         backgroundColor: "white",
         boxShadow: "0px 8px 11px 0px #9BA0AB24",
+
+        marginBottom: "20px",
       }}
     >
       {/* Section title */}

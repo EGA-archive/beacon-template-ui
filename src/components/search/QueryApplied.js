@@ -27,21 +27,9 @@ export default function QueryApplied({ variant }) {
 
     // Only remove the filter with the exact id
     setSelectedFilter((prevFilters) =>
-      prevFilters.filter((filter) => filter.id !== item.id)
+      prevFilters.filter((filter) => filter.key !== item.key)
     );
   };
-
-  // const handleFilterRemove = (idToDelete) => {
-  //   setLoadingData(false);
-  //   setResultData([]);
-  //   setHasSearchResult(false);
-
-  //   setSelectedFilter((prevFilters) =>
-  //     prevFilters.filter((filter) => filter.id !== idToDelete)
-  //   );
-
-  //   console.log("🔥 Removed filter with id:", idToDelete);
-  // };
 
   return (
     <Box

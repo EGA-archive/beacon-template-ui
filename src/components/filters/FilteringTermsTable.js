@@ -17,6 +17,8 @@ import Loader from "../common/Loader";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import { FILTERING_TERMS_COLUMNS } from "../../lib/constants";
 import { capitalize } from "../common/textFormatting";
+import AddTaskIcon from "@mui/icons-material/AddTask";
+import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 import {
   assignDefaultScopesToTerms,
   handleFilterSelection,
@@ -38,6 +40,9 @@ export default function FilteringTermsTable({
 }) {
   // State to keep track of which scope was selected per filtering term
   const [selectedScopes, setSelectedScopes] = useState({});
+  const [addedFilters, setAddedFilters] = useState(new Set());
+  const [changedScopes, setChangedScopes] = useState(new Set());
+  const [manuallySelectedScopes, setManuallySelectedScopes] = useState({});
 
   // Optional message to show errors to the user
   const [message, setMessage] = useState(null);
@@ -63,13 +68,22 @@ export default function FilteringTermsTable({
   // When the filtering terms or the default scope changes, this code figures out which scope should be selected by default for each filtering term, and then stores that in state.
   // This useEffect runs automatically when detects changes
   useEffect(() => {
+    const terms = filteringTerms?.response?.filteringTerms ?? [];
     const defaults = assignDefaultScopesToTerms(
-      filteringTerms?.response?.filteringTerms ?? [],
+      terms,
       defaultScope,
       scopeAlias
     );
-    setSelectedScopes(defaults);
-  }, [filteringTerms, defaultScope]);
+
+    // Merge with manually selected scopes
+    const mergedScopes = {};
+    terms.forEach((term) => {
+      mergedScopes[term.id] =
+        manuallySelectedScopes[term.id] || defaults[term.id];
+    });
+
+    setSelectedScopes(mergedScopes);
+  }, [filteringTerms, defaultScope, manuallySelectedScopes]);
 
   // Lighten the primary color from config for table styling
   const bgPrimary = lighten(config.ui.colors.primary, 0.8);
@@ -83,6 +97,35 @@ export default function FilteringTermsTable({
       ...prev,
       [termId]: scope,
     }));
+
+    setManuallySelectedScopes((prev) => ({
+      ...prev,
+      [termId]: scope,
+    }));
+
+    const scopeKey = `${termId}-${scope}`;
+    setChangedScopes((prevSet) => {
+      const newSet = new Set(prevSet);
+      newSet.add(scopeKey);
+
+      setTimeout(() => {
+        setChangedScopes((current) => {
+          const updated = new Set(current);
+          updated.delete(scopeKey);
+          return updated;
+        });
+      }, 1000);
+
+      return newSet;
+    });
+
+    setTimeout(() => {
+      setManuallySelectedScopes((prev) => {
+        const updated = { ...prev };
+        delete updated[termId];
+        return updated;
+      });
+    }, 5000);
   };
 
   // Show a loading spinner if the data is still loading
@@ -189,7 +232,7 @@ export default function FilteringTermsTable({
                         // For alphanumeric terms, set as extra filter
                         onClick={() => {
                           if (item.type === "alphanumeric") {
-                            setExtraFilter(item);
+                            setExtraFilter({ ...item, setAddedFilters });
                             return;
                           }
                           setSelectedFilter((prev) => {
@@ -204,6 +247,23 @@ export default function FilteringTermsTable({
                               setTimeout(() => setMessage(null), 3000);
                               return prev; // return unchanged
                             }
+
+                            const newKey = `${item.id}-${item.scope}`;
+                            setAddedFilters((prevSet) => {
+                              const newSet = new Set(prevSet);
+                              newSet.add(newKey);
+
+                              // Remove after 5 seconds
+                              setTimeout(() => {
+                                setAddedFilters((current) => {
+                                  const updated = new Set(current);
+                                  updated.delete(newKey);
+                                  return updated;
+                                });
+                              }, 5000);
+
+                              return newSet;
+                            });
 
                             // Otherwise, add normally
                             return handleFilterSelection({
@@ -247,6 +307,23 @@ export default function FilteringTermsTable({
                                 </Box>
                               );
                             })}
+
+                          {changedScopes.has(`${item.id}-${item.scope}`) && (
+                            <ChangeCircleIcon
+                              sx={{
+                                color: config.ui.colors.primary,
+                                fontSize: "20px",
+                              }}
+                            />
+                          )}
+                          {addedFilters.has(`${item.id}-${item.scope}`) && (
+                            <AddTaskIcon
+                              sx={{
+                                color: config.ui.colors.primary,
+                                fontSize: "20px",
+                              }}
+                            />
+                          )}
                         </TableCell>
                       </TableRow>
                     );

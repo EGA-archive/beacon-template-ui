@@ -18,7 +18,6 @@ export const SelectedEntryProvider = ({ children }) => {
 
   // Filters currently selected by the user
   const [selectedFilter, setSelectedFilter] = useState([]);
-  console.log("selectedFilter", selectedFilter);
 
   // Optional extra filter (e.g., numeric value with operator)
   const [extraFilter, setExtraFilter] = useState(null);

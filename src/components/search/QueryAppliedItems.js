@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import FilterLabelRemovable from "../styling/FilterLabelRemovable";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CommonMessage, {
   COMMON_MESSAGES,
 } from "../../components/common/CommonMessage";
@@ -17,6 +17,10 @@ export default function QueryAppliedItems({
   const [expandedKey, setExpandedKey] = useState(false);
   // Error message if user tries to select the same scope twice
   const [message, setMessage] = useState(null);
+
+  useEffect(() => {
+    console.log("📌 Applied filters:", selectedFilter);
+  }, [selectedFilter]);
 
   // Handle when a user changes the scope inside an expanded label
   const handleScopeChange = (keyValue, newScope) => {
@@ -38,6 +42,10 @@ export default function QueryAppliedItems({
       setTimeout(() => setMessage(null), 3000);
       return;
     }
+
+    console.log(
+      `🔄 Changing scope for filter: ${target.label} (${prevScope} → ${newScope})`
+    );
 
     // Otherwise update the scope
     setSelectedFilter((prevFilters) =>
@@ -83,7 +91,10 @@ export default function QueryAppliedItems({
               label={filter.label}
               scope={filter.scope}
               scopes={filter.scopes}
-              onDelete={() => handleFilterRemove(filter)}
+              onDelete={() => {
+                console.log("❌ Removing filter:", filter);
+                handleFilterRemove(filter);
+              }}
               onScopeChange={handleScopeChange}
               bgColor={filter.bgColor || "common"}
               expandedKey={expandedKey}

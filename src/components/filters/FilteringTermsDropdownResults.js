@@ -17,6 +17,7 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import useFilteringTerms from "../../hooks/useFilteringTerms";
 import Loader from "../common/Loader";
+import AddTaskIcon from "@mui/icons-material/AddTask";
 
 // Helper functions for filtering/searching terms
 import {
@@ -32,6 +33,7 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
   const [message, setMessage] = useState(null); // For validation or feedback
   const [filteredTerms, setFilteredTerms] = useState([]); // Search result terms
   const [filtering, setFiltering] = useState(false); // Loading state
+  const [addedFilters, setAddedFilters] = useState(new Set());
 
   // Get all filtering terms from API or local state
   const { filteringTerms } = useFilteringTerms();
@@ -182,6 +184,10 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
                     px: 2,
                     py: 1,
                     cursor: "pointer",
+                    transition: "background-color 0.2s ease",
+                    "&:hover": {
+                      backgroundColor: `${config.ui.colors.primary}20`,
+                    },
                   }}
                 >
                   {/* Show display label on the left */}
