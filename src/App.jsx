@@ -9,6 +9,8 @@ import HomePage from "./components/pages/HomePage";
 import { CssBaseline, Box } from "@mui/material";
 import config from "./config/config.json";
 import { useState } from "react";
+import LoginModal from "./components/common/LoginModal";
+import { useAuth } from "oidc-react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -19,6 +21,7 @@ import { SelectedEntryProvider } from "./components/context/SelectedEntryContext
 
 export default function App() {
   const [selectedTool, setSelectedTool] = useState(null);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   const baseNavItems = [
     { label: "Network Members", url: "/network-members" },
@@ -77,6 +80,7 @@ export default function App() {
                   <HomePage
                     selectedTool={selectedTool}
                     setSelectedTool={setSelectedTool}
+                    setLoginModalOpen={setLoginModalOpen}
                   />
                 }
               />
@@ -102,6 +106,10 @@ export default function App() {
           </Box>
 
           <Footer navItems={navItems} />
+          <LoginModal
+            open={loginModalOpen}
+            onClose={() => setLoginModalOpen(false)}
+          />
         </Box>
       </Router>
     </SelectedEntryProvider>

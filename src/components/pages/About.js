@@ -75,7 +75,7 @@ export default function About() {
               color: config.ui.colors.primary,
             }}
           >
-            About {title}
+            About
           </Typography>
           {logoUrl && (
             <Box

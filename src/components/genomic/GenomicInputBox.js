@@ -9,12 +9,13 @@ import {
   FieldHeader,
 } from "./styling/genomicInputBoxStyling";
 import AminoAcidChangeFields from "./sharedFields/AminoAcidChangeFields";
-import BasesChangeFields from "./sharedFields/BasesChangeFields";
+import AlternateBasesFields from "./sharedFields/AlternateBasesFields";
+import BracketRangeFields from "./sharedFields/BracketRangeFields";
 
 /**
  * This is a reusable input component tailored for genomic query building.
  * Dynamically renders a TextField, Select, or customized components
- * like `BasesChangeFields` or `AminoAcidChangeFields` based on the `name` or passed props.
+ * like `Alternate BasesFields` or `AminoAcidChangeFields` based on the `name` or passed props.
  **/
 export default function GenomicInputBox({
   name,
@@ -32,22 +33,27 @@ export default function GenomicInputBox({
   customRefPlaceholder,
   customAltPlaceholder,
   customPaddingTop,
+  disabled = false,
 }) {
   // Connect this field to Formik (value, error, helpers)
   const [field, meta, helpers] = useField(name);
+
   // Show error only if user touched the field
   const error = meta.touched && meta.error;
   // Main color imported from the config.file
   const primaryDarkColor = config.ui.colors.darkPrimary;
   // Disable input if it's selectable but not the active one
-  const isDisabled = isSelectable && !isSelected;
+  const isDisabled = (isSelectable && !isSelected) || disabled;
 
   // This function returns different field types based on input name or options
   const renderFieldByType = () => {
-    // Show custom fields if name is "basesChange"
-    if (name === "basesChange") {
+    // Show custom fields if name is "alternateBases"
+    if (name === "alternateBases") {
       return (
-        <BasesChangeFields
+        <AlternateBasesFields
+          field={field}
+          meta={meta}
+          helpers={helpers}
           isDisabled={isDisabled}
           customRefLabel={customRefLabel}
           customAltLabel={customAltLabel}
@@ -60,15 +66,21 @@ export default function GenomicInputBox({
     // Show custom fields if name is "aminoacidChange"
     if (name === "aminoacidChange")
       return <AminoAcidChangeFields isDisabled={isDisabled} />;
+    if (name === "braketRangeFields")
+      return <BracketRangeFields isDisabled={isDisabled} />;
+
+    const normalizedOptions = options.map((opt) =>
+      typeof opt === "string" ? { jsonName: opt, displayName: opt } : opt
+    );
     // If the input requires options, then it renders a dropdown menu
-    if (options.length > 0) {
+    if (normalizedOptions.length > 0) {
       return (
         <Select
           fullWidth
           IconComponent={KeyboardArrowDownIcon}
           displayEmpty
-          {...field}
-          onChange={(e) => helpers.setValue(e.target.value)} // Update Formik value
+          value={field.value}
+          onChange={(e) => helpers.setValue(e.target.value)}
           error={!!error}
           disabled={isDisabled}
           sx={{
@@ -82,26 +94,23 @@ export default function GenomicInputBox({
           }}
           renderValue={(selected) =>
             selected ? (
-              selected
+              normalizedOptions.find((o) => o.jsonName === selected)
+                ?.displayName || selected
             ) : (
-              <span
-                style={{
-                  fontFamily: '"Open Sans", sans-serif',
-                  fontSize: "14px",
-                  color: "#999",
-                }}
-              >
-                {placeholder}
-              </span>
+              <span style={{ color: "#999" }}>{placeholder}</span>
             )
           }
         >
-          <MenuItem value="" disabled>
+          <MenuItem value="" sx={{ fontSize: "12px" }}>
             {placeholder}
           </MenuItem>
-          {options.map((option) => (
-            <MenuItem key={option} value={option} sx={{ fontSize: "12px" }}>
-              {option}
+          {normalizedOptions.map((option) => (
+            <MenuItem
+              key={option.jsonName}
+              value={option.jsonName}
+              sx={{ fontSize: "12px" }}
+            >
+              {option.displayName}
             </MenuItem>
           ))}
         </Select>

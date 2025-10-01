@@ -5,7 +5,7 @@ export const GENOMIC_LABELS_MAP = {
   start: "Start Position",
   end: "End Position",
   variationType: "Variant Type",
-  basesChange: "Bases Change",
+  alternateBases: "Alternate Bases",
   refBases: "Reference Bases",
   altBases: "Alternate Bases",
   aminoacidChange: "Amino Acid Change",
@@ -15,4 +15,8 @@ export const GENOMIC_LABELS_MAP = {
   minVariantLength: "Min Variant Length",
   maxVariantLength: "Max Variant Length",
   genomicHGVSshortForm: "HGVS ID",
+  startMin: "Start Min",
+  startMax: "Start Max",
+  endMin: "End Min",
+  endMax: "End Max",
 };

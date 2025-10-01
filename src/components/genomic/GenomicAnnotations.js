@@ -247,7 +247,7 @@ export default function GenomicAnnotations({ setActiveInput }) {
             </AccordionSummary>
 
             {/* Accordion body with filter chips */}
-            <AccordionDetails sx={{ px: 0, pt: 0 }}>
+            <AccordionDetails sx={{ px: 0, pt: 0, mb: 3 }}>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                 {validLabels.map((item) => (
                   <FilterLabelRemovable

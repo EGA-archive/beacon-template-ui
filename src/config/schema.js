@@ -26,7 +26,6 @@ const schema = Joi.object({
         'API_URL must be a valid HTTPS URL (e.g., "https://example.com/api")',
       "any.required": "API_URL is required",
     }),
-
   assemblyId: Joi.array()
     .items(Joi.string().min(1))
     .min(1)
@@ -38,14 +37,33 @@ const schema = Joi.object({
     }),
 
   // Set this value according to the variant type used in your VCF file.
+  // variationType is a requiered array with at least one item
+  // Each item is an object with jsonName and displayName
+  // jsonName is a technical key, must follow your VFC annotations
+  // displayName is label shown to the user in the UI associated to the jsonName
   variationType: Joi.array()
-    .items(Joi.string().min(1))
+    .items(
+      Joi.object({
+        jsonName: Joi.string()
+          .pattern(/^[A-Za-z0-9_]+$/) // allow letters, numbers, underscore
+          .required()
+          .messages({
+            "string.pattern.base":
+              "jsonName must contain only letters, numbers, or underscores",
+            "any.required":
+              "Each variationType entry must include a 'jsonName' key",
+          }),
+        displayName: Joi.string().min(1).required().messages({
+          "any.required":
+            "Each variationType entry must include a 'displayName' key",
+        }),
+      })
+    )
     .min(1)
     .required()
     .messages({
       "any.required": "variationType is required.",
       "array.min": "At least one variationType must be provided.",
-      "string.min": "Each variationType must be a non-empty string.",
     }),
 
   ui: Joi.object({
@@ -161,6 +179,14 @@ const schema = Joi.object({
         "array.min":
           "At least one genomicAnnotations category must be provided",
       }),
+  }).optional(),
+  // This is also optional
+  // The default value will always be true if not set false explicitly
+  genomicQueries: Joi.object({
+    genomicQueryBuilder: Joi.object({
+      showAlternateBases: Joi.boolean().default(true),
+      showAminoacidChange: Joi.boolean().default(true),
+    }).required(),
   }).optional(),
 });
 

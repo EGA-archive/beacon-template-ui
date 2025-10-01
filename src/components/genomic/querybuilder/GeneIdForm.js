@@ -1,9 +1,23 @@
 import { Box, Typography } from "@mui/material";
+import { useEffect } from "react";
+import { useFormikContext } from "formik";
 import config from "../../../config/config.json";
 import GenomicInputBox from "../GenomicInputBox";
 import { mainBoxTypography } from "../styling/genomicInputBoxStyling";
+import { normalizeVariationType } from "../../genomic/utils/variationType";
 
 export default function GeneIdForm({ selectedInput, setSelectedInput }) {
+  const { values, setFieldValue } = useFormikContext();
+
+  const isSNP = normalizeVariationType(values?.variationType) === "SNP";
+  const lengthEnabled = !isSNP;
+  // Clear stale values when the selected variation type doesn't support length
+  useEffect(() => {
+    if (!lengthEnabled) {
+      setFieldValue("minVariantLength", "");
+      setFieldValue("maxVariantLength", "");
+    }
+  }, [lengthEnabled, setFieldValue]);
   return (
     <Box>
       <Box
@@ -71,7 +85,7 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
               fontSize: "14px",
             }}
           >
-            Optional parameters
+            Optional Parameters
           </Typography>
           <Typography
             sx={{
@@ -98,35 +112,45 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
                 name="variationType"
                 label="Variation Type"
                 description="Select the Variation Type"
-                placeholder={config.variationType[0]}
-                options={config.variationType}
+                placeholder="Select variation type"
+                options={(config?.variationType || []).map((opt) => ({
+                  jsonName: opt.jsonName,
+                  displayName: opt.displayName,
+                }))}
                 isSelectable
                 isSelected={selectedInput === "variationType"}
                 onSelect={() => setSelectedInput("variationType")}
               />
             </Box>
-            <Box sx={{ flex: "1 1 200px" }}>
-              <GenomicInputBox
-                name="basesChange"
-                label="Bases Change"
-                isSelectable
-                isSelected={selectedInput === "basesChange"}
-                onSelect={() => setSelectedInput("basesChange")}
-              />
-            </Box>
-            <Box sx={{ flex: "1 1 200px" }}>
-              <GenomicInputBox
-                name="aminoacidChange"
-                label="Aminoacid Change"
-                isSelectable
-                isSelected={selectedInput === "aminoacidChange"}
-                onSelect={() => setSelectedInput("aminoacidChange")}
-              />
-            </Box>
+            {config.ui.genomicQueries.genomicQueryBuilder
+              .showAlternateBases && (
+              <Box sx={{ flex: "1 1 200px" }}>
+                <GenomicInputBox
+                  name="alternateBases"
+                  label="Alternate Bases"
+                  isSelectable
+                  isSelected={selectedInput === "alternateBases"}
+                  onSelect={() => setSelectedInput("alternateBases")}
+                />
+              </Box>
+            )}
+
+            {config.ui.genomicQueries.genomicQueryBuilder
+              .showAminoacidChange && (
+              <Box sx={{ flex: "1 1 200px" }}>
+                <GenomicInputBox
+                  name="aminoacidChange"
+                  label="Aminoacid Change"
+                  isSelectable
+                  isSelected={selectedInput === "aminoacidChange"}
+                  onSelect={() => setSelectedInput("aminoacidChange")}
+                />
+              </Box>
+            )}
           </Box>
 
           <Typography sx={mainBoxTypography}>
-            You can add the Genomic Location
+            You can add the Genomic Location:
           </Typography>
 
           {/* Genomic location */}
@@ -142,29 +166,29 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
           >
             <Box sx={{ flex: "1 1 200px" }}>
               <GenomicInputBox
-                name="assemblyId"
-                label="Assembly ID"
-                description="Select the reference genome:"
-                placeholder={config.assemblyId[0]}
-                options={config.assemblyId}
+                name="minVariantLength"
+                label="Min Variant Length"
+                description="Select the Min Variant Length in bases"
+                placeholder="ex. 5"
+                endAdornmentLabel="Bases"
+                disabled={
+                  selectedInput === "variationType" &&
+                  values.variationType === "SNP"
+                }
               />
             </Box>
 
             <Box sx={{ flex: "1 1 200px" }}>
               <GenomicInputBox
-                name="start"
-                label="Start"
-                description="Add the location start:"
-                placeholder="ex. 7572837"
-              />
-            </Box>
-
-            <Box sx={{ flex: "1 1 200px" }}>
-              <GenomicInputBox
-                name="end"
-                label="End"
-                description="Add the location end:"
-                placeholder="ex. 7578641"
+                name="maxVariantLength"
+                label="Max Variant Length"
+                description="Select the Max Variant Length in bases"
+                placeholder="ex. 125"
+                endAdornmentLabel="Bases"
+                disabled={
+                  selectedInput === "variationType" &&
+                  values.variationType === "SNP"
+                }
               />
             </Box>
           </Box>

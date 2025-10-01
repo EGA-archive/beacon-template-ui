@@ -4,12 +4,14 @@
   "apiUrlNetwork": "https://beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
   "apiUrlSingle": "https://beacon-spain.ega-archive.org/api",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
-
   "variationType": [
-    "DEL (Copy Number Loss)",
-    "SNP (Single Nucleotide Polymorphism)",
-    "DUP",
-    "BND"
+    { "jsonName": "SNP", "displayName": "SNP" },
+    { "jsonName": "DEL", "displayName": "DEL" },
+    { "jsonName": "DUP", "displayName": "DUP" },
+    { "jsonName": "INV", "displayName": "INV" },
+    { "jsonName": "INS", "displayName": "INS" },
+    { "jsonName": "CNV", "displayName": "CNV" },
+    { "jsonName": "BND", "displayName": "BND" }
   ],
   "ui": {
     "title": "EGA Beacon Network Browser",
@@ -183,6 +185,12 @@
         "Protein Examples",
         "Molecular Effect"
       ]
+    },
+    "genomicQueries": {
+      "genomicQueryBuilder": {
+        "showAlternateBases": true,
+        "showAminoacidChange": true
+      }
     }
   }
 }

@@ -59,7 +59,7 @@ export default function GenomicLocationBracket() {
                   name="assemblyId"
                   label="Assembly ID"
                   options={config.assemblyId}
-                  placeholder={config.assemblyId[0]}
+                  placeholder="Select Assembly ID"
                   required
                 />
               </Box>
@@ -74,7 +74,7 @@ export default function GenomicLocationBracket() {
             </Box>
 
             {/* Approximate position range */}
-            <GenomicInputBox
+            {/* <GenomicInputBox
               name="start"
               label="Start Braket"
               placeholder="ex. 5000000"
@@ -87,6 +87,13 @@ export default function GenomicLocationBracket() {
               placeholder="ex. 7676592"
               required
               endAdornmentLabel="(Min)"
+            /> */}
+
+            <GenomicInputBox
+              name="braketRangeFields"
+              label="Braket Position"
+              isDisabled={false}
+              required
             />
           </Box>
         </Box>
@@ -109,7 +116,7 @@ export default function GenomicLocationBracket() {
               fontSize: "14px",
             }}
           >
-            Optional parameters
+            Optional Parameters
           </Typography>
           <Typography
             sx={{
@@ -117,7 +124,7 @@ export default function GenomicLocationBracket() {
               mt: 0,
             }}
           >
-            You can add the Variant Length
+            You can add the Variant Length:
           </Typography>
 
           {/* Optional: Variation Type dropdown */}
@@ -127,7 +134,7 @@ export default function GenomicLocationBracket() {
                 name="variationType"
                 label="Variation Type"
                 description="Select the Variation Type"
-                placeholder={config.variationType[0]}
+                placeholder="Select Variation Type"
                 options={config.variationType}
               />
             </Box>

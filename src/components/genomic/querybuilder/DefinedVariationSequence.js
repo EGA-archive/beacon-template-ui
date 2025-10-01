@@ -55,10 +55,10 @@ export default function DefinedVariationSequence() {
           <GenomicInputBox
             name="assemblyId"
             label="Assembly ID"
-            placeholder={config.assemblyId[0]}
-            description={"Select your reference genome (Optional)"}
+            placeholder="Select Assembly ID"
+            description={"Select your reference genome:"}
             options={config.assemblyId}
-            required={false}
+            required={true}
           />
           {/* Required: Chromosome where the variation occurs */}
           <GenomicInputBox
@@ -76,14 +76,12 @@ export default function DefinedVariationSequence() {
             placeholder="ex. 7572837"
             required={true}
           />
-          {/* Required: Change in DNA bases, shown as two fields (ref and alt) */}
+          {/* Required: Change in DNA bases, shown as one field */}
           <GenomicInputBox
-            name="basesChange"
-            label="Bases Change"
+            name="alternateBases"
+            label="Alternate Bases"
             required={true}
-            customRefLabel="Reference Bases"
             customAltLabel="Alternate Bases"
-            customRefPlaceholder="ex. T"
             customAltPlaceholder="ex. G"
             customPaddingTop="4%"
           />

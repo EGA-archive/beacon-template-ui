@@ -459,6 +459,7 @@ export default function Search({
         <Box
           sx={{
             mt: 5,
+            mb: 2,
             gap: 2,
             flexWrap: "wrap",
             display: "flex",

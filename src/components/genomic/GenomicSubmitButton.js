@@ -15,7 +15,7 @@ export default function GenomicSubmitButton() {
     <Button
       type="submit"
       variant="outlined"
-      disabled={!isValid || !dirty} // Disable button if form is invalid or untouched
+      disabled={!isValid || !dirty}
       startIcon={<AddIcon />}
       sx={{
         mt: 4,

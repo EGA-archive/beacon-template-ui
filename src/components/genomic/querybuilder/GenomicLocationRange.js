@@ -1,7 +1,10 @@
 import { Box, Typography } from "@mui/material";
+import { useEffect } from "react";
+import { useFormikContext } from "formik";
 import config from "../../../config/config.json";
 import GenomicInputBox from "../GenomicInputBox";
 import { mainBoxTypography } from "../styling/genomicInputBoxStyling";
+import { normalizeVariationType } from "../../genomic/utils/variationType";
 
 // This component renders the "Genetic Location (Range)" form
 // It is used inside the Genomic Query Builder dialog
@@ -10,6 +13,17 @@ export default function GenomicLocationRage({
   selectedInput,
   setSelectedInput,
 }) {
+  const { values, setFieldValue } = useFormikContext();
+
+  const isSNP = normalizeVariationType(values?.variationType) === "SNP";
+  const lengthEnabled = !isSNP;
+  // Clear stale values when the selected variation type doesn't support length
+  useEffect(() => {
+    if (!lengthEnabled) {
+      setFieldValue("minVariantLength", "");
+      setFieldValue("maxVariantLength", "");
+    }
+  }, [lengthEnabled, setFieldValue]);
   return (
     <Box>
       {/* Main container split in two sections: Main and Optional parameters */}
@@ -62,7 +76,7 @@ export default function GenomicLocationRage({
             <GenomicInputBox
               name="assemblyId"
               label="Assembly ID"
-              placeholder={config.assemblyId[0]}
+              placeholder="Select Assembly ID"
               options={config.assemblyId}
               required={true}
             />
@@ -123,7 +137,7 @@ export default function GenomicLocationRage({
               fontSize: "14px",
             }}
           >
-            Optional parameters
+            Optional Parameters
           </Typography>
           <Typography sx={{ ...mainBoxTypography, mt: 0 }}>
             Please select one:
@@ -146,8 +160,11 @@ export default function GenomicLocationRage({
                 name="variationType"
                 label="Variation Type"
                 description="Select the Variation Type"
-                placeholder={config.variationType[0]}
-                options={config.variationType}
+                placeholder="Select variation type"
+                options={(config?.variationType || []).map((opt) => ({
+                  jsonName: opt.jsonName,
+                  displayName: opt.displayName,
+                }))}
                 isSelectable
                 isSelected={selectedInput === "variationType"}
                 onSelect={() => setSelectedInput("variationType")}
@@ -155,33 +172,37 @@ export default function GenomicLocationRage({
             </Box>
 
             {/* Bases Change text input */}
-            <Box sx={{ flex: "1 1 200px" }}>
-              <GenomicInputBox
-                name="basesChange"
-                label="Bases Change"
-                placeholder="ex. BRAF"
-                isSelectable
-                isSelected={selectedInput === "basesChange"}
-                onSelect={() => setSelectedInput("basesChange")}
-              />
-            </Box>
+            {config.ui.genomicQueries.genomicQueryBuilder
+              .showAlternateBases && (
+              <Box sx={{ flex: "1 1 200px" }}>
+                <GenomicInputBox
+                  name="alternateBases"
+                  label="Alternate Bases"
+                  isSelectable
+                  isSelected={selectedInput === "alternateBases"}
+                  onSelect={() => setSelectedInput("alternateBases")}
+                />
+              </Box>
+            )}
 
             {/* Aminoacid Change text input */}
-            <Box sx={{ flex: "1 1 200px" }}>
-              <GenomicInputBox
-                name="aminoacidChange"
-                label="Aminoacid Change"
-                placeholder="ex. BRAF"
-                isSelectable
-                isSelected={selectedInput === "aminoacidChange"}
-                onSelect={() => setSelectedInput("aminoacidChange")}
-              />
-            </Box>
+            {config.ui.genomicQueries.genomicQueryBuilder
+              .showAminoacidChange && (
+              <Box sx={{ flex: "1 1 200px" }}>
+                <GenomicInputBox
+                  name="aminoacidChange"
+                  label="Aminoacid Change"
+                  isSelectable
+                  isSelected={selectedInput === "aminoacidChange"}
+                  onSelect={() => setSelectedInput("aminoacidChange")}
+                />
+              </Box>
+            )}
           </Box>
 
           {/* Min and Max variant length are not exclusive, both can be filled */}
           <Typography sx={mainBoxTypography}>
-            You can add the Variant Length
+            You can add the Variant Length:
           </Typography>
 
           <Box
@@ -201,6 +222,10 @@ export default function GenomicLocationRage({
                 description="Select the Min Variant Length in bases"
                 placeholder="ex. 5"
                 endAdornmentLabel="Bases"
+                disabled={
+                  selectedInput === "variationType" &&
+                  values.variationType === "SNP"
+                }
               />
             </Box>
 
@@ -211,6 +236,10 @@ export default function GenomicLocationRage({
                 description="Select the Max Variant Length in bases"
                 placeholder="ex. 125"
                 endAdornmentLabel="Bases"
+                disabled={
+                  selectedInput === "variationType" &&
+                  values.variationType === "SNP"
+                }
               />
             </Box>
           </Box>

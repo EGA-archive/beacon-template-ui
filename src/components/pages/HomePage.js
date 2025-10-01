@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Box } from "@mui/material";
+import { useState, useEffect } from "react";
+import { useAuth } from "oidc-react";
+import { Box, Button } from "@mui/material";
 import Founders from "../Founders";
 import FiltersContainer from "../filters/FiltersContainer";
 import Search from "../Search";
@@ -7,6 +8,7 @@ import AllFilteringTermsComponent from "../filters/AllFilteringTermsComponent";
 import ResultsContainer from "../results/ResultsContainer";
 import config from "../../config/config.json";
 import BeaconTypeBanner from "../homepageBanner/BeaconTypeBanner";
+import { useLocation } from "react-router-dom";
 
 // Import context to access whether a search was triggered
 import { useSelectedEntry } from "../context/SelectedEntryContext";
@@ -14,9 +16,36 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 // This is the main HomePage component
 // It shows the Search bar, optional filters, and results.
 // It changes based on config settings and which tool is selected.
-export default function HomePage({ selectedTool, setSelectedTool }) {
+export default function HomePage({
+  selectedTool,
+  setSelectedTool,
+  setLoginModalOpen,
+}) {
   // State to store the height of the Search component, for aligning filters
   const [searchHeight, setSearchHeight] = useState(null);
+  const [hasModalBeenTriggered, setHasModalBeenTriggered] = useState(false);
+  const auth = useAuth();
+  const isLoggedIn = !!auth?.userData;
+  const location = useLocation();
+  const isOnLoginPage = location.pathname === "/login";
+
+  useEffect(() => {
+    if (isLoggedIn || hasModalBeenTriggered || isOnLoginPage) return;
+    const handleFirstInteraction = () => {
+      setLoginModalOpen(true);
+      setHasModalBeenTriggered(true);
+      window.removeEventListener("click", handleFirstInteraction);
+      window.removeEventListener("keydown", handleFirstInteraction);
+    };
+
+    window.addEventListener("click", handleFirstInteraction, { once: true });
+    window.addEventListener("keydown", handleFirstInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener("click", handleFirstInteraction);
+      window.removeEventListener("keydown", handleFirstInteraction);
+    };
+  }, [isLoggedIn, hasModalBeenTriggered, setLoginModalOpen, isOnLoginPage]);
 
   // Get from context whether the user already submitted a search
   const { hasSearchBeenTriggered } = useSelectedEntry();

@@ -18,8 +18,8 @@ import GenomicSubmitButton from "../genomic/GenomicSubmitButton";
 import { Formik, Form } from "formik";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import { GENOMIC_LABELS_MAP } from "../genomic/genomicLabelHelper";
-
 import {
+  bracketRangeValidator,
   assemblyIdRequired,
   chromosomeValidator,
   createStartValidator,
@@ -34,6 +34,7 @@ import {
   assemblyIdOptional,
   requiredRefBases,
   requiredAltBases,
+  requiredAlternateBases,
   genomicHGVSshortForm,
   geneId,
 } from "../genomic/genomicQueryBuilderValidator";
@@ -41,10 +42,10 @@ import {
 // List of all query types shown as options in the UI
 // Used to display the selection buttons and control which form is shown
 const genomicQueryTypes = [
-  "GeneID",
-  "Genetic location (Range)",
-  "Genetic location aprox (Bracket)",
-  "Defined short variation (Sequence)",
+  "Sequence Query",
+  "Gene ID",
+  "Range Query",
+  "Bracket Query",
   "Genomic Allele Query (HGVS)",
 ];
 
@@ -64,10 +65,10 @@ export default function GenomicQueryBuilderDialog({
   // This map links each query type label to the corresponding form component
   // It tells the app which form to display based on the user's selection
   const formComponentsMap = {
-    GeneID: GeneIdForm,
-    "Genetic location (Range)": GenomicLocationRage,
-    "Genetic location aprox (Bracket)": GenomicLocationBracket,
-    "Defined short variation (Sequence)": DefinedVariationSequence,
+    "Gene ID": GeneIdForm,
+    "Range Query": GenomicLocationRage,
+    "Bracket Query": GenomicLocationBracket,
+    "Sequence Query": DefinedVariationSequence,
     "Genomic Allele Query (HGVS)": GenomicAlleleQuery,
   };
 
@@ -75,44 +76,27 @@ export default function GenomicQueryBuilderDialog({
   // Validation rules for each query type form
   // Each type has its own schema to check if required fields are filled
   const validationSchemaMap = {
-    GeneID: Yup.object({
+    "Gene ID": Yup.object({
       // Gene ID is required
-      geneId,
+      geneId: Yup.string().required("Gene ID is required"),
 
       // These are optional and validated if present
-      refBases: refBasesValidator,
+      // refBases: refBasesValidator,
       altBases: altBasesValidator,
       refAa: refAaValidator,
       altAa: altAaValidator,
       aaPosition: aaPositionValidator,
-
-      // Assembly ID is optional in this form
-      assemblyId: assemblyIdOptional,
-
-      // Start and end must be numbers and integers if provided
-      start: Yup.number()
-        .typeError("Start must be a number")
-        .integer("Start must be an integer")
-        .optional(),
-      end: Yup.number()
-        .typeError("End must be a number")
-        .integer("End must be an integer")
-        // If start is filled, end must be >= start
-        .when("start", (start, schema) =>
-          start
-            ? schema.min(start, "End must be greater than or equal to Start")
-            : schema
-        )
-        .optional(),
+      minVariantLength,
+      maxVariantLength,
     }),
 
     // This form requires more positional data and variation info
-    "Genetic location (Range)": Yup.object({
+    "Range Query": Yup.object({
       assemblyId: assemblyIdRequired,
       chromosome: chromosomeValidator.required("Chromosome is required"),
       start: createStartValidator("Start"),
       end: createEndValidator("End", "Start"),
-      refBases: refBasesValidator,
+      // refBases: refBasesValidator,
       altBases: altBasesValidator,
       refAa: refAaValidator,
       altAa: altAaValidator,
@@ -122,20 +106,18 @@ export default function GenomicQueryBuilderDialog({
     }),
 
     // Bracket query uses a simpler schema, just needs the chromosome + location range
-    "Genetic location aprox (Bracket)": Yup.object({
+    "Bracket Query": bracketRangeValidator.shape({
       assemblyId: assemblyIdRequired,
       chromosome: chromosomeValidator.required("Chromosome is required"),
-      start: createStartValidator("Start braket"),
-      end: createEndValidator("End braket", "Start braket"),
     }),
 
-    // This query uses defined start + reference and alternate bases
-    "Defined short variation (Sequence)": Yup.object({
-      assemblyId: assemblyIdOptional,
+    "Sequence Query": Yup.object({
+      assemblyId: assemblyIdRequired.required("Assembly ID is required"),
       chromosome: chromosomeValidator.required("Chromosome is required"),
       start: createStartValidator("Start"),
-      refBases: requiredRefBases,
-      altBases: requiredAltBases,
+      alternateBases: requiredAlternateBases.required(
+        "Alternate Base is required"
+      ),
     }),
 
     // This is a shortcut query type using HGVS format
@@ -214,20 +196,24 @@ export default function GenomicQueryBuilderDialog({
             start: "",
             end: "",
             variationType: "",
-            basesChange: "",
+            alternateBases: "",
             refBases: "",
             altBases: "",
             aminoacidChange: "",
             minVariantLength: "",
             maxVariantLength: "",
             genomicHGVSshortForm: "",
+            startMin: "",
+            startMax: "",
+            endMin: "",
+            endMax: "",
           }}
           validationSchema={validationSchemaMap[selectedQueryType]}
           onSubmit={(values) => {
             // These are exclusive groups. Only one group should be active based on user selection
             const mutuallyExclusiveGroups = {
               variationType: ["variationType"],
-              basesChange: ["basesChange", "refBases", "altBases"],
+              alternateBases: ["alternateBases", "refBases", "altBases"],
               aminoacidChange: [
                 "aminoacidChange",
                 "refAa",
@@ -252,9 +238,7 @@ export default function GenomicQueryBuilderDialog({
 
                 if (allExclusiveKeys.includes(key)) {
                   // Allow all exclusive fields if Defined Short Variation is selected
-                  if (
-                    selectedQueryType === "Defined short variation (Sequence)"
-                  ) {
+                  if (selectedQueryType === "Sequence Query") {
                     return true;
                   }
                   // Allow all if no specific selection logic is active
@@ -268,25 +252,6 @@ export default function GenomicQueryBuilderDialog({
             );
 
             // Generate display label from valid entries
-
-            // Option 1: Keys and values displayed
-            // const labelParts = validEntries.map(
-            //   ([key, value]) => `${key}: ${value}`
-            // );
-
-            // Option 3: only straight values from the form
-            // const labelParts = validEntries.map(([value]) => ` ${value}`);
-
-            // const combinedLabel = `${labelParts.join(" | ")}`;
-
-            // const newFilter = {
-            //   id: `genomic-${combinedLabel}`,
-            //   label: combinedLabel,
-            //   key: selectedQueryType,
-            //   scope: "genomicQuery",
-            //   bgColor: "genomic",
-            // };
-
             // Option 2: Keys and values displayed, but with bold key
             const idLabel = validEntries
               .map(([key, value]) => `${key}:${value}`)
@@ -334,43 +299,47 @@ export default function GenomicQueryBuilderDialog({
             handleClose();
           }}
         >
-          {({ resetForm, isValid, dirty }) => (
-            <Form>
-              {/* Render the selectable query type buttons */}
-              {/* When a user clicks a button, the form type changes and the form is reset */}
-              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-                {genomicQueryTypes.map((label, index) => (
-                  <StyledGenomicLabels
-                    key={index}
-                    label={label}
-                    selected={selectedQueryType === label}
-                    onClick={() => {
-                      setSelectedQueryType(label);
-                      resetForm(); // Clears the form when switching query type
-                    }}
-                  />
-                ))}
-              </Box>
-              {/* Render the selected form based on the current query type based on user's selection */}
-              <Box sx={{ mt: 4 }}>
-                {SelectedFormComponent && (
-                  <SelectedFormComponent
-                    selectedInput={selectedInput}
-                    setSelectedInput={setSelectedInput}
-                  />
-                )}
-              </Box>
-              <Box sx={{ mt: 2, mb: 0 }}>
-                {duplicateMessage && (
-                  <CommonMessage text={duplicateMessage} type="error" />
-                )}
-              </Box>
-              {/* Submit button is shown at the bottom right of all the query types and is disabled if the form is invalid or untouched */}
-              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
-                <GenomicSubmitButton disabled={!isValid || !dirty} />
-              </Box>
-            </Form>
-          )}
+          {({ resetForm, isValid, dirty, values, errors }) => {
+            return (
+              <Form>
+                {/* Render the selectable query type buttons */}
+                {/* When a user clicks a button, the form type changes and the form is reset */}
+                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+                  {genomicQueryTypes.map((label, index) => (
+                    <StyledGenomicLabels
+                      key={index}
+                      label={label}
+                      selected={selectedQueryType === label}
+                      onClick={() => {
+                        setSelectedQueryType(label);
+                        resetForm(); // Clears the form when switching query type
+                      }}
+                    />
+                  ))}
+                </Box>
+                {/* Render the selected form based on the current query type based on user's selection */}
+                <Box sx={{ mt: 4 }}>
+                  {SelectedFormComponent && (
+                    <SelectedFormComponent
+                      selectedInput={selectedInput}
+                      setSelectedInput={setSelectedInput}
+                    />
+                  )}
+                </Box>
+                <Box sx={{ mt: 2, mb: 0 }}>
+                  {duplicateMessage && (
+                    <CommonMessage text={duplicateMessage} type="error" />
+                  )}
+                </Box>
+                {/* Submit button is shown at the bottom right of all the query types and is disabled if the form is invalid or untouched */}
+                <Box
+                  sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}
+                >
+                  <GenomicSubmitButton disabled={!isValid || !dirty} />
+                </Box>
+              </Form>
+            );
+          }}
         </Formik>
       </DialogContent>
     </Dialog>

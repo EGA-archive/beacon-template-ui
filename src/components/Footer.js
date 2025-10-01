@@ -1,16 +1,26 @@
 import { Box, Typography, Link as MuiLink } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { useAuth } from "oidc-react"; // Authentication context
 
-// Logos of institutions providing the UI
+// Logos shown in the footer
 import maingrey from "../assets/logos/maingrey.svg";
 import crg from "../assets/logos/crg.svg";
 import bsc from "../assets/logos/bsc.svg";
 
-// Footer component for the Beacon UI
-// Displays logos and dynamic navigation links
-// Responsive layout handled with MUI's sx and media queries
+// Footer component shows credits, the same items as in the navbar, and logout if logged in
 export default function Footer({ navItems }) {
+  const auth = useAuth();
+  const isLoggedIn = !!auth?.userData; // True if user is logged in
+
+  //  Function to log the user out
+  const handleLogout = () => {
+    auth.signOut();
+    auth.signOutRedirect();
+  };
+
   return (
+    // Main footer container with background and padding
     <Box
       component="footer"
       sx={{
@@ -18,15 +28,16 @@ export default function Footer({ navItems }) {
         py: 2,
         px: 4,
         minHeight: "68px",
-        mt: "auto", // Push footer to bottom if using flex layout
+        mt: "auto", // pushes footer to bottom if using flex layout
       }}
     >
+      {/* Inside layout – responsive flex: stacked on small screens */}
       <Box
         sx={{
           display: "flex",
-          flexDirection: { xs: "column", sm: "column", md: "row" }, // Stack on small screens
+          flexDirection: { xs: "column", sm: "column", md: "row" },
           "@media (max-width: 1044px) and (min-width: 900px)": {
-            flexDirection: "column", // Force column in awkward mid-breakpoint
+            flexDirection: "column",
           },
           justifyContent: "space-between",
           alignItems: "center",
@@ -34,7 +45,7 @@ export default function Footer({ navItems }) {
           mr: 1,
         }}
       >
-        {/* Left side: logos and credits */}
+        {/* Left Side — Text and institution logos */}
         <Box
           sx={{
             display: "flex",
@@ -48,6 +59,7 @@ export default function Footer({ navItems }) {
             alignItems: "center",
           }}
         >
+          {/* Small credit text */}
           <Typography
             variant="body2"
             color="black"
@@ -64,7 +76,7 @@ export default function Footer({ navItems }) {
             Beacon User Interface template provided by:
           </Typography>
 
-          {/* Logos with external links */}
+          {/* Logos with links to partner websites */}
           <MuiLink
             href="https://ega-archive.org/"
             target="_blank"
@@ -72,7 +84,6 @@ export default function Footer({ navItems }) {
           >
             <img src={maingrey} alt="EGA Logo" style={{ height: 34 }} />
           </MuiLink>
-
           <MuiLink
             href="https://www.crg.eu/"
             target="_blank"
@@ -80,7 +91,6 @@ export default function Footer({ navItems }) {
           >
             <img src={crg} alt="CRG Logo" style={{ height: 34 }} />
           </MuiLink>
-
           <MuiLink
             href="https://www.bsc.es/"
             target="_blank"
@@ -90,13 +100,17 @@ export default function Footer({ navItems }) {
           </MuiLink>
         </Box>
 
-        {/* Right side: optional nav links (internal or external) */}
-        <Box sx={{ display: "flex", gap: 2 }}>
+        {/* Right Side — Navigation links or logout icon */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           {navItems
-            .filter((item) => item.label && item.label.trim() !== "") // Skip empty labels
+            .filter((item) => item.label && item.label.trim() !== "")
+            .filter((item) => {
+              // Don't show "Log in" if already logged in
+              return !(isLoggedIn && item.label.toLowerCase() === "log in");
+            })
             .map((item) =>
+              // External links open in new tab
               item.url && item.url.startsWith("http") ? (
-                // External link
                 <MuiLink
                   key={item.label}
                   href={item.url}
@@ -116,7 +130,7 @@ export default function Footer({ navItems }) {
                   {item.label}
                 </MuiLink>
               ) : (
-                // Internal link using React Router
+                // Internal links use RouterLink
                 <MuiLink
                   key={item.label}
                   component={RouterLink}
@@ -136,6 +150,20 @@ export default function Footer({ navItems }) {
                 </MuiLink>
               )
             )}
+
+          {/* If user is logged in, show logout icon */}
+          {isLoggedIn && (
+            <LogoutIcon
+              onClick={handleLogout}
+              sx={{
+                color: "#444",
+                cursor: "pointer",
+                fontSize: "20px",
+                "&:hover": { color: "#000" },
+              }}
+              titleAccess="Log out"
+            />
+          )}
         </Box>
       </Box>
     </Box>
