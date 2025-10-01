@@ -118,6 +118,7 @@ export default function NetworkMembers() {
                 beacon.response.alternativeUrl || beacon.response.welcomeUrl;
               const contactLink =
                 beacon.response.organization?.contactUrl || "#";
+              const beaconEnvironment = beacon.response.environment;
 
               return (
                 <Grid key={index} size={{ xs: 12, md: 6 }}>
@@ -208,15 +209,28 @@ export default function NetworkMembers() {
                             mb: 1,
                           }}
                         >
-                          <Chip
-                            label={beacon?.meta?.apiVersion || "Undefined"}
-                            color="primary"
-                            size="small"
-                            sx={{
-                              borderRadius: "4px",
-                              backgroundColor: config.ui.colors.primary,
-                            }}
-                          />
+                          <Box sx={{ display: "flex", gap: 5 }}>
+                            <Chip
+                              label={beacon?.meta?.apiVersion || "Undefined"}
+                              color="primary"
+                              size="small"
+                              sx={{
+                                borderRadius: "4px",
+                                backgroundColor: config.ui.colors.primary,
+                              }}
+                            />
+                            <Chip
+                              label={`Environment: ${
+                                beaconEnvironment || "Undefined"
+                              }`}
+                              color="primary"
+                              size="small"
+                              sx={{
+                                borderRadius: "4px",
+                                backgroundColor: config.ui.colors.primary,
+                              }}
+                            />
+                          </Box>
                           <Typography
                             variant="subtitle1"
                             sx={{
