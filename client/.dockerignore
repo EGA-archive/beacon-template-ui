@@ -1,0 +1,9 @@
+# client/.dockerignore
+
+.DS_Store
+.dockerignore
+.gitignore
+README.md
+cypress
+cypress.config.js
+node_modules
