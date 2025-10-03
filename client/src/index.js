@@ -18,10 +18,10 @@ const oidcConfig = {
   automaticSilentRenew: true,
   redirectUri:
     process.env.NODE_ENV === "development" && configData.REDIRECT_URL,
-  postLogoutRedirectUri:
-    // process.env.NODE_ENV === "development" &&
-    // configData.POST_LOGOUT_REDIRECT_URL,
-    process.env.NODE_ENV === "development" && configData.REDIRECT_URL,
+  // postLogoutRedirectUri:
+  // process.env.NODE_ENV === "development" &&
+  // configData.POST_LOGOUT_REDIRECT_URL,
+  // process.env.NODE_ENV === "development" && configData.REDIRECT_URL,
   scope: "openid profile email ga4gh_passport_v1 offline_access",
   revokeAccessTokenOnSignout: true,
 };
