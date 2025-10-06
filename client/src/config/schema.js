@@ -103,7 +103,50 @@ const schema = Joi.object({
         "array.max": "You can specify a maximum of 7 entry types for ordering.",
       }),
   }).required(),
-  showAboutPage: Joi.boolean().optional(),
+  showAboutPage: Joi.boolean().default(false),
+
+  about: Joi.alternatives().conditional("showAboutPage", {
+    is: true,
+    then: Joi.object({
+      logos: Joi.array()
+        .items(Joi.string().uri({ relativeOnly: true }))
+        .min(1),
+      descriptions: Joi.array().items(Joi.string().min(1)).min(1),
+      fundingOrgs: Joi.array()
+        .items(
+          Joi.object({
+            title: Joi.string().min(1).required(),
+            logos: Joi.array()
+              .items(Joi.string().uri({ relativeOnly: true }))
+              .min(1)
+              .required(),
+          })
+        )
+        .min(1),
+    })
+      // require at least one of the three when showAboutPage = true
+      .or("logos", "descriptions", "fundingOrgs")
+      .required(),
+
+    // If About page is OFF, the object is optional and unconstrained
+    otherwise: Joi.object({
+      logos: Joi.array()
+        .items(Joi.string().uri({ relativeOnly: true }))
+        .min(1),
+      descriptions: Joi.array().items(Joi.string().min(1)).min(1),
+      fundingOrgs: Joi.array()
+        .items(
+          Joi.object({
+            title: Joi.string().min(1).required(),
+            logos: Joi.array()
+              .items(Joi.string().uri({ relativeOnly: true }))
+              .min(1)
+              .required(),
+          })
+        )
+        .min(1),
+    }).optional(),
+  }),
   showContactPage: Joi.boolean().optional(),
   showLogin: Joi.boolean().default(true),
   colors: Joi.object({

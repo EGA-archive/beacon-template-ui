@@ -21,6 +21,7 @@ export const SelectedEntryProvider = ({ children }) => {
 
   // Optional extra filter (e.g., numeric value with operator)
   const [extraFilter, setExtraFilter] = useState(null);
+  console.log("extraFilter", extraFilter);
 
   // Shows whether data is currently being loaded
   const [loadingData, setLoadingData] = useState(false);

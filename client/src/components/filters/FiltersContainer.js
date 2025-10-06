@@ -5,12 +5,8 @@ import GenomicAnnotations from "../genomic/GenomicAnnotations";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 
 function TabPanel(props) {
-  // TabPanel shows the content of each tab (only if active)
+  // Reusable wrapper that renders the content of each tab when active
   const { children, value, index, ...other } = props;
-
-  {
-    /* This is the main container for the common filters and genomic annotation */
-  }
   return (
     <div
       role="tabpanel"
@@ -26,7 +22,12 @@ function TabPanel(props) {
 }
 
 // Main container that decides whether to show "Common Filters" and/or "Genomic Annotations"
+//  Behavior:
+//  - Renders tabs dynamically based on config and available entry types.
+// - Automatically switches to the “Genomic Annotations” tab whenever the activeInput is set to "genomic".
+//  - Resets the active tab when entry type changes.
 export default function FiltersContainer({
+  activeInput,
   setActiveInput,
   searchHeight, // height of the filter box (passed as prop)
   hasGenomicAnnotationsConfig, // boolean: should show Genomic Annotations?
@@ -35,7 +36,7 @@ export default function FiltersContainer({
   // Grab the currently selected entry type and the list of all entry types from context
   const { selectedPathSegment, entryTypes } = useSelectedEntry();
 
-  // State to track which tab is active (0 = first tab, 1 = second, etc.)
+  // Track which tab is active
   const [tabValue, setTabValue] = useState(0);
 
   // Reset tabs when user switches entry type
@@ -43,17 +44,19 @@ export default function FiltersContainer({
     setTabValue(0);
   }, [selectedPathSegment]);
 
+  // Handle user tab change
   const handleChange = (event, newValue) => {
     setTabValue(newValue);
   };
 
-  // Detect if genomic entry type exists & is selected
+  // Detect if genomic entry type exists and/or is selected
   const hasGenomic = entryTypes.some(
     (entry) => entry.pathSegment === "g_variants"
   );
   const isGenomicSelected = selectedPathSegment === "g_variants";
 
-  let tabs = []; // start with an empty list of tabs
+  // Build tab list dynamically based on configuration and entry type
+  let tabs = [];
 
   // Case 1: user is currently viewing "Genomic Variants"
   if (hasGenomic && isGenomicSelected) {
@@ -94,6 +97,24 @@ export default function FiltersContainer({
 
   // If no tabs were added (both configs are false) → don't render anything
   if (!tabs.length) return null;
+
+  useEffect(() => {
+    if (!tabs.length || !activeInput) return;
+
+    const targetByInput = {
+      genomic: "Genomic Annotations",
+      filter: "Common Filters",
+      common: "Common Filters",
+    };
+
+    const targetLabel = targetByInput[activeInput];
+    if (!targetLabel) return;
+
+    const targetIndex = tabs.findIndex((tab) => tab.label === targetLabel);
+    if (targetIndex !== -1 && targetIndex !== tabValue) {
+      setTabValue(targetIndex);
+    }
+  }, [activeInput]);
 
   return (
     <Box>

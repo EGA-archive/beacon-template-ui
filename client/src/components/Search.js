@@ -63,6 +63,20 @@ export default function Search({
   const inputRef = useRef(null);
   const { isLoaded, setIsLoaded } = useSelectedEntry();
 
+  // 🧠 Debug: Track activeInput changes
+  useEffect(() => {
+    if (activeInput) {
+      console.log("🔍 [Search] activeInput changed →", activeInput);
+    }
+  }, [activeInput]);
+
+  // 🧠 Debug: Track selectedTool changes
+  useEffect(() => {
+    if (selectedTool !== undefined) {
+      console.log("🧰 [Search] selectedTool changed →", selectedTool);
+    }
+  }, [selectedTool]);
+
   useEffect(() => {
     if (activeInput === "genomic" && inputRef.current) {
       inputRef.current.focus();

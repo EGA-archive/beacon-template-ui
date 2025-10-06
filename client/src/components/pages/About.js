@@ -1,72 +1,33 @@
-import {
-  Box,
-  Card,
-  CardContent,
-  CardActions,
-  Typography,
-  Button,
-  Chip,
-} from "@mui/material";
-import { Grid } from "@mui/material";
-import { darken } from "@mui/system";
-import { useEffect, useState } from "react";
+import { Box, Typography, Grid } from "@mui/material";
 import config from "../../config/config.json";
-import Founders from "../Founders";
 
 /**
  * About page for the Beacon instance or network.
- * Fetches info from the Beacon API and displays dynamic metadata.
+ * Uses config.json to render About info: logos, descriptions, etc.
  */
 
 export default function About() {
-  const [serviceInfo, setServiceInfo] = useState(null);
-  const [beaconInfo, setBeaconInfo] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // On mount: fetch Beacon network members
-  useEffect(() => {
-    const fetchAboutInfo = async () => {
-      try {
-        const [serviceRes, infoRes] = await Promise.all([
-          fetch(`${config.apiUrl}/service-info`),
-          fetch(`${config.apiUrl}/info`),
-        ]);
-
-        const serviceData = await serviceRes.json();
-        const infoData = await infoRes.json();
-
-        setServiceInfo(serviceData);
-        setBeaconInfo(infoData);
-      } catch (error) {
-        console.error("Error fetching about page data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAboutInfo();
-  }, []);
-
-  const title = serviceInfo?.name || "Beacon Service";
-  const description = serviceInfo?.description || "No description provided.";
-  const contactUrl = serviceInfo?.contactUrl;
-  const version = serviceInfo?.version;
-  const organization = beaconInfo?.organization?.name || "Unknown organization";
-  const logoUrl = beaconInfo?.response?.organization?.logoUrl || null;
+  const logos = config.ui.about?.logos || [];
+  const descriptions = config.ui.about?.descriptions || [];
+  const secondTitle = config.ui.about?.fundingOrgs?.[0]?.title || "";
+  const secondaryLogos = config.ui.about?.fundingOrgs?.[0]?.logos || [];
 
   return (
     <>
       <Box
         sx={{
-          mt: "90px",
+          mt: 5,
+          mb: 5,
           p: "2rem",
-          pt: 1,
+          pt: 7,
           display: "flex",
           justifyContent: "center",
+          backgroundColor: "white",
+          borderRadius: 3,
         }}
       >
-        {/* Page title */}
         <Box sx={{ width: "80%" }}>
+          {/* Page title */}
           <Typography
             variant="h5"
             sx={{
@@ -77,27 +38,104 @@ export default function About() {
           >
             About
           </Typography>
-          {logoUrl && (
-            <Box
-              sx={{ mt: 1, display: "flex", justifyContent: "flex-end", mb: 3 }}
-            >
-              <img
-                src={logoUrl}
-                alt={`${organization} logo`}
-                style={{
-                  width: 130,
-                  height: "auto",
-                  objectFit: "contain",
-                }}
-              />
-            </Box>
-          )}
 
+          {/* Logos row */}
+          <Grid
+            container
+            spacing={2}
+            justifyContent="flex-end"
+            alignItems="center"
+            sx={{ mt: 2, mb: 3 }}
+          >
+            {logos.map((logo, index) => (
+              <Grid
+                item
+                xs={12} // full width on extra-small screens
+                sm={4} // 3 logos side by side on small+
+                key={index}
+                sx={{ textAlign: "center" }}
+              >
+                <img
+                  src={logo}
+                  alt={`About logo ${index + 1}`}
+                  style={{
+                    maxWidth: "120px",
+                    width: "100%",
+                    height: "auto",
+                    objectFit: "contain",
+                  }}
+                />
+              </Grid>
+            ))}
+          </Grid>
+
+          {/* Descriptions */}
           <Box>
-            <Typography sx={{ fontWeight: 400, fontSize: "14px" }}>
-              {description}
-            </Typography>
+            {descriptions.map((text, index) => (
+              <Typography
+                key={index}
+                sx={{
+                  fontWeight: 400,
+                  fontSize: "14px",
+                  mb: 2,
+                  textAlign: "justify",
+                  "& b, & strong": {
+                    color: config.ui.colors.primary,
+                    fontWeight: 700,
+                  },
+                }}
+                dangerouslySetInnerHTML={{ __html: text }}
+              ></Typography>
+            ))}
           </Box>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 700,
+              mt: 6,
+              fontSize: "16px",
+              color: config.ui.colors.primary,
+            }}
+          >
+            {secondTitle}
+          </Typography>
+          {/* Logos row */}
+          <Grid
+            container
+            spacing={{
+              xs: 4,
+              sm: 4,
+              md: 8,
+              lg: 14,
+            }}
+            justifyContent="center"
+            alignItems="center"
+            sx={{
+              mt: 2,
+              mb: 3,
+            }}
+          >
+            {secondaryLogos.map((secondaryLogos, index) => (
+              <Grid
+                item
+                xs={12}
+                sm={4}
+                key={index}
+                sx={{ textAlign: "center" }}
+              >
+                <img
+                  src={secondaryLogos}
+                  alt={`About secondary logos ${index + 1}`}
+                  style={{
+                    maxWidth: "150px",
+                    width: "100%",
+                    height: "auto",
+                    objectFit: "contain",
+                  }}
+                />
+              </Grid>
+            ))}
+          </Grid>
         </Box>
       </Box>
     </>

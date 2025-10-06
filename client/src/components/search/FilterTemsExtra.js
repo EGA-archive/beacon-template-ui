@@ -8,7 +8,7 @@ import {
   FormControl,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import config from "../../config/config.json";
@@ -29,41 +29,16 @@ export default function FilterTermsExtra() {
   const [selectedValue, setSelectedValue] = useState("");
   const [error, setError] = useState("");
 
-  // // Function to validate and add the new filter
-  // const handleAddFilter = () => {
-  //   setError("");
-  //   // If the value is empty, show error and stop
-  //   if (!selectedValue) {
-  //     setError(COMMON_MESSAGES.fillFields);
-  //   } else {
-  //     // Otherwise, try to add the custom filter
-  //     setSelectedFilter((prevFilters) => {
-  //       // If the same key already exists, do not add again
-  //       if (prevFilters.some((filter) => filter.key === extraFilter.key)) {
-  //         return prevFilters;
-  //       }
+  const containerRef = useRef(null);
 
-  //       // Create a custom filter object
-  //       const extraFilterCustom = {
-  //         field: extraFilter.key,
-  //         operator: selectedOperator,
-  //         value: selectedValue,
-  //         label: `${extraFilter.label} ${selectedOperator} ${selectedValue}`,
-  //         scope: extraFilter.scope || null,
-  //         scopes: extraFilter.scopes || [],
-  //         type: extraFilter.type || "alphanumeric",
-  //       };
-
-  //       // Reset local and global state for next input
-  //       setExtraFilter(null);
-  //       setSelectedOperator(">");
-  //       setSelectedValue("");
-
-  //       // Add new filter to the list
-  //       return [...prevFilters, extraFilterCustom];
-  //     });
-  //   }
-  // };
+  useEffect(() => {
+    if (extraFilter && containerRef.current) {
+      containerRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [extraFilter]);
 
   // Function to validate and add the new filter
   const handleAddFilter = () => {
@@ -77,18 +52,23 @@ export default function FilterTermsExtra() {
         }
 
         const extraFilterCustom = {
-          field: extraFilter.key,
+          id: extraFilter.id,
+          key: extraFilter.key,
+          label: `${extraFilter.label} ${selectedOperator} ${selectedValue}`,
           operator: selectedOperator,
           value: selectedValue,
-          label: `${extraFilter.label} ${selectedOperator} ${selectedValue}`,
           scope: extraFilter.scope || null,
           scopes: extraFilter.scopes || [],
           type: extraFilter.type || "alphanumeric",
         };
 
+        console.log("extraFilterCustom ", extraFilterCustom);
+
         const newKey = `${extraFilter.id || extraFilter.key}-${
           extraFilter.scope || "noScope"
         }`;
+
+        console.log("newKey", newKey);
 
         if (extraFilter.setAddedFilters) {
           extraFilter.setAddedFilters((prevSet) => {
@@ -118,6 +98,7 @@ export default function FilterTermsExtra() {
 
   return (
     <Box
+      ref={containerRef}
       sx={{
         display: "flex",
         gap: 2,
@@ -137,7 +118,8 @@ export default function FilterTermsExtra() {
             minWidth: "80px",
           }}
         >
-          Insert value:
+          Insert value for{" "}
+          <strong>{extraFilter?.label || extraFilter?.key || "filter"}</strong>:
         </Typography>
       </Box>
 

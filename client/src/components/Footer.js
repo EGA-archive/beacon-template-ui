@@ -1,5 +1,4 @@
 import { Box, Typography, Link as MuiLink } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useAuth } from "oidc-react"; // Authentication context
 
@@ -8,15 +7,25 @@ import maingrey from "../assets/logos/maingrey.svg";
 import crg from "../assets/logos/crg.svg";
 import bsc from "../assets/logos/bsc.svg";
 
-// Footer component shows credits, the same items as in the navbar, and logout if logged in
-export default function Footer({ navItems }) {
+/**
+ * Footer component
+ * Displays:
+ *  - Credits and institutional logos (EGA, CRG, BSC)
+ *  - Log in / Log out control depending on authentication state
+ */
+export default function Footer() {
   const auth = useAuth();
   const isLoggedIn = !!auth?.userData; // True if user is logged in
 
-  //  Function to log the user out
+  // Function to log the user out
   const handleLogout = () => {
     auth.signOut();
     auth.signOutRedirect();
+  };
+
+  // Function to redirect to login
+  const handleLogin = () => {
+    auth.signIn();
   };
 
   return (
@@ -100,58 +109,30 @@ export default function Footer({ navItems }) {
           </MuiLink>
         </Box>
 
-        {/* Right Side — Navigation links or logout icon */}
+        {/* Right Side — Only login / logout controls */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          {navItems
-            .filter((item) => item.label && item.label.trim() !== "")
-            .filter((item) => {
-              // Don't show "Log in" if already logged in
-              return !(isLoggedIn && item.label.toLowerCase() === "log in");
-            })
-            .map((item) =>
-              // External links open in new tab
-              item.url && item.url.startsWith("http") ? (
-                <MuiLink
-                  key={item.label}
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  underline="none"
-                  sx={{
-                    fontFamily: '"Open Sans", sans-serif',
-                    fontSize: "14px",
-                    "@media (max-width: 452px)": {
-                      fontSize: "12px",
-                    },
-                    color: "#333",
-                    "&:hover": { textDecoration: "underline" },
-                  }}
-                >
-                  {item.label}
-                </MuiLink>
-              ) : (
-                // Internal links use RouterLink
-                <MuiLink
-                  key={item.label}
-                  component={RouterLink}
-                  to={item.url}
-                  underline="none"
-                  sx={{
-                    fontFamily: '"Open Sans", sans-serif',
-                    fontSize: "14px",
-                    "@media (max-width: 452px)": {
-                      fontSize: "12px",
-                    },
-                    color: "#333",
-                    "&:hover": { textDecoration: "underline" },
-                  }}
-                >
-                  {item.label}
-                </MuiLink>
-              )
-            )}
+          {/* If not logged in, show "Log in" link */}
+          {!isLoggedIn && (
+            <MuiLink
+              component="button"
+              underline="none"
+              sx={{
+                fontFamily: '"Open Sans", sans-serif',
+                fontSize: "14px",
+                "@media (max-width: 452px)": {
+                  fontSize: "12px",
+                },
+                color: "#333",
+                "&:hover": { textDecoration: "underline" },
+                cursor: "pointer",
+              }}
+              onClick={handleLogin}
+            >
+              Log in
+            </MuiLink>
+          )}
 
-          {/* If user is logged in, show logout icon */}
+          {/* If logged in, show logout icon */}
           {isLoggedIn && (
             <LogoutIcon
               onClick={handleLogout}

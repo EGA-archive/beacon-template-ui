@@ -30,6 +30,9 @@ export default function HomePage({
   const isOnLoginPage = location.pathname === "/login";
 
   useEffect(() => {
+    // Change later this is only for testing
+    if (window.Cypress) return;
+
     if (isLoggedIn || hasModalBeenTriggered || isOnLoginPage) return;
     const handleFirstInteraction = () => {
       setLoginModalOpen(true);
@@ -65,6 +68,12 @@ export default function HomePage({
   // If at least one group of filters is configured, show the filters sidebar
   const shouldShowFilters =
     hasGenomicAnnotationsConfig || hasCommonFiltersConfig;
+
+  useEffect(() => {
+    const handler = (e) => setActiveInput(e.detail);
+    window.addEventListener("setActiveInput", handler);
+    return () => window.removeEventListener("setActiveInput", handler);
+  }, []);
 
   return (
     <>
@@ -134,6 +143,7 @@ export default function HomePage({
               hasCommonFiltersConfig={hasCommonFiltersConfig}
               hasGenomicAnnotationsConfig={hasGenomicAnnotationsConfig}
               setActiveInput={setActiveInput}
+              activeInput={activeInput}
             />
           </Box>
         )}

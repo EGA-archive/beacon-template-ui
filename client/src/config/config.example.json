@@ -87,13 +87,6 @@
             "id": "height",
             "label": "Height",
             "type": "alphanumeric"
-          },
-          {
-            "key": "label6",
-            "id": "label6",
-            "label": "label6",
-            "type": "ontology",
-            "scopes": ["observed"]
           }
         ],
         "Cancer": [

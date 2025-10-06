@@ -19,6 +19,15 @@ import {
 } from "react-router-dom";
 import { SelectedEntryProvider } from "./components/context/SelectedEntryContext";
 
+if (window.Cypress) {
+  window.__beaconTestHooks = {
+    setActiveInput: (val) => {
+      console.log("[Cypress] setActiveInput:", val);
+      window.dispatchEvent(new CustomEvent("setActiveInput", { detail: val }));
+    },
+  };
+}
+
 export default function App() {
   const [selectedTool, setSelectedTool] = useState(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
