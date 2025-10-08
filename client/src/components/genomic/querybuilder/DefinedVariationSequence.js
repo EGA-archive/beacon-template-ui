@@ -64,7 +64,7 @@ export default function DefinedVariationSequence() {
           <GenomicInputBox
             name="chromosome"
             label="Chromosome"
-            placeholder="ex. Chr 1 (NC_000001.11)"
+            placeholder="ex. 22"
             description={"Select the reference value:"}
             required={true}
           />

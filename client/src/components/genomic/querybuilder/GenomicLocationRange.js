@@ -85,7 +85,7 @@ export default function GenomicLocationRage({
             <GenomicInputBox
               name="chromosome"
               label="Chromosome"
-              placeholder="ex. Chr 1 (NC_000001.11)"
+              placeholder="ex. 22"
               required={true}
             />
 
