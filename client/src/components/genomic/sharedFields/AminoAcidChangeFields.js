@@ -21,7 +21,11 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
  and only shows valid matching amino acid options in the dropdowns.
 */
 
-export default function AminoAcidChangeFields({ isDisabled }) {
+export default function AminoAcidChangeFields({
+  isDisabled,
+  isInactiveSelectable,
+  isUnavailable,
+}) {
   // Get access to values coming from the form and a function to update them
   const { values, setFieldValue } = useFormikContext();
 
@@ -61,7 +65,12 @@ export default function AminoAcidChangeFields({ isDisabled }) {
     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
       {/* REF AA dropdown */}
       <Box sx={{ flex: 1 }}>
-        <FieldLabel>Ref AA</FieldLabel>
+        <FieldLabel
+          isInactiveSelectable={isInactiveSelectable}
+          isUnavailable={isUnavailable}
+        >
+          Ref AA
+        </FieldLabel>
         <Select
           fullWidth
           value={values.refAa || ""}
@@ -81,7 +90,12 @@ export default function AminoAcidChangeFields({ isDisabled }) {
 
       {/* Position input */}
       <Box sx={{ flex: 1 }}>
-        <FieldLabel>Position</FieldLabel>
+        <FieldLabel
+          isInactiveSelectable={isInactiveSelectable}
+          isUnavailable={isUnavailable}
+        >
+          Position
+        </FieldLabel>
         <TextField
           fullWidth
           {...positionField}
@@ -95,7 +109,12 @@ export default function AminoAcidChangeFields({ isDisabled }) {
 
       {/* ALT AA dropdown */}
       <Box sx={{ flex: 1 }}>
-        <FieldLabel>Alt AA</FieldLabel>
+        <FieldLabel
+          isInactiveSelectable={isInactiveSelectable}
+          isUnavailable={isUnavailable}
+        >
+          Alt AA
+        </FieldLabel>
         <Select
           fullWidth
           value={values.altAa || ""}

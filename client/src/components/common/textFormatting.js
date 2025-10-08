@@ -101,7 +101,7 @@ export const entryTypeDescriptions = {
   biosamples: "query biosample data (e.g. histological samples)",
   cohorts: "query cohort-level data (e.g. shared traits, study groups)",
   datasets: "query datasets-level data (e.g. name, description)",
-  g_variants: "query genomic variants across individuals",
+  g_variants: "query genomic variants across a population",
   individuals: "query individual-level data (e.g. phenotypes, treatment)",
   runs: "query sequencing run details (e.g. platform, run date)",
 };

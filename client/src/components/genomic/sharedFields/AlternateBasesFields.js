@@ -19,6 +19,9 @@ export default function AlternateBasesFields({
   customRefPlaceholder, // optional placeholder for Ref
   customAltPlaceholder, // optional placeholder for Alt
   customPaddingTop, // optional spacing above arrow icon
+  variant = "sequence",
+  isInactiveSelectable,
+  isUnavailable,
 }) {
   // Connect Ref. Base input to Formik
   const [refField, refMeta] = useField("refBases");
@@ -27,32 +30,53 @@ export default function AlternateBasesFields({
   const [altField, altMeta] = useField("alternateBases");
 
   return (
-    // Layout: horizontal row with 2 inputs and a right arrow in between
     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-      {/* <BaseInputBox
-        fieldProps={refField}
-        metaProps={refMeta}
-        label={customRefLabel || "Ref. Bases"}
-        placeholder={customRefPlaceholder || "T"}
-        isDisabled={isDisabled}
-      /> */}
-      {/* Arrow icon separating Ref and Alt */}
-      {/* <Box
-        sx={{
-          display: "flex",
-          alignItems: "flex-end",
-          pt: customPaddingTop || "8%",
-        }}
-      >
-        <KeyboardArrowRightIcon sx={{ color: "#999", fontSize: "24px" }} />
-      </Box>{" "} */}
-      <BaseInputBox
-        fieldProps={altField}
-        metaProps={altMeta}
-        label={customAltLabel || "Alt. Bases"}
-        placeholder={customAltPlaceholder || "G"}
-        isDisabled={isDisabled}
-      />
+      {/* Case 1: Sequence Query */}
+      {variant === "sequence" && (
+        <>
+          <BaseInputBox
+            fieldProps={refField}
+            metaProps={refMeta}
+            label={customRefLabel || "Reference Bases"}
+            placeholder={customRefPlaceholder || "ex. T"}
+            isDisabled={isDisabled}
+            isInactiveSelectable={isInactiveSelectable}
+            isUnavailable={isUnavailable}
+          />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "flex-end",
+              pt: customPaddingTop || "8%",
+            }}
+          >
+            <KeyboardArrowRightIcon sx={{ color: "#999", fontSize: "24px" }} />
+          </Box>
+        </>
+      )}
+
+      {/* Case 2: Gene ID / Range Query */}
+      {variant === "gene" || variant === "range" ? (
+        <BaseInputBox
+          fieldProps={altField}
+          metaProps={altMeta}
+          label={customAltLabel || "Enter the Alternate Bases"}
+          placeholder={customAltPlaceholder || "Ex. G"}
+          isDisabled={isDisabled}
+          isInactiveSelectable={isInactiveSelectable}
+          isUnavailable={isUnavailable}
+        />
+      ) : (
+        <BaseInputBox
+          fieldProps={altField}
+          metaProps={altMeta}
+          label={customAltLabel || "Enter the Alternate Bases"}
+          placeholder={customAltPlaceholder || "Ex. G"}
+          isDisabled={isDisabled}
+          isInactiveSelectable={isInactiveSelectable}
+          isUnavailable={isUnavailable}
+        />
+      )}
     </Box>
   );
 }

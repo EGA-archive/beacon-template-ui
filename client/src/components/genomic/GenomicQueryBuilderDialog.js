@@ -24,8 +24,6 @@ import {
   chromosomeValidator,
   createStartValidator,
   createEndValidator,
-  refBasesValidator,
-  altBasesValidator,
   refAaValidator,
   aaPositionValidator,
   altAaValidator,
@@ -34,7 +32,7 @@ import {
   assemblyIdOptional,
   requiredRefBases,
   requiredAltBases,
-  requiredAlternateBases,
+  nonRequiredAltBases,
   genomicHGVSshortForm,
   geneId,
 } from "../genomic/genomicQueryBuilderValidator";
@@ -81,8 +79,7 @@ export default function GenomicQueryBuilderDialog({
       geneId: Yup.string().required("Gene ID is required"),
 
       // These are optional and validated if present
-      // refBases: refBasesValidator,
-      altBases: altBasesValidator,
+      alternateBases: nonRequiredAltBases,
       refAa: refAaValidator,
       altAa: altAaValidator,
       aaPosition: aaPositionValidator,
@@ -96,8 +93,7 @@ export default function GenomicQueryBuilderDialog({
       chromosome: chromosomeValidator.required("Chromosome is required"),
       start: createStartValidator("Start"),
       end: createEndValidator("End", "Start"),
-      // refBases: refBasesValidator,
-      altBases: altBasesValidator,
+      alternateBases: nonRequiredAltBases,
       refAa: refAaValidator,
       altAa: altAaValidator,
       aaPosition: aaPositionValidator,
@@ -115,9 +111,8 @@ export default function GenomicQueryBuilderDialog({
       assemblyId: assemblyIdRequired.required("Assembly ID is required"),
       chromosome: chromosomeValidator.required("Chromosome is required"),
       start: createStartValidator("Start"),
-      alternateBases: requiredAlternateBases.required(
-        "Alternate Base is required"
-      ),
+      alternateBases: requiredAltBases,
+      refBases: requiredRefBases,
     }),
 
     // This is a shortcut query type using HGVS format
@@ -210,6 +205,9 @@ export default function GenomicQueryBuilderDialog({
           }}
           validationSchema={validationSchemaMap[selectedQueryType]}
           onSubmit={(values) => {
+            if (values.chromosome) {
+              values.chromosome = values.chromosome.trim().toUpperCase();
+            }
             // These are exclusive groups. Only one group should be active based on user selection
             const mutuallyExclusiveGroups = {
               variationType: ["variationType"],
@@ -283,6 +281,7 @@ export default function GenomicQueryBuilderDialog({
               key: selectedQueryType,
               scope: "genomicQueryBuilder",
               bgColor: "genomic",
+              queryType: "genomic",
             };
 
             // Prevent duplicates
@@ -293,6 +292,16 @@ export default function GenomicQueryBuilderDialog({
               return;
             }
 
+            const alreadyHasGenomic = selectedFilter.some(
+              (f) => f.queryType === "genomic"
+            );
+
+            if (alreadyHasGenomic) {
+              setDuplicateMessage(COMMON_MESSAGES.singleGenomicQuery);
+              setTimeout(() => setDuplicateMessage(""), 5000);
+              setTimeout(() => handleClose(), 3000);
+              return;
+            }
             // Save the new filter
             setSelectedFilter((prev) => [...prev, newFilter]);
             setDuplicateMessage("");

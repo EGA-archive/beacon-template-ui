@@ -63,20 +63,6 @@ export default function Search({
   const inputRef = useRef(null);
   const { isLoaded, setIsLoaded } = useSelectedEntry();
 
-  // 🧠 Debug: Track activeInput changes
-  useEffect(() => {
-    if (activeInput) {
-      console.log("🔍 [Search] activeInput changed →", activeInput);
-    }
-  }, [activeInput]);
-
-  // 🧠 Debug: Track selectedTool changes
-  useEffect(() => {
-    if (selectedTool !== undefined) {
-      console.log("🧰 [Search] selectedTool changed →", selectedTool);
-    }
-  }, [selectedTool]);
-
   useEffect(() => {
     if (activeInput === "genomic" && inputRef.current) {
       inputRef.current.focus();
@@ -222,7 +208,7 @@ export default function Search({
     biosamples: "query biosample data (e.g. histological samples)",
     cohorts: "query cohort-level data (e.g. shared traits, study groups)",
     datasets: "query datasets-level data (e.g. name, description)",
-    g_variants: "query genomic variants across individuals",
+    g_variants: "query genomic variants across a population",
     individuals: "query individual-level data (e.g. phenotypes, treatment)",
     runs: "query sequencing run details (e.g. platform, run date)",
   };

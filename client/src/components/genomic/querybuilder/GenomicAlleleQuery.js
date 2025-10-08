@@ -39,7 +39,7 @@ export default function GenomicAlleleQuery() {
               mt: 0,
             }}
           >
-            You need to fill in the fields with a (*)
+            Required (*)
           </Typography>
 
           {/* Single required input field: HGVS short form */}

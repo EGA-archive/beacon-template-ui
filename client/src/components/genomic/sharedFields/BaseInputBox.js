@@ -13,10 +13,17 @@ export default function BaseInputBox({
   label, // label to show above the input
   placeholder, // placeholder text for the input field
   isDisabled, // whether the field is disabled
+  isInactiveSelectable,
+  isUnavailable,
 }) {
   return (
     <Box sx={{ width: "100%" }}>
-      <FieldLabel>{label}</FieldLabel>
+      <FieldLabel
+        isInactiveSelectable={isInactiveSelectable}
+        isUnavailable={isUnavailable}
+      >
+        {label}
+      </FieldLabel>
       <TextField
         {...fieldProps}
         error={metaProps.touched && Boolean(metaProps.error)}

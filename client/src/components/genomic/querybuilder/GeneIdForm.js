@@ -57,7 +57,7 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
               mt: 0,
             }}
           >
-            You need to fill in the fields with a (*)
+            Required (*)
           </Typography>
           <GenomicInputBox
             name="geneId"
@@ -126,6 +126,7 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
               .showAlternateBases && (
               <Box sx={{ flex: "1 1 200px" }}>
                 <GenomicInputBox
+                  variant="gene"
                   name="alternateBases"
                   label="Alternate Bases"
                   isSelectable

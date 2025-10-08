@@ -29,8 +29,10 @@ export default function FilterTermsExtra() {
   const [selectedValue, setSelectedValue] = useState("");
   const [error, setError] = useState("");
 
+  // Used to scroll the container into view when a new alphanumeric filter is active
   const containerRef = useRef(null);
 
+  // When a new filter is selected, scroll to this section smoothly
   useEffect(() => {
     if (extraFilter && containerRef.current) {
       containerRef.current.scrollIntoView({
@@ -40,60 +42,89 @@ export default function FilterTermsExtra() {
     }
   }, [extraFilter]);
 
-  // Function to validate and add the new filter
+  // Main function that runs when the "+" button is clicked
   const handleAddFilter = () => {
-    setError("");
+    setError(""); // clear any previous errors
+
+    // Step 1. If the input is empty, show an error and stop
     if (!selectedValue) {
       setError(COMMON_MESSAGES.fillFields);
-    } else {
-      setSelectedFilter((prevFilters) => {
-        if (prevFilters.some((filter) => filter.key === extraFilter.key)) {
-          return prevFilters;
-        }
-
-        const extraFilterCustom = {
-          id: extraFilter.id,
-          key: extraFilter.key,
-          label: `${extraFilter.label} ${selectedOperator} ${selectedValue}`,
-          operator: selectedOperator,
-          value: selectedValue,
-          scope: extraFilter.scope || null,
-          scopes: extraFilter.scopes || [],
-          type: extraFilter.type || "alphanumeric",
-        };
-
-        console.log("extraFilterCustom ", extraFilterCustom);
-
-        const newKey = `${extraFilter.id || extraFilter.key}-${
-          extraFilter.scope || "noScope"
-        }`;
-
-        console.log("newKey", newKey);
-
-        if (extraFilter.setAddedFilters) {
-          extraFilter.setAddedFilters((prevSet) => {
-            const newSet = new Set(prevSet);
-            newSet.add(newKey);
-
-            setTimeout(() => {
-              extraFilter.setAddedFilters((current) => {
-                const updated = new Set(current);
-                updated.delete(newKey);
-                return updated;
-              });
-            }, 3000);
-
-            return newSet;
-          });
-        }
-
-        setExtraFilter(null);
-        setSelectedOperator(">");
-        setSelectedValue("");
-
-        return [...prevFilters, extraFilterCustom];
-      });
+      setSelectedValue(""); // clear the input
+      setTimeout(() => setError(""), 3000);
+      return;
     }
+
+    // Step 2. If there is a value, continue
+    setSelectedFilter((prevFilters) => {
+      // Create a guaranteed unique key for this new filter
+      // This helps avoid problems when deleting or checking duplicates
+      const uniqueId = `common-free-${Date.now().toString(36)}-${Math.random()
+        .toString(36)
+        .slice(2, 7)}`;
+
+      // Check if this same filter already exists (only for filters of type "alphanumeric")
+      const isDuplicate =
+        extraFilter.type === "alphanumeric" &&
+        prevFilters.some(
+          (f) =>
+            f.type === "alphanumeric" &&
+            f.operator === selectedOperator &&
+            f.value === selectedValue &&
+            (f.id === extraFilter.id || f.key === extraFilter.key)
+        );
+
+      // If it’s a duplicate, show an error, clear the input, and stop
+      if (isDuplicate) {
+        setError(COMMON_MESSAGES.doubleFilter);
+        setSelectedValue("");
+        setTimeout(() => setError(""), 3000);
+        return prevFilters;
+      }
+
+      // Step 3. If no duplicates, create the new filter object
+      const extraFilterCustom = {
+        id: extraFilter.id,
+        key: uniqueId,
+        label: `${extraFilter.label} ${selectedOperator} ${selectedValue}`,
+        operator: selectedOperator,
+        value: selectedValue,
+        scope: extraFilter.scope || null,
+        scopes: extraFilter.scopes || [],
+        type: extraFilter.type || "alphanumeric",
+        originalKey: extraFilter.key,
+      };
+
+      // Used to track recently added filters
+      const newKey = `${extraFilter.id || uniqueId}-${
+        extraFilter.scope || "noScope"
+      }`;
+
+      // Update setAddedFilters if it exists for short highlighting effect
+      if (extraFilter.setAddedFilters) {
+        extraFilter.setAddedFilters((prevSet) => {
+          const newSet = new Set(prevSet);
+          newSet.add(newKey);
+
+          setTimeout(() => {
+            extraFilter.setAddedFilters((current) => {
+              const updated = new Set(current);
+              updated.delete(newKey);
+              return updated;
+            });
+          }, 3000);
+
+          return newSet;
+        });
+      }
+
+      // Step 4. Reset all local inputs after successfully adding the filter
+      setExtraFilter(null);
+      setSelectedOperator(">");
+      setSelectedValue("");
+
+      // Add the new filter to the list
+      return [...prevFilters, extraFilterCustom];
+    });
   };
 
   return (

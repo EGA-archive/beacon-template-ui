@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import { normalizeVariationType } from "./utils/variationType";
+import config from "../../config/config.json";
 
 // Yup base pattern for Ref/Alt bases — allows IUPAC codes (excluding U), '.' and '-'
 export const basePattern = /^[ACGTRYSWKMBDHVN.\-]+$/;
@@ -10,84 +10,23 @@ export const basePattern = /^[ACGTRYSWKMBDHVN.\-]+$/;
 // - Sex chromosomes: "X", "Y" (case-insensitive)
 // - With or without "chr" prefix: e.g. "chr1", "chrX"
 // - RefSeq identifiers: starting with "refseq:" or "nc_"
-export const chromosomeValidator = Yup.string().test(
-  "valid-chromosome",
-  "Invalid chromosome format",
-  function (input) {
-    if (!input) return false;
 
-    // Normalize input: trim and convert to lowercase to make it case-insensitive
-    const normalizedChromosome = input.trim().toLowerCase();
-
-    // Accept RefSeq formats, meaning formats that start with refseq: and nc_
-    if (
-      normalizedChromosome.startsWith("refseq:") ||
-      normalizedChromosome.startsWith("nc_")
-    )
-      return true;
-
-    // Accept "chr" prefix with chromosomes 1-22, X, or Y
-    if (/^chr([1-9]|1[0-9]|2[0-2]|x|y)$/.test(normalizedChromosome))
-      return true;
-
-    // Accept numeric chromosomes directly (e.g. "1", "12", "22")
-    const chromosomeNumber = parseInt(normalizedChromosome, 10);
-    if (
-      !isNaN(chromosomeNumber) &&
-      chromosomeNumber >= 1 &&
-      chromosomeNumber <= 24
-    )
-      return true;
-
-    // Accept plain "x" or "y"
-    if (normalizedChromosome === "x" || normalizedChromosome === "y")
-      return true;
-
-    // Anything else is invalid
-    return false;
-  }
-);
-
-export const requiredAlternateBases = Yup.string()
-  .matches(
-    basePattern,
-    "Only valid IUPAC codes (except U) and characters '.' or '-' are allowed"
-  )
-  .required("Alternate Base is required")
+// Chromosome validator (dynamic from config)
+export const chromosomeValidator = Yup.string()
+  .required("Chromosome is required")
   .test(
-    "not-equal-to-ref",
-    "Ref and Alt bases must not be the same",
-    function (value) {
-      const { refBases } = this.parent;
-      if (!refBases || !value) return true;
-      return refBases !== value;
-    }
-  );
+    "valid-chromosome",
+    "Invalid chromosome — must match the available list",
+    function (input) {
+      if (!input) return false;
 
-// Optional RefBases: must match IUPAC pattern, not required
-// Combinations of the IUPAC characters are allowed
-export const refBasesValidator = Yup.string()
-  .matches(
-    basePattern,
-    "Only valid IUPAC codes (except U) and characters '.' or '-' are allowed"
-  )
-  .optional();
+      const library = config?.ui?.chromosomeLibrary;
 
-// Optional AltBases: must match IUPAC pattern, and not equal to RefBases
-// Combinations of the IUPAC characters are allowed
-export const altBasesValidator = Yup.string()
-  .matches(
-    basePattern,
-    "Only valid IUPAC codes (except U) and characters '.' or '-' are allowed"
-  )
-  .optional()
-  .test(
-    "not-equal-to-ref",
-    "Ref and Alt bases must not be the same",
-    function (value) {
-      const { refBases } = this.parent;
-      if (!refBases || !value) return true;
-      return refBases !== value;
+      // Normalize input (trim, uppercase)
+      const normalized = input.trim().toUpperCase();
+
+      // Only allow exact matches from library from the config
+      return library.map((c) => c.toUpperCase()).includes(normalized);
     }
   );
 
@@ -117,6 +56,11 @@ export const requiredAltBases = Yup.string()
       return refBases !== value;
     }
   );
+
+export const nonRequiredAltBases = Yup.string().matches(
+  basePattern,
+  "Only valid IUPAC codes (except U) and characters '.' or '-' are allowed"
+);
 
 // Aminoacid Change fields (Ref and Alt): optional string
 export const refAaValidator = Yup.string().optional();
@@ -157,6 +101,7 @@ export const minVariantLength = Yup.number()
   .transform((val, original) => (original === "" ? undefined : val)) // "" → undefined
   .typeError("Must be a number")
   .integer("Must be an integer")
+  .min(1, "Must be at least 1")
   .optional();
 
 // Max variant length
@@ -199,16 +144,25 @@ const numberField = (label) =>
 
 export const bracketRangeValidator = Yup.object({
   startMin: numberField("Start Min"),
+
   startMax: numberField("Start Max").moreThan(
     Yup.ref("startMin"),
     "Start Max must be greater than Start Min"
   ),
-  endMin: numberField("End Min").moreThan(
-    Yup.ref("startMax"),
-    "End Min must be greater than Start Max"
-  ),
-  endMax: numberField("End Max").moreThan(
-    Yup.ref("endMin"),
-    "End Max must be greater than End Min"
-  ),
+
+  endMin: numberField("End Min")
+    // allow overlap, just ensure logical order relative to Start Min
+    .moreThan(Yup.ref("startMin"), "End Min must be greater than Start Min"),
+
+  endMax: numberField("End Max")
+    .moreThan(Yup.ref("endMin"), "End Max must be greater than End Min")
+    .test(
+      "endMax-vs-startMax",
+      "End Max cannot be smaller than Start Max",
+      function (value) {
+        const { startMax } = this.parent;
+        if (value == null || startMax == null) return true;
+        return value >= startMax;
+      }
+    ),
 });

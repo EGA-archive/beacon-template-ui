@@ -13,6 +13,7 @@ export const COMMON_MESSAGES = {
   loadingData: "Loading data...",
   fillFields: "Please fill in all the fields",
   addFilter: "Please apply at least one filter to run this search.",
+  singleGenomicQuery: "Only one genomic query can be added at a time.",
 };
 
 // Reusable component to display messages (error or success)

@@ -48,7 +48,7 @@ export default function SearchGenomicInput({
         detectedAssembly =
           assemblies[assembliesLower.indexOf(firstToken.toLowerCase())];
         tokens.shift(); // remove assembly from beginning
-        raw = tokens.join(" ");
+        raw = tokens.join("-");
       }
 
       // If no assembly found at start, check last token
@@ -58,7 +58,7 @@ export default function SearchGenomicInput({
           detectedAssembly =
             assemblies[assembliesLower.indexOf(lastToken.toLowerCase())];
           tokens.pop(); // remove assembly from end
-          raw = tokens.join(" ");
+          raw = tokens.join("");
         }
       }
     }
@@ -66,10 +66,12 @@ export default function SearchGenomicInput({
     // Clean the input into standard format
     const cleaned = raw
       .replace(/\./g, "") // remove dots
+      .replace(/\//g, "") // remove slashes
+      .replace(/\t+/g, "-") // tabs to hyphens
       .replace(/\s+/g, "-") // spaces to hyphens
-      .replace(/\t+/g, "-")
       .replace(/-+/g, "-") // collapse multiple hyphens
-      .replace(/^-|-$/g, ""); // remove hyphens at start/end
+      .replace(/^-|-$/g, "") // remove hyphens at start/end
+      .replace(/^[-|]+|[-|]+$/g, ""); // removes leading/trailing hyphens *or* pipes
 
     // Regex to check if it looks like a genomic variant
     const variantRegex =
@@ -128,8 +130,24 @@ export default function SearchGenomicInput({
     // Use typed assembly or fallback to current dropdown
     const finalAssembly = detectedAssembly || assembly;
 
+    const alreadyHasGenomic = selectedFilter.some(
+      (f) => f.queryType === "genomic"
+    );
+
+    if (alreadyHasGenomic) {
+      setMessage(COMMON_MESSAGES.singleGenomicQuery);
+      setTimeout(() => setMessage(null), 3000);
+      setTimeout(() => setGenomicDraft(""), 3000);
+      return;
+    }
+
     // Avoid duplicates
-    const labelForCheck = `${finalAssembly} | ${cleanedValue}`;
+    const labelForCheck = `${finalAssembly} | ${cleanedValue}`
+      .replace(/\|{2,}/g, "|") // collapse double/more pipes
+      .replace(/\|\s*\|/g, "|") // just in case spaced pipes
+      .replace(/\|\s+$/, "") // no trailing pipe
+      .replace(/^\s+\|/, ""); // no leading pipe
+
     const isDuplicate = selectedFilter.some(
       (f) => f.label.trim().toLowerCase() === labelForCheck.toLowerCase()
     );
@@ -151,6 +169,7 @@ export default function SearchGenomicInput({
       label: labelForCheck,
       scope: isVariant ? "genomicVariant" : "genomicQuery",
       bgColor: "genomic",
+      queryType: "genomic",
     };
 
     // Add to list and clear input
@@ -220,7 +239,7 @@ export default function SearchGenomicInput({
         <Box sx={{ position: "relative", flex: 1 }}>
           <InputBase
             inputRef={inputRef}
-            placeholder="Search by Genomic Query"
+            placeholder="Search by Genomic Query. Example: 17:7674945G>A"
             fullWidth
             value={genomicDraft}
             onChange={(e) => setGenomicDraft(e.target.value)}
@@ -291,11 +310,14 @@ export default function SearchGenomicInput({
               </>
             )}
           </Box>
-
-          {/* Show duplicate error message if necessary */}
-          {message === COMMON_MESSAGES.doubleValue && (
-            <CommonMessage text={message} type="error" />
-          )}
+          <Box
+            sx={{
+              mt: message ? 2 : 0,
+            }}
+          >
+            {/* Show duplicate error message if necessary */}
+            {message && <CommonMessage text={message} type="error" />}
+          </Box>
         </Box>
       )}
     </Box>

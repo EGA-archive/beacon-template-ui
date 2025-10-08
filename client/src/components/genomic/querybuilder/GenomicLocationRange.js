@@ -60,7 +60,7 @@ export default function GenomicLocationRage({
             Main Parameters
           </Typography>
           <Typography sx={{ ...mainBoxTypography, mt: 0 }}>
-            You need to fill in the fields with a (*)
+            Required (*)
           </Typography>
 
           {/* Required fields like assemblyId, chromosome, start and end */}
@@ -176,6 +176,7 @@ export default function GenomicLocationRage({
               .showAlternateBases && (
               <Box sx={{ flex: "1 1 200px" }}>
                 <GenomicInputBox
+                  variant="range"
                   name="alternateBases"
                   label="Alternate Bases"
                   isSelectable

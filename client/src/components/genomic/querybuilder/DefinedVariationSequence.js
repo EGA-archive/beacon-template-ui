@@ -36,7 +36,7 @@ export default function DefinedVariationSequence() {
             mt: 0,
           }}
         >
-          You need to fill in the fields with a (*)
+          Required (*)
         </Typography>
 
         {/* Inputs are shown in a responsive grid (1 column on mobile, 2 on larger screens) */}
@@ -79,7 +79,7 @@ export default function DefinedVariationSequence() {
           {/* Required: Change in DNA bases, shown as one field */}
           <GenomicInputBox
             name="alternateBases"
-            label="Alternate Bases"
+            label="Bases Change"
             required={true}
             customAltLabel="Alternate Bases"
             customAltPlaceholder="ex. G"

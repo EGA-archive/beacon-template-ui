@@ -46,9 +46,9 @@ export default function GenomicAnnotations({ setActiveInput }) {
     "SNP Examples": [
       { key: "TP53", id: "TP53", label: "TP53" },
       {
-        key: "7661960T>C",
-        id: "7661960T>C",
-        label: "7661960T>C",
+        key: "17:7661960T>C",
+        id: "17:7661960T>C",
+        label: "17:7661960T>C",
       },
       {
         key: "NC_000023.10 : 33038255C>A",

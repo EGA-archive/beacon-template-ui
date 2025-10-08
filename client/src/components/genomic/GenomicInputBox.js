@@ -34,6 +34,7 @@ export default function GenomicInputBox({
   customAltPlaceholder,
   customPaddingTop,
   disabled = false,
+  variant,
 }) {
   // Connect this field to Formik (value, error, helpers)
   const [field, meta, helpers] = useField(name);
@@ -45,6 +46,10 @@ export default function GenomicInputBox({
   // Disable input if it's selectable but not the active one
   const isDisabled = (isSelectable && !isSelected) || disabled;
 
+  // Differentiate unavailable (disabled) vs inactive (selectable but not chosen)
+  const isUnavailable = disabled; // explicitly passed from parent (e.g. SNP logic)
+  const isInactiveSelectable = isSelectable && !isSelected && !disabled;
+
   // This function returns different field types based on input name or options
   const renderFieldByType = () => {
     // Show custom fields if name is "alternateBases"
@@ -55,17 +60,26 @@ export default function GenomicInputBox({
           meta={meta}
           helpers={helpers}
           isDisabled={isDisabled}
+          isInactiveSelectable={isInactiveSelectable}
+          isUnavailable={isUnavailable}
           customRefLabel={customRefLabel}
           customAltLabel={customAltLabel}
           customRefPlaceholder={customRefPlaceholder}
           customAltPlaceholder={customAltPlaceholder}
           customPaddingTop={customPaddingTop}
+          variant={variant}
         />
       );
     }
     // Show custom fields if name is "aminoacidChange"
     if (name === "aminoacidChange")
-      return <AminoAcidChangeFields isDisabled={isDisabled} />;
+      return (
+        <AminoAcidChangeFields
+          isDisabled={isDisabled}
+          isInactiveSelectable={isInactiveSelectable}
+          isUnavailable={isUnavailable}
+        />
+      );
     if (name === "braketRangeFields")
       return <BracketRangeFields isDisabled={isDisabled} />;
 
@@ -147,13 +161,45 @@ export default function GenomicInputBox({
 
   // Final return: wrapper box with label and dynamic input
   return (
+    // <Box
+    //   sx={{
+    //     border: `1px solid ${primaryDarkColor}`,
+    //     borderRadius: "10px",
+    //     padding: "12px",
+    //     backgroundColor: isDisabled ? "#F0F0F0" : "white",
+    //     opacity: isDisabled ? 0.5 : 1,
+    //   }}
+    // >
     <Box
       sx={{
-        border: `1px solid ${primaryDarkColor}`,
+        border: `1px solid ${
+          isUnavailable
+            ? "#E0E0E0" // pale border for unavailable
+            : isInactiveSelectable
+            ? "#BDBDBD" // medium gray for inactive (clickable)
+            : primaryDarkColor // normal active border
+        }`,
+
         borderRadius: "10px",
         padding: "12px",
-        backgroundColor: isDisabled ? "#F0F0F0" : "white",
-        opacity: isDisabled ? 0.5 : 1,
+        backgroundColor: isUnavailable
+          ? "#F5F5F5" // light gray for unavailable
+          : isInactiveSelectable
+          ? "#FAFAFA" // softer gray for inactive selectable
+          : "white",
+        opacity: isUnavailable ? 0.4 : 1,
+        cursor: isInactiveSelectable ? "pointer" : "default",
+        transition: "all 0.2s ease",
+
+        "&:hover": isInactiveSelectable
+          ? {
+              borderColor: primaryDarkColor,
+              backgroundColor: "#fff",
+            }
+          : {},
+      }}
+      onClick={() => {
+        if (isInactiveSelectable) onSelect(); // make selectable boxes clickable
       }}
     >
       {/* Top label + optional select logic */}
@@ -163,9 +209,18 @@ export default function GenomicInputBox({
         isSelectable={isSelectable}
         isSelected={isSelected}
         onSelect={onSelect}
+        isInactiveSelectable={isInactiveSelectable}
+        isUnavailable={isUnavailable}
       />
       {/* Optional description */}
-      {description && <FieldLabel>{description}</FieldLabel>}
+      {description && (
+        <FieldLabel
+          isInactiveSelectable={isInactiveSelectable}
+          isUnavailable={isUnavailable}
+        >
+          {description}
+        </FieldLabel>
+      )}
       {/* Render the correct input */}
       {renderFieldByType()}
     </Box>

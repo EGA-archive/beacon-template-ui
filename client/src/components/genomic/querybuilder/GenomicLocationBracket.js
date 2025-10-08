@@ -47,7 +47,7 @@ export default function GenomicLocationBracket() {
               mt: 0,
             }}
           >
-            You need to fill in the fields with a (*)
+            Required (*)
           </Typography>
 
           {/* Required inputs: Assembly, Chromosome, Start, End */}
@@ -91,7 +91,7 @@ export default function GenomicLocationBracket() {
 
             <GenomicInputBox
               name="braketRangeFields"
-              label="Braket Position"
+              label="Bracket Position"
               isDisabled={false}
               required
             />
