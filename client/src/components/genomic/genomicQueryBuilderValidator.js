@@ -64,7 +64,18 @@ export const nonRequiredAltBases = Yup.string().matches(
 
 // Aminoacid Change fields (Ref and Alt): optional string
 export const refAaValidator = Yup.string().optional();
-export const altAaValidator = Yup.string().optional();
+
+export const altAaValidator = Yup.string()
+  .optional()
+  .test(
+    "not-equal-to-refAa",
+    "Ref AA and Alt AA cannot be the same",
+    function (value) {
+      const { refAa } = this.parent;
+      if (!refAa || !value) return true;
+      return refAa !== value;
+    }
+  );
 
 // As part of Aminoacid Change fields: aaPosition, must be a positive integer number
 export const aaPositionValidator = Yup.number()

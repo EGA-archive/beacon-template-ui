@@ -74,10 +74,17 @@ export default function GenomicQueryBuilderDialog({
   // Validation rules for each query type form
   // Each type has its own schema to check if required fields are filled
   const validationSchemaMap = {
+    "Sequence Query": Yup.object({
+      assemblyId: assemblyIdRequired.required("Assembly ID is required"),
+      chromosome: chromosomeValidator.required("Chromosome is required"),
+      start: createStartValidator("Start"),
+      alternateBases: requiredAltBases,
+      refBases: requiredRefBases,
+    }),
+
     "Gene ID": Yup.object({
       // Gene ID is required
       geneId: Yup.string().required("Gene ID is required"),
-
       // These are optional and validated if present
       alternateBases: nonRequiredAltBases,
       refAa: refAaValidator,
@@ -105,14 +112,6 @@ export default function GenomicQueryBuilderDialog({
     "Bracket Query": bracketRangeValidator.shape({
       assemblyId: assemblyIdRequired,
       chromosome: chromosomeValidator.required("Chromosome is required"),
-    }),
-
-    "Sequence Query": Yup.object({
-      assemblyId: assemblyIdRequired.required("Assembly ID is required"),
-      chromosome: chromosomeValidator.required("Chromosome is required"),
-      start: createStartValidator("Start"),
-      alternateBases: requiredAltBases,
-      refBases: requiredRefBases,
     }),
 
     // This is a shortcut query type using HGVS format
@@ -202,6 +201,8 @@ export default function GenomicQueryBuilderDialog({
             startMax: "",
             endMin: "",
             endMax: "",
+            refAa: "",
+            altAa: "",
           }}
           validationSchema={validationSchemaMap[selectedQueryType]}
           onSubmit={(values) => {

@@ -19,6 +19,8 @@ import { FILTERING_TERMS_COLUMNS } from "../../lib/constants";
 import { capitalize } from "../common/textFormatting";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
   assignDefaultScopesToTerms,
   handleFilterSelection,
@@ -49,6 +51,7 @@ export default function FilteringTermsTable({
 
   // Gets shared states and functions from the context
   const {
+    selectedFilter,
     setExtraFilter,
     setSelectedFilter,
     selectedPathSegment: selectedEntryType,
@@ -281,11 +284,70 @@ export default function FilteringTermsTable({
                           transition: "background-color 0.2s ease-in-out",
                         }}
                       >
-                        {/* Column 1: ID */}
+                        {/* Column 1: Empty placeholder for Selector */}
+                        {/* Column 1: Toggle selection icon */}
+                        <TableCell
+                          align="left"
+                          onClick={(e) => {
+                            e.stopPropagation();
+
+                            // Check if this filter is already selected
+                            const isSelected = selectedFilter.some(
+                              (filter) =>
+                                filter.label === item.label &&
+                                filter.scope === item.scope
+                            );
+
+                            if (isSelected) {
+                              // Remove it
+                              setSelectedFilter((prev) =>
+                                prev.filter(
+                                  (filter) =>
+                                    !(
+                                      filter.label === item.label &&
+                                      filter.scope === item.scope
+                                    )
+                                )
+                              );
+                            } else {
+                              // Add it
+                              setSelectedFilter((prev) =>
+                                handleFilterSelection({
+                                  item,
+                                  prevFilters: prev,
+                                  setMessage,
+                                })
+                              );
+                            }
+                          }}
+                        >
+                          {/** Check whether this filter is currently applied */}
+                          {selectedFilter.some(
+                            (filter) =>
+                              filter.label === item.label &&
+                              filter.scope === item.scope
+                          ) ? (
+                            <CheckCircleIcon
+                              sx={{
+                                color: config.ui.colors.primary,
+                                fontSize: 20,
+                              }}
+                            />
+                          ) : (
+                            <RadioButtonUncheckedIcon
+                              sx={{
+                                color: "grey",
+                                fontSize: 20,
+                              }}
+                            />
+                          )}
+                        </TableCell>
+
+                        {/* Column 2: ID */}
                         <TableCell>{term.id}</TableCell>
-                        {/* Column 2: Label + Type */}
+                        {/* Column 3: Label + Type */}
                         <TableCell>{`${item.label} (${item.type})`}</TableCell>
-                        {/* Column 3: Available scopes as selectable chips */}
+                        {/* Column 4: Available scopes as selectable chips */}
                         <TableCell>
                           {item.scopes.length > 0 &&
                             item.scopes.map((scope, i) => {
@@ -310,14 +372,6 @@ export default function FilteringTermsTable({
 
                           {changedScopes.has(`${item.id}-${item.scope}`) && (
                             <ChangeCircleIcon
-                              sx={{
-                                color: config.ui.colors.primary,
-                                fontSize: "20px",
-                              }}
-                            />
-                          )}
-                          {addedFilters.has(`${item.id}-${item.scope}`) && (
-                            <AddTaskIcon
                               sx={{
                                 color: config.ui.colors.primary,
                                 fontSize: "20px",
