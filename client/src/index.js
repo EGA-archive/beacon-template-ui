@@ -10,7 +10,7 @@ const oidcConfig = {
     window.history.replaceState(null, "", "/login");
   },
 
-  authority: "https://login.elixir-czech.org/oidc",
+  authority: "https://login.aai.lifescience-ri.eu/oidc",
   clientId: process.env.REACT_APP_CLIENT_ID,
   clientSecret: process.env.REACT_APP_CLIENT_SECRET,
   autoSignIn: false,
