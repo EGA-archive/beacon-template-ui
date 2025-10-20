@@ -1,6 +1,6 @@
 {
-  "beaconType": "networkBeacon",
-  "apiUrl": "https://beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
+  "beaconType": "singleBeacon",
+  "apiUrl": "https://beacon.testing.gdi.lu/api",
   "apiUrlNetwork": "https://beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
   "apiUrlSingle": "https://beacon-spain.ega-archive.org/api",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
@@ -15,16 +15,20 @@
   ],
   "ui": {
     "title": "EGA Beacon Network Browser",
-    "entryTypesOrder": [
-      "individuals",
-      "g_variants",
-      "biosamples",
-      "runs",
-      "analyses",
-      "cohorts",
-      "datasets",
-      ""
-    ],
+    "colors": {
+      "primary": "#3176B1",
+      "darkPrimary": "#173D5D",
+      "secondary": "#FFE4D4",
+      "tertiary": "#B1AC31"
+    },
+    "logos": {
+      "main": "/assets/logos/main.svg",
+      "founders": [
+        "/assets/logos/founder1.svg",
+        "/assets/logos/founder2.svg",
+        "/assets/logos/founder3.svg"
+      ]
+    },
     "showExternalNavBarLink": true,
     "externalNavBarLink": [
       {
@@ -62,20 +66,16 @@
       "recipientKey": "beacon_support"
     },
     "showLogin": true,
-    "colors": {
-      "primary": "#3176B1",
-      "darkPrimary": "#173D5D",
-      "secondary": "#FFE4D4",
-      "tertiary": "#B1AC31"
-    },
-    "logos": {
-      "main": "/assets/logos/main.svg",
-      "founders": [
-        "/assets/logos/founder1.svg",
-        "/assets/logos/founder2.svg",
-        "/assets/logos/founder3.svg"
-      ]
-    },
+    "entryTypesOrder": [
+      "individuals",
+      "g_variants",
+      "biosamples",
+      "runs",
+      "analyses",
+      "cohorts",
+      "datasets",
+      ""
+    ],
     "commonFilters": {
       "filterCategories": ["Demographics", "Cancer", "Covid"],
       "filterLabels": {
@@ -201,35 +201,7 @@
         "Molecular Effect"
       ]
     },
-    "chromosomeLibrary": [
-      "1",
-      "2",
-      "3",
-      "4",
-      "5",
-      "6",
-      "7",
-      "8",
-      "9",
-      "10",
-      "11",
-      "12",
-      "13",
-      "14",
-      "15",
-      "16",
-      "17",
-      "18",
-      "19",
-      "20",
-      "21",
-      "22",
-      "23",
-      "24",
-      "X",
-      "Y",
-      "MT"
-    ],
+
     "genomicQueries": {
       "genomicQueryBuilder": {
         "showAlternateBases": true,
@@ -257,6 +229,35 @@
           "Y",
           "X",
           "*"
+        ],
+        "chromosomeLibrary": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24",
+          "X",
+          "Y",
+          "MT"
         ]
       }
     }

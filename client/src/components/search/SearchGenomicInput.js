@@ -130,9 +130,7 @@ export default function SearchGenomicInput({
     // Use typed assembly or fallback to current dropdown
     const finalAssembly = detectedAssembly || assembly;
 
-    const alreadyHasGenomic = selectedFilter.some(
-      (f) => f.queryType === "genomic"
-    );
+    const alreadyHasGenomic = selectedFilter.some((f) => f.type === "genomic");
 
     if (alreadyHasGenomic) {
       setMessage(COMMON_MESSAGES.singleGenomicQuery);
@@ -169,7 +167,7 @@ export default function SearchGenomicInput({
       label: labelForCheck,
       scope: isVariant ? "genomicVariant" : "genomicQuery",
       bgColor: "genomic",
-      queryType: "genomic",
+      type: "genomic",
     };
 
     // Add to list and clear input

@@ -144,18 +144,36 @@ const ResultsTableModalBody = ({
     return summarizeValue(value);
   }
 
+  console.log("sortedHeaders", sortedHeaders);
+
   return (
-    <Box>
+    <Box
+      sx={{
+        maxHeight: "70vh",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <Paper
         sx={{
           width: "100%",
+          flexGrow: 1,
           overflow: "hidden",
           boxShadow: "none",
           borderRadius: 0,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <>
-          <TableContainer sx={{ maxHeight: 540 }}>
+          {/* <TableContainer sx={{ maxHeight: 540 }}> */}
+          <TableContainer
+            sx={{
+              maxHeight: "60vh",
+              overflowY: "auto",
+            }}
+          >
             <Table stickyHeader aria-label="Results table">
               <TableHead>
                 <StyledTableRow>
@@ -193,15 +211,17 @@ const ResultsTableModalBody = ({
                           fontWeight: "bold",
                         }}
                       >
-                        {Object.values(sortedHeaders).map((colConfig) => (
-                          <StyledTableCell
-                            key={`${id}-${colConfig.id}`}
-                            sx={{ fontSize: "11px" }}
-                            style={{ width: colConfig.width }}
-                          >
-                            {renderCellContent(item, colConfig.id)}
-                          </StyledTableCell>
-                        ))}
+                        {Object.values(sortedHeaders).map((colConfig) => {
+                          return (
+                            <StyledTableCell
+                              key={`${id}-${colConfig.id}`}
+                              sx={{ fontSize: "11px" }}
+                              style={{ width: colConfig.width }}
+                            >
+                              {renderCellContent(item, colConfig.id)}
+                            </StyledTableCell>
+                          );
+                        })}
                       </StyledTableRow>
 
                       {isExpanded && (
@@ -223,6 +243,7 @@ const ResultsTableModalBody = ({
             onPageChange={handleChangePage}
             rowsPerPage={rowsPerPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[5, 10, 20]}
           />
         </>
       </Paper>

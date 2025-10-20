@@ -15,111 +15,125 @@ import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
 import config from "../../config/config.json";
 
 export default function ResultsTableRow({ item, handleOpenModal }) {
+  // console.log(item);
   return (
-    <>
-      <TableRow>
-        <TableCell
-          colSpan={6}
-          sx={{
-            backgroundColor: "background.paper",
-            borderTop: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <Box sx={{ p: 0 }}>
-            <TableContainer>
-              <Table stickyHeader aria-label="Results table">
-                <TableBody>
-                  {item.items.map((dataset, i) => (
-                    <React.Fragment key={i}>
-                      <TableRow key={i}>
-                        <TableCell
-                          style={{
-                            width:
-                              BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset,
-                          }}
-                        ></TableCell>
-                        <TableCell
-                          style={{
-                            width:
-                              BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset_name,
-                          }}
-                        >
-                          <Box sx={{ display: "flex" }}>
-                            <Typography
-                              sx={{ fontWeight: "bold" }}
-                              variant="body2"
-                            >
-                              Dataset:{" "}
-                            </Typography>
-                            <Typography
-                              sx={{ paddingLeft: "5px" }}
-                              variant="body2"
-                            >
-                              {dataset.dataset}{" "}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell
-                          sx={{ fontWeight: "bold" }}
-                          style={{
-                            width:
-                              BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset_response,
-                          }}
-                        >
+    <TableRow>
+      <TableCell colSpan={5} sx={{ p: 0 }}>
+        <Box sx={{ p: 0 }}>
+          <TableContainer>
+            <Table
+              stickyHeader
+              aria-label="Results table"
+              sx={{ tableLayout: "fixed" }}
+            >
+              <TableBody>
+                {item.items.map((dataset, i) => (
+                  <TableRow key={i}>
+                    {/* Dataset Name */}
+                    <TableCell
+                      style={{
+                        width:
+                          BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset_name
+                            .width,
+                      }}
+                    >
+                      <Box sx={{ display: "flex", pl: 9 }}>
+                        <Typography sx={{ fontWeight: "bold" }} variant="body2">
+                          Dataset:
+                        </Typography>
+                        <Typography sx={{ pl: 1 }} variant="body2">
+                          {dataset.dataset}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+
+                    {/* Empty column 1 */}
+                    <TableCell
+                      style={{
+                        width:
+                          BEACON_NETWORK_COLUMNS_EXPANDED
+                            .beacon_dataset_empty_one.width,
+                      }}
+                    />
+
+                    {/* Empty column 2 */}
+                    <TableCell
+                      style={{
+                        width:
+                          BEACON_NETWORK_COLUMNS_EXPANDED
+                            .beacon_dataset_empty_two.width,
+                      }}
+                    />
+
+                    {/* Response + Details */}
+                    <TableCell
+                      // sx={{
+                      //   backgroundColor: {
+                      //     lg: "seashell",
+                      //     md: "steelblue",
+                      //     sm: "lightgreen",
+                      //     xs: "lightblue",
+                      //   },
+                      // }}
+                      style={{
+                        width:
+                          BEACON_NETWORK_COLUMNS_EXPANDED
+                            .beacon_dataset_response.width,
+                      }}
+                    >
+                      <Box display="flex" alignItems="center" gap={3}>
+                        <Typography variant="body2" fontWeight="bold">
                           {dataset.results.length > 0
                             ? dataset.results.length
-                            : "-"}
-                        </TableCell>
-                        <TableCell
-                          style={{
-                            width:
-                              BEACON_NETWORK_COLUMNS_EXPANDED
-                                .beacon_dataset_detail.width,
-                            paddingRight: "0px",
-                          }}
-                          align={
-                            BEACON_NETWORK_COLUMNS_EXPANDED
-                              .beacon_dataset_detail.float
-                          }
-                        >
-                          <Tooltip title="View dataset details" arrow>
-                            <Button
-                              variant="text"
-                              onClick={() => handleOpenModal(item)}
-                              sx={{
-                                textTransform: "none",
-                                fontSize: "14px",
-                                fontWeight: 400,
-                                fontFamily: '"Open Sans", sans-serif',
-                                backgroundColor: "transparent",
-                                color: "gray",
-                                width: "50px",
-                                height: "30px",
-                                minWidth: "30px",
-                                minHeight: "30px",
-                                padding: "0",
-                                marginRight: "5px",
-                                transition: "all 0.3s ease",
-                                "&:hover": {
-                                  color: config.ui.colors.primary,
-                                  transform: "scale(1.1)",
-                                },
-                              }}
-                            >
-                              <CalendarViewMonthIcon />
-                            </Button>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    </React.Fragment>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
-        </TableCell>
-      </TableRow>
-    </>
+                            : "---"}
+                        </Typography>
+
+                        <Tooltip title="View dataset details" arrow>
+                          <Button
+                            onClick={() => handleOpenModal(item)}
+                            variant="outlined"
+                            startIcon={<CalendarViewMonthIcon />}
+                            sx={{
+                              textTransform: "none",
+                              fontSize: "13px",
+                              fontWeight: 400,
+                              fontFamily: '"Open Sans", sans-serif',
+                              color: config.ui.colors.darkPrimary,
+                              borderColor: config.ui.colors.darkPrimary,
+                              borderRadius: "8px",
+                              px: 1.5,
+                              py: 0.5,
+                              minHeight: "28px",
+                              minWidth: "84px",
+                              "& .MuiButton-startIcon": {
+                                marginRight: "6px",
+                              },
+                              "&:hover": {
+                                backgroundColor: `${config.ui.colors.darkPrimary}10`,
+                              },
+                            }}
+                          >
+                            Details
+                          </Button>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+
+                    {/* Dataset Detail Icon (Optional/Filler) */}
+                    <TableCell
+                      style={{
+                        width:
+                          BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset_detail
+                            .width,
+                      }}
+                    />
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      </TableCell>
+    </TableRow>
   );
 }

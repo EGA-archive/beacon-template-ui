@@ -1,6 +1,7 @@
 import { Box, Typography, Link as MuiLink } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { useAuth } from "oidc-react"; // Authentication context
+import { useAuth } from "oidc-react";
+import { Link } from "react-router-dom";
 
 // Logos shown in the footer
 import maingrey from "../assets/logos/maingrey.svg";
@@ -19,6 +20,7 @@ export default function Footer() {
 
   // Function to log the user out
   const handleLogout = () => {
+    localStorage.setItem("isLoggingOut", "true");
     auth.signOut();
     auth.signOutRedirect();
   };
@@ -114,8 +116,10 @@ export default function Footer() {
           {/* If not logged in, show "Log in" link */}
           {!isLoggedIn && (
             <MuiLink
-              component="button"
+              component={Link}
+              to="/login"
               underline="none"
+              className="login-button"
               sx={{
                 fontFamily: '"Open Sans", sans-serif',
                 fontSize: "14px",

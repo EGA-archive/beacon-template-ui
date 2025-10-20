@@ -20,7 +20,8 @@ export const chromosomeValidator = Yup.string()
     function (input) {
       if (!input) return false;
 
-      const library = config?.ui?.chromosomeLibrary;
+      const library =
+        config.ui.genomicQueries.genomicQueryBuilder.chromosomeLibrary;
 
       // Normalize input (trim, uppercase)
       const normalized = input.trim().toUpperCase();

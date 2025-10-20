@@ -17,6 +17,7 @@ import DefinedVariationSequence from "./querybuilder/DefinedVariationSequence";
 import GenomicSubmitButton from "../genomic/GenomicSubmitButton";
 import { Formik, Form } from "formik";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
+import { buildGenomicParams } from "../genomic/utils/buildGenomicParams";
 import { GENOMIC_LABELS_MAP } from "../genomic/genomicLabelHelper";
 import {
   bracketRangeValidator,
@@ -205,11 +206,127 @@ export default function GenomicQueryBuilderDialog({
             altAa: "",
           }}
           validationSchema={validationSchemaMap[selectedQueryType]}
+          // onSubmit={(values) => {
+          //   if (values.chromosome) {
+          //     values.chromosome = values.chromosome.trim().toUpperCase();
+          //   }
+          //   // These are exclusive groups. Only one group should be active based on user selection
+          //   const mutuallyExclusiveGroups = {
+          //     variationType: ["variationType"],
+          //     alternateBases: ["alternateBases", "refBases", "altBases"],
+          //     aminoacidChange: [
+          //       "aminoacidChange",
+          //       "refAa",
+          //       "altAa",
+          //       "aaPosition",
+          //     ],
+          //   };
+
+          //   // It collects all field names from all mutually exclusive groups into a single flat array
+          //   const allExclusiveKeys = Object.values(
+          //     mutuallyExclusiveGroups
+          //   ).flat();
+
+          //   // Get the allowed keys for the currently selected input
+          //   const allowedExclusiveKeys =
+          //     mutuallyExclusiveGroups[selectedInput] || [];
+
+          //   // Filter submitted values to remove empty and disallowed fields
+          //   const validEntries = Object.entries(values).filter(
+          //     ([key, value]) => {
+          //       if (!value || value.trim() === "") return false;
+
+          //       if (allExclusiveKeys.includes(key)) {
+          //         // Allow all exclusive fields if Defined Short Variation is selected
+          //         if (selectedQueryType === "Sequence Query") {
+          //           return true;
+          //         }
+          //         // Allow all if no specific selection logic is active
+          //         if (!selectedInput) return true;
+          //         // Allow only if key is part of the selected group
+          //         return allowedExclusiveKeys.includes(key);
+          //       }
+          //       // Always allow non-exclusive fields
+          //       return true;
+          //     }
+          //   );
+
+          //   // Generate display label from valid entries
+          //   // Option 2: Keys and values displayed, but with bold key
+          //   const idLabel = validEntries
+          //     .map(([key, value]) => `${key}:${value}`)
+          //     .join("-");
+
+          //   // console.log("idLabel", idLabel);
+          //   // console.log("valid", validEntries);
+
+          //   // const combinedLabel = (
+          //   //   <>
+          //   //     {validEntries.map(([key, value], i) => (
+          //   //       <span key={key}>
+          //   //         <strong>{key}</strong>: {value}
+          //   //         {i < validEntries.length - 1 && " | "}
+          //   //       </span>
+          //   //     ))}
+          //   //   </>
+          //   // );
+          //   const combinedLabel = validEntries
+          //     .map(([key, value]) => {
+          //       const displayKey = GENOMIC_LABELS_MAP[key] || key; // fallback to raw key
+          //       return `${displayKey}: ${value}`;
+          //     })
+          //     .join(" | ");
+
+          //   const newFilter = {
+          //     id: `genomic-${selectedQueryType}-${idLabel}`,
+          //     label: combinedLabel,
+          //     key: selectedQueryType,
+          //     scope: "genomicQueryBuilder",
+          //     bgColor: "genomic",
+          //     type: "genomic",
+          //   };
+
+          //   // Prevent duplicates
+          //   const exists = selectedFilter.some((f) => f.id === newFilter.id);
+          //   if (exists) {
+          //     setDuplicateMessage(COMMON_MESSAGES.doubleValue);
+          //     setTimeout(() => setDuplicateMessage(""), 5000);
+          //     return;
+          //   }
+
+          //   const alreadyHasGenomic = selectedFilter.some(
+          //     (f) => f.type === "genomic"
+          //   );
+
+          //   if (alreadyHasGenomic) {
+          //     setDuplicateMessage(COMMON_MESSAGES.singleGenomicQuery);
+          //     setTimeout(() => setDuplicateMessage(""), 5000);
+          //     setTimeout(() => handleClose(), 3000);
+          //     return;
+          //   }
+          //   // Save the new filter
+          //   setSelectedFilter((prev) => [...prev, newFilter]);
+          //   setDuplicateMessage("");
+          //   handleClose();
+          // }}
           onSubmit={(values) => {
             if (values.chromosome) {
               values.chromosome = values.chromosome.trim().toUpperCase();
             }
-            // These are exclusive groups. Only one group should be active based on user selection
+
+            console.log("[GQB] onSubmit.values ➜", values);
+            console.log("[GQB] onSubmit.queryType ➜", selectedQueryType);
+
+            // ✅ STEP 2A: build Beacon-compatible query params
+            const queryParams = buildGenomicParams(
+              selectedQueryType,
+              values,
+              selectedInput
+            );
+
+            console.log("[GQB] onSubmit.queryParams ➜", queryParams);
+
+            // These are exclusive groups...
             const mutuallyExclusiveGroups = {
               variationType: ["variationType"],
               alternateBases: ["alternateBases", "refBases", "altBases"],
@@ -221,90 +338,78 @@ export default function GenomicQueryBuilderDialog({
               ],
             };
 
-            // It collects all field names from all mutually exclusive groups into a single flat array
             const allExclusiveKeys = Object.values(
               mutuallyExclusiveGroups
             ).flat();
-
-            // Get the allowed keys for the currently selected input
             const allowedExclusiveKeys =
               mutuallyExclusiveGroups[selectedInput] || [];
 
-            // Filter submitted values to remove empty and disallowed fields
             const validEntries = Object.entries(values).filter(
               ([key, value]) => {
                 if (!value || value.trim() === "") return false;
-
                 if (allExclusiveKeys.includes(key)) {
-                  // Allow all exclusive fields if Defined Short Variation is selected
-                  if (selectedQueryType === "Sequence Query") {
-                    return true;
-                  }
-                  // Allow all if no specific selection logic is active
+                  if (selectedQueryType === "Sequence Query") return true;
                   if (!selectedInput) return true;
-                  // Allow only if key is part of the selected group
                   return allowedExclusiveKeys.includes(key);
                 }
-                // Always allow non-exclusive fields
                 return true;
               }
             );
 
-            // Generate display label from valid entries
-            // Option 2: Keys and values displayed, but with bold key
             const idLabel = validEntries
               .map(([key, value]) => `${key}:${value}`)
               .join("-");
 
-            console.log("idLabel", idLabel);
-            console.log("valid", validEntries);
-
-            // const combinedLabel = (
-            //   <>
-            //     {validEntries.map(([key, value], i) => (
-            //       <span key={key}>
-            //         <strong>{key}</strong>: {value}
-            //         {i < validEntries.length - 1 && " | "}
-            //       </span>
-            //     ))}
-            //   </>
-            // );
             const combinedLabel = validEntries
               .map(([key, value]) => {
-                const displayKey = GENOMIC_LABELS_MAP[key] || key; // fallback to raw key
+                const displayKey = GENOMIC_LABELS_MAP[key] || key;
                 return `${displayKey}: ${value}`;
               })
               .join(" | ");
 
+            // ✅ STEP 2B: add queryParams to the filter
             const newFilter = {
               id: `genomic-${selectedQueryType}-${idLabel}`,
               label: combinedLabel,
               key: selectedQueryType,
               scope: "genomicQueryBuilder",
               bgColor: "genomic",
-              queryType: "genomic",
+              type: "genomic",
+              queryType: selectedQueryType,
+              queryParams, // 🌟 new field
             };
+
+            console.log("[GQB] newFilter created ➜", newFilter);
 
             // Prevent duplicates
             const exists = selectedFilter.some((f) => f.id === newFilter.id);
             if (exists) {
+              console.warn("[GQB] Duplicate genomic query prevented");
               setDuplicateMessage(COMMON_MESSAGES.doubleValue);
               setTimeout(() => setDuplicateMessage(""), 5000);
               return;
             }
 
             const alreadyHasGenomic = selectedFilter.some(
-              (f) => f.queryType === "genomic"
+              (f) => f.type === "genomic"
             );
-
             if (alreadyHasGenomic) {
+              console.warn(
+                "[GQB] Attempted to add a second genomic query — blocked"
+              );
               setDuplicateMessage(COMMON_MESSAGES.singleGenomicQuery);
               setTimeout(() => setDuplicateMessage(""), 5000);
               setTimeout(() => handleClose(), 3000);
               return;
             }
-            // Save the new filter
-            setSelectedFilter((prev) => [...prev, newFilter]);
+
+            // ✅ STEP 2C: update applied filters
+            setSelectedFilter((prev) => {
+              const next = [...prev, newFilter];
+              console.log("[GQB] appliedFilters.next ➜", next);
+              return next;
+            });
+
             setDuplicateMessage("");
             handleClose();
           }}

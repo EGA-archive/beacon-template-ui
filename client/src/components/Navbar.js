@@ -17,26 +17,28 @@ import config from "../config/config.json";
 import { Link } from "react-router-dom";
 import { useAuth } from "oidc-react";
 
-// /**
-//  * Displays a responsive navigation bar with a title, logo, and links.
-//  * On small screens, it shows a burger menu that opens a drawer.
-//  * On larger screens, links are shown directly in the toolbar.
-//  */
+/**
+ * Displays a responsive navigation bar with a title, logo, and links.
+ * On small screens, it shows a burger menu that opens a drawer.
+ * On larger screens, links are shown directly in the toolbar.
+ */
 
 export default function Navbar({ title, main, navItems }) {
   // State to control mobile drawer open/close
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Retrieves the authentication context provided by the oidc-react library
+  // Retrieves the authentication context provided by the oidc-react context
   const auth = useAuth();
-  // Checks if the user is currently logged in
+
+  // Checks if a user is authenticated by verifying if user data exists
   const isLoggedIn = !!auth?.userData;
 
   // Extracts the user's name from the authentication profile
   const userName = auth?.userData?.profile?.given_name || "User";
 
-  //  Function to log the user out
+  // Triggers logout by clearing session and redirecting to the logout endpoint
   const handleLogout = () => {
+    localStorage.setItem("isLoggingOut", "true");
     auth.signOut();
     auth.signOutRedirect();
   };
@@ -93,9 +95,7 @@ export default function Navbar({ title, main, navItems }) {
             <Box
               component="span"
               sx={{
-                display: {
-                  xs: "block",
-                },
+                display: { xs: "block" },
                 "@media (max-width: 385px)": {
                   display: "none",
                 },
@@ -135,7 +135,6 @@ export default function Navbar({ title, main, navItems }) {
               {title}
             </Typography>
           </Box>
-
           {/* Right section: nav links + burger menu */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <IconButton
@@ -147,7 +146,7 @@ export default function Navbar({ title, main, navItems }) {
             >
               <MenuIcon />
             </IconButton>
-            {/* Navigation links (hidden on small screens) */}
+            {/* Desktop navigation links are shown on md+ screens only */}
             <Box
               data-cy="navbar-links"
               className="nav-items-box"
@@ -167,13 +166,16 @@ export default function Navbar({ title, main, navItems }) {
               {navItems
                 .filter((item) => item.label && item.label.trim() !== "")
                 .map((item) => {
-                  // Hide "Log in" if already authenticated
+                  // Hide "Log in" in drawer if logged in
                   if (item.label.toLowerCase() === "log in" && isLoggedIn)
                     return null;
+
+                  const isLogin = item.label.toLowerCase() === "log in";
 
                   const buttonProps = {
                     key: item.label,
                     sx: { ...textStyle, textTransform: "none" },
+                    className: isLogin ? "login-button" : undefined,
                     children: item.label,
                   };
 
@@ -218,7 +220,6 @@ export default function Navbar({ title, main, navItems }) {
           </Box>
         </Toolbar>
       </AppBar>
-
       {/* Drawer menu for mobile screens */}
       <Drawer
         data-cy="navbar-drawer"
@@ -246,9 +247,10 @@ export default function Navbar({ title, main, navItems }) {
           {navItems
             .filter((item) => item.label && item.label.trim() !== "")
             .map((item) => {
-              // Hide "Log in" in drawer if logged in
               if (item.label.toLowerCase() === "log in" && isLoggedIn)
                 return null;
+
+              const isLogin = item.label.toLowerCase() === "log in";
 
               return (
                 <ListItem key={item.label} disablePadding>
@@ -258,6 +260,7 @@ export default function Navbar({ title, main, navItems }) {
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className={isLogin ? "login-button" : undefined}
                       sx={{
                         px: 3,
                         py: 1,
@@ -276,6 +279,7 @@ export default function Navbar({ title, main, navItems }) {
                       fullWidth
                       component={Link}
                       to={item.url}
+                      className={isLogin ? "login-button" : undefined}
                       sx={{
                         px: 3,
                         py: 1,

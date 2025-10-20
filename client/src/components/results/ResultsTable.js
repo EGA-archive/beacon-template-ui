@@ -22,7 +22,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import InfoIcon from "@mui/icons-material/Info";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import MailOutlineRoundedIcon from "@mui/icons-material/MailOutlineRounded";
 import config from "../../config/config.json";
 
 import { useSelectedEntry } from "../context/SelectedEntryContext";
@@ -168,7 +168,9 @@ export default function ResultsTable() {
                     >
                       <TableCell
                         sx={{ fontWeight: "bold" }}
-                        style={{ width: BEACON_NETWORK_COLUMNS[0].width }}
+                        style={{
+                          width: BEACON_NETWORK_COLUMNS[0].width,
+                        }}
                       >
                         <Box
                           display="flex"
@@ -217,23 +219,31 @@ export default function ResultsTable() {
 
                       <TableCell
                         sx={{ fontWeight: "bold" }}
-                        style={{ width: BEACON_NETWORK_COLUMNS[1].width }}
+                        style={{
+                          width: BEACON_NETWORK_COLUMNS[1].width,
+                        }}
                       >
                         {item.exists ? "Production Beacon" : "Development"}
                       </TableCell>
 
                       <TableCell
                         sx={{ fontWeight: "bold" }}
-                        style={{ width: BEACON_NETWORK_COLUMNS[2].width }}
+                        style={{
+                          width: BEACON_NETWORK_COLUMNS[2].width,
+                        }}
                       >
                         {item.items.length > 0
-                          ? `${item.items.length} Datasets`
+                          ? `${item.items.length} ${
+                              item.items.length === 1 ? "Dataset" : "Datasets"
+                            }`
                           : "-"}
                       </TableCell>
 
                       <TableCell
                         sx={{ fontWeight: "bold" }}
-                        style={{ width: BEACON_NETWORK_COLUMNS[3].width }}
+                        style={{
+                          width: BEACON_NETWORK_COLUMNS[3].width,
+                        }}
                       >
                         {item.totalResultsCount > 0
                           ? new Intl.NumberFormat(navigator.language).format(
@@ -244,7 +254,9 @@ export default function ResultsTable() {
 
                       {config.beaconType === "singleBeacon" && (
                         <TableCell
-                          style={{ width: BEACON_NETWORK_COLUMNS[3].width }}
+                          style={{
+                            width: BEACON_NETWORK_COLUMNS[3].width,
+                          }}
                         >
                           {item.totalResultsCount > 0 ? (
                             <Button
@@ -273,7 +285,7 @@ export default function ResultsTable() {
                               <CalendarViewMonthIcon />
                             </Button>
                           ) : (
-                            "-"
+                            "---"
                           )}
                         </TableCell>
                       )}
@@ -281,9 +293,7 @@ export default function ResultsTable() {
                       <TableCell
                         style={{
                           width: BEACON_NETWORK_COLUMNS[4].width,
-                          align: BEACON_NETWORK_COLUMNS[4].align,
                         }}
-                        align={BEACON_NETWORK_COLUMNS[4].align}
                       >
                         {itemEmail && (
                           <Tooltip title="Contact this beacon" arrow>
@@ -299,7 +309,7 @@ export default function ResultsTable() {
                                 fontWeight: 400,
                                 fontFamily: '"Open Sans", sans-serif',
                                 backgroundColor: "transparent",
-                                color: "gray",
+                                color: config.ui.colors.darkPrimary,
                                 width: "50px",
                                 height: "30px",
                                 minWidth: "30px",
@@ -308,11 +318,10 @@ export default function ResultsTable() {
                                 transition: "all 0.3s ease",
                                 "&:hover": {
                                   color: config.ui.colors.primary,
-                                  transform: "scale(1.1)",
                                 },
                               }}
                             >
-                              <MailOutlineIcon />
+                              <MailOutlineRoundedIcon />
                             </Button>
                           </Tooltip>
                         )}

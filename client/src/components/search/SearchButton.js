@@ -5,7 +5,7 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 import { COMMON_MESSAGES } from "../common/CommonMessage";
 import { PATH_SEGMENT_TO_ENTRY_ID } from "../../components/common/textFormatting";
 
-// This button triggers a search when clicked. It builds a query from selected filters,
+// This button triggers a search when clicked. It builds a query from selected filters and/or genomic  queries,
 // sends a request to the Beacon API, handles grouping of results, and updates global state accordingly.
 // If no filters are applied and they are required, it shows an error message instead.
 export default function SearchButton({ setSelectedTool }) {
@@ -46,11 +46,17 @@ export default function SearchButton({ setSelectedTool }) {
     setResultData([]);
     setHasSearchBeenTriggered(true);
 
+    // API request logic
+
+    console.log("[SearchButton] Starting search...");
     try {
+      // Builds the full endpoint dynamically
       const url = `${config.apiUrl}/${selectedPathSegment}`;
       let response;
-      // If filters are selected, build a POST request
+
+      // If user applied filters
       if (selectedFilter.length > 0) {
+        // The queryBuilder builds the Beacon-compliant POST body
         const query = queryBuilder(selectedFilter, entryTypeId);
         const requestOptions = {
           method: "POST",
@@ -61,7 +67,7 @@ export default function SearchButton({ setSelectedTool }) {
         };
         response = await fetch(url, requestOptions);
       } else {
-        // Otherwise, send a simple GET request
+        // Otherwise, send a simple GET request to get all data
         response = await fetch(url);
       }
 
@@ -74,18 +80,20 @@ export default function SearchButton({ setSelectedTool }) {
       }
       // Parse response data
       const data = await response.json();
-      // console.log("Response data:", data);
+      console.log("Response data:", data);
 
-      // group beacons
-      // Group results by beaconId or dataset id
+      // This block groups raw Beacon responses by dataset or beacon.
+      // This ensures your final table doesn’t show duplicates for datasets that appear multiple times.
+      // DEBUG: Shows as no result but has response in the network - problem with the grouping
       const rawItems =
         data?.response?.resultSets ?? data?.response?.collections ?? [];
 
+      console.log("[SearchButton] rawItems ➜", rawItems);
       const groupedArray = Object.values(
         Object.values(rawItems).reduce((acc, item) => {
           const isBeaconNetwork = !!item.beaconId;
           const key = isBeaconNetwork ? item.beaconId : item.id;
-
+          console.log("[SearchButton] item ➜", item);
           // Initialize group if it doesn't exist
           if (!acc[key]) {
             acc[key] = {
@@ -133,42 +141,48 @@ export default function SearchButton({ setSelectedTool }) {
 
   // Helper to build the Beacon API query object from the selected filters
   const queryBuilder = (params, entryId) => {
-    let filter = {
-      meta: {
-        apiVersion: "2.0",
-      },
+    console.log("[SearchButton] queryBuilder.input ➜", { params, entryId });
+
+    // Identify genomic and non-genomic filters
+    // Looks for a filter object that is type genomic
+    const genomicQuery = params.find((f) => f.type === "genomic");
+    // Keeps all the other filters
+    const nonGenomicFilters = params.filter((f) => f.type !== "genomic");
+
+    // This builds the Beacon POST body
+    const filter = {
+      meta: { apiVersion: "2.0" },
       query: {
-        filters: [],
+        // This is where Beacon expects all the query data.
+        // If a genomic query exists then add the .queryParams here
+        // Otherwise leave it as empty object
+        requestParameters: genomicQuery?.queryParams || {},
+        // Loops through all remaining filters and formats them for Beacon
+        // Scope: if there is no scope it is left empty
+        filters: nonGenomicFilters.map((item) => {
+          if (item.operator) {
+            // Advanced filter with operator and value
+            return {
+              id: item.field,
+              operator: item.operator,
+              value: item.value,
+            };
+          } else {
+            // Simple filtering term
+            return {
+              id: item.id,
+              ...(item.scope ? { scope: item.scope } : {}),
+            };
+          }
+        }),
+        includeResultsetResponses: "HIT",
+        pagination: { skip: 0, limit: 10 },
+        testMode: false,
+        requestedGranularity: "record",
       },
-      includeResultsetResponses: "HIT",
-      pagination: {
-        skip: 0,
-        limit: 10,
-      },
-      testMode: false,
-      requestedGranularity: "record",
     };
 
-    // Convert filters to Beacon-compatible format
-    let filterData = params.map((item) => {
-      if (item.operator) {
-        // Advanced filter with operator and value
-        return {
-          id: item.field,
-          operator: item.operator,
-          value: item.value,
-        };
-      } else {
-        // Simple filtering term
-        return {
-          id: item.id,
-          ...(item.scope ? { scope: item.scope } : {}),
-        };
-      }
-    });
-
-    filter.query.filters = filterData;
-
+    console.log("[SearchButton] queryBuilder.output ➜", filter);
     return filter;
   };
 
