@@ -22,7 +22,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import InfoIcon from "@mui/icons-material/Info";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import MailOutlineRoundedIcon from "@mui/icons-material/MailOutlineRounded";
 import config from "../../config/config.json";
 
 import { useSelectedEntry } from "../context/SelectedEntryContext";
@@ -168,7 +168,9 @@ export default function ResultsTable() {
                     >
                       <TableCell
                         sx={{ fontWeight: "bold" }}
-                        style={{ width: BEACON_NETWORK_COLUMNS[0].width }}
+                        style={{
+                          width: BEACON_NETWORK_COLUMNS[0].width,
+                        }}
                       >
                         <Box
                           display="flex"
@@ -204,36 +206,54 @@ export default function ResultsTable() {
                             ) : (
                               <KeyboardArrowUpIcon />
                             ))}
+
                           {iconUrl && (
                             <img
                               className="table-icon"
                               src={iconUrl}
                               alt="Beacon logo"
+                              onError={(e) => {
+                                const fallbackId =
+                                  item.beaconId || item.id || "unknown";
+                                console.warn(
+                                  `[ResultsTable] Broken logo for beacon: ${fallbackId}`
+                                );
+                                e.target.style.display = "none";
+                              }}
                             />
                           )}
+
                           <span>{item.beaconId ? item.beaconId : item.id}</span>
                         </Box>
                       </TableCell>
 
                       <TableCell
                         sx={{ fontWeight: "bold" }}
-                        style={{ width: BEACON_NETWORK_COLUMNS[1].width }}
+                        style={{
+                          width: BEACON_NETWORK_COLUMNS[1].width,
+                        }}
                       >
                         {item.exists ? "Production Beacon" : "Development"}
                       </TableCell>
 
                       <TableCell
                         sx={{ fontWeight: "bold" }}
-                        style={{ width: BEACON_NETWORK_COLUMNS[2].width }}
+                        style={{
+                          width: BEACON_NETWORK_COLUMNS[2].width,
+                        }}
                       >
                         {item.items.length > 0
-                          ? `${item.items.length} Datasets`
+                          ? `${item.items.length} ${
+                              item.items.length === 1 ? "Dataset" : "Datasets"
+                            }`
                           : "-"}
                       </TableCell>
 
                       <TableCell
                         sx={{ fontWeight: "bold" }}
-                        style={{ width: BEACON_NETWORK_COLUMNS[3].width }}
+                        style={{
+                          width: BEACON_NETWORK_COLUMNS[3].width,
+                        }}
                       >
                         {item.totalResultsCount > 0
                           ? new Intl.NumberFormat(navigator.language).format(
@@ -244,36 +264,66 @@ export default function ResultsTable() {
 
                       {config.beaconType === "singleBeacon" && (
                         <TableCell
-                          style={{ width: BEACON_NETWORK_COLUMNS[3].width }}
+                          style={{
+                            width: BEACON_NETWORK_COLUMNS[3].width,
+                          }}
                         >
                           {item.totalResultsCount > 0 ? (
-                            <Button
-                              variant="text"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleOpenModal(item);
-                              }}
-                              sx={{
-                                textTransform: "none",
-                                fontSize: "14px",
-                                fontWeight: 400,
-                                fontFamily: '"Open Sans", sans-serif',
-                                color: "gray",
-                                width: "50px",
-                                height: "30px",
-                                minWidth: "30px",
-                                minHeight: "30px",
-                                backgroundColor: "transparent",
-                                padding: 0,
-                                "&:hover": {
-                                  color: config.ui.colors.primary,
-                                },
-                              }}
-                            >
-                              <CalendarViewMonthIcon />
-                            </Button>
+                            // <Button
+                            //   variant="text"
+                            //   onClick={(e) => {
+                            //     e.stopPropagation();
+                            //     handleOpenModal(item);
+                            //   }}
+                            //   sx={{
+                            //     textTransform: "none",
+                            //     fontSize: "14px",
+                            //     fontWeight: 400,
+                            //     fontFamily: '"Open Sans", sans-serif',
+                            //     color: "gray",
+                            //     width: "50px",
+                            //     height: "30px",
+                            //     minWidth: "30px",
+                            //     minHeight: "30px",
+                            //     backgroundColor: "transparent",
+                            //     padding: 0,
+                            //     "&:hover": {
+                            //       color: config.ui.colors.primary,
+                            //     },
+                            //   }}
+                            // >
+                            //   <CalendarViewMonthIcon />
+                            // </Button>
+                            <Tooltip title="View dataset details" arrow>
+                              <Button
+                                onClick={() => handleOpenModal(item)}
+                                variant="outlined"
+                                startIcon={<CalendarViewMonthIcon />}
+                                sx={{
+                                  textTransform: "none",
+                                  fontSize: "13px",
+                                  fontWeight: 400,
+                                  fontFamily: '"Open Sans", sans-serif',
+                                  color: config.ui.colors.darkPrimary,
+                                  borderColor: config.ui.colors.darkPrimary,
+                                  borderRadius: "8px",
+                                  px: 1.5,
+                                  py: 0.5,
+                                  minHeight: "28px",
+                                  minWidth: "84px",
+                                  "& .MuiButton-startIcon": {
+                                    marginRight: "6px",
+                                  },
+                                  "&:hover": {
+                                    backgroundColor: `${config.ui.colors.darkPrimary}10`,
+                                  },
+                                }}
+                              >
+                                Details
+                              </Button>
+                            </Tooltip>
                           ) : (
-                            "-"
+                            "---"
                           )}
                         </TableCell>
                       )}
@@ -281,9 +331,7 @@ export default function ResultsTable() {
                       <TableCell
                         style={{
                           width: BEACON_NETWORK_COLUMNS[4].width,
-                          align: BEACON_NETWORK_COLUMNS[4].align,
                         }}
-                        align={BEACON_NETWORK_COLUMNS[4].align}
                       >
                         {itemEmail && (
                           <Tooltip title="Contact this beacon" arrow>
@@ -299,7 +347,7 @@ export default function ResultsTable() {
                                 fontWeight: 400,
                                 fontFamily: '"Open Sans", sans-serif',
                                 backgroundColor: "transparent",
-                                color: "gray",
+                                color: config.ui.colors.darkPrimary,
                                 width: "50px",
                                 height: "30px",
                                 minWidth: "30px",
@@ -308,11 +356,10 @@ export default function ResultsTable() {
                                 transition: "all 0.3s ease",
                                 "&:hover": {
                                   color: config.ui.colors.primary,
-                                  transform: "scale(1.1)",
                                 },
                               }}
                             >
-                              <MailOutlineIcon />
+                              <MailOutlineRoundedIcon />
                             </Button>
                           </Tooltip>
                         )}

@@ -130,9 +130,7 @@ export default function SearchGenomicInput({
     // Use typed assembly or fallback to current dropdown
     const finalAssembly = detectedAssembly || assembly;
 
-    const alreadyHasGenomic = selectedFilter.some(
-      (f) => f.queryType === "genomic"
-    );
+    const alreadyHasGenomic = selectedFilter.some((f) => f.type === "genomic");
 
     if (alreadyHasGenomic) {
       setMessage(COMMON_MESSAGES.singleGenomicQuery);
@@ -162,6 +160,19 @@ export default function SearchGenomicInput({
       .toString(36)
       .slice(2, 7)}`;
 
+    // Build Beacon-compliant genomic query parameters
+    let queryParams = {};
+    if (isVariant) {
+      const [chromosome, position, ref, alt] = cleanedValue.split("-");
+      queryParams = {
+        assemblyId: finalAssembly,
+        referenceName: chromosome,
+        start: [Number(position)],
+        referenceBases: ref,
+        alternateBases: alt,
+      };
+    }
+
     // Build new filter item with final label
     const newGenomicFilter = {
       id: uniqueId,
@@ -169,7 +180,8 @@ export default function SearchGenomicInput({
       label: labelForCheck,
       scope: isVariant ? "genomicVariant" : "genomicQuery",
       bgColor: "genomic",
-      queryType: "genomic",
+      type: "genomic",
+      queryParams,
     };
 
     // Add to list and clear input

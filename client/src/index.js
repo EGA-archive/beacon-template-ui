@@ -26,7 +26,7 @@ const oidcConfig = {
   revokeAccessTokenOnSignout: true,
 };
 
-console.log("OIDC Config:", oidcConfig);
+// console.log("OIDC Config:", oidcConfig);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

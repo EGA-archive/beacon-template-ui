@@ -19,7 +19,9 @@ export default function Login() {
         mt: 10,
       }}
     >
-      <CircularProgress />
+      <Box data-cy="login-page-loader">
+        <CircularProgress />
+      </Box>
       <Typography
         variant="body1"
         sx={{ fontFamily: '"Open Sans", sans-serif', fontSize: "14px", mt: 4 }}

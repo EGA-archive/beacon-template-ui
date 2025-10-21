@@ -1,20 +1,29 @@
+import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
+import { Box } from "@mui/material";
+
 export const BEACON_NETWORK_COLUMNS = [
   {
     id: "beacon_dataset",
-    label: "Beacon > Dataset",
+    label: (
+      <Box display="flex" alignItems="center" gap={1} ml={4}>
+        Beacon
+        <KeyboardArrowRightRoundedIcon sx={{ fontSize: "26px" }} />
+        Dataset
+      </Box>
+    ),
     align: "left",
     width: "30%",
   },
   {
     id: "maturity",
     label: "Beacon Maturity",
-    align: "center",
+    align: "left",
     width: "20%",
   },
   {
     id: "datasets_count",
     label: "nº of Datasets",
-    align: "right",
+    align: "left",
     numeric: true,
     width: "20%",
   },
@@ -22,44 +31,7 @@ export const BEACON_NETWORK_COLUMNS = [
     id: "response",
     label: "Response",
     width: "10%",
-  },
-  {
-    id: "contact",
-    label: "Contact",
-    width: "10%",
     align: "left",
-  },
-];
-
-export const BEACON_SINGLE_COLUMNS = [
-  {
-    id: "beacon_dataset",
-    label: "Dataset",
-    align: "left",
-    width: "30%",
-  },
-  {
-    id: "maturity",
-    label: "Beacon Maturity",
-    align: "center",
-    width: "20%",
-  },
-  {
-    id: "datasets_count",
-    label: "nº of Datasets",
-    align: "right",
-    numeric: true,
-    width: "20%",
-  },
-  {
-    id: "response",
-    label: "Response",
-    width: "10%",
-  },
-  {
-    id: "details",
-    label: "Details",
-    width: "10%",
   },
   {
     id: "contact",
@@ -70,13 +42,72 @@ export const BEACON_SINGLE_COLUMNS = [
 ];
 
 export const BEACON_NETWORK_COLUMNS_EXPANDED = {
-  beacon_dataset_name: "70%",
-  beacon_dataset_response: "10%",
-  beacon_dataset_detail: {
+  beacon_dataset_name: {
+    width: "30%",
+    align: "left",
+  },
+  beacon_dataset_empty_one: {
     width: "20%",
-    float: "right",
+    align: "left",
+  },
+  beacon_dataset_empty_two: {
+    width: "20%",
+    align: "left",
+  },
+  beacon_dataset_response: {
+    width: "20%",
+    align: "left",
+  },
+  beacon_dataset_detail: {
+    width: "0%",
+    align: "left",
   },
 };
+
+export const BEACON_SINGLE_COLUMNS = [
+  {
+    id: "beacon_dataset",
+    label: (
+      <Box display="flex" alignItems="center" ml={4}>
+        Dataset
+      </Box>
+    ),
+    align: "left",
+    width: "30%",
+  },
+
+  {
+    id: "maturity",
+    label: "Beacon Maturity",
+    align: "left",
+    width: "20%",
+  },
+  {
+    id: "datasets_count",
+    label: "nº of Datasets",
+    align: "left",
+    numeric: true,
+    width: "20%",
+  },
+  {
+    id: "response",
+    label: "Response",
+    width: "10%",
+    align: "left",
+  },
+  {
+    id: "details",
+    label: "Details",
+    width: "10%",
+    align: "left",
+  },
+  {
+    id: "contact",
+    label: "Contact",
+    width: "10%",
+    align: "left",
+  },
+];
 
 export const FILTERING_TERMS_COLUMNS = [
   {

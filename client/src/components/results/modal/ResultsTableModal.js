@@ -11,16 +11,33 @@ import Loader from "../../common/Loader";
 import { PATH_SEGMENT_TO_ENTRY_ID } from "../../common/textFormatting";
 
 const style = {
+  // position: "absolute",
+  // top: "50%",
+  // left: "50%",
+  // transform: "translate(-50%, -50%)",
+  // width: "90%",
+  // height: "70%",
+  // bgcolor: "background.paper",
+  // borderRadius: 2,
+  // boxShadow: 24,
+  // p: 4,
+  // textAlign: "left",
+  // fontSize: "14px",
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 1200,
+  width: "90%",
+  maxWidth: "1200px",
+  height: "80vh",
   bgcolor: "background.paper",
-  border: "2px solid #000",
+  borderRadius: 2,
   boxShadow: 24,
+  display: "flex",
+  flexDirection: "column",
+  overflow: "hidden",
+  overflowY: "auto",
   p: 4,
-  pt: "15px",
 };
 
 const ResultsTableModal = ({ open, subRow, onClose }) => {
@@ -29,7 +46,7 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [dataTable, setDataTable] = useState([]);
   const [url, setUrl] = useState("");
   const entryTypeId = PATH_SEGMENT_TO_ENTRY_ID[selectedPathSegment];
@@ -101,45 +118,45 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
   };
 
   useEffect(() => {
+    if (!open) return;
+
     const fetchTableItems = async () => {
       try {
         setLoading(true);
         const url = `${config.apiUrl}/${selectedPathSegment}`;
         setUrl(url);
         let query = queryBuilder(page, entryTypeId);
-
-        const requestOptions = {
+        const response = await fetch(url, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(query),
-        };
+        });
 
-        const response = await fetch(url, requestOptions);
         const data = await response.json();
         const results = data.response?.resultSets;
 
-        const beacon = results.find((item) => {
+        const beacon = results?.find((item) => {
           const id = subRow.beaconId || subRow.id;
           const itemId = item.beaconId || item.id;
           return id === itemId;
         });
-
+        if (!beacon) {
+          console.warn("[Modal] No matching beacon found:", subRow);
+          return;
+        }
         const totalDatasetsPages = Math.ceil(beacon.resultsCount / rowsPerPage);
-
         setTotalItems(beacon.resultsCount);
         setTotalPages(totalDatasetsPages);
         setDataTable(beacon.results);
       } catch (err) {
-        console.error("Failed to fetch modal table", err);
+        console.error("❌ Failed to fetch modal table", err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchTableItems();
-  }, [subRow, page, rowsPerPage]);
+  }, [open, subRow, page, rowsPerPage]);
 
   return (
     <Modal
@@ -239,7 +256,7 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
                   </Box>
                 )}
               </Box>
-              <Box sx={{ paddingBottom: "15px" }}>
+              {/* <Box sx={{ paddingBottom: "15px" }}>
                 <Typography
                   sx={{
                     color: `${config.ui.colors.darkPrimary}`,
@@ -258,7 +275,7 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
                     {url}
                   </Link>
                 </Typography>
-              </Box>
+              </Box> */}
             </Box>
             <Box>
               {loading && <Loader message="Loading data..." />}

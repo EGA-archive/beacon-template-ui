@@ -30,13 +30,36 @@ export default function HomePage({
   const isOnLoginPage = location.pathname === "/login";
 
   useEffect(() => {
+    localStorage.removeItem("isLoggingOut");
+  }, []);
+
+  useEffect(() => {
     // Change later this is only for testing
     if (window.Cypress) return;
 
+    // The login modal does not show if:
+    // - the user is already logged in
+    // - the modal was already triggered once
+    // - the user is currently on the login page
+
+    const isLoggingOut = localStorage.getItem("isLoggingOut") === "true";
+    if (isLoggingOut) return;
+
     if (isLoggedIn || hasModalBeenTriggered || isOnLoginPage) return;
-    const handleFirstInteraction = () => {
+
+    // Handler for detecting the first user interaction: click or keydown
+    const handleFirstInteraction = (e) => {
+      // If the first interaction is a click on a "Log In" button, skip modal
+      const isLoginButton = e?.target?.closest(".login-button");
+      const isBurgerMenu = e?.target?.closest('[data-cy="burger-menu"]');
+      if (isLoginButton || isBurgerMenu) {
+        return;
+      }
+
+      // Open the login modal since it's the first non-login interaction
       setLoginModalOpen(true);
       setHasModalBeenTriggered(true);
+
       window.removeEventListener("click", handleFirstInteraction);
       window.removeEventListener("keydown", handleFirstInteraction);
     };
