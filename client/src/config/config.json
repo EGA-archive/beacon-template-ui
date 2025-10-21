@@ -14,7 +14,7 @@
     { "jsonName": "BND", "displayName": "BND" }
   ],
   "ui": {
-    "title": "EGA Beacon Network Browser",
+    "title": "EGA Beacon Browser",
     "colors": {
       "primary": "#3176B1",
       "darkPrimary": "#173D5D",

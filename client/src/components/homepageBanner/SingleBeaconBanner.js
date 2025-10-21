@@ -258,6 +258,10 @@ export default function SingleBeaconBanner() {
                         sx={{
                           height: "50px",
                           objectFit: "contain",
+                          display: "block",
+                        }}
+                        onError={(e) => {
+                          e.target.style.display = "none";
                         }}
                       />
                     )}
