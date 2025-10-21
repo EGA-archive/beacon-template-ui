@@ -206,13 +206,23 @@ export default function ResultsTable() {
                             ) : (
                               <KeyboardArrowUpIcon />
                             ))}
+
                           {iconUrl && (
                             <img
                               className="table-icon"
                               src={iconUrl}
                               alt="Beacon logo"
+                              onError={(e) => {
+                                const fallbackId =
+                                  item.beaconId || item.id || "unknown";
+                                console.warn(
+                                  `[ResultsTable] Broken logo for beacon: ${fallbackId}`
+                                );
+                                e.target.style.display = "none";
+                              }}
                             />
                           )}
+
                           <span>{item.beaconId ? item.beaconId : item.id}</span>
                         </Box>
                       </TableCell>
@@ -259,31 +269,59 @@ export default function ResultsTable() {
                           }}
                         >
                           {item.totalResultsCount > 0 ? (
-                            <Button
-                              variant="text"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleOpenModal(item);
-                              }}
-                              sx={{
-                                textTransform: "none",
-                                fontSize: "14px",
-                                fontWeight: 400,
-                                fontFamily: '"Open Sans", sans-serif',
-                                color: "gray",
-                                width: "50px",
-                                height: "30px",
-                                minWidth: "30px",
-                                minHeight: "30px",
-                                backgroundColor: "transparent",
-                                padding: 0,
-                                "&:hover": {
-                                  color: config.ui.colors.primary,
-                                },
-                              }}
-                            >
-                              <CalendarViewMonthIcon />
-                            </Button>
+                            // <Button
+                            //   variant="text"
+                            //   onClick={(e) => {
+                            //     e.stopPropagation();
+                            //     handleOpenModal(item);
+                            //   }}
+                            //   sx={{
+                            //     textTransform: "none",
+                            //     fontSize: "14px",
+                            //     fontWeight: 400,
+                            //     fontFamily: '"Open Sans", sans-serif',
+                            //     color: "gray",
+                            //     width: "50px",
+                            //     height: "30px",
+                            //     minWidth: "30px",
+                            //     minHeight: "30px",
+                            //     backgroundColor: "transparent",
+                            //     padding: 0,
+                            //     "&:hover": {
+                            //       color: config.ui.colors.primary,
+                            //     },
+                            //   }}
+                            // >
+                            //   <CalendarViewMonthIcon />
+                            // </Button>
+                            <Tooltip title="View dataset details" arrow>
+                              <Button
+                                onClick={() => handleOpenModal(item)}
+                                variant="outlined"
+                                startIcon={<CalendarViewMonthIcon />}
+                                sx={{
+                                  textTransform: "none",
+                                  fontSize: "13px",
+                                  fontWeight: 400,
+                                  fontFamily: '"Open Sans", sans-serif',
+                                  color: config.ui.colors.darkPrimary,
+                                  borderColor: config.ui.colors.darkPrimary,
+                                  borderRadius: "8px",
+                                  px: 1.5,
+                                  py: 0.5,
+                                  minHeight: "28px",
+                                  minWidth: "84px",
+                                  "& .MuiButton-startIcon": {
+                                    marginRight: "6px",
+                                  },
+                                  "&:hover": {
+                                    backgroundColor: `${config.ui.colors.darkPrimary}10`,
+                                  },
+                                }}
+                              >
+                                Details
+                              </Button>
+                            </Tooltip>
                           ) : (
                             "---"
                           )}

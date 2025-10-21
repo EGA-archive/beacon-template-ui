@@ -211,6 +211,7 @@ export default function Navbar({ title, main, navItems }) {
                     color="inherit"
                     size="small"
                     aria-label="logout"
+                    data-cy="logout-button"
                   >
                     <LogoutIcon fontSize="small" />
                   </IconButton>
@@ -313,6 +314,7 @@ export default function Navbar({ title, main, navItems }) {
                 color="inherit"
                 size="small"
                 aria-label="logout"
+                data-cy="logout-button"
                 sx={{ color: config.ui.colors.primary }}
               >
                 <LogoutIcon fontSize="small" />

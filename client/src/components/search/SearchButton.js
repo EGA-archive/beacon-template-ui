@@ -139,52 +139,105 @@ export default function SearchButton({ setSelectedTool }) {
     }
   };
 
+  // // Helper to build the Beacon API query object from the selected filters
+  // const queryBuilder = (params, entryId) => {
+  //   console.log("[SearchButton] queryBuilder.input ➜", { params, entryId });
+
+  //   // Identify genomic and non-genomic filters
+  //   // Looks for a filter object that is type genomic
+  //   const genomicQuery = params.find((f) => f.type === "genomic");
+  //   // Keeps all the other filters
+  //   const nonGenomicFilters = params.filter((f) => f.type !== "genomic");
+
+  //   // This builds the Beacon POST body
+  //   const filter = {
+  //     meta: { apiVersion: "2.0" },
+  //     query: {
+  //       // This is where Beacon expects all the query data.
+  //       // If a genomic query exists then add the .queryParams here
+  //       // Otherwise leave it as empty object
+  //       requestParameters: genomicQuery?.queryParams || {},
+  //       // Loops through all remaining filters and formats them for Beacon
+  //       // Scope: if there is no scope it is left empty
+  //       filters: nonGenomicFilters.map((item) => {
+  //         if (item.operator) {
+  //           // Advanced filter with operator and value
+  //           return {
+  //             id: item.field,
+  //             operator: item.operator,
+  //             value: item.value,
+  //           };
+  //         } else {
+  //           // Simple filtering term
+  //           return {
+  //             id: item.id,
+  //             ...(item.scope ? { scope: item.scope } : {}),
+  //           };
+  //         }
+  //       }),
+  //       includeResultsetResponses: "HIT",
+  //       pagination: { skip: 0, limit: 10 },
+  //       testMode: false,
+  //       requestedGranularity: "record",
+  //     },
+  //   };
+
   // Helper to build the Beacon API query object from the selected filters
   const queryBuilder = (params, entryId) => {
     console.log("[SearchButton] queryBuilder.input ➜", { params, entryId });
 
     // Identify genomic and non-genomic filters
-    // Looks for a filter object that is type genomic
     const genomicQuery = params.find((f) => f.type === "genomic");
-    // Keeps all the other filters
     const nonGenomicFilters = params.filter((f) => f.type !== "genomic");
 
-    // This builds the Beacon POST body
-    const filter = {
-      meta: { apiVersion: "2.0" },
-      query: {
-        // This is where Beacon expects all the query data.
-        // If a genomic query exists then add the .queryParams here
-        // Otherwise leave it as empty object
-        requestParameters: genomicQuery?.queryParams || {},
-        // Loops through all remaining filters and formats them for Beacon
-        // Scope: if there is no scope it is left empty
-        filters: nonGenomicFilters.map((item) => {
-          if (item.operator) {
-            // Advanced filter with operator and value
-            return {
-              id: item.field,
-              operator: item.operator,
-              value: item.value,
-            };
-          } else {
-            // Simple filtering term
-            return {
-              id: item.id,
-              ...(item.scope ? { scope: item.scope } : {}),
-            };
-          }
-        }),
-        includeResultsetResponses: "HIT",
-        pagination: { skip: 0, limit: 10 },
-        testMode: false,
-        requestedGranularity: "record",
-      },
+    // ✅ Check if genomic query actually contains any parameters
+    const hasGenomicParams =
+      genomicQuery?.queryParams &&
+      Object.keys(genomicQuery.queryParams).length > 0;
+
+    // Build the base Beacon POST body
+    const queryBody = {
+      filters: nonGenomicFilters.map((item) => {
+        if (item.operator) {
+          // Advanced filter with operator and value
+          return {
+            id: item.field,
+            operator: item.operator,
+            value: item.value,
+          };
+        } else {
+          // Simple filtering term
+          return {
+            id: item.id,
+            ...(item.scope ? { scope: item.scope } : {}),
+          };
+        }
+      }),
+      // ⚙️ Only include requestParameters when genomic data exists
+      ...(hasGenomicParams
+        ? { requestParameters: genomicQuery.queryParams }
+        : {}),
+      includeResultsetResponses: "HIT",
+      pagination: { skip: 0, limit: 10 },
+      testMode: false,
+      requestedGranularity: "record",
     };
 
+    const filter = {
+      meta: { apiVersion: "2.0" },
+      query: queryBody,
+    };
+
+    // Debugging logs
+    console.log("[SearchButton] hasGenomicParams ➜", hasGenomicParams);
     console.log("[SearchButton] queryBuilder.output ➜", filter);
+
     return filter;
   };
+
+  //   console.log("[SearchButton] queryBuilder.output ➜", filter);
+  //   return filter;
+  // };
 
   // Render the button itself
   return (

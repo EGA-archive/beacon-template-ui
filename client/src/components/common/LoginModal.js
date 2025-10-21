@@ -52,6 +52,7 @@ export default function LoginModal({ open, onClose }) {
               variant="contained"
               color="primary"
               fullWidth
+              data-cy="modal-login-button"
             >
               Log In
             </Button>
