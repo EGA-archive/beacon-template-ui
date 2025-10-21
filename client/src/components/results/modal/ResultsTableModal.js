@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Box, Typography, Link } from "@mui/material";
+import { Box, Typography, Link, Button } from "@mui/material";
 import Modal from "@mui/material/Modal";
 import Fade from "@mui/material/Fade";
 import ResultsTableModalBody from "./ResultsTableModalBody";
@@ -51,6 +51,7 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
   const [url, setUrl] = useState("");
   const entryTypeId = PATH_SEGMENT_TO_ENTRY_ID[selectedPathSegment];
 
+  console.log(totalPages);
   const parseType = (item) => {
     switch (item) {
       case "dataset":
@@ -290,6 +291,8 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
                     handleChangePage={handleChangePage}
                     handleChangeRowsPerPage={handleChangeRowsPerPage}
                     primary={config.ui.colors.primary}
+                    entryTypeId={entryTypeId}
+                    selectedPathSegment={selectedPathSegment}
                   />
                 </>
               )}

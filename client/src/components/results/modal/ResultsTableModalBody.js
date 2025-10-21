@@ -10,10 +10,13 @@ import {
   TableRow,
   tableCellClasses,
   TablePagination,
+  Button,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import config from "../../../config/config.json";
 import ResultsTableModalRow from "./ResultsTableModalRow";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import { queryBuilder } from "../../search/utils/queryBuilder";
 
 const ResultsTableModalBody = ({
   dataTable,
@@ -22,6 +25,8 @@ const ResultsTableModalBody = ({
   rowsPerPage,
   handleChangePage,
   handleChangeRowsPerPage,
+  entryTypeId,
+  selectedPathSegment,
 }) => {
   const [expandedRow, setExpandedRow] = useState(null);
 
@@ -146,6 +151,25 @@ const ResultsTableModalBody = ({
 
   console.log("sortedHeaders", sortedHeaders);
 
+  // 🧪 Debug: inspect header vs rendered content of first row
+  if (dataTable.length > 0) {
+    const firstRow = dataTable[0];
+    console.log("🧩 DEBUG — First row raw object:", firstRow);
+
+    console.log("🧾 Header → Rendered content comparison (first row only):");
+    sortedHeaders.forEach((col) => {
+      const rawValue = firstRow[col.id];
+      const rendered = summarizeValue(rawValue);
+      console.log(
+        `${col.id}:`,
+        "\n   ↳ Raw:",
+        rawValue,
+        "\n   ↳ Rendered:",
+        rendered
+      );
+    });
+  }
+
   return (
     <Box
       sx={{
@@ -245,6 +269,106 @@ const ResultsTableModalBody = ({
             onRowsPerPageChange={handleChangeRowsPerPage}
             rowsPerPageOptions={[5, 10, 20]}
           />
+
+          {/* 🔽 Export CSV Button (keeps header order from sortedHeaders) */}
+          {/* Export CSV Button */}
+          <Box
+            sx={{ display: "flex", justifyContent: "flex-end", mt: 2, pr: 2 }}
+          >
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<DownloadRoundedIcon />}
+              onClick={async () => {
+                try {
+                  console.log("Starting full CSV export...");
+
+                  // Build a minimal valid Beacon query (no filters by default)
+                  // You can pass selectedFilter from the parent if you want to export with filters
+                  const fullQuery = queryBuilder([], entryTypeId);
+
+                  // Request a large batch (adjust limit as needed)
+                  fullQuery.query.pagination = { skip: 0, limit: 10000 };
+
+                  const fullUrl = `${config.apiUrl}/${selectedPathSegment}`;
+                  console.log("Fetching all results from:", fullUrl);
+
+                  const response = await fetch(fullUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(fullQuery),
+                  });
+
+                  if (!response.ok) {
+                    console.error("Fetch failed with status:", response.status);
+                    alert("Failed to fetch data for export.");
+                    return;
+                  }
+
+                  const data = await response.json();
+                  const resultSets = data?.response?.resultSets ?? [];
+                  const results = resultSets.flatMap((r) => r.results || []);
+
+                  console.log("Fetched", results.length, "records for export");
+
+                  if (!results.length) {
+                    alert("No data available to export.");
+                    return;
+                  }
+
+                  // Use the same header order as the rendered table
+                  const headers = sortedHeaders.map((h) => h.id);
+                  const headerLabels = sortedHeaders.map((h) => h.name);
+
+                  // Build CSV rows using the rendered (summarized) values
+                  const csvRows = [
+                    headerLabels.join(","), // header line
+                    ...results.map((row) =>
+                      headers
+                        .map((field) =>
+                          JSON.stringify(
+                            summarizeValue(
+                              row[field] !== undefined && row[field] !== null
+                                ? row[field]
+                                : ""
+                            )
+                          )
+                        )
+                        .join(",")
+                    ),
+                  ];
+
+                  const csvContent = csvRows.join("\n");
+
+                  // Create downloadable file
+                  const blob = new Blob([csvContent], {
+                    type: "text/csv;charset=utf-8;",
+                  });
+                  const url = URL.createObjectURL(blob);
+
+                  // File name includes entry type and current date
+                  const fileName = `beacon-${
+                    selectedPathSegment || "results"
+                  }-${new Date().toISOString().split("T")[0]}.csv`;
+
+                  const link = document.createElement("a");
+                  link.href = url;
+                  link.setAttribute("download", fileName);
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(url);
+
+                  console.log("CSV downloaded successfully:", fileName);
+                } catch (err) {
+                  console.error("CSV export failed:", err);
+                  alert("CSV export failed. Check the console for details.");
+                }
+              }}
+            >
+              Export CSV
+            </Button>
+          </Box>
         </>
       </Paper>
     </Box>

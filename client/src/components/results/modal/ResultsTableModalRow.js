@@ -4,7 +4,7 @@ import {
   TableContainer,
   TableRow,
   Table,
-  TableBody
+  TableBody,
 } from "@mui/material";
 
 const ResultsTableModalRow = ({ item }) => {
@@ -15,10 +15,10 @@ const ResultsTableModalRow = ({ item }) => {
       <TableCell
         colSpan={5}
         sx={{
-          backgroundColor: 'background.paper',
-          borderTop: '1px solid',
-          borderColor: 'divider',
-          p: 2
+          backgroundColor: "background.paper",
+          borderTop: "1px solid",
+          borderColor: "divider",
+          p: 2,
         }}
       >
         <Box>
