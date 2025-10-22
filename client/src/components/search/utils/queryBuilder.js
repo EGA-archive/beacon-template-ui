@@ -3,8 +3,6 @@
  * Supports both genomic and non-genomic filters.
  */
 export const queryBuilder = (params = [], entryId) => {
-  console.log("[queryBuilder] input ➜", { params, entryId });
-
   const genomicQuery = params.find((f) => f.type === "genomic");
   const nonGenomicFilters = params.filter((f) => f.type !== "genomic");
 
@@ -40,7 +38,5 @@ export const queryBuilder = (params = [], entryId) => {
     meta: { apiVersion: "2.0" },
     query: queryBody,
   };
-
-  console.log("[queryBuilder] output ➜", filter);
   return filter;
 };

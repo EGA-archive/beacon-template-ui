@@ -43,10 +43,6 @@ export default function QueryAppliedItems({
       return;
     }
 
-    console.log(
-      `🔄 Changing scope for filter: ${target.label} (${prevScope} → ${newScope})`
-    );
-
     // Otherwise update the scope
     setSelectedFilter((prevFilters) =>
       prevFilters.map((filter) =>

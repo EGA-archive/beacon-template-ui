@@ -314,17 +314,12 @@ export default function GenomicQueryBuilderDialog({
               values.chromosome = values.chromosome.trim().toUpperCase();
             }
 
-            console.log("[GQB] onSubmit.values ➜", values);
-            console.log("[GQB] onSubmit.queryType ➜", selectedQueryType);
-
-            // ✅ STEP 2A: build Beacon-compatible query params
+            // STEP 2A: build Beacon-compatible query params
             const queryParams = buildGenomicParams(
               selectedQueryType,
               values,
               selectedInput
             );
-
-            console.log("[GQB] onSubmit.queryParams ➜", queryParams);
 
             // These are exclusive groups...
             const mutuallyExclusiveGroups = {
