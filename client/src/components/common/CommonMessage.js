@@ -14,6 +14,12 @@ export const COMMON_MESSAGES = {
   fillFields: "Please fill in all the fields",
   addFilter: "Please apply at least one filter to run this search.",
   singleGenomicQuery: "Only one genomic query can be added at a time.",
+  incompleteFilter:
+    "Please fill in the current filter value before adding a new one.",
+  invalidChromosome: "Invalid chromosome name in the query.",
+  invalidBases: "Invalid DNA base. Only A, C, G, or T are allowed.",
+  invalidFormat:
+    "Unrecognized genomic query format. Please use 17-7674945-G-A or 17:7674945G>A.",
 };
 
 // Reusable component to display messages (error or success)

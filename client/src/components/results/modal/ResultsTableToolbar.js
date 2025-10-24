@@ -28,6 +28,7 @@ export default function ResultsTableToolbar({
   setSearchTerm,
   handleExport,
   sortedHeaders,
+  count,
 }) {
   const colors = config.ui.colors;
 
@@ -40,28 +41,16 @@ export default function ResultsTableToolbar({
         gap: 3,
       }}
     >
-      {/* Export CSV Button */}
-      <Button
-        variant="outlined"
-        size="large"
+      <Box
         sx={{
-          px: 2,
-          borderColor: colors.darkPrimary,
-          borderRadius: "24px",
-          "& .MuiButton-startIcon": {
-            marginLeft: 0,
-            marginRight: 0,
-          },
+          color: colors.darkPrimary,
+          fontSize: "14px",
+          display: "flex",
+          alignItems: "center",
         }}
-        startIcon={
-          <DownloadForOfflineRoundedIcon
-            sx={{
-              color: colors.darkPrimary,
-            }}
-          />
-        }
-        onClick={handleExport}
-      />
+      >
+        Total Results:{count}
+      </Box>
 
       {/* Column Selector */}
       <FormControl size="small">
@@ -104,7 +93,7 @@ export default function ResultsTableToolbar({
               gap: "8px",
               py: 0.5,
               width: "200px",
-              height: "32px",
+              height: "33px",
             },
           }}
           IconComponent={KeyboardArrowDownRoundedIcon}
@@ -162,6 +151,29 @@ export default function ResultsTableToolbar({
             </InputAdornment>
           ),
         }}
+      />
+
+      {/* Export CSV Button */}
+      <Button
+        variant="outlined"
+        size="large"
+        sx={{
+          px: 2,
+          borderColor: colors.darkPrimary,
+          borderRadius: "24px",
+          "& .MuiButton-startIcon": {
+            marginLeft: 0,
+            marginRight: 0,
+          },
+        }}
+        startIcon={
+          <DownloadForOfflineRoundedIcon
+            sx={{
+              color: colors.darkPrimary,
+            }}
+          />
+        }
+        onClick={handleExport}
       />
     </Box>
   );

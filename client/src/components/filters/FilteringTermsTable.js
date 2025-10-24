@@ -52,9 +52,12 @@ export default function FilteringTermsTable({
   // Gets shared states and functions from the context
   const {
     selectedFilter,
+    extraFilter,
     setExtraFilter,
     setSelectedFilter,
     selectedPathSegment: selectedEntryType,
+    valueInputRef,
+    filteringTermsRef,
   } = useSelectedEntry();
 
   // A mapping to make scope names more human-readable
@@ -150,253 +153,295 @@ export default function FilteringTermsTable({
       )}
 
       {/* Table container */}
-      <Paper
-        sx={{
-          width: "100%",
-          overflow: "hidden",
-          boxShadow: "none",
-          borderRadius: 0,
-        }}
-      >
-        <TableContainer sx={{ maxHeight: 440 }}>
-          <Table stickyHeader aria-label="filtering terms table">
-            {/* Table header */}
-            <TableHead>
-              <TableRow>
-                {FILTERING_TERMS_COLUMNS.map((col) => (
-                  <TableCell
-                    key={col.id}
-                    sx={{
-                      backgroundColor: bgPrimary,
-                      fontWeight: 700,
-                      width: col.width,
-                      textAlign: col.align,
-                    }}
-                  >
-                    {col.label}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {/* If search was done but no terms found */}
-              {allFilteringTerms.length === 0 && searchWasPerformed ? (
+      <Box ref={filteringTermsRef}>
+        <Paper
+          sx={{
+            width: "100%",
+            overflow: "hidden",
+            boxShadow: "none",
+            borderRadius: 0,
+          }}
+        >
+          <TableContainer sx={{ maxHeight: 440 }}>
+            <Table stickyHeader aria-label="filtering terms table">
+              {/* Table header */}
+              <TableHead>
                 <TableRow>
-                  <TableCell colSpan={3} align="center">
-                    <CommonMessage
-                      text={COMMON_MESSAGES.noMatch}
-                      type="error"
-                    />
-                  </TableCell>
+                  {FILTERING_TERMS_COLUMNS.map((col) => (
+                    <TableCell
+                      key={col.id}
+                      sx={{
+                        backgroundColor: bgPrimary,
+                        fontWeight: 700,
+                        width: col.width,
+                        textAlign: col.align,
+                      }}
+                    >
+                      {col.label}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              ) : (
-                // Loop through filtering terms and render rows
-                allFilteringTerms
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((term) => {
-                    // Get label and scopes from helper
-                    const { displayLabel, selectedScope, allScopes } =
-                      getDisplayLabelAndScope(term, selectedEntryType);
+              </TableHead>
+              <TableBody>
+                {/* If search was done but no terms found */}
+                {allFilteringTerms.length === 0 && searchWasPerformed ? (
+                  <TableRow>
+                    <TableCell colSpan={3} align="center">
+                      <CommonMessage
+                        text={COMMON_MESSAGES.noMatch}
+                        type="error"
+                      />
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  // Loop through filtering terms and render rows
+                  allFilteringTerms
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((term) => {
+                      // Get label and scopes from helper
+                      const { displayLabel, selectedScope, allScopes } =
+                        getDisplayLabelAndScope(term, selectedEntryType);
 
-                    // Figure out which scope is selected
-                    const activeScope =
-                      selectedScopes[term.id] ||
-                      selectedScope ||
-                      allScopes?.[0] ||
-                      null;
+                      // Figure out which scope is selected
+                      const activeScope =
+                        selectedScopes[term.id] ||
+                        selectedScope ||
+                        allScopes?.[0] ||
+                        null;
 
-                    // const item = {
-                    //   key: term.id,
-                    //   label: displayLabel?.trim()
-                    //     ? displayLabel
-                    //     : term.label || term.id,
-                    //   type: term.type,
-                    //   scope: activeScope,
-                    //   scopes: allScopes || [],
-                    // };
+                      // const item = {
+                      //   key: term.id,
+                      //   label: displayLabel?.trim()
+                      //     ? displayLabel
+                      //     : term.label || term.id,
+                      //   type: term.type,
+                      //   scope: activeScope,
+                      //   scopes: allScopes || [],
+                      // };
 
-                    const uniqueId = `common-free-${Date.now().toString(
-                      36
-                    )}-${Math.random().toString(36).slice(2, 7)}`;
+                      const uniqueId = `common-free-${Date.now().toString(
+                        36
+                      )}-${Math.random().toString(36).slice(2, 7)}`;
 
-                    const item = {
-                      id: term.id,
-                      key: uniqueId,
-                      bgColor: "common",
-                      label: displayLabel?.trim() ? displayLabel : term.id,
-                      type: term.type,
-                      scope: activeScope,
-                      scopes: allScopes || [],
-                    };
+                      const item = {
+                        id: term.id,
+                        key: uniqueId,
+                        bgColor: "common",
+                        label: displayLabel?.trim() ? displayLabel : term.id,
+                        type: term.type,
+                        scope: activeScope,
+                        scopes: allScopes || [],
+                      };
 
-                    return (
-                      <TableRow
-                        key={item.key}
-                        // For alphanumeric terms, set as extra filter
-                        onClick={() => {
-                          if (item.type === "alphanumeric") {
-                            setExtraFilter({ ...item, setAddedFilters });
-                            return;
-                          }
-                          setSelectedFilter((prev) => {
-                            const isDuplicate = prev.some(
-                              (filter) =>
-                                filter.label === item.label &&
-                                filter.scope === item.scope
-                            );
+                      return (
+                        <TableRow
+                          key={item.key}
+                          onClick={() => {
+                            if (extraFilter && !extraFilter.value) {
+                              setMessage(COMMON_MESSAGES.incompleteFilter);
 
-                            if (isDuplicate) {
-                              setMessage(COMMON_MESSAGES.doubleFilter);
-                              setTimeout(() => setMessage(null), 3000);
-                              return prev; // return unchanged
-                            }
-
-                            const newKey = `${item.id}-${item.scope}`;
-                            setAddedFilters((prevSet) => {
-                              const newSet = new Set(prevSet);
-                              newSet.add(newKey);
-
-                              // Remove after 5 seconds
                               setTimeout(() => {
-                                setAddedFilters((current) => {
-                                  const updated = new Set(current);
-                                  updated.delete(newKey);
-                                  return updated;
-                                });
-                              }, 5000);
-
-                              return newSet;
-                            });
-
-                            // Otherwise, add normally
-                            return handleFilterSelection({
-                              item,
-                              prevFilters: prev,
-                              setMessage,
-                            });
-                          });
-                        }}
-                        sx={{
-                          cursor: "pointer",
-                          "&:hover td": {
-                            backgroundColor: bgPrimary,
-                          },
-                          transition: "background-color 0.2s ease-in-out",
-                        }}
-                      >
-                        {/* Column 1: Empty placeholder for Selector */}
-                        {/* Column 1: Toggle selection icon */}
-                        <TableCell
-                          align="left"
-                          onClick={(e) => {
-                            e.stopPropagation();
-
-                            // Check if this filter is already selected
-                            const isSelected = selectedFilter.some(
-                              (filter) =>
-                                filter.label === item.label &&
-                                filter.scope === item.scope
-                            );
-
-                            if (isSelected) {
-                              // Remove it
-                              setSelectedFilter((prev) =>
-                                prev.filter(
-                                  (filter) =>
-                                    !(
-                                      filter.label === item.label &&
-                                      filter.scope === item.scope
-                                    )
-                                )
-                              );
-                            } else {
-                              // Add it
-                              setSelectedFilter((prev) =>
-                                handleFilterSelection({
-                                  item,
-                                  prevFilters: prev,
-                                  setMessage,
-                                })
-                              );
+                                setMessage(null);
+                                if (valueInputRef?.current) {
+                                  valueInputRef.current.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "center",
+                                  });
+                                }
+                              }, 3000);
+                              return;
                             }
+                            if (item.type === "alphanumeric") {
+                              setExtraFilter({ ...item, setAddedFilters });
+                              return;
+                            }
+                            setSelectedFilter((prev) => {
+                              const isDuplicate = prev.some(
+                                (filter) =>
+                                  filter.label === item.label &&
+                                  filter.scope === item.scope
+                              );
+                              if (isDuplicate) {
+                                setMessage(COMMON_MESSAGES.doubleFilter);
+                                setTimeout(() => {
+                                  setMessage(null);
+                                  if (valueInputRef?.current) {
+                                    valueInputRef.current.scrollIntoView({
+                                      behavior: "smooth",
+                                      block: "center",
+                                    });
+                                  }
+                                }, 3000);
+                                return prev;
+                              }
+
+                              const newKey = `${item.id}-${item.scope}`;
+                              setAddedFilters((prevSet) => {
+                                const newSet = new Set(prevSet);
+                                newSet.add(newKey);
+                                setTimeout(() => {
+                                  setAddedFilters((current) => {
+                                    const updated = new Set(current);
+                                    updated.delete(newKey);
+                                    return updated;
+                                  });
+                                }, 5000);
+
+                                return newSet;
+                              });
+                              return handleFilterSelection({
+                                item,
+                                prevFilters: prev,
+                                setMessage,
+                              });
+                            });
+                          }}
+                          sx={{
+                            cursor: "pointer",
+                            opacity: message ? 0.6 : 1,
+                            pointerEvents: message ? "none" : "auto",
+                            transition:
+                              "opacity 0.2s ease, background-color 0.2s ease-in-out",
+                            "&:hover td": {
+                              backgroundColor: bgPrimary,
+                            },
                           }}
                         >
-                          {/** Check whether this filter is currently applied */}
-                          {selectedFilter.some(
-                            (filter) =>
-                              filter.label === item.label &&
-                              filter.scope === item.scope
-                          ) ? (
-                            <CheckCircleIcon
-                              sx={{
-                                color: config.ui.colors.primary,
-                                fontSize: 20,
-                              }}
-                            />
-                          ) : (
-                            <RadioButtonUncheckedIcon
-                              sx={{
-                                color: "grey",
-                                fontSize: 20,
-                              }}
-                            />
-                          )}
-                        </TableCell>
+                          {/* Column 1: Empty placeholder for Selector */}
+                          {/* Column 1: Toggle selection icon */}
+                          <TableCell
+                            align="left"
+                            onClick={(e) => {
+                              e.stopPropagation();
 
-                        {/* Column 2: ID */}
-                        <TableCell>{term.id}</TableCell>
-                        {/* Column 3: Label + Type */}
-                        <TableCell>{`${item.label} (${item.type})`}</TableCell>
-                        {/* Column 4: Available scopes as selectable chips */}
-                        <TableCell>
-                          {item.scopes.length > 0 &&
-                            item.scopes.map((scope, i) => {
-                              const isSelected =
-                                selectedScopes[term.id] === scope;
-                              return (
-                                <Box
-                                  key={i}
-                                  component="span"
-                                  // When the user clicks this scope "pill"...
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleScopeClick(term.id, scope); // Update the selected scope for this term
-                                  }}
-                                  // Apply dynamic styles based on whether this scope is selected or not
-                                  sx={getSelectableScopeStyles(isSelected)}
-                                >
-                                  {capitalize(scopeAlias[scope] || scope)}
-                                </Box>
+                              if (extraFilter && !extraFilter.value) {
+                                setMessage(COMMON_MESSAGES.incompleteFilter);
+                                setTimeout(() => {
+                                  setMessage(null);
+                                  if (valueInputRef?.current) {
+                                    valueInputRef.current.scrollIntoView({
+                                      behavior: "smooth",
+                                      block: "center",
+                                    });
+                                  }
+                                }, 3000);
+                                return;
+                              }
+
+                              if (item.type === "alphanumeric") {
+                                if (extraFilter?.id === item.id) {
+                                  setExtraFilter(null);
+                                  return;
+                                }
+
+                                setExtraFilter({ ...item, setAddedFilters });
+                                return;
+                              }
+
+                              const isSelected = selectedFilter.some(
+                                (filter) =>
+                                  filter.label === item.label &&
+                                  filter.scope === item.scope
                               );
-                            })}
 
-                          {changedScopes.has(`${item.id}-${item.scope}`) && (
-                            <ChangeCircleIcon
-                              sx={{
-                                color: config.ui.colors.primary,
-                                fontSize: "20px",
-                              }}
-                            />
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        {/* Pagination controls */}
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 20]}
-          component="div"
-          count={allFilteringTerms.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper>
+                              if (isSelected) {
+                                setSelectedFilter((prev) =>
+                                  prev.filter(
+                                    (filter) =>
+                                      !(
+                                        filter.label === item.label &&
+                                        filter.scope === item.scope
+                                      )
+                                  )
+                                );
+                              } else {
+                                setSelectedFilter((prev) =>
+                                  handleFilterSelection({
+                                    item,
+                                    prevFilters: prev,
+                                    setMessage,
+                                  })
+                                );
+                              }
+                            }}
+                          >
+                            {/** Check whether this filter is currently applied */}
+                            {selectedFilter.some(
+                              (filter) =>
+                                filter.label === item.label &&
+                                filter.scope === item.scope
+                            ) ? (
+                              <CheckCircleIcon
+                                sx={{
+                                  color: config.ui.colors.primary,
+                                  fontSize: 20,
+                                }}
+                              />
+                            ) : (
+                              <RadioButtonUncheckedIcon
+                                sx={{
+                                  color: "grey",
+                                  fontSize: 20,
+                                }}
+                              />
+                            )}
+                          </TableCell>
+
+                          {/* Column 2: ID */}
+                          <TableCell>{term.id}</TableCell>
+                          {/* Column 3: Label + Type */}
+                          <TableCell>{`${item.label} (${item.type})`}</TableCell>
+                          {/* Column 4: Available scopes as selectable chips */}
+                          <TableCell>
+                            {item.scopes.length > 0 &&
+                              item.scopes.map((scope, i) => {
+                                const isSelected =
+                                  selectedScopes[term.id] === scope;
+                                return (
+                                  <Box
+                                    key={i}
+                                    component="span"
+                                    // When the user clicks this scope "pill"...
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleScopeClick(term.id, scope); // Update the selected scope for this term
+                                    }}
+                                    // Apply dynamic styles based on whether this scope is selected or not
+                                    sx={getSelectableScopeStyles(isSelected)}
+                                  >
+                                    {capitalize(scopeAlias[scope] || scope)}
+                                  </Box>
+                                );
+                              })}
+
+                            {changedScopes.has(`${item.id}-${item.scope}`) && (
+                              <ChangeCircleIcon
+                                sx={{
+                                  color: config.ui.colors.primary,
+                                  fontSize: "20px",
+                                }}
+                              />
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          {/* Pagination controls */}
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 20]}
+            component="div"
+            count={allFilteringTerms.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Paper>
+      </Box>
     </>
   );
 }

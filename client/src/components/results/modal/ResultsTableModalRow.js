@@ -1,11 +1,4 @@
-import {
-  Box,
-  TableCell,
-  TableContainer,
-  TableRow,
-  Table,
-  TableBody,
-} from "@mui/material";
+import { Box, TableCell, TableRow } from "@mui/material";
 
 const ResultsTableModalRow = ({ item }) => {
   const itemRow = item.results;

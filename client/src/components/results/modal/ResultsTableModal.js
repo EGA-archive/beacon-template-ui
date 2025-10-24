@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Box, Typography, Link, Button } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import Modal from "@mui/material/Modal";
 import Fade from "@mui/material/Fade";
 import ResultsTableModalBody from "./ResultsTableModalBody";
@@ -11,18 +11,6 @@ import Loader from "../../common/Loader";
 import { PATH_SEGMENT_TO_ENTRY_ID } from "../../common/textFormatting";
 
 const style = {
-  // position: "absolute",
-  // top: "50%",
-  // left: "50%",
-  // transform: "translate(-50%, -50%)",
-  // width: "90%",
-  // height: "70%",
-  // bgcolor: "background.paper",
-  // borderRadius: 2,
-  // boxShadow: 24,
-  // p: 4,
-  // textAlign: "left",
-  // fontSize: "14px",
   position: "absolute",
   top: "50%",
   left: "50%",
@@ -257,26 +245,6 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
                   </Box>
                 )}
               </Box>
-              {/* <Box sx={{ paddingBottom: "15px" }}>
-                <Typography
-                  sx={{
-                    color: `${config.ui.colors.darkPrimary}`,
-                    fontWeight: 700,
-                    fontSize: "13px",
-                    fontStyle: "italic",
-                  }}
-                >
-                  <Link
-                    href={url}
-                    color="inherit"
-                    underline="hover"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {url}
-                  </Link>
-                </Typography>
-              </Box> */}
             </Box>
             <Box>
               {loading && <Loader message="Loading data..." />}

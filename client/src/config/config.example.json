@@ -66,7 +66,6 @@
       "recipientKey": "beacon_support"
     },
     "showLogin": true,
-
     "entryTypesOrder": [
       "individuals",
       "g_variants",

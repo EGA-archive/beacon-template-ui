@@ -1,4 +1,4 @@
-import { useState, Fragment } from "react";
+import { useState, Fragment, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -35,6 +35,7 @@ const ResultsTableModalBody = ({
 }) => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filteredData, setFilteredData] = useState(dataTable);
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -109,6 +110,19 @@ const ResultsTableModalBody = ({
     sortedHeaders.map((h) => h.id)
   );
 
+  useEffect(() => {
+    const filtered = dataTable.filter((item) => {
+      if (!searchTerm) return true;
+      const rowString = sortedHeaders
+        .map((h) => summarizeValue(item[h.id]))
+        .join(" ")
+        .toLowerCase();
+      return rowString.includes(searchTerm.toLowerCase());
+    });
+
+    setFilteredData(filtered);
+  }, [searchTerm, dataTable, sortedHeaders]);
+
   // 🧪 Debug: inspect header vs rendered content of first row
   if (dataTable.length > 0) {
     const firstRow = dataTable[0];
@@ -128,6 +142,8 @@ const ResultsTableModalBody = ({
     });
   }
 
+  const displayedTotal = searchTerm ? filteredData.length : totalItems;
+
   return (
     <Box
       sx={{
@@ -139,6 +155,7 @@ const ResultsTableModalBody = ({
     >
       <ResultsTableToolbar
         visibleColumns={visibleColumns}
+        count={displayedTotal}
         setVisibleColumns={setVisibleColumns}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -188,7 +205,7 @@ const ResultsTableModalBody = ({
                 </StyledTableRow>
               </TableHead>
               <TableBody>
-                {dataTable
+                {/* {dataTable
                   .filter((item) => {
                     if (!searchTerm) return true;
                     const rowString = sortedHeaders
@@ -197,63 +214,63 @@ const ResultsTableModalBody = ({
                       .toLowerCase();
                     return rowString.includes(searchTerm.toLowerCase());
                   })
-                  .map((item, index) => {
-                    const isExpanded =
-                      expandedRow && expandedRow?.id === item.id;
-                    let id = item.id;
-                    const parsedInfo = cleanAndParseInfo(item.info);
-                    if (parsedInfo?.sampleID) {
-                      id += `_${parsedInfo.sampleID}`;
-                    } else {
-                      id += `_${index}`;
-                    }
+                  .map((item, index) => { */}
+                {filteredData.map((item, index) => {
+                  const isExpanded = expandedRow && expandedRow?.id === item.id;
+                  let id = item.id;
+                  const parsedInfo = cleanAndParseInfo(item.info);
+                  if (parsedInfo?.sampleID) {
+                    id += `_${parsedInfo.sampleID}`;
+                  } else {
+                    id += `_${index}`;
+                  }
 
-                    return (
-                      <Fragment key={id}>
-                        <StyledTableRow
-                          key={`row-${id}`}
-                          hover
-                          sx={{
-                            "&.MuiTableRow-root": {
-                              transition: "background-color 0.2s ease",
-                            },
-                            "& td": {
-                              borderBottom: "1px solid rgba(224, 224, 224, 1)",
-                              py: 1.5,
-                            },
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {Object.values(sortedHeaders)
-                            .filter((colConfig) =>
-                              visibleColumns.includes(colConfig.id)
-                            )
-                            .map((colConfig) => (
-                              <StyledTableCell
-                                key={`${id}-${colConfig.id}`}
-                                sx={{ fontSize: "11px" }}
-                                style={{ width: colConfig.width }}
-                              >
-                                {renderCellContent(item, colConfig.id)}
-                              </StyledTableCell>
-                            ))}
-                        </StyledTableRow>
+                  return (
+                    <Fragment key={id}>
+                      <StyledTableRow
+                        key={`row-${id}`}
+                        hover
+                        sx={{
+                          "&.MuiTableRow-root": {
+                            transition: "background-color 0.2s ease",
+                          },
+                          "& td": {
+                            borderBottom: "1px solid rgba(224, 224, 224, 1)",
+                            py: 1.5,
+                          },
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {Object.values(sortedHeaders)
+                          .filter((colConfig) =>
+                            visibleColumns.includes(colConfig.id)
+                          )
+                          .map((colConfig) => (
+                            <StyledTableCell
+                              key={`${id}-${colConfig.id}`}
+                              sx={{ fontSize: "11px" }}
+                              style={{ width: colConfig.width }}
+                            >
+                              {renderCellContent(item, colConfig.id)}
+                            </StyledTableCell>
+                          ))}
+                      </StyledTableRow>
 
-                        {isExpanded && (
-                          <ResultsTableModalRow
-                            key={`expanded-${id}`}
-                            item={expandedRow}
-                          />
-                        )}
-                      </Fragment>
-                    );
-                  })}
+                      {isExpanded && (
+                        <ResultsTableModalRow
+                          key={`expanded-${id}`}
+                          item={expandedRow}
+                        />
+                      )}
+                    </Fragment>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>
           <TablePagination
             component="div"
-            count={totalItems}
+            count={displayedTotal}
             page={page}
             onPageChange={handleChangePage}
             rowsPerPage={rowsPerPage}

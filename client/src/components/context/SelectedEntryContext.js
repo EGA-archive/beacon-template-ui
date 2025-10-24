@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useRef } from "react";
 
 /**
  * SelectedEntryContext is a shared state used across the app
@@ -48,6 +48,9 @@ export const SelectedEntryProvider = ({ children }) => {
 
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const valueInputRef = useRef(null);
+  const filteringTermsRef = useRef(null);
+
   // Provide all state variables and their updaters to children
   return (
     <SelectedEntryContext.Provider
@@ -78,6 +81,8 @@ export const SelectedEntryProvider = ({ children }) => {
         setGenomicDraft,
         isLoaded,
         setIsLoaded,
+        valueInputRef,
+        filteringTermsRef,
       }}
     >
       {children}
