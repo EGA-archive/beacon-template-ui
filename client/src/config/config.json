@@ -1,6 +1,6 @@
 {
-  "beaconType": "singleBeacon",
-  "apiUrl": "https://beacon-spain.ega-archive.org/api",
+  "beaconType": "networkBeacon",
+  "apiUrl": "https://beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
   "apiUrlNetwork": "https://beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
   "apiUrlSingle": "https://beacon-spain.ega-archive.org/api",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
@@ -61,8 +61,7 @@
     },
     "showLogin": true,
     "contact": {
-      "enabled": true,
-      "showContactPage": true,
+      "showContactPage": false,
       "apiPath": "http://localhost:5000/api/contact",
       "recipientKey": "beacon_support"
     },

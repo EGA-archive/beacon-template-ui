@@ -38,5 +38,7 @@ export const queryBuilder = (params = [], entryId) => {
     meta: { apiVersion: "2.0" },
     query: queryBody,
   };
+
+  console.log("[queryBuilder] output ➜", filter);
   return filter;
 };

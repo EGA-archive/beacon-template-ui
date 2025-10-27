@@ -48,6 +48,8 @@ export const SelectedEntryProvider = ({ children }) => {
 
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const [hasQueryStarted, setHasQueryStarted] = useState(false);
+
   const valueInputRef = useRef(null);
   const filteringTermsRef = useRef(null);
 
@@ -83,6 +85,8 @@ export const SelectedEntryProvider = ({ children }) => {
         setIsLoaded,
         valueInputRef,
         filteringTermsRef,
+        hasQueryStarted,
+        setHasQueryStarted,
       }}
     >
       {children}

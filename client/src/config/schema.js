@@ -18,6 +18,7 @@ const allowedEntryTypes = [
 
 const schema = Joi.object({
   beaconType: Joi.string().valid("singleBeacon", "networkBeacon").required(),
+
   apiUrl: Joi.string()
     .pattern(/^https:\/\/.+/)
     .required()
@@ -26,6 +27,7 @@ const schema = Joi.object({
         'API_URL must be a valid HTTPS URL (e.g., "https://example.com/api")',
       "any.required": "API_URL is required",
     }),
+
   assemblyId: Joi.array()
     .items(Joi.string().min(1))
     .min(1)
@@ -67,6 +69,22 @@ const schema = Joi.object({
     }),
 
   ui: Joi.object({
+    title: Joi.string().min(3).max(100).required(),
+
+    colors: Joi.object({
+      primary: hexColor.required(),
+      darkPrimary: hexColor.required(),
+      secondary: hexColor.required(),
+      tertiary: hexColor.required(),
+    }).required(),
+
+    logos: Joi.object({
+      main: Joi.string().uri({ relativeOnly: true }).required(),
+      founders: Joi.array()
+        .items(Joi.string().uri({ relativeOnly: true }))
+        .max(3),
+    }).required(),
+
     showExternalNavBarLink: Joi.boolean().optional(),
 
     externalNavBarLink: Joi.alternatives().conditional(
@@ -94,143 +112,171 @@ const schema = Joi.object({
         }),
       }
     ),
-    title: Joi.string().min(3).max(100).required(),
+
+    showAboutPage: Joi.boolean().default(false),
+
+    about: Joi.alternatives().conditional("showAboutPage", {
+      is: true,
+      then: Joi.object({
+        logos: Joi.array()
+          .items(Joi.string().uri({ relativeOnly: true }))
+          .min(1),
+        descriptions: Joi.array().items(Joi.string().min(1)).min(1),
+        fundingOrgs: Joi.array()
+          .items(
+            Joi.object({
+              title: Joi.string().min(1).required(),
+              logos: Joi.array()
+                .items(Joi.string().uri({ relativeOnly: true }))
+                .min(1)
+                .required(),
+            })
+          )
+          .min(1),
+      })
+        // require at least one of the three when showAboutPage = true
+        .or("logos", "descriptions", "fundingOrgs")
+        .required(),
+
+      // If About page is OFF, the object is optional and unconstrained
+      otherwise: Joi.object({
+        logos: Joi.array()
+          .items(Joi.string().uri({ relativeOnly: true }))
+          .min(1),
+        descriptions: Joi.array().items(Joi.string().min(1)).min(1),
+        fundingOrgs: Joi.array()
+          .items(
+            Joi.object({
+              title: Joi.string().min(1).required(),
+              logos: Joi.array()
+                .items(Joi.string().uri({ relativeOnly: true }))
+                .min(1)
+                .required(),
+            })
+          )
+          .min(1),
+      }).optional(),
+    }),
+
+    showLogin: Joi.boolean().default(true),
+
+    contact: Joi.object({
+      showContactPage: Joi.boolean().optional(),
+      apiPath: Joi.string().uri().optional(),
+      recipientKey: Joi.string().min(1).optional(),
+    }).optional(),
+
+    showPrivacyPolicy: Joi.boolean().required(),
+    privacyPolicyFile: Joi.string()
+      .uri({ relativeOnly: true })
+      .required()
+      .messages({
+        "any.required": "privacyPolicyFile is required under ui",
+      }),
+
     entryTypesOrder: Joi.array()
-      .items(Joi.string().valid(...allowedEntryTypes))
+      .items(
+        Joi.string()
+          .valid(...allowedEntryTypes)
+          .disallow("")
+      )
       .max(7)
       .optional()
       .messages({
         "array.max": "You can specify a maximum of 7 entry types for ordering.",
+        "any.invalid": "Empty strings are not allowed in entryTypesOrder.",
       }),
-  }).required(),
-  showAboutPage: Joi.boolean().default(false),
 
-  about: Joi.alternatives().conditional("showAboutPage", {
-    is: true,
-    then: Joi.object({
-      logos: Joi.array()
-        .items(Joi.string().uri({ relativeOnly: true }))
-        .min(1),
-      descriptions: Joi.array().items(Joi.string().min(1)).min(1),
-      fundingOrgs: Joi.array()
-        .items(
-          Joi.object({
-            title: Joi.string().min(1).required(),
-            logos: Joi.array()
-              .items(Joi.string().uri({ relativeOnly: true }))
-              .min(1)
-              .required(),
-          })
-        )
-        .min(1),
-    })
-      // require at least one of the three when showAboutPage = true
-      .or("logos", "descriptions", "fundingOrgs")
-      .required(),
+    // This is optional, but when the user decides to fill in the field, then there are rules.
+    // This field gives a lot of freedom to the beacon user
+    commonFilters: Joi.object({
+      filterCategories: Joi.array()
+        .items(Joi.string().min(1).max(20))
+        .max(3)
+        .required(),
 
-    // If About page is OFF, the object is optional and unconstrained
-    otherwise: Joi.object({
-      logos: Joi.array()
-        .items(Joi.string().uri({ relativeOnly: true }))
-        .min(1),
-      descriptions: Joi.array().items(Joi.string().min(1)).min(1),
-      fundingOrgs: Joi.array()
-        .items(
-          Joi.object({
-            title: Joi.string().min(1).required(),
-            logos: Joi.array()
-              .items(Joi.string().uri({ relativeOnly: true }))
-              .min(1)
-              .required(),
-          })
+      filterLabels: Joi.object()
+        .pattern(
+          Joi.string().valid(...Joi.ref("...filterCategories")),
+          Joi.array()
+            .items(
+              Joi.object({
+                id: Joi.string().min(1).required(),
+                type: Joi.string()
+                  .valid(
+                    "ontology",
+                    "alphanumeric",
+                    "ontologyTerm",
+                    "customTerm",
+                    "custom"
+                  )
+                  .required(),
+                key: Joi.string().min(1).max(100).optional(),
+                label: Joi.string().min(1).max(100).optional(),
+                scopes: Joi.array().items(Joi.string()).optional(), // TO DISCUSS BEACON TEAM - scopes as free text
+              })
+            )
+            .max(6)
         )
-        .min(1),
+        .required(),
     }).optional(),
-  }),
-  showContactPage: Joi.boolean().optional(),
-  showLogin: Joi.boolean().default(true),
-  colors: Joi.object({
-    primary: hexColor.required(),
-    darkPrimary: hexColor.required(),
-    secondary: hexColor.required(),
-    tertiary: hexColor.required(),
-  }).required(),
 
-  logos: Joi.object({
-    main: Joi.string().uri({ relativeOnly: true }).required(),
-    founders: Joi.array()
-      .items(Joi.string().uri({ relativeOnly: true }))
-      .max(3),
-  }).required(),
-
-  // This is optional, but when the user decides to fill in the field, then there are rules.
-  // This field gives a lot of freedom to the beacon user
-  commonFilters: Joi.object({
-    filterCategories: Joi.array()
-      .items(Joi.string().min(1).max(20))
-      .max(3)
-      .required(),
-
-    filterLabels: Joi.object()
-      .pattern(
-        Joi.string().valid(...Joi.ref("...filterCategories")),
-        Joi.array()
-          .items(
-            Joi.object({
-              key: Joi.string().min(1).max(100).required(),
-              type: Joi.string()
-                .valid(
-                  "ontology",
-                  "alphanumeric",
-                  "ontologyTerm",
-                  "customTerm",
-                  "custom"
-                )
-                .required(),
-              id: Joi.string().min(1).required(),
-              label: Joi.string().min(1).max(100).optional(),
-              scopes: Joi.array().items(Joi.string()).optional(), // TO DISCUSS BEACON TEAM - scopes as free text
-              // scopes: Joi.array()
-              //   .items(Joi.string().valid(...allowedEntryTypes))
-              //   .optional(), // TO DISCUSS BEACON TEAM - scopes entryTypes
-            })
+    // This is also optional
+    // This field directs the user into choosing at least one of the following strings
+    // If the user does not fill anything related to the genomicAnnotations
+    // This field might need further development (TODO)
+    genomicAnnotations: Joi.object({
+      visibleGenomicCategories: Joi.array()
+        .items(
+          Joi.string().valid(
+            "SNP Examples",
+            "CNV Examples",
+            "Protein Examples",
+            "Molecular Effect"
           )
-          .max(6)
-      )
-      .required(),
-  }).optional(),
-
-  // This is also optional
-  // This field directs the user into choosing at least one of the following strings
-  // If the user does not fill anything related to the genomicAnnotations
-  // This field might need further development (TODO)
-  genomicAnnotations: Joi.object({
-    visibleGenomicCategories: Joi.array()
-      .items(
-        Joi.string().valid(
-          "SNP Examples",
-          "CNV Examples",
-          "Protein Examples",
-          "Molecular Effect"
         )
-      )
-      .min(1)
-      .required()
-      .messages({
-        "any.required":
-          "visibleGenomicCategories is required under genomicAnnotations",
-        "array.min":
-          "At least one genomicAnnotations category must be provided",
-      }),
-  }).optional(),
-  // This is also optional
-  // The default value will always be true if not set false explicitly
-  genomicQueries: Joi.object({
-    genomicQueryBuilder: Joi.object({
-      showAlternateBases: Joi.boolean().default(true),
-      showAminoacidChange: Joi.boolean().default(true),
-    }).required(),
-  }).optional(),
+        .min(1)
+        .required()
+        .messages({
+          "any.required":
+            "visibleGenomicCategories is required under genomicAnnotations",
+          "array.min":
+            "At least one genomicAnnotations category must be provided",
+        }),
+    }).optional(),
+
+    // This is also optional
+    // The default value will always be true if not set false explicitly
+    genomicQueries: Joi.object({
+      genomicQueryBuilder: Joi.object({
+        showAlternateBases: Joi.boolean().default(true),
+        showAminoacidChange: Joi.boolean().default(true),
+        chromosomeLibrary: Joi.array()
+          .items(Joi.string().min(1))
+          .min(1)
+          .required()
+          .messages({
+            "any.required":
+              "chromosomeLibrary is required under genomicQueryBuilder",
+          }),
+        aminoAcidNotation: Joi.alternatives().conditional(
+          "showAminoacidChange",
+          {
+            is: true,
+            then: Joi.array()
+              .items(Joi.string().min(1))
+              .min(1)
+              .required()
+              .messages({
+                "any.required":
+                  "aminoAcidNotation is required when showAminoacidChange is true",
+              }),
+            otherwise: Joi.forbidden(),
+          }
+        ),
+      }).required(),
+    }).optional(),
+  }).required(),
 });
 
 module.exports = schema;
