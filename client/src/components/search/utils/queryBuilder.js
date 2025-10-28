@@ -39,6 +39,6 @@ export const queryBuilder = (params = [], entryId) => {
     query: queryBody,
   };
 
-  console.log("[queryBuilder] output ➜", filter);
+  // console.log("[queryBuilder] output ➜", filter);
   return filter;
 };

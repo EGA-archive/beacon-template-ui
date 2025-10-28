@@ -14,17 +14,14 @@ import config from "../../config/config.json";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import FilterLabelRemovable from "../styling/FilterLabelRemovable";
 import { queryBuilder } from "../search/utils/queryBuilder";
+import { filterLabels } from "../genomic/utils/GenomicFilterLabels";
 
-export default function GenomicAnnotations({ setActiveInput }) {
+// This component of predefined genomic example queries inside collapsible sections
+// We can look at it as quick access menu
+export default function GenomicAnnotations() {
   const [message, setMessage] = useState(null);
 
-  const allGenomicCategories = [
-    "SNP Examples",
-    "CNV Examples",
-    "Protein Examples",
-    "Molecular Effect",
-  ];
-
+  // Extract from context the functions that update the app's global state
   const {
     setSelectedFilter,
     setLoadingData,
@@ -32,172 +29,27 @@ export default function GenomicAnnotations({ setActiveInput }) {
     setResultData,
   } = useSelectedEntry();
 
+  // The full list of possible annotation categorie
+  const allGenomicCategories = [
+    "SNP Examples",
+    "Genomic Variant Examples",
+    "Protein Examples",
+    "Molecular Effect",
+  ];
+
+  // Read from the config file which categories should actually be visible in the UI
+  // This allows hiding entire sections via configuration, without editing the code
   const genomicVisibleCategories =
     config.ui.genomicAnnotations?.visibleGenomicCategories || [];
 
+  // From the full list, keep only those that are marked as visible in the config
   const filterCategories = allGenomicCategories.filter((cat) =>
     genomicVisibleCategories.includes(cat)
   );
 
-  const filterLabels = {
-    "SNP Examples": [
-      {
-        key: "TP53",
-        id: "TP53",
-        label: "TP53",
-        type: "genomic",
-        field: "geneId",
-        queryParams: { geneId: "TP53" },
-      },
-      {
-        key: "GRCh38:17:7661960T>C",
-        id: "GRCh38:17:7661960T>C",
-        label: "GRCh38:17:7661960T>C",
-        type: "genomic",
-        queryParams: {
-          assemblyId: "GRCh38",
-          referenceName: "17",
-          start: [7661960],
-          referenceBases: "T",
-          alternateBases: "C",
-        },
-      },
-      {
-        key: "NC_000017.11:g.43057063G>A",
-        id: "NC_000017.11:g.43057063G>A",
-        label: "NC_000017.11:g.43057063G>A",
-        type: "genomic",
-        queryParams: {
-          identifiers: {
-            genomicHGVSId: "NC_000017.11:g.43057063G>A",
-          },
-        },
-      },
-      // {
-      //   key: "NC_000017.11:g.43057063G>A",
-      //   id: "NC_000017.11:g.43057063G>A",
-      //   label: "NC_000017.11:g.43057063G>A",
-      //   type: "genomic",
-      //   queryParams: {
-      //     genomicHGVSId: "NC_000017.11:g.43057063G>A",
-      //   },
-      // },
-    ],
-
-    "CNV Examples": [
-      {
-        key: "NC_000001.11 : 1234del",
-        id: "NC_000001.11 : 1234del",
-        label: "GRCh38:NC_000001.11:1234del",
-        type: "genomic",
-        field: "variantType",
-        queryParams: {
-          assemblyId: "GRCh38",
-          referenceName: "NC_000001.11",
-          start: 1234,
-          end: 1234,
-          variantType: "DEL",
-        },
-      },
-      {
-        key: "MSK1 : 7572837_7578461del",
-        id: "MSK1 : 7572837_7578461del",
-        label: "GRCh38:MSK1:7572837_7578461del",
-        type: "genomic",
-        field: "variantType",
-        queryParams: {
-          assemblyId: "GRCh38",
-          referenceName: "MSK1",
-          start: 7572837,
-          end: 7578461,
-          variantType: "DEL",
-        },
-      },
-      {
-        key: "NC_000001.11 : [5000, 7676]",
-        id: "NC_000001.11 : [5000, 7676]",
-        label: "GRCh38:NC_000001.11:[5000,7676]",
-        type: "genomic",
-        field: "location",
-        queryParams: {
-          assemblyId: "GRCh38",
-          referenceName: "NC_000001.11",
-          start: 5000,
-          end: 7676,
-        },
-      },
-      {
-        key: "[7669, 10000]del",
-        id: "[7669, 10000]del",
-        label: "GRCh38:[7669,10000]del",
-        type: "genomic",
-        field: "variantType",
-        queryParams: {
-          assemblyId: "GRCh38",
-          start: 7669,
-          end: 10000,
-          variantType: "DEL",
-        },
-      },
-    ],
-
-    "Protein Examples": [
-      {
-        key: "NP_009225.1:p.Glu1817Ter",
-        id: "NP_009225.1:p.Glu1817Ter",
-        label: "NP_009225.1:p.Glu1817Ter",
-        type: "genomic",
-        field: "proteinHGVSIds",
-        queryParams: {
-          identifiers: {
-            proteinHGVSIds: ["NP_009225.1:p.Glu1817Ter"],
-          },
-        },
-      },
-      {
-        key: "LRG 199p1:p.Val25Gly",
-        id: "LRG 199p1:p.Val25Gly",
-        label: "LRG 199p1:p.Val25Gly",
-        type: "genomic",
-        field: "proteinHGVSIds",
-        queryParams: {
-          identifiers: {
-            proteinHGVSIds: ["LRG 199p1:p.Val25Gly"],
-          },
-        },
-      },
-    ],
-
-    "Molecular Effect": [
-      {
-        key: "SO:0001583",
-        id: "SO:0001583",
-        label: "Missense Variant",
-        type: "genomic",
-        field: "molecularEffects",
-        queryParams: {
-          molecularAttributes: {
-            molecularEffects: [{ id: "SO:0001583", label: "Missense Variant" }],
-          },
-        },
-      },
-      {
-        key: "SO:0002322",
-        id: "SO:0002322",
-        label: "Stop gained NMD escaping",
-        type: "genomic",
-        field: "molecularEffects",
-        queryParams: {
-          molecularAttributes: {
-            molecularEffects: [
-              { id: "SO:0002322", label: "Stop gained NMD escaping" },
-            ],
-          },
-        },
-      },
-    ],
-  };
-
+  // When the component first loads:
+  // - Automatically open the first section that actually has content
+  // - Keep all others closed
   const [expanded, setExpanded] = useState(() => {
     const initial = {};
     let first = false;
@@ -211,9 +63,12 @@ export default function GenomicAnnotations({ setActiveInput }) {
     return initial;
   });
 
+  // Function that runs when a user clicks to open or close a section
+  // It updates the "expanded" state to show only one accordion open at a time
   const handleChange = (panel) => (_, isExpanded) =>
     setExpanded({ [panel]: isExpanded });
 
+  // Styling for the accordion headers to make it fit to the UI
   const summarySx = {
     px: 0,
     "& .MuiAccordionSummary-expandIconWrapper": {
@@ -226,17 +81,59 @@ export default function GenomicAnnotations({ setActiveInput }) {
     "& .MuiAccordionSummary-content": { mr: 1 },
   };
 
-  // --- handle click on chip ---
+  // Main interaction handler of the component, it is called everytime a chip is clicked
+  // Item is an object that represents that clicked chip
   const handleGenomicFilterChange = (item) => {
+    // Take the label or id of the clicked chip and remove accidental extra spaces
     const value = (item.label || item.id)?.trim();
 
-    // add filter to context
+    // Check whether the item has "queryParams" or not
+    // If it doesn’t, we assume this is a filtering term  ("Missense Variant") instead of a genomic query
+    const isFilterTerm =
+      !item.queryParams || Object.keys(item.queryParams).length === 0;
+
+    //  Case 1. Filteting Term (This is a case specific example for the Molecual Effects)
+    if (isFilterTerm) {
+      // Update the global filter list stored in context
+      // First, check if this filter already exists — if it does, show an error message and skip adding it
+      setSelectedFilter((prev = []) => {
+        const isDuplicate = prev.some((f) => f.id === item.id);
+        if (isDuplicate) {
+          setMessage(COMMON_MESSAGES.doubleValue);
+          setTimeout(() => setMessage(null), 3000);
+          return prev;
+        }
+
+        // After the check passes, then the filter gets added to the list
+        return [
+          ...prev,
+          {
+            key: item.key,
+            id: item.id,
+            label: value,
+            value,
+            type: "filter",
+          },
+        ];
+      });
+
+      // Automatically send a query to the Beacon API using only this filter
+      triggerGenomicQuery([
+        {
+          id: item.id,
+          label: value,
+          type: "filter",
+        },
+      ]);
+      return;
+    }
+
+    // Case 2. All the others Genomic Queries
+    // Add the selected genomic filter to the context
     setSelectedFilter((prev = []) => {
+      // Check if the exact same genomic filter already exists. If yes, we won't add it
       const isDuplicate = prev.some(
-        (f) =>
-          f.type === "genomic" &&
-          f.id === (item.field || "geneId") &&
-          f.label === value
+        (f) => f.type === "genomic" && f.id === item.field && f.label === value
       );
       if (isDuplicate) {
         setMessage(COMMON_MESSAGES.doubleValue);
@@ -244,6 +141,8 @@ export default function GenomicAnnotations({ setActiveInput }) {
         return prev;
       }
 
+      // Check if there’s already another genomic query active
+      // The app only allows one genomic query at a time
       const alreadyHasGenomic = prev.some((f) => f.type === "genomic");
       if (alreadyHasGenomic) {
         setMessage(COMMON_MESSAGES.singleGenomicQuery);
@@ -251,6 +150,7 @@ export default function GenomicAnnotations({ setActiveInput }) {
         return prev;
       }
 
+      // If it’s not a duplicate and no other genomic query exists, add the genomic query finally
       return [
         ...prev,
         {
@@ -265,11 +165,10 @@ export default function GenomicAnnotations({ setActiveInput }) {
       ];
     });
 
+    // Wait to ansure the state id updated
+    // Then send the Beacon API query with this genomic filter
+    // This tells the Beacon to search variants that match this query
     setTimeout(() => {
-      if (!item.queryParams || Object.keys(item.queryParams).length === 0) {
-        console.warn("[GenomicAnnotations] Skipping empty query", item);
-        return;
-      }
       triggerGenomicQuery([
         {
           key: item.key,
@@ -284,16 +183,18 @@ export default function GenomicAnnotations({ setActiveInput }) {
     }, 150);
   };
 
+  //  This helper function builds the actual Beacon request payload using
+  //  the `queryBuilder()` utility and sends it to the backend
+  //  It handles both genomic queries and filter-based queries
   const triggerGenomicQuery = async (filters) => {
+    // Check if the list of filters contains at least one genomic query
     const genomic = filters.find((f) => f.type === "genomic");
-    if (
-      !genomic ||
-      !genomic.queryParams ||
-      !Object.keys(genomic.queryParams).length
-    ) {
-      console.warn(
-        "[GenomicAnnotations] Skipped query — missing valid genomic params."
-      );
+
+    // Check if there are any filter-type terms, in this case Molecular Effects
+    const hasFilterTerms = filters.some((f) => f.type === "filter");
+
+    // If nothing is found, we do not query anything
+    if (!genomic && !hasFilterTerms) {
       return;
     }
 
@@ -302,32 +203,27 @@ export default function GenomicAnnotations({ setActiveInput }) {
       setHasSearchResult(false);
       setResultData([]);
 
+      // Use the utility function to construct the Beacon query payload
       const builtQuery = queryBuilder(filters);
       console.log("[GenomicAnnotations] Built query ➜", builtQuery);
 
+      // Make a POST request to the Beacon API endpoint
+      // `${selectedPathSegment}` is the current entry
       const response = await fetch(`${config.apiUrl}/${selectedPathSegment}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(builtQuery),
       });
 
+      // Parse the Beacon response
       const data = await response.json();
 
-      // Only set results if we actually got a valid payload
       if (data && Object.keys(data).length > 0) {
         setResultData(data);
         setHasSearchResult(true);
-      } else {
-        console.info(
-          "[GenomicAnnotations] Empty or invalid response — skipping display."
-        );
       }
     } catch (err) {
-      // Silent catch: no UI message, just a light log for dev visibility
-      console.warn(
-        "[GenomicAnnotations] Query request failed:",
-        err?.message || err
-      );
+      console.warn("[GenomicAnnotations] Query request failed:", err);
     } finally {
       setLoadingData(false);
     }
@@ -335,12 +231,14 @@ export default function GenomicAnnotations({ setActiveInput }) {
 
   return (
     <Box>
+      {/* If there's an error show it above the filters */}
       {message && (
         <Box sx={{ mt: 2 }}>
           <CommonMessage text={message} type="error" />
         </Box>
       )}
 
+      {/* Loop through each visible category and render the content */}
       {filterCategories.map((topic) => {
         const valid = filterLabels[topic]?.filter((l) => l.label?.trim());
         if (!valid?.length) return null;
@@ -348,8 +246,8 @@ export default function GenomicAnnotations({ setActiveInput }) {
         return (
           <Accordion
             key={topic}
-            expanded={!!expanded[topic]}
-            onChange={handleChange(topic)}
+            expanded={!!expanded[topic]} // Open/close status
+            onChange={handleChange(topic)} // Clicking toggles the accordion
             disableGutters
             elevation={0}
             sx={{
@@ -358,6 +256,7 @@ export default function GenomicAnnotations({ setActiveInput }) {
               "&::before": { display: "none" },
             }}
           >
+            {/* Accordion Header */}
             <AccordionSummary
               expandIcon={<KeyboardArrowRightIcon />}
               sx={summarySx}
@@ -370,13 +269,16 @@ export default function GenomicAnnotations({ setActiveInput }) {
               </Typography>
             </AccordionSummary>
 
+            {/* Accordion Body */}
             <AccordionDetails sx={{ px: 0, pt: 0, mb: 3 }}>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                {/* For each label, render a clickable chip */}
                 {valid.map((item) => (
                   <FilterLabelRemovable
                     variant="simple"
                     key={item.label}
                     label={item.label}
+                    // When clicked, call the main handler with this item’s data
                     onClick={() =>
                       handleGenomicFilterChange({ ...item, bgColor: "genomic" })
                     }

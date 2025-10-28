@@ -74,7 +74,7 @@ export default function SearchButton({ setSelectedTool }) {
       const rawItems =
         data?.response?.resultSets ?? data?.response?.collections ?? [];
 
-      console.log("[SearchButton] rawItems ➜", rawItems);
+      // console.log("[SearchButton] rawItems ➜", rawItems);
 
       const groupedArray = Object.values(
         Object.values(rawItems).reduce((acc, item) => {

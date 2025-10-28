@@ -104,8 +104,6 @@ const ResultsTableModalBody = ({
     return summarizeValue(value);
   }
 
-  console.log("sortedHeaders", sortedHeaders);
-
   const [visibleColumns, setVisibleColumns] = useState(
     sortedHeaders.map((h) => h.id)
   );

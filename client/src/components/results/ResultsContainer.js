@@ -12,8 +12,6 @@ export default function ResultsContainer() {
 
   const showBox = loadingData || hasSearchResults || message;
 
-  console.log("message", message);
-
   const tableRef = useRef(null);
 
   useEffect(() => {

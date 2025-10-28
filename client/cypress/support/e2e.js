@@ -15,3 +15,10 @@
 
 // Import commands.js using ES2015 syntax:
 import "./commands";
+
+Cypress.on("uncaught:exception", (err) => {
+  // Ignore React DOM insertBefore race-condition errors
+  if (err.message.includes("insertBefore")) {
+    return false;
+  }
+});

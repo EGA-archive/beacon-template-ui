@@ -230,7 +230,7 @@ const schema = Joi.object({
         .items(
           Joi.string().valid(
             "SNP Examples",
-            "CNV Examples",
+            "Genomic Variant Examples",
             "Protein Examples",
             "Molecular Effect"
           )

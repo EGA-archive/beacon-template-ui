@@ -71,11 +71,10 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
     let skipItems = page * rowsPerPage;
 
     let filter = {
-      meta: {
-        apiVersion: "2.0",
-      },
+      meta: { apiVersion: "2.0" },
       query: {
         filters: [],
+        requestParameters: {},
         includeResultsetResponses: "HIT",
         pagination: {
           skip: parseInt(`${skipItems}`),
@@ -87,22 +86,30 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
     };
 
     if (selectedFilter.length > 0) {
-      let filterData = selectedFilter.map((item) => {
-        if (item.operator) {
-          return {
+      selectedFilter.forEach((item) => {
+        if (item.queryParams) {
+          // Range or genomic query here
+          filter.query.requestParameters = {
+            ...filter.query.requestParameters,
+            ...item.queryParams,
+          };
+        } else if (item.operator) {
+          // Normal Beacon filters
+          filter.query.filters.push({
             id: item.field,
             operator: item.operator,
             value: item.value,
-          };
+          });
         } else {
-          return {
+          // Standard filtering term
+          filter.query.filters.push({
             id: item.id,
             ...(item.scope ? { scope: item.scope } : {}),
-          };
+          });
         }
       });
-      filter.query.filters = filterData;
     }
+
     return filter;
   };
 
@@ -114,12 +121,23 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
         setLoading(true);
         const url = `${config.apiUrl}/${selectedPathSegment}`;
         setUrl(url);
-        let query = queryBuilder(page, entryTypeId);
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(query),
-        });
+        // let query = queryBuilder(page, entryTypeId);
+        // const response = await fetch(url, {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify(query),
+        // });
+        let response;
+        if (selectedFilter.length === 0) {
+          response = await fetch(url);
+        } else {
+          const query = queryBuilder(page, entryTypeId);
+          response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(query),
+          });
+        }
 
         const data = await response.json();
         const results = data.response?.resultSets;

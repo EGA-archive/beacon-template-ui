@@ -15,8 +15,8 @@ export const buildGenomicParams = (queryType, values, selectedInput) => {
       break;
 
     case "Range Query": {
-      const refAa = values.refAa?.trim().toUpperCase();
-      const altAa = values.altAa?.trim().toUpperCase();
+      const refAa = values.refAa?.trim();
+      const altAa = values.altAa?.trim();
       const aaPos = values.aaPosition?.trim();
 
       // derive aminoacidChange if needed
@@ -72,8 +72,8 @@ export const buildGenomicParams = (queryType, values, selectedInput) => {
       break;
 
     case "Gene ID": {
-      const refAa = values.refAa?.trim().toUpperCase();
-      const altAa = values.altAa?.trim().toUpperCase();
+      const refAa = values.refAa?.trim();
+      const altAa = values.altAa?.trim();
       const aaPos = values.aaPosition?.trim();
 
       // derive aminoacidChange if needed

@@ -390,7 +390,8 @@ export default function FilteringTermsTable({
                           {/* Column 2: ID */}
                           <TableCell>{term.id}</TableCell>
                           {/* Column 3: Label + Type */}
-                          <TableCell>{`${item.label} (${item.type})`}</TableCell>
+                          <TableCell>{`${item.label}`}</TableCell>
+                          {/* <TableCell>{`${item.label} (${item.type})`}</TableCell>  */}
                           {/* Column 4: Available scopes as selectable chips */}
                           <TableCell>
                             {item.scopes.length > 0 &&
@@ -401,7 +402,7 @@ export default function FilteringTermsTable({
                                   <Box
                                     key={i}
                                     component="span"
-                                    // When the user clicks this scope "pill"...
+                                    // When the user clicks this scope "pill"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handleScopeClick(term.id, scope); // Update the selected scope for this term

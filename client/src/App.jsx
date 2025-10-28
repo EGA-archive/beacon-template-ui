@@ -8,9 +8,9 @@ import Login from "./components/pages/login/Login";
 import HomePage from "./components/pages/HomePage";
 import { CssBaseline, Box } from "@mui/material";
 import config from "./config/config.json";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LoginModal from "./components/common/LoginModal";
-import { useAuth } from "oidc-react";
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -31,6 +31,21 @@ if (window.Cypress) {
 export default function App() {
   const [selectedTool, setSelectedTool] = useState(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (config.ui?.title) {
+      document.title = config.ui.title;
+    }
+
+    const faviconUrl = config.ui?.favicon || "/favicon.ico";
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "icon";
+      document.head.appendChild(link);
+    }
+    link.href = faviconUrl;
+  }, []);
 
   const baseNavItems = [
     { label: "Network Members", url: "/network-members" },

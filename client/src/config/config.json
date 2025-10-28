@@ -1,6 +1,6 @@
 {
-  "beaconType": "networkBeacon",
-  "apiUrl": "https://beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
+  "beaconType": "singleBeacon",
+  "apiUrl": "https://beacon-spain.ega-archive.org/api",
   "apiUrlNetwork": "https://beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
   "apiUrlSingle": "https://beacon-spain.ega-archive.org/api",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
@@ -15,6 +15,7 @@
   ],
   "ui": {
     "title": "EGA Beacon Browser",
+    "favicon": "/assets/logos/favicon.ico",
     "colors": {
       "primary": "#3176B1",
       "darkPrimary": "#173D5D",
@@ -199,7 +200,7 @@
     "genomicAnnotations": {
       "visibleGenomicCategories": [
         "SNP Examples",
-        "CNV Examples",
+        "Genomic Variant Examples",
         "Protein Examples",
         "Molecular Effect"
       ]
