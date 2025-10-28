@@ -34,7 +34,7 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(3);
   const [dataTable, setDataTable] = useState([]);
   const [url, setUrl] = useState("");
   const entryTypeId = PATH_SEGMENT_TO_ENTRY_ID[selectedPathSegment];

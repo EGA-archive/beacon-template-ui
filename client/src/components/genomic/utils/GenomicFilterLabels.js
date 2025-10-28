@@ -35,7 +35,7 @@ const genomicVariantExamples = [
   {
     key: "BRCA1:Pro1856Ser",
     id: "BRCA1:Pro1856Ser",
-    label: "BRCA1[Pro1856Ser]",
+    label: "BRCA1:p.Pro1856Ser",
     type: "genomic",
     queryParams: {
       geneId: "BRCA1",
@@ -45,16 +45,16 @@ const genomicVariantExamples = [
   {
     key: "NC_000008.10:g.467881_467885delinsA",
     id: "NC_000008.10:g.467881_467885delinsA",
-    label: "NC_000008.10[g.467881_467885delinsA]",
+    label: "NC_000008.10:g.467881_467885delinsA",
     type: "genomic",
     queryParams: {
       genomicAlleleShortForm: "NC_000008.10:g.467881_467885delinsA",
     },
   },
   {
-    key: "GRCh37:17[43045703,43045704]:[43045704,43045705]",
-    id: "GRCh37:17[43045703,43045704]:[43045704,43045705]",
-    label: "GRCh37:17[43045703,43045704]:[43045704,43045705]",
+    key: "NC_000017.10:g.43045703_43045705",
+    id: "NC_000017.10:g.43045703_43045705",
+    label: "NC_000017.10:g.43045703_43045705",
     type: "genomic",
     queryParams: {
       assemblyId: "GRCh37",
@@ -64,9 +64,9 @@ const genomicVariantExamples = [
     },
   },
   {
-    key: "GRCh37:2[343675,345681]",
-    id: "GRCh37:2[343675,345681]",
-    label: "GRCh37:2[343675,345681]",
+    key: "GRCh37:2:343675-345681",
+    id: "GRCh37:2:343675-345681",
+    label: "GRCh37:2:343675-345681",
     type: "genomic",
     queryParams: {
       assemblyId: "GRCh37",

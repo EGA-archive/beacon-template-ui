@@ -246,8 +246,32 @@ const ResultsTableModalBody = ({
                           .map((colConfig) => (
                             <StyledTableCell
                               key={`${id}-${colConfig.id}`}
-                              sx={{ fontSize: "11px" }}
-                              style={{ width: colConfig.width }}
+                              sx={{
+                                fontSize: "11px",
+
+                                ...(colConfig.id === "variantInternalId"
+                                  ? {
+                                      whiteSpace: "wrap",
+                                      wordBreak: "break-word",
+                                      overflowWrap: "anywhere",
+                                      verticalAlign: "top",
+                                      lineHeight: 1.4,
+                                      paddingTop: "6px",
+                                      paddingBottom: "6px",
+                                    }
+                                  : {
+                                      whiteSpace: "wrap",
+                                      overflowWrap: "anywhere",
+                                      verticalAlign: "top",
+                                    }),
+                              }}
+                              style={{
+                                width: colConfig.width || "auto",
+                                maxWidth:
+                                  colConfig.id === "variantInternalId"
+                                    ? "300px"
+                                    : "250px",
+                              }}
                             >
                               {renderCellContent(item, colConfig.id)}
                             </StyledTableCell>
@@ -273,7 +297,7 @@ const ResultsTableModalBody = ({
             onPageChange={handleChangePage}
             rowsPerPage={rowsPerPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[5, 10, 20]}
+            rowsPerPageOptions={[3, 5, 10]}
           />
         </>
       </Paper>

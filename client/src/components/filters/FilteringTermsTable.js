@@ -17,7 +17,6 @@ import Loader from "../common/Loader";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import { FILTERING_TERMS_COLUMNS } from "../../lib/constants";
 import { capitalize } from "../common/textFormatting";
-import AddTaskIcon from "@mui/icons-material/AddTask";
 import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
