@@ -1,0 +1,14 @@
+# docker-compose.yml
+
+version: "3.8"
+
+services:
+  client:
+    build:
+      context: ./client
+    command: node /opt/yarn-v1.22.22/bin/yarn.js start
+    container_name: template-ui
+    ports:
+      - 3025:3000
+    volumes:
+      - ./client:/usr/src/app
