@@ -93,7 +93,7 @@ export default function ResultsTableToolbar({
               gap: "8px",
               py: 0.5,
               width: "200px",
-              height: "33px",
+              height: "33.1px",
             },
           }}
           IconComponent={KeyboardArrowDownRoundedIcon}
@@ -132,7 +132,7 @@ export default function ResultsTableToolbar({
         onChange={(e) => setSearchTerm(e.target.value)}
         sx={{
           width: "237px",
-          height: "39px",
+
           "& .MuiOutlinedInput-root": {
             borderRadius: "24px",
             "& fieldset": { borderColor: colors.darkPrimary },

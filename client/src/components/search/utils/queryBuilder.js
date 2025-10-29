@@ -14,7 +14,7 @@ export const queryBuilder = (params = [], entryId) => {
     filters: nonGenomicFilters.map((item) => {
       if (item.operator) {
         return {
-          id: item.field,
+          id: item.id,
           operator: item.operator,
           value: item.value,
         };

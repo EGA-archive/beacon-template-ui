@@ -8,7 +8,7 @@ import {
   FormControl,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import config from "../../config/config.json";
@@ -83,12 +83,35 @@ export default function FilterTermsExtra() {
       }
 
       // Step 3. If no duplicates, create the new filter object
+      let formattedOperator = selectedOperator;
+      let formattedValue = selectedValue;
+
+      // Handle LIKE and !LIKE (contains / does not contain)
+      if (selectedOperator === "LIKE" || selectedOperator === "!LIKE") {
+        // Add wildcards if missing
+        if (!selectedValue.includes("%")) {
+          formattedValue = `%${selectedValue}%`;
+        }
+
+        // Normalize operators for backend:
+        formattedOperator = selectedOperator === "LIKE" ? "=" : "!";
+      }
+
+      const operatorDisplay =
+        selectedOperator === "!"
+          ? "is not"
+          : selectedOperator === "LIKE"
+          ? "contains"
+          : selectedOperator === "!LIKE"
+          ? "does not contain"
+          : selectedOperator;
+
       const extraFilterCustom = {
         id: extraFilter.id,
         key: uniqueId,
-        label: `${extraFilter.label} ${selectedOperator} ${selectedValue}`,
-        operator: selectedOperator,
-        value: selectedValue,
+        label: `${extraFilter.label} ${operatorDisplay} ${selectedValue}`,
+        operator: formattedOperator,
+        value: formattedValue,
         scope: extraFilter.scope || null,
         scopes: extraFilter.scopes || [],
         type: extraFilter.type || "alphanumeric",
@@ -202,6 +225,9 @@ export default function FilterTermsExtra() {
             <MenuItem value=">">{">"}</MenuItem>
             <MenuItem value="=">{"="}</MenuItem>
             <MenuItem value="<">{"<"}</MenuItem>
+            <MenuItem value="!">{"is not"}</MenuItem>
+            <MenuItem value="LIKE">{"contains"}</MenuItem>
+            <MenuItem value="!LIKE">{"does not contain"}</MenuItem>
           </Select>
         </FormControl>
       </Box>

@@ -1,4 +1,4 @@
-import { useState, Fragment, useEffect } from "react";
+import { useState, Fragment, useEffect, useCallback } from "react";
 import {
   Box,
   Paper,
@@ -118,29 +118,52 @@ const ResultsTableModalBody = ({
       return rowString.includes(searchTerm.toLowerCase());
     });
 
-    setFilteredData(filtered);
+    // Only update if the number of visible rows actually changes
+    if (filtered.length !== filteredData.length) {
+      setFilteredData(filtered);
+    }
   }, [searchTerm, dataTable, sortedHeaders]);
 
   // 🧪 Debug: inspect header vs rendered content of first row
   if (dataTable.length > 0) {
     const firstRow = dataTable[0];
-    console.log("🧩 DEBUG — First row raw object:", firstRow);
+    // console.log("🧩 DEBUG — First row raw object:", firstRow);
 
-    console.log("🧾 Header → Rendered content comparison (first row only):");
-    sortedHeaders.forEach((col) => {
-      const rawValue = firstRow[col.id];
-      const rendered = summarizeValue(rawValue);
-      console.log(
-        `${col.id}:`,
-        "\n   ↳ Raw:",
-        rawValue,
-        "\n   ↳ Rendered:",
-        rendered
-      );
-    });
+    // console.log("🧾 Header → Rendered content comparison (first row only):");
+    // sortedHeaders.forEach((col) => {
+    //   const rawValue = firstRow[col.id];
+    //   const rendered = summarizeValue(rawValue);
+    //   console.log(
+    //     `${col.id}:`,
+    //     "\n   ↳ Raw:",
+    //     rawValue,
+    //     "\n   ↳ Rendered:",
+    //     rendered
+    //   );
+    // });
   }
 
   const displayedTotal = searchTerm ? filteredData.length : totalItems;
+
+  const handleExport = useCallback(() => {
+    exportCSV({
+      dataTable,
+      sortedHeaders,
+      visibleColumns,
+      summarizeValue,
+      searchTerm,
+      entryTypeId,
+      selectedPathSegment,
+      queryBuilder,
+    });
+  }, [
+    dataTable,
+    sortedHeaders,
+    visibleColumns,
+    searchTerm,
+    entryTypeId,
+    selectedPathSegment,
+  ]);
 
   return (
     <Box
@@ -157,18 +180,7 @@ const ResultsTableModalBody = ({
         setVisibleColumns={setVisibleColumns}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        handleExport={() =>
-          exportCSV({
-            dataTable,
-            sortedHeaders,
-            visibleColumns,
-            summarizeValue,
-            searchTerm,
-            entryTypeId,
-            selectedPathSegment,
-            queryBuilder,
-          })
-        }
+        handleExport={handleExport}
         sortedHeaders={sortedHeaders}
       />
 
@@ -297,7 +309,7 @@ const ResultsTableModalBody = ({
             onPageChange={handleChangePage}
             rowsPerPage={rowsPerPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[3, 5, 10]}
+            rowsPerPageOptions={[5, 10, 20]}
           />
         </>
       </Paper>

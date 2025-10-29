@@ -20,6 +20,8 @@ export default function SearchButton({ setSelectedTool }) {
     entryTypesConfig,
     setMessage,
     setHasSearchBeenTriggered,
+    setQueryDirty,
+    setLastSearchedFilters,
   } = useSelectedEntry();
 
   // Main logic executed when the user clicks "Search"
@@ -43,12 +45,15 @@ export default function SearchButton({ setSelectedTool }) {
     setLoadingData(true);
     setResultData([]);
     setHasSearchBeenTriggered(true);
+    setLastSearchedFilters(selectedFilter);
+    setQueryDirty(false);
+
     try {
       const url = `${config.apiUrl}/${selectedPathSegment}`;
       let response;
 
       if (selectedFilter.length > 0) {
-        // ✅ Use shared query builder
+        // Using shared query builder
         const query = queryBuilder(selectedFilter, entryTypeId);
         const requestOptions = {
           method: "POST",
