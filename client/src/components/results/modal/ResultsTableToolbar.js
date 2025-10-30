@@ -46,10 +46,10 @@ export default function ResultsTableToolbar({
           color: colors.darkPrimary,
           fontSize: "14px",
           display: "flex",
-          alignItems: "center",
+          alignItems: "flex-end",
         }}
       >
-        Total Results:{count}
+        Total Results: {count}
       </Box>
 
       {/* Column Selector */}
@@ -81,6 +81,7 @@ export default function ResultsTableToolbar({
           )}
           sx={{
             borderRadius: "24px",
+            height: "40px",
             "& .MuiOutlinedInput-notchedOutline": {
               borderColor: colors.darkPrimary,
             },
@@ -93,7 +94,7 @@ export default function ResultsTableToolbar({
               gap: "8px",
               py: 0.5,
               width: "200px",
-              height: "33.1px",
+              height: "40px",
             },
           }}
           IconComponent={KeyboardArrowDownRoundedIcon}
@@ -132,9 +133,9 @@ export default function ResultsTableToolbar({
         onChange={(e) => setSearchTerm(e.target.value)}
         sx={{
           width: "237px",
-
           "& .MuiOutlinedInput-root": {
             borderRadius: "24px",
+            height: "40px",
             "& fieldset": { borderColor: colors.darkPrimary },
             "&:hover fieldset": { borderColor: colors.primary },
             "& input::placeholder": {

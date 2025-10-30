@@ -52,18 +52,27 @@ export default function SearchButton({ setSelectedTool }) {
       const url = `${config.apiUrl}/${selectedPathSegment}`;
       let response;
 
-      if (selectedFilter.length > 0) {
-        // Using shared query builder
-        const query = queryBuilder(selectedFilter, entryTypeId);
-        const requestOptions = {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(query),
-        };
-        response = await fetch(url, requestOptions);
-      } else {
-        response = await fetch(url);
-      }
+      // if (selectedFilter.length > 0) {
+      //   // Using shared query builder
+      //   const query = queryBuilder(selectedFilter, entryTypeId);
+      //   const requestOptions = {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify(query),
+      //   };
+      //   response = await fetch(url, requestOptions);
+      // } else {
+      //   response = await fetch(url);
+      // }
+
+      const query = queryBuilder(selectedFilter, entryTypeId);
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(query),
+      };
+
+      response = await fetch(url, requestOptions);
 
       if (!response.ok) {
         console.error("Fetch failed:", response.status);

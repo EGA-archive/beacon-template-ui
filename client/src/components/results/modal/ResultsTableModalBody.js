@@ -9,7 +9,6 @@ import {
   TableHead,
   TableRow,
   tableCellClasses,
-  TablePagination,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import config from "../../../config/config.json";
@@ -26,10 +25,6 @@ import {
 const ResultsTableModalBody = ({
   dataTable,
   totalItems,
-  page,
-  rowsPerPage,
-  handleChangePage,
-  handleChangeRowsPerPage,
   entryTypeId,
   selectedPathSegment,
 }) => {
@@ -302,15 +297,6 @@ const ResultsTableModalBody = ({
               </TableBody>
             </Table>
           </TableContainer>
-          <TablePagination
-            component="div"
-            count={displayedTotal}
-            page={page}
-            onPageChange={handleChangePage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[5, 10, 20]}
-          />
         </>
       </Paper>
     </Box>

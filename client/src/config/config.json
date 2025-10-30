@@ -1,6 +1,6 @@
 {
   "beaconType": "singleBeacon",
-  "apiUrl": "https://beacon-spain.ega-archive.org/api",
+  "apiUrl": "https://beacon-network-backend-test.ega-archive.org/api",
   "apiUrlNetwork": "https://beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
   "apiUrlSingle": "https://beacon-network-backend-test.ega-archive.org/api",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],

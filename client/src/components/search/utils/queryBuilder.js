@@ -29,7 +29,10 @@ export const queryBuilder = (params = [], entryId) => {
       ? { requestParameters: genomicQuery.queryParams }
       : {}),
     includeResultsetResponses: "HIT",
-    pagination: { skip: 0, limit: 10 },
+    pagination: {
+      skip: 0,
+      limit: 1000,
+    },
     testMode: false,
     requestedGranularity: "record",
   };
