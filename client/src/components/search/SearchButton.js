@@ -138,6 +138,7 @@ export default function SearchButton({ setSelectedTool }) {
   // Render the Search button
   return (
     <Button
+      data-cy="search-button"
       variant="contained"
       fullWidth
       sx={{

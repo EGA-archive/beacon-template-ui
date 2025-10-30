@@ -115,7 +115,7 @@ export default function FilterLabelRemovable({
     >
       {/* Top part of the label: shows text and delete icon if removable */}
       <Box display="flex" alignItems="center" gap={1}>
-        <Typography sx={{ fontSize: "14px" }}>
+        <Typography sx={{ fontSize: "14px" }} data-cy="filter-chip">
           {scope === "genomicQueryBuilder" && typeof label === "string"
             ? label.split(" | ").map((part, i, arr) => {
                 const [key, ...valueParts] = part.split(":");
@@ -153,7 +153,13 @@ export default function FilterLabelRemovable({
             flexItem
             sx={{ borderColor: "black" }}
           />
-          <Typography fontWeight={400} fontSize={13} mb={1} mt={1}>
+          <Typography
+            fontWeight={400}
+            fontSize={13}
+            mb={1}
+            mt={1}
+            data-cy="scope-selector-title"
+          >
             Select the scope:
           </Typography>
 
