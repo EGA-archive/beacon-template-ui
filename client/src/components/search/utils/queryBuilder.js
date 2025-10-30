@@ -14,7 +14,7 @@ export const queryBuilder = (params = [], entryId) => {
     filters: nonGenomicFilters.map((item) => {
       if (item.operator) {
         return {
-          id: item.field,
+          id: item.id,
           operator: item.operator,
           value: item.value,
         };
@@ -29,7 +29,10 @@ export const queryBuilder = (params = [], entryId) => {
       ? { requestParameters: genomicQuery.queryParams }
       : {}),
     includeResultsetResponses: "HIT",
-    pagination: { skip: 0, limit: 10 },
+    pagination: {
+      skip: 0,
+      limit: 1000,
+    },
     testMode: false,
     requestedGranularity: "record",
   };

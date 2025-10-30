@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, TablePagination } from "@mui/material";
 import Modal from "@mui/material/Modal";
 import Fade from "@mui/material/Fade";
 import ResultsTableModalBody from "./ResultsTableModalBody";
@@ -10,53 +10,47 @@ import { useSelectedEntry } from "../../context/SelectedEntryContext";
 import Loader from "../../common/Loader";
 import { PATH_SEGMENT_TO_ENTRY_ID } from "../../common/textFormatting";
 
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "90%",
-  maxWidth: "1200px",
-  height: "80vh",
-  bgcolor: "background.paper",
-  borderRadius: 2,
-  boxShadow: 24,
-  display: "flex",
-  flexDirection: "column",
-  overflow: "hidden",
-  overflowY: "auto",
-  p: 4,
-};
-
+/**
+ * Displays a modal containing a paginated results table for the selected dataset.
+ * Fetches detailed records from the Beacon API using POST requests with pagination.
+ */
 const ResultsTableModal = ({ open, subRow, onClose }) => {
   const { selectedPathSegment, selectedFilter } = useSelectedEntry();
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(3);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [dataTable, setDataTable] = useState([]);
   const [url, setUrl] = useState("");
   const entryTypeId = PATH_SEGMENT_TO_ENTRY_ID[selectedPathSegment];
 
-  console.log(totalPages);
-  const parseType = (item) => {
-    switch (item) {
-      case "dataset":
-        return "datasets";
-      default:
-        return null;
-    }
+  const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "90%",
+    maxWidth: "1200px",
+    height: "80vh",
+    bgcolor: "background.paper",
+    borderRadius: 2,
+    boxShadow: 24,
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+    overflowY: "auto",
+    p: 4,
   };
-
-  const tableType = parseType(subRow.setType);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
+    const newLimit = parseInt(event.target.value, 10);
+    setRowsPerPage(newLimit);
+    setPage(0);
   };
 
   const handleClose = () => {
@@ -67,41 +61,36 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
     onClose();
   };
 
+  // Builds the Beacon query with pagination
   const queryBuilder = (page, entryTypeId) => {
-    let skipItems = page * rowsPerPage;
-
-    let filter = {
+    const skipItems = page * rowsPerPage;
+    const filter = {
       meta: { apiVersion: "2.0" },
       query: {
         filters: [],
         requestParameters: {},
         includeResultsetResponses: "HIT",
-        pagination: {
-          skip: parseInt(`${skipItems}`),
-          limit: parseInt(`${rowsPerPage}`),
-        },
+        pagination: { skip: 0, limit: 1000 },
         testMode: false,
         requestedGranularity: "record",
       },
     };
 
+    // Add filters if present
     if (selectedFilter.length > 0) {
       selectedFilter.forEach((item) => {
         if (item.queryParams) {
-          // Range or genomic query here
           filter.query.requestParameters = {
             ...filter.query.requestParameters,
             ...item.queryParams,
           };
         } else if (item.operator) {
-          // Normal Beacon filters
           filter.query.filters.push({
-            id: item.field,
+            id: item.id,
             operator: item.operator,
             value: item.value,
           });
         } else {
-          // Standard filtering term
           filter.query.filters.push({
             id: item.id,
             ...(item.scope ? { scope: item.scope } : {}),
@@ -110,60 +99,75 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
       });
     }
 
+    if (
+      !filter.query.requestParameters ||
+      Object.keys(filter.query.requestParameters).length === 0
+    ) {
+      delete filter.query.requestParameters;
+    }
+
+    if (filter.query.filters.length === 0) {
+      delete filter.query.filters;
+    }
+
     return filter;
   };
 
+  // Fetches data for the modal table
   useEffect(() => {
     if (!open) return;
+    let active = true;
 
     const fetchTableItems = async () => {
       try {
         setLoading(true);
         const url = `${config.apiUrl}/${selectedPathSegment}`;
         setUrl(url);
-        // let query = queryBuilder(page, entryTypeId);
-        // const response = await fetch(url, {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify(query),
-        // });
-        let response;
-        if (selectedFilter.length === 0) {
-          response = await fetch(url);
-        } else {
-          const query = queryBuilder(page, entryTypeId);
-          response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(query),
-          });
-        }
+
+        // Always use POST with pagination, even if no filters
+        const query = queryBuilder(page, entryTypeId);
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(query),
+        });
 
         const data = await response.json();
-        const results = data.response?.resultSets;
+        if (!active) return;
 
-        const beacon = results?.find((item) => {
+        const results = data.response?.resultSets;
+        if (!results?.length) return;
+
+        // Try to match the correct beacon by ID; otherwise, use the first
+        let beacon = results.find((item) => {
           const id = subRow.beaconId || subRow.id;
           const itemId = item.beaconId || item.id;
           return id === itemId;
         });
-        if (!beacon) {
-          console.warn("[Modal] No matching beacon found:", subRow);
-          return;
-        }
+        if (!beacon) beacon = results[0];
+
+        if (!beacon?.results) return;
+
         const totalDatasetsPages = Math.ceil(beacon.resultsCount / rowsPerPage);
         setTotalItems(beacon.resultsCount);
         setTotalPages(totalDatasetsPages);
         setDataTable(beacon.results);
       } catch (err) {
-        console.error("❌ Failed to fetch modal table", err);
+        console.error("Failed to fetch modal table:", err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchTableItems();
+    return () => {
+      active = false;
+    };
   }, [open, subRow, page, rowsPerPage]);
+
+  const start = page * rowsPerPage;
+  const end = start + rowsPerPage;
+  const visibleRows = dataTable.slice(start, end);
 
   return (
     <Modal
@@ -174,15 +178,10 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
     >
       <Fade in={open}>
         <Box sx={style}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
-          >
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <InputAdornment position="end">
               <IconButton
-                onClick={() => handleClose()}
+                onClick={handleClose}
                 size="small"
                 sx={{ color: config.ui.colors.darkPrimary }}
               >
@@ -190,6 +189,7 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
               </IconButton>
             </InputAdornment>
           </Box>
+
           <Box>
             <Typography
               id="modal-modal-title"
@@ -197,93 +197,45 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
                 fontWeight: "bold",
                 fontSize: "17px",
                 paddingBottom: "10px",
-                color: `${config.ui.colors.darkPrimary}`,
+                color: config.ui.colors.darkPrimary,
               }}
             >
               Results detailed table
             </Typography>
           </Box>
+
           <Box>
-            <Box>
-              <Box>
-                {subRow.beaconId && (
-                  <Box
-                    sx={{
-                      display: "flex",
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        color: "black",
-                        fontSize: "15px",
-                        paddingRight: "10px",
-                        color: `${config.ui.colors.darkPrimary}`,
-                      }}
-                    >
-                      Beacon:
-                    </Typography>
-                    <Typography
-                      sx={{
-                        color: "black",
-                        fontWeight: 700,
-                        fontSize: "15px",
-                        color: `${config.ui.colors.darkPrimary}`,
-                      }}
-                    >
-                      {subRow.beaconId}
-                    </Typography>
-                  </Box>
-                )}
-                {subRow.id && (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      paddingTop: "1px",
-                      paddingBottom: "10px",
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        color: `${config.ui.colors.darkPrimary}`,
-                        fontSize: "15px",
-                        paddingRight: "10px",
-                      }}
-                    >
-                      Dataset:
-                    </Typography>
-                    <Typography
-                      sx={{
-                        color: `${config.ui.colors.darkPrimary}`,
-                        fontWeight: 700,
-                        fontSize: "15px",
-                      }}
-                    >
-                      {subRow.id}
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-            </Box>
-            <Box>
-              {loading && <Loader message="Loading data..." />}
-              {!loading && dataTable.length > 0 && (
-                <>
-                  <ResultsTableModalBody
-                    dataTable={dataTable}
-                    totalItems={totalItems}
+            {loading && <Loader message="Loading data..." />}
+            {!loading && dataTable.length > 0 && (
+              <>
+                <ResultsTableModalBody
+                  dataTable={visibleRows}
+                  totalItems={totalItems}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                  totalPages={totalPages}
+                  handleChangePage={handleChangePage}
+                  handleChangeRowsPerPage={handleChangeRowsPerPage}
+                  primary={config.ui.colors.primary}
+                  entryTypeId={entryTypeId}
+                  selectedPathSegment={selectedPathSegment}
+                />
+                {/* Pagination moved here */}
+                <Box
+                  sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}
+                >
+                  <TablePagination
+                    component="div"
+                    count={totalItems}
                     page={page}
+                    onPageChange={handleChangePage}
                     rowsPerPage={rowsPerPage}
-                    totalPages={totalPages}
-                    handleChangePage={handleChangePage}
-                    handleChangeRowsPerPage={handleChangeRowsPerPage}
-                    primary={config.ui.colors.primary}
-                    entryTypeId={entryTypeId}
-                    selectedPathSegment={selectedPathSegment}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    rowsPerPageOptions={[5, 10, 20]}
                   />
-                </>
-              )}
-            </Box>
-            <Box></Box>
+                </Box>
+              </>
+            )}
           </Box>
         </Box>
       </Fade>

@@ -48,6 +48,7 @@ export default function QueryApplied({ variant }) {
       >
         {/* Header: title and Clear All button */}
         <Box
+          data-cy="query-applied-container"
           sx={{
             display: "flex",
             flexWrap: "wrap",
@@ -57,6 +58,7 @@ export default function QueryApplied({ variant }) {
         >
           {/* Section title */}
           <Typography
+            data-cy="query-applied-title"
             sx={{
               mb: 2,
               pt: 1,

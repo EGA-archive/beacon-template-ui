@@ -20,6 +20,8 @@ export default function SearchButton({ setSelectedTool }) {
     entryTypesConfig,
     setMessage,
     setHasSearchBeenTriggered,
+    setQueryDirty,
+    setLastSearchedFilters,
   } = useSelectedEntry();
 
   // Main logic executed when the user clicks "Search"
@@ -43,22 +45,34 @@ export default function SearchButton({ setSelectedTool }) {
     setLoadingData(true);
     setResultData([]);
     setHasSearchBeenTriggered(true);
+    setLastSearchedFilters(selectedFilter);
+    setQueryDirty(false);
+
     try {
       const url = `${config.apiUrl}/${selectedPathSegment}`;
       let response;
 
-      if (selectedFilter.length > 0) {
-        // ✅ Use shared query builder
-        const query = queryBuilder(selectedFilter, entryTypeId);
-        const requestOptions = {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(query),
-        };
-        response = await fetch(url, requestOptions);
-      } else {
-        response = await fetch(url);
-      }
+      // if (selectedFilter.length > 0) {
+      //   // Using shared query builder
+      //   const query = queryBuilder(selectedFilter, entryTypeId);
+      //   const requestOptions = {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify(query),
+      //   };
+      //   response = await fetch(url, requestOptions);
+      // } else {
+      //   response = await fetch(url);
+      // }
+
+      const query = queryBuilder(selectedFilter, entryTypeId);
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(query),
+      };
+
+      response = await fetch(url, requestOptions);
 
       if (!response.ok) {
         console.error("Fetch failed:", response.status);
@@ -124,6 +138,7 @@ export default function SearchButton({ setSelectedTool }) {
   // Render the Search button
   return (
     <Button
+      data-cy="search-button"
       variant="contained"
       fullWidth
       sx={{

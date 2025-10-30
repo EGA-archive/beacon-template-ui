@@ -127,7 +127,11 @@ export default function ResultsTable() {
         }}
       >
         <TableContainer>
-          <Table stickyHeader aria-label="Results table">
+          <Table
+            stickyHeader
+            aria-label="Results table"
+            data-cy="results-table"
+          >
             <TableHead>
               <TableRow>
                 {tableColumns.map((column) => (
@@ -167,6 +171,7 @@ export default function ResultsTable() {
                       }}
                     >
                       <TableCell
+                        data-cy="results-table-cell-id"
                         sx={{ fontWeight: "bold" }}
                         style={{
                           width: BEACON_NETWORK_COLUMNS[0].width,
@@ -223,7 +228,9 @@ export default function ResultsTable() {
                             />
                           )}
 
-                          <span>{item.beaconId ? item.beaconId : item.id}</span>
+                          <span data-cy="results-table-id-value">
+                            {item.beaconId ? item.beaconId : item.id}
+                          </span>
                         </Box>
                       </TableCell>
 
@@ -251,6 +258,7 @@ export default function ResultsTable() {
 
                       <TableCell
                         sx={{ fontWeight: "bold" }}
+                        data-cy="results-table-total-results"
                         style={{
                           width: BEACON_NETWORK_COLUMNS[3].width,
                         }}
@@ -269,31 +277,6 @@ export default function ResultsTable() {
                           }}
                         >
                           {item.totalResultsCount > 0 ? (
-                            // <Button
-                            //   variant="text"
-                            //   onClick={(e) => {
-                            //     e.stopPropagation();
-                            //     handleOpenModal(item);
-                            //   }}
-                            //   sx={{
-                            //     textTransform: "none",
-                            //     fontSize: "14px",
-                            //     fontWeight: 400,
-                            //     fontFamily: '"Open Sans", sans-serif',
-                            //     color: "gray",
-                            //     width: "50px",
-                            //     height: "30px",
-                            //     minWidth: "30px",
-                            //     minHeight: "30px",
-                            //     backgroundColor: "transparent",
-                            //     padding: 0,
-                            //     "&:hover": {
-                            //       color: config.ui.colors.primary,
-                            //     },
-                            //   }}
-                            // >
-                            //   <CalendarViewMonthIcon />
-                            // </Button>
                             <Tooltip title="View dataset details" arrow>
                               <Button
                                 onClick={() => handleOpenModal(item)}

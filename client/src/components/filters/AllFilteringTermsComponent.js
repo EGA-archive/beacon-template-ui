@@ -19,7 +19,7 @@ export default function AllFilteringTermsComponent() {
   // Track loading state during fetch
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const { selectedPathSegment } = useSelectedEntry();
+  const { selectedPathSegment, filteringTermsRef } = useSelectedEntry();
 
   // Filtered list of terms after applying search
   const [filteredTerms, setFilteredTerms] = useState([]);
@@ -49,7 +49,7 @@ export default function AllFilteringTermsComponent() {
   useEffect(() => {
     const fetchFilteringTerms = async () => {
       try {
-        const res = await fetch(`${config.apiUrl}/filtering_terms`);
+        const res = await fetch(`${config.apiUrl}/filtering_terms?limit=0`);
         // const res = await fetch("/api.json");
         const data = await res.json();
         setFilteringTerms(data);
@@ -80,6 +80,7 @@ export default function AllFilteringTermsComponent() {
   // UI: search bar + table of filtering terms
   return (
     <Box
+      ref={filteringTermsRef}
       // Outer container styling
       sx={{
         width: "100%",

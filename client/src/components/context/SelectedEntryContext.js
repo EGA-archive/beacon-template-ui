@@ -50,6 +50,10 @@ export const SelectedEntryProvider = ({ children }) => {
 
   const [hasQueryStarted, setHasQueryStarted] = useState(false);
 
+  const [queryDirty, setQueryDirty] = useState(false);
+
+  const [lastSearchedFilters, setLastSearchedFilters] = useState([]);
+
   const valueInputRef = useRef(null);
   const filteringTermsRef = useRef(null);
 
@@ -87,6 +91,10 @@ export const SelectedEntryProvider = ({ children }) => {
         filteringTermsRef,
         hasQueryStarted,
         setHasQueryStarted,
+        queryDirty,
+        setQueryDirty,
+        lastSearchedFilters,
+        setLastSearchedFilters,
       }}
     >
       {children}
