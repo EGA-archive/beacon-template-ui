@@ -21,7 +21,6 @@ import {
   formatEntryLabel,
   sortEntries,
   singleEntryCustomLabels,
-  entryTypeDescriptions,
 } from "../components/common/textFormatting";
 
 export default function Search({

@@ -58,6 +58,7 @@ export default function StyledButtons({
             selected ? primaryDarkColor : unselectedBorderColor
           }`,
           color: primaryDarkColor,
+
           "&:hover": {
             backgroundColor: selected ? selectedBg : lighten("#fff", 0.05),
             border: `1px solid ${primaryDarkColor}`,
@@ -93,7 +94,6 @@ const primaryColor = config.ui.colors.primary;
 const unselectedBorderColor = alpha(primaryColor, 0.15); // Light border for non-selected buttons
 const selectedBg = alpha(primaryColor, 0.15); // Light background when selected
 const primaryDarkColor = config.ui.colors.darkPrimary;
-const selectedBgColor = lighten(primaryDarkColor, 0.9);
 
 // Prop types for validation
 StyledButtons.propTypes = {

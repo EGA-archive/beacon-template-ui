@@ -8,10 +8,11 @@ import {
   FormControl,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import config from "../../config/config.json";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 // FilterTermsExtra allows users to add a custom numeric filter
 // It provides:
@@ -30,17 +31,17 @@ export default function FilterTermsExtra() {
   const [error, setError] = useState("");
 
   // Used to scroll the container into view when a new alphanumeric filter is active
-  const containerRef = useRef(null);
+  const { valueInputRef } = useSelectedEntry();
 
   // When a new filter is selected, scroll to this section smoothly
   useEffect(() => {
-    if (extraFilter && containerRef.current) {
-      containerRef.current.scrollIntoView({
+    if (extraFilter && valueInputRef?.current) {
+      valueInputRef.current.scrollIntoView({
         behavior: "smooth",
         block: "center",
       });
     }
-  }, [extraFilter]);
+  }, [extraFilter, valueInputRef]);
 
   // Main function that runs when the "+" button is clicked
   const handleAddFilter = () => {
@@ -82,12 +83,35 @@ export default function FilterTermsExtra() {
       }
 
       // Step 3. If no duplicates, create the new filter object
+      let formattedOperator = selectedOperator;
+      let formattedValue = selectedValue;
+
+      // Handle LIKE and !LIKE (contains / does not contain)
+      if (selectedOperator === "LIKE" || selectedOperator === "!LIKE") {
+        // Add wildcards if missing
+        if (!selectedValue.includes("%")) {
+          formattedValue = `%${selectedValue}%`;
+        }
+
+        // Normalize operators for backend:
+        formattedOperator = selectedOperator === "LIKE" ? "=" : "!";
+      }
+
+      const operatorDisplay =
+        selectedOperator === "!"
+          ? "is not"
+          : selectedOperator === "LIKE"
+          ? "contains"
+          : selectedOperator === "!LIKE"
+          ? "does not contain"
+          : selectedOperator;
+
       const extraFilterCustom = {
         id: extraFilter.id,
         key: uniqueId,
-        label: `${extraFilter.label} ${selectedOperator} ${selectedValue}`,
-        operator: selectedOperator,
-        value: selectedValue,
+        label: `${extraFilter.label} ${operatorDisplay} ${selectedValue}`,
+        operator: formattedOperator,
+        value: formattedValue,
         scope: extraFilter.scope || null,
         scopes: extraFilter.scopes || [],
         type: extraFilter.type || "alphanumeric",
@@ -127,9 +151,20 @@ export default function FilterTermsExtra() {
     });
   };
 
+  // Runs when user clicks the Cancel (X) button
+  const handleCancelFilter = () => {
+    // Reset local inputs
+    setSelectedOperator(">");
+    setSelectedValue("");
+    setError("");
+
+    // Remove the pending extra filter from global context
+    setExtraFilter(null);
+  };
+
   return (
     <Box
-      ref={containerRef}
+      ref={valueInputRef}
       sx={{
         display: "flex",
         gap: 2,
@@ -190,6 +225,9 @@ export default function FilterTermsExtra() {
             <MenuItem value=">">{">"}</MenuItem>
             <MenuItem value="=">{"="}</MenuItem>
             <MenuItem value="<">{"<"}</MenuItem>
+            <MenuItem value="!">{"is not"}</MenuItem>
+            <MenuItem value="LIKE">{"contains"}</MenuItem>
+            <MenuItem value="!LIKE">{"does not contain"}</MenuItem>
           </Select>
         </FormControl>
       </Box>
@@ -225,6 +263,7 @@ export default function FilterTermsExtra() {
           fontFamily: '"Open Sans", sans-serif',
           padding: "0px",
           maxWidth: "30px",
+          gap: 2,
         }}
       >
         <Button
@@ -252,6 +291,30 @@ export default function FilterTermsExtra() {
         >
           <AddIcon fontSize="small" />
         </Button>
+
+        <CancelIcon
+          onClick={handleCancelFilter}
+          fontSize="small"
+          sx={{
+            textTransform: "none",
+            fontSize: "14px",
+            fontWeight: 400,
+            fontFamily: '"Open Sans", sans-serif',
+            border: `1px solid #e0e0e0`,
+            backgroundColor: "white",
+            color: "#9e9e9e",
+            borderRadius: "50%",
+            width: "30px",
+            height: "30px",
+            minWidth: "30px",
+            minHeight: "30px",
+            padding: 0,
+            "&:hover": {
+              backgroundColor: "#8B0000",
+              color: "white",
+            },
+          }}
+        />
       </Box>
 
       {/* Display error message if needed */}

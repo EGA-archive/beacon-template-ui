@@ -35,6 +35,7 @@ export default function SearchFiltersInput({ activeInput, setActiveInput }) {
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <SearchIcon sx={{ color: primaryDarkColor, mr: 1 }} />
           <InputBase
+            data-testid="filtering-input"
             placeholder="Search by Filtering Terms (min. 1 letter required)"
             fullWidth
             value={searchInput}

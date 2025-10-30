@@ -9,9 +9,17 @@ import CommonMessage, {
 export default function QueryAppliedItems({
   handleFilterRemove,
   variant = "removable",
+  customFilters,
 }) {
   // Get the current filters and setter from context
-  const { selectedFilter, setSelectedFilter } = useSelectedEntry();
+  const {
+    selectedFilter,
+    setSelectedFilter,
+    lastSearchedFilters,
+    setQueryDirty,
+  } = useSelectedEntry();
+
+  const filtersToRender = customFilters || selectedFilter;
 
   // Track which label is expanded (if any)
   const [expandedKey, setExpandedKey] = useState(false);
@@ -19,8 +27,9 @@ export default function QueryAppliedItems({
   const [message, setMessage] = useState(null);
 
   useEffect(() => {
+    setQueryDirty(selectedFilter.length > 0);
     console.log("📌 Applied filters:", selectedFilter);
-  }, [selectedFilter]);
+  }, [selectedFilter, setQueryDirty]);
 
   // Handle when a user changes the scope inside an expanded label
   const handleScopeChange = (keyValue, newScope) => {
@@ -43,10 +52,6 @@ export default function QueryAppliedItems({
       return;
     }
 
-    console.log(
-      `🔄 Changing scope for filter: ${target.label} (${prevScope} → ${newScope})`
-    );
-
     // Otherwise update the scope
     setSelectedFilter((prevFilters) =>
       prevFilters.map((filter) =>
@@ -58,6 +63,28 @@ export default function QueryAppliedItems({
 
     setExpandedKey(null);
   };
+
+  useEffect(() => {
+    const sameLength = selectedFilter.length === lastSearchedFilters.length;
+
+    const sameContent =
+      sameLength &&
+      selectedFilter.every((f, index) => {
+        const g = lastSearchedFilters[index];
+        return (
+          g &&
+          f.id === g.id &&
+          f.operator === g.operator &&
+          f.value === g.value &&
+          f.scope === g.scope
+        );
+      });
+
+    const dirty = !sameContent;
+    setQueryDirty(dirty);
+
+    console.log("📌 Applied filters:", selectedFilter, { dirty });
+  }, [selectedFilter, lastSearchedFilters, setQueryDirty]);
 
   return (
     <Box>
@@ -76,7 +103,7 @@ export default function QueryAppliedItems({
           flexWrap: "wrap",
         }}
       >
-        {selectedFilter.map((filter) => {
+        {filtersToRender.map((filter) => {
           const isGenomic = filter.scope === "genomicQueryBuilder";
 
           // Unique key for identifying and expanding a label

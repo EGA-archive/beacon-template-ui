@@ -4,19 +4,19 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 
 export default function ResultsFilters() {
   const {
-    setSelectedFilter,
     setLoadingData,
     setResultData,
     setHasSearchResult,
+    lastSearchedFilters,
+    setLastSearchedFilters,
   } = useSelectedEntry();
 
   const handleFilterRemove = (item) => {
-    // If something has change, reload filter
     setLoadingData(false);
     setResultData([]);
     setHasSearchResult(false);
 
-    setSelectedFilter((prevFilters) =>
+    setLastSearchedFilters((prevFilters) =>
       prevFilters.filter((filter) => filter.key !== item.key)
     );
   };
@@ -31,6 +31,7 @@ export default function ResultsFilters() {
       <QueryAppliedItems
         handleFilterRemove={handleFilterRemove}
         variant="readonly"
+        customFilters={lastSearchedFilters}
       />
     </Box>
   );

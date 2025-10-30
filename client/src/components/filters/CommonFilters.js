@@ -25,6 +25,8 @@ export default function CommonFilters() {
     setResultData,
     setHasSearchResult,
     selectedPathSegment,
+    extraFilter,
+    valueInputRef,
   } = useSelectedEntry();
 
   const getValidLabels = (topic) =>
@@ -63,24 +65,36 @@ export default function CommonFilters() {
     setLoadingData(false);
     setResultData([]);
     setHasSearchResult(false);
-
+    if (extraFilter && !extraFilter.value) {
+      setMessage(COMMON_MESSAGES.incompleteFilter);
+      setTimeout(() => {
+        setMessage(null);
+        if (valueInputRef?.current) {
+          valueInputRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }, 3000);
+      return;
+    }
     if (item.type === "alphanumeric") {
       setExtraFilter(item);
-    } else {
-      setSelectedFilter((prevFilters) => {
-        const isDuplicate = prevFilters.some(
-          (filter) => filter.key === item.key && filter.scope === item.scope
-        );
-
-        if (isDuplicate) {
-          setMessage(COMMON_MESSAGES.doubleFilter);
-          setTimeout(() => setMessage(null), 3000);
-          return prevFilters;
-        }
-
-        return [...prevFilters, item];
-      });
+      return;
     }
+    setSelectedFilter((prevFilters) => {
+      const isDuplicate = prevFilters.some(
+        (filter) => filter.id === item.id && filter.scope === item.scope
+      );
+
+      if (isDuplicate) {
+        setMessage(COMMON_MESSAGES.doubleFilter);
+        setTimeout(() => setMessage(null), 3000);
+        return prevFilters;
+      }
+
+      return [...prevFilters, item];
+    });
   };
 
   const summarySx = {
@@ -101,9 +115,10 @@ export default function CommonFilters() {
     <>
       {message && (
         <Box sx={{ mt: 2 }}>
-          <CommonMessage text={COMMON_MESSAGES.doubleFilter} type="error" />
+          <CommonMessage text={message} type="error" />
         </Box>
       )}
+
       <Box>
         {filterCategories.map((topic) => {
           const validLabels = getValidLabels(topic);

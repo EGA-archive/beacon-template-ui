@@ -1,4 +1,4 @@
-import { useState, Fragment } from "react";
+import { useState, Fragment, useEffect, useCallback } from "react";
 import {
   Box,
   Paper,
@@ -9,21 +9,28 @@ import {
   TableHead,
   TableRow,
   tableCellClasses,
-  TablePagination,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import config from "../../../config/config.json";
 import ResultsTableModalRow from "./ResultsTableModalRow";
+import { queryBuilder } from "../../search/utils/queryBuilder";
+import ResultsTableToolbar from "./ResultsTableToolbar";
+import { exportCSV } from "../utils/exportCSV";
+import {
+  cleanAndParseInfo,
+  summarizeValue,
+  formatHeaderName,
+} from "../utils/tableHelpers";
 
 const ResultsTableModalBody = ({
   dataTable,
   totalItems,
-  page,
-  rowsPerPage,
-  handleChangePage,
-  handleChangeRowsPerPage,
+  entryTypeId,
+  selectedPathSegment,
 }) => {
   const [expandedRow, setExpandedRow] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredData, setFilteredData] = useState(dataTable);
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -52,24 +59,6 @@ const ResultsTableModalBody = ({
     backgroundColor: config.ui.colors.darkPrimary,
     fontWeight: 700,
     color: "white",
-  };
-
-  function formatHeaderName(header) {
-    const withSpaces = header.replace(/([A-Z])/g, " $1");
-    return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
-  }
-
-  const cleanAndParseInfo = (infoString) => {
-    try {
-      if (typeof infoString !== "string") return null;
-
-      const cleaned = infoString.replace(/"|"/g, '"');
-      const parsed = JSON.parse(cleaned);
-      return parsed;
-    } catch (error) {
-      console.log("Failed to parse item.info:", error);
-      return null;
-    }
   };
 
   const headersSet = new Set();
@@ -103,40 +92,6 @@ const ResultsTableModalBody = ({
       ]
     : headersArray;
 
-  function summarizeValue(value) {
-    if (value == null) return "-";
-
-    if (Array.isArray(value)) {
-      return value.map((el) => summarizeValue(el)).join(", ");
-    }
-
-    if (typeof value === "object") {
-      if (value.label) {
-        return value.label;
-      }
-
-      if (value.id) {
-        return value.id;
-      }
-
-      const nestedValues = Object.values(value)
-        .map((v) => summarizeValue(v))
-        .filter(Boolean);
-
-      if (nestedValues.length) {
-        return nestedValues.join(", ");
-      }
-
-      return "-";
-    }
-
-    if (typeof value === "string" || typeof value === "number") {
-      return value;
-    }
-
-    return "-";
-  }
-
   function renderCellContent(item, column) {
     const value = item[column];
     if (!value) return "-";
@@ -144,7 +99,66 @@ const ResultsTableModalBody = ({
     return summarizeValue(value);
   }
 
-  console.log("sortedHeaders", sortedHeaders);
+  const [visibleColumns, setVisibleColumns] = useState(
+    sortedHeaders.map((h) => h.id)
+  );
+
+  useEffect(() => {
+    const filtered = dataTable.filter((item) => {
+      if (!searchTerm) return true;
+      const rowString = sortedHeaders
+        .map((h) => summarizeValue(item[h.id]))
+        .join(" ")
+        .toLowerCase();
+      return rowString.includes(searchTerm.toLowerCase());
+    });
+
+    // Only update if the number of visible rows actually changes
+    if (filtered.length !== filteredData.length) {
+      setFilteredData(filtered);
+    }
+  }, [searchTerm, dataTable, sortedHeaders]);
+
+  // 🧪 Debug: inspect header vs rendered content of first row
+  if (dataTable.length > 0) {
+    const firstRow = dataTable[0];
+    // console.log("🧩 DEBUG — First row raw object:", firstRow);
+
+    // console.log("🧾 Header → Rendered content comparison (first row only):");
+    // sortedHeaders.forEach((col) => {
+    //   const rawValue = firstRow[col.id];
+    //   const rendered = summarizeValue(rawValue);
+    //   console.log(
+    //     `${col.id}:`,
+    //     "\n   ↳ Raw:",
+    //     rawValue,
+    //     "\n   ↳ Rendered:",
+    //     rendered
+    //   );
+    // });
+  }
+
+  const displayedTotal = searchTerm ? filteredData.length : totalItems;
+
+  const handleExport = useCallback(() => {
+    exportCSV({
+      dataTable,
+      sortedHeaders,
+      visibleColumns,
+      summarizeValue,
+      searchTerm,
+      entryTypeId,
+      selectedPathSegment,
+      queryBuilder,
+    });
+  }, [
+    dataTable,
+    sortedHeaders,
+    visibleColumns,
+    searchTerm,
+    entryTypeId,
+    selectedPathSegment,
+  ]);
 
   return (
     <Box
@@ -155,6 +169,16 @@ const ResultsTableModalBody = ({
         flexDirection: "column",
       }}
     >
+      <ResultsTableToolbar
+        visibleColumns={visibleColumns}
+        count={displayedTotal}
+        setVisibleColumns={setVisibleColumns}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        handleExport={handleExport}
+        sortedHeaders={sortedHeaders}
+      />
+
       <Paper
         sx={{
           width: "100%",
@@ -167,7 +191,6 @@ const ResultsTableModalBody = ({
         }}
       >
         <>
-          {/* <TableContainer sx={{ maxHeight: 540 }}> */}
           <TableContainer
             sx={{
               maxHeight: "60vh",
@@ -177,15 +200,27 @@ const ResultsTableModalBody = ({
             <Table stickyHeader aria-label="Results table">
               <TableHead>
                 <StyledTableRow>
-                  {sortedHeaders.map((column) => (
-                    <TableCell key={column.id} sx={headerCellStyle}>
-                      {column.name}
-                    </TableCell>
-                  ))}
+                  {sortedHeaders
+                    .filter((col) => visibleColumns.includes(col.id))
+                    .map((column) => (
+                      <TableCell key={column.id} sx={headerCellStyle}>
+                        {column.name}
+                      </TableCell>
+                    ))}
                 </StyledTableRow>
               </TableHead>
               <TableBody>
-                {dataTable.map((item, index) => {
+                {/* {dataTable
+                  .filter((item) => {
+                    if (!searchTerm) return true;
+                    const rowString = sortedHeaders
+                      .map((h) => summarizeValue(item[h.id]))
+                      .join(" ")
+                      .toLowerCase();
+                    return rowString.includes(searchTerm.toLowerCase());
+                  })
+                  .map((item, index) => { */}
+                {filteredData.map((item, index) => {
                   const isExpanded = expandedRow && expandedRow?.id === item.id;
                   let id = item.id;
                   const parsedInfo = cleanAndParseInfo(item.info);
@@ -211,17 +246,43 @@ const ResultsTableModalBody = ({
                           fontWeight: "bold",
                         }}
                       >
-                        {Object.values(sortedHeaders).map((colConfig) => {
-                          return (
+                        {Object.values(sortedHeaders)
+                          .filter((colConfig) =>
+                            visibleColumns.includes(colConfig.id)
+                          )
+                          .map((colConfig) => (
                             <StyledTableCell
                               key={`${id}-${colConfig.id}`}
-                              sx={{ fontSize: "11px" }}
-                              style={{ width: colConfig.width }}
+                              sx={{
+                                fontSize: "11px",
+
+                                ...(colConfig.id === "variantInternalId"
+                                  ? {
+                                      whiteSpace: "wrap",
+                                      wordBreak: "break-word",
+                                      overflowWrap: "anywhere",
+                                      verticalAlign: "top",
+                                      lineHeight: 1.4,
+                                      paddingTop: "6px",
+                                      paddingBottom: "6px",
+                                    }
+                                  : {
+                                      whiteSpace: "wrap",
+                                      overflowWrap: "anywhere",
+                                      verticalAlign: "top",
+                                    }),
+                              }}
+                              style={{
+                                width: colConfig.width || "auto",
+                                maxWidth:
+                                  colConfig.id === "variantInternalId"
+                                    ? "300px"
+                                    : "250px",
+                              }}
                             >
                               {renderCellContent(item, colConfig.id)}
                             </StyledTableCell>
-                          );
-                        })}
+                          ))}
                       </StyledTableRow>
 
                       {isExpanded && (
@@ -236,15 +297,6 @@ const ResultsTableModalBody = ({
               </TableBody>
             </Table>
           </TableContainer>
-          <TablePagination
-            component="div"
-            count={totalItems}
-            page={page}
-            onPageChange={handleChangePage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[5, 10, 20]}
-          />
         </>
       </Paper>
     </Box>

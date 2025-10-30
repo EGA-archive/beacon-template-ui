@@ -19,7 +19,9 @@ export default function useFilteringTerms() {
 
       try {
         // Make the GET request to the filtering_terms endpoint
-        const response = await fetch(`${config.apiUrl}/filtering_terms`);
+        const response = await fetch(
+          `${config.apiUrl}/filtering_terms?limit=0`
+        );
         // const response = await fetch("/api.json");
         // Convert the response to JSON
         const data = await response.json();

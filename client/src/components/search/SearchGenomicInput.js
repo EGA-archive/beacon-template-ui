@@ -8,10 +8,11 @@ import config from "../../config/config.json";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 
 // This component renders an input bar for adding free-text genomic queries.
-// It includes a dropdown for selecting the genome assembly coming from the config
+// It includes a dropdown for selecting the genome assembly coming from the config,
 // a search input field, a "clear" icon to reset input, and a button to add the query.
 // When the user presses Enter or clicks the "Add" button, the query is added to the filters.
-// There is also a functionlaity that auto-detects the assmebly ID in the input
+// It also auto-detects assembly IDs and normalizes genomic variant formats.
+
 export default function SearchGenomicInput({
   activeInput,
   setActiveInput,
@@ -27,9 +28,12 @@ export default function SearchGenomicInput({
 }) {
   const inputRef = useRef(null); // For managing focus on the input field
 
-  // This function checks if the input is a valid variant
-  // It also looks for an assembly ID  either at the start or end of the input
-  const detectAndCleanVariant = (input = "", assemblies = []) => {
+  // Detect and normalize genomic variant format (e.g., 17:7674945G>A -> 17-7674945-G-A)
+  const detectAndCleanVariant = (
+    input = "",
+    assemblies = [],
+    chromosomeLibrary = []
+  ) => {
     if (!input)
       return { isVariant: false, cleanedValue: "", detectedAssembly: null };
 
@@ -63,33 +67,80 @@ export default function SearchGenomicInput({
       }
     }
 
-    // Clean the input into standard format
-    const cleaned = raw
-      .replace(/\./g, "") // remove dots
-      .replace(/\//g, "") // remove slashes
-      .replace(/\t+/g, "-") // tabs to hyphens
-      .replace(/\s+/g, "-") // spaces to hyphens
-      .replace(/-+/g, "-") // collapse multiple hyphens
-      .replace(/^-|-$/g, "") // remove hyphens at start/end
-      .replace(/^[-|]+|[-|]+$/g, ""); // removes leading/trailing hyphens *or* pipes
+    // Step 1: Replace symbols to make formats consistent
+    const normalised = raw
+      .replace(/:/g, "-") // colon → dash
+      .replace(/>/g, "-"); // greater-than → dash
 
-    // Regex to check if it looks like a genomic variant
-    const variantRegex =
-      /^(?:chr)?(?:[1-9]|1\d|2[0-2]|X|Y|MT)-\d+-[ACGT]+-[ACGT]+$/i;
+    // Step 2: If ref/alt bases are stuck together (e.g., G>A → G-A)
+    const withSplitBases = normalised.replace(
+      /(\d+)([ACGTacgt]+)-([ACGTacgt]+)$/g,
+      "$1-$2-$3"
+    );
+
+    // Step 3: Final cleanup and uppercasing
+    const cleaned = withSplitBases
+      .toUpperCase()
+      .replace(/\./g, "")
+      .replace(/\//g, "")
+      .replace(/\t+/g, "-")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
+      .replace(/^[-|]+|[-|]+$/g, "");
+
+    // Dynamically validate the referenceName against chromosomeLibrary
+    const chromPattern = chromosomeLibrary
+      .map((c) => c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")) // escape regex chars
+      .join("|");
+
+    const variantRegex = new RegExp(
+      `^(?:CHR)?(?:${chromPattern})-\\d+-[ACGT]+-[ACGT]+$`,
+      "i"
+    );
 
     if (variantRegex.test(cleaned)) {
       return {
         isVariant: true,
-        cleanedValue: cleaned.toUpperCase(), // cleaned variant (no assembly)
+        cleanedValue: cleaned.toUpperCase(),
         detectedAssembly,
       };
     }
 
     return {
       isVariant: false,
-      cleanedValue: raw.trim(), // just plain query (not a variant)
+      cleanedValue: raw.trim(),
       detectedAssembly,
     };
+  };
+
+  // Validate genomic variant: checks chromosome and base validity
+  const validateGenomicVariant = (cleanedValue, chromosomeLibrary) => {
+    const [chrom, pos, ref, alt] = cleanedValue.split("-");
+    const errors = [];
+
+    const validChromosomes = chromosomeLibrary.map((c) => c.toUpperCase());
+    const basePattern = /^[ACGT]+$/i;
+
+    // Invalid chromosome
+    if (!validChromosomes.includes(chrom.toUpperCase())) {
+      errors.push(
+        `${
+          COMMON_MESSAGES.invalidChromosome
+        } ("${chrom}"). Allowed: ${validChromosomes.join(", ")}.`
+      );
+    }
+
+    // Invalid bases
+    if (!basePattern.test(ref) || !basePattern.test(alt)) {
+      errors.push(`${COMMON_MESSAGES.invalidBases} (Found ${ref}/${alt}).`);
+    }
+
+    if (errors.length > 0) {
+      return errors.join(" ");
+    }
+
+    return null;
   };
 
   // Automatically focuses the input when genomic input becomes active
@@ -99,39 +150,41 @@ export default function SearchGenomicInput({
     }
   }, [activeInput]);
 
-  // Live detection
+  // Live detection of variant structure
   const { isVariant, cleanedValue, detectedAssembly } = detectAndCleanVariant(
     genomicDraft,
-    config?.assemblyId ?? []
+    config?.assemblyId ?? [],
+    config?.ui?.genomicQueries?.genomicQueryBuilder?.chromosomeLibrary ?? []
   );
 
-  // Keep the dropdown synced if user typed it
+  // Keep dropdown synced with detected assembly
   useEffect(() => {
     if (detectedAssembly && detectedAssembly !== assembly) {
       setAssembly(detectedAssembly);
     }
   }, [detectedAssembly, assembly, setAssembly]);
 
-  // This function is called when the user presses Enter or clicks "Add"
-  // It detects if the input is a genomic variant, cleans it if needed, checks for duplicates,
-  // and then adds it to the selected filters list.
+  // Commit the draft query to filters
   const commitGenomicDraft = () => {
+    const chromosomeLibrary =
+      config?.ui?.genomicQueries?.genomicQueryBuilder?.chromosomeLibrary ?? [];
+
     const { isVariant, cleanedValue, detectedAssembly } = detectAndCleanVariant(
       genomicDraft,
-      config?.assemblyId ?? []
+      config?.assemblyId ?? [],
+      chromosomeLibrary
     );
+
     if (!cleanedValue) return;
 
-    // If user typed an assembly, sync it with dropdown
     if (detectedAssembly && detectedAssembly !== assembly) {
       setAssembly(detectedAssembly);
     }
 
-    // Use typed assembly or fallback to current dropdown
     const finalAssembly = detectedAssembly || assembly;
 
+    // Restrict to single genomic query
     const alreadyHasGenomic = selectedFilter.some((f) => f.type === "genomic");
-
     if (alreadyHasGenomic) {
       setMessage(COMMON_MESSAGES.singleGenomicQuery);
       setTimeout(() => setMessage(null), 3000);
@@ -139,12 +192,12 @@ export default function SearchGenomicInput({
       return;
     }
 
-    // Avoid duplicates
+    // Prevent duplicates
     const labelForCheck = `${finalAssembly} | ${cleanedValue}`
-      .replace(/\|{2,}/g, "|") // collapse double/more pipes
-      .replace(/\|\s*\|/g, "|") // just in case spaced pipes
-      .replace(/\|\s+$/, "") // no trailing pipe
-      .replace(/^\s+\|/, ""); // no leading pipe
+      .replace(/\|{2,}/g, "|")
+      .replace(/\|\s*\|/g, "|")
+      .replace(/\|\s+$/, "")
+      .replace(/^\s+\|/, "");
 
     const isDuplicate = selectedFilter.some(
       (f) => f.label.trim().toLowerCase() === labelForCheck.toLowerCase()
@@ -155,36 +208,76 @@ export default function SearchGenomicInput({
       return;
     }
 
-    // Create unique ID for this new filter
+    // Case 1: Variant-like structure detected
+    if (isVariant) {
+      const validationError = validateGenomicVariant(
+        cleanedValue,
+        chromosomeLibrary
+      );
+      if (validationError) {
+        setMessage(validationError);
+        setTimeout(() => setMessage(null), 4000);
+        return;
+      }
+    } else {
+      // Case 2: No proper variant structure — detect if user tried but failed
+      const draft = genomicDraft.trim().toUpperCase();
+
+      // Check chromosome portion
+      const chrom = draft.split(/[-:]/)[0];
+      const validChromosomes = chromosomeLibrary.map((c) => c.toUpperCase());
+      const basePattern = /^[ACGT]+$/i;
+
+      let errors = [];
+
+      if (!validChromosomes.includes(chrom)) {
+        errors.push(COMMON_MESSAGES.invalidChromosome);
+      }
+
+      // Try to extract bases from something like 17:7674945X>Y
+      const match = draft.match(/([ACGT])[\->]([ACGT])/i);
+      if (!match) {
+        errors.push(COMMON_MESSAGES.invalidBases);
+      }
+
+      // If nothing matches any known pattern, fallback to format error
+      if (errors.length === 0) {
+        errors.push(
+          COMMON_MESSAGES.invalidFormat +
+            " Use formats like 17-7674945-G-A or 17:7674945G>A."
+        );
+      }
+
+      setMessage(errors.join(" "));
+      setTimeout(() => setMessage(null), 4000);
+      return;
+    }
+
+    // If everything passes, build the Beacon-compliant query
+    const [chromosome, position, ref, alt] = cleanedValue.split("-");
+    const queryParams = {
+      assemblyId: finalAssembly,
+      referenceName: chromosome,
+      start: [Number(position)],
+      referenceBases: ref,
+      alternateBases: alt,
+    };
+
+    // Create unique ID
     const uniqueId = `genomic-free-${Date.now().toString(36)}-${Math.random()
       .toString(36)
       .slice(2, 7)}`;
 
-    // Build Beacon-compliant genomic query parameters
-    let queryParams = {};
-    if (isVariant) {
-      const [chromosome, position, ref, alt] = cleanedValue.split("-");
-      queryParams = {
-        assemblyId: finalAssembly,
-        referenceName: chromosome,
-        start: [Number(position)],
-        referenceBases: ref,
-        alternateBases: alt,
-      };
-    }
-
-    // Build new filter item with final label
     const newGenomicFilter = {
       id: uniqueId,
       key: uniqueId,
       label: labelForCheck,
-      scope: isVariant ? "genomicVariant" : "genomicQuery",
+      scope: "genomicVariant",
       bgColor: "genomic",
       type: "genomic",
       queryParams,
     };
 
-    // Add to list and clear input
     setSelectedFilter((prev) => [...prev, newGenomicFilter]);
     setGenomicDraft("");
   };
@@ -200,7 +293,7 @@ export default function SearchGenomicInput({
     >
       {/* Input container */}
       <Box
-        onClick={() => setActiveInput("genomic")} // Make this input active on click
+        onClick={() => setActiveInput("genomic")}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -210,7 +303,7 @@ export default function SearchGenomicInput({
           transition: "flex 0.3s ease",
         }}
       >
-        {/* Genome assembly dropdown (only visible when input is active) */}
+        {/* Genome assembly dropdown */}
         {activeInput === "genomic" && (
           <Select
             value={assembly}
@@ -233,7 +326,6 @@ export default function SearchGenomicInput({
               ".MuiSelect-icon": { color: "#fff", mr: 1 },
             }}
           >
-            {/* Load the options from config */}
             {config.assemblyId.map((id) => (
               <MenuItem key={id} value={id} sx={{ fontSize: "12px" }}>
                 {id}
@@ -247,11 +339,11 @@ export default function SearchGenomicInput({
           <SearchIcon />
         </Box>
 
-        {/* Main text input */}
+        {/* Main input */}
         <Box sx={{ position: "relative", flex: 1 }}>
           <InputBase
             inputRef={inputRef}
-            placeholder="Search by Genomic Query. Example: 17:7674945G>A"
+            placeholder="Search by Genomic Query. Examples: 17-7674945-G-A or 17:7674945G>A"
             fullWidth
             value={genomicDraft}
             onChange={(e) => setGenomicDraft(e.target.value)}
@@ -265,7 +357,7 @@ export default function SearchGenomicInput({
             }}
           />
 
-          {/* Clear icon to reset the input */}
+          {/* Clear icon */}
           {genomicDraft?.trim() && (
             <Box
               role="button"
@@ -295,7 +387,7 @@ export default function SearchGenomicInput({
         </Box>
       </Box>
 
-      {/* "Add" button and error message (only show if input is not empty) */}
+      {/* Add button and message */}
       {genomicDraft?.trim() && (
         <Box>
           <Box
@@ -322,12 +414,8 @@ export default function SearchGenomicInput({
               </>
             )}
           </Box>
-          <Box
-            sx={{
-              mt: message ? 2 : 0,
-            }}
-          >
-            {/* Show duplicate error message if necessary */}
+
+          <Box sx={{ mt: message ? 2 : 0 }}>
             {message && <CommonMessage text={message} type="error" />}
           </Box>
         </Box>

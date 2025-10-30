@@ -28,7 +28,7 @@ import {
 
 const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
   // Access setters from global context to update filters
-  const { setExtraFilter, setSelectedFilter } = useSelectedEntry();
+  const { extraFilter, setExtraFilter, setSelectedFilter } = useSelectedEntry();
 
   const [message, setMessage] = useState(null); // For validation or feedback
   const [filteredTerms, setFilteredTerms] = useState([]); // Search result terms
@@ -144,7 +144,14 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
                 <ListItem
                   key={item.key}
                   onClick={() => {
-                    // Handle numeric/alphanumeric filters separately
+                    if (extraFilter && !extraFilter.value) {
+                      setMessage(COMMON_MESSAGES.incompleteFilter);
+                      setTimeout(() => {
+                        setMessage(null);
+                        onCloseDropdown();
+                      }, 3000);
+                      return;
+                    }
                     if (item.type === "alphanumeric") {
                       setExtraFilter(item);
                       onCloseDropdown();
@@ -157,14 +164,15 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
                           filter.label === item.label &&
                           filter.scope === item.scope
                       );
-
                       if (isDuplicate) {
                         setMessage(COMMON_MESSAGES.doubleFilter);
-                        setTimeout(() => setMessage(null), 3000);
-                        return prev; // return unchanged
-                      }
+                        setTimeout(() => {
+                          setMessage(null);
+                          onCloseDropdown();
+                        }, 3000);
 
-                      // Otherwise, add filter
+                        return prev;
+                      }
                       return handleFilterSelection({
                         item,
                         prevFilters: prev,
