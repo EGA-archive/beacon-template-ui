@@ -279,6 +279,7 @@ export default function ResultsTable() {
                           {item.totalResultsCount > 0 ? (
                             <Tooltip title="View dataset details" arrow>
                               <Button
+                                data-cy="results-table-details-button"
                                 onClick={() => handleOpenModal(item)}
                                 variant="outlined"
                                 startIcon={<CalendarViewMonthIcon />}

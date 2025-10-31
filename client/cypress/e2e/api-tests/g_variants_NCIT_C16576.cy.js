@@ -9,13 +9,13 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
     query: {
       filters: [{ id: "NCIT:C16576", scope: "individual" }],
       includeResultsetResponses: "HIT",
-      pagination: { skip: 0, limit: 10 },
+      pagination: { skip: 0, limit: 1000 },
       testMode: false,
       requestedGranularity: "record",
     },
   };
 
-  it("compares backend response with UI table", () => {
+  it("compares backend variantInternalIds with UI table", () => {
     // STEP 1: Detect entry type from apiUrl
     const entryType = apiUrl.split("/").pop();
     const entryTypeLabel =
@@ -33,53 +33,43 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
       headers: { "Content-Type": "application/json" },
     }).then((res) => {
       const backend = res.body;
-      const backendResultSets = backend?.response?.resultSets || [];
-      const backendIds = backendResultSets
-        .map((set) => set.id?.toString().toLowerCase())
-        .filter(Boolean);
+      const resultSets = backend?.response?.resultSets || [];
 
-      cy.log(
-        `Backend resultSets IDs: ${JSON.stringify(backendIds.slice(0, 5))}`
+      const backendVariantIds = resultSets.flatMap((set) =>
+        (set.results || [])
+          .map((r) => r.variantInternalId?.toString().toLowerCase())
+          .filter(Boolean)
       );
-      cy.wrap(backendIds).as("backendIds");
-
+      cy.wrap(backendVariantIds).as("backendVariantIds");
       // STEP 3: Open the application
       cy.visit("/");
-
-      // STEP 4: Select correct entry type in UI
+      // STEP 4: Select correct entry type in UI from the apiUrl
       cy.contains("button", entryTypeLabel, { timeout: 20000 })
         .should("be.visible")
         .click();
-
       cy.contains("button", entryTypeLabel)
         .should("have.css", "background-color")
         .then((bg) => {
           expect(bg).not.to.eq("rgb(255, 255, 255)");
         });
-
-      // STEP 5: If query has filters, add and verify them
+      // STEP 5: Apply filters and verify
       const filters = query.query.filters || [];
       if (filters.length > 0) {
         filters.forEach((filter) => {
           const filterId = filter.id;
           let label;
           let idText;
-
-          // Type filter ID in "Search by Filtering Terms" input
           cy.get('[data-testid="filtering-input"]', { timeout: 15000 })
             .should("be.visible")
             .click()
             .type(filterId, { delay: 100 });
-
-          // Wait for dropdown and select first item
           cy.get(".MuiListItem-root", { timeout: 20000 })
             .should("have.length.greaterThan", 0)
             .first()
             .within(() => {
               cy.get("div").then(($divs) => {
-                if ($divs.length < 2) {
-                  throw new Error("Dropdown item missing expected columns");
-                }
+                if ($divs.length < 2)
+                  throw new Error("Dropdown item missing columns");
 
                 label = $divs.first().text().trim();
                 idText = $divs.last().text().trim();
@@ -90,7 +80,6 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
               });
             });
 
-          // STEP 6: Verify filter appears in "Query Applied" section
           cy.wait(1000);
           cy.get('[data-cy="query-applied-container"]', {
             timeout: 20000,
@@ -112,13 +101,12 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
               );
             }
 
-            // Expand filter to access scopes
             cy.get('[data-cy="filter-chip"]')
               .contains(label.split(" | ")[0].trim(), { matchCase: false })
               .click({ force: true });
           });
 
-          // STEP 7: Select correct scope from query
+          // STEP 6: Select correct scope from query
           const expectedScope = filter.scope;
           if (expectedScope) {
             cy.get('[data-cy="scope-selector-title"]', { timeout: 10000 })
@@ -142,52 +130,101 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
                       .contains(new RegExp(`^${expectedScope}$`, "i"))
                       .click({ force: true });
 
-                    // STEP 8: Trigger search
+                    // STEP 7: Trigger search
                     cy.get('[data-cy="search-button"]')
                       .should("be.visible")
                       .click({ force: true });
 
-                    // STEP 9: Compare backend vs frontend IDs
-                    cy.get("@backendIds").then((backendIds) => {
+                    cy.get("@backendVariantIds").then((backendVariantIds) => {
                       cy.get('[data-cy="results-table"]', { timeout: 30000 })
                         .should("be.visible")
                         .and("not.contain.text", "Loading");
 
-                      cy.get('[data-cy="results-table-id-value"]')
-                        .should("have.length.greaterThan", 0)
-                        .then(($cells) => {
-                          const uiIds = [...$cells].map((el) =>
-                            el.innerText.trim().toLowerCase()
-                          );
+                      // STEP 8: Open details modal
+                      cy.get('[data-cy="results-table-details-button"]', {
+                        timeout: 10000,
+                      })
+                        .should("be.visible")
+                        .first()
+                        .click({ force: true });
 
-                          const matched = backendIds.some((id) =>
-                            uiIds.some((ui) => ui.includes(id))
-                          );
+                      const allVariantIds = [];
 
-                          if (!matched) {
-                            throw new Error(
-                              `No backend resultSet.id found in UI.
-                                 Backend IDs: ${backendIds.join(", ")}
-                                 UI IDs: ${uiIds.join(", ")}`
+                      function collectVariantIdsAndPaginate() {
+                        cy.get('[data-cy="variant-internal-id-cell"]', {
+                          timeout: 20000,
+                        })
+                          .should("have.length.greaterThan", 0)
+                          .then(($cells) => {
+                            const uiVariantIds = [...$cells].map((el) =>
+                              el.innerText.trim().toLowerCase()
                             );
-                          }
-                        });
+                            allVariantIds.push(...uiVariantIds);
 
-                      // STEP 10: Capture totalResultsCount values
-                      cy.get('[data-cy="results-table-total-results"]').then(
-                        ($cells) => {
-                          const values = [...$cells].map((el) =>
-                            parseInt(el.innerText.replace(/[^\d]/g, ""), 10)
-                          );
-                          cy.log(`UI totalResultsCount values: ${values}`);
-                        }
-                      );
+                            cy.window().then((win) =>
+                              win.scrollTo(0, document.body.scrollHeight)
+                            );
+
+                            cy.get("body").then(($body) => {
+                              const nextButton = $body.find(
+                                'button[aria-label="Go to next page"]:not(:disabled)'
+                              );
+                              if (nextButton.length > 0) {
+                                cy.get('button[aria-label="Go to next page"]')
+                                  .scrollIntoView()
+                                  .should("be.visible")
+                                  .and("not.be.disabled")
+                                  .click({ force: true });
+
+                                cy.wait(2000);
+                                collectVariantIdsAndPaginate();
+                              } else {
+                                cy.log(
+                                  `Collected ${allVariantIds.length} UI Variant Internal IDs`
+                                );
+                                cy.wrap(allVariantIds).as("uiVariantIds");
+                              }
+                            });
+                          });
+                      }
+
+                      collectVariantIdsAndPaginate();
                     });
                   });
               });
           }
         });
       }
+    });
+
+    // STEP 9: Final comparison
+    cy.then(function () {
+      const backendVariantIds = this.backendVariantIds;
+      const uiVariantIds = this.uiVariantIds;
+
+      if (!backendVariantIds || !uiVariantIds) {
+        throw new Error("Missing backend or UI variant IDs for comparison");
+      }
+
+      cy.log(
+        `Comparing ${uiVariantIds.length} UI IDs vs ${backendVariantIds.length} backend IDs`
+      );
+
+      const missing = uiVariantIds.filter(
+        (id) => !backendVariantIds.includes(id)
+      );
+
+      if (missing.length > 0) {
+        throw new Error(
+          `Mismatch detected: ${
+            missing.length
+          } UI variant IDs not found in backend.\nMissing examples: ${JSON.stringify(
+            missing.slice(0, 10)
+          )}`
+        );
+      }
+
+      cy.log("All UI variantInternalIds successfully matched backend data");
     });
   });
 });

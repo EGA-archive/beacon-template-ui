@@ -78,6 +78,8 @@ const ResultsTableModalBody = ({
     };
   });
 
+  console.log("indexedHeaders", indexedHeaders);
+
   const headersArray = Object.values(indexedHeaders);
   const primaryId = headersArray.find((h) => h.id === "id")
     ? "id"
@@ -119,7 +121,7 @@ const ResultsTableModalBody = ({
     }
   }, [searchTerm, dataTable, sortedHeaders]);
 
-  // 🧪 Debug: inspect header vs rendered content of first row
+  // Debug: inspect header vs rendered content of first row
   if (dataTable.length > 0) {
     const firstRow = dataTable[0];
     // console.log("🧩 DEBUG — First row raw object:", firstRow);
@@ -253,6 +255,11 @@ const ResultsTableModalBody = ({
                           .map((colConfig) => (
                             <StyledTableCell
                               key={`${id}-${colConfig.id}`}
+                              data-cy={
+                                colConfig.id === "variantInternalId"
+                                  ? "variant-internal-id-cell"
+                                  : undefined
+                              }
                               sx={{
                                 fontSize: "11px",
 
