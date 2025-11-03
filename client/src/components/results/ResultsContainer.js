@@ -75,6 +75,10 @@ export default function ResultsContainer() {
     }
   }, [loadingData]);
 
+  console.log("queryDirty", queryDirty);
+
+  console.log("hasSearchResults", hasSearchResults);
+
   return (
     <>
       {showBox && (

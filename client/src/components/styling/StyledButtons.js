@@ -27,7 +27,7 @@ export default function StyledButtons({
     fontSize: { xs: "13px", sm: "14px" },
     fontWeight: 400,
     fontFamily: '"Open Sans", sans-serif',
-    minWidth: { xs: "140px", sm: "180px" },
+    minWidth: { xs: "120px", sm: "180px" },
     height: { xs: "45px", sm: "40px" },
     px: 2,
     py: 0.5,

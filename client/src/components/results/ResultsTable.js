@@ -24,7 +24,6 @@ import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
 import MailOutlineRoundedIcon from "@mui/icons-material/MailOutlineRounded";
 import config from "../../config/config.json";
-
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import { lighten } from "@mui/system";
 import { useState } from "react";
@@ -32,7 +31,7 @@ import ResultsTableRow from "./ResultsTableRow";
 const ResultsTableModal = lazy(() => import("./modal/ResultsTableModal"));
 
 export default function ResultsTable() {
-  const { resultData, beaconsInfo } = useSelectedEntry();
+  const { resultData, beaconsInfo, entryTypesConfig } = useSelectedEntry();
   const [expandedRow, setExpandedRow] = useState(null);
   const [selectedSubRow, setSelectedSubRow] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -233,15 +232,36 @@ export default function ResultsTable() {
                           </span>
                         </Box>
                       </TableCell>
-
-                      <TableCell
-                        sx={{ fontWeight: "bold" }}
-                        style={{
-                          width: BEACON_NETWORK_COLUMNS[1].width,
-                        }}
-                      >
-                        {item.exists ? "Production Beacon" : "Development"}
-                      </TableCell>
+                      {config.beaconType === "singleBeacon" ? (
+                        <TableCell
+                          sx={{ fontWeight: "bold" }}
+                          style={{
+                            width: BEACON_SINGLE_COLUMNS[1].width,
+                          }}
+                        >
+                          {(() => {
+                            const status =
+                              entryTypesConfig?.maturityAttributes
+                                ?.productionStatus || "Undefined";
+                            if (status.toUpperCase() === "PROD")
+                              return "Production Beacon";
+                            if (status.toUpperCase() === "TEST")
+                              return "Test Beacon";
+                            if (status.toUpperCase() === "DEV")
+                              return "Development Beacon";
+                            return status;
+                          })()}
+                        </TableCell>
+                      ) : (
+                        <TableCell
+                          sx={{ fontWeight: "bold" }}
+                          style={{
+                            width: BEACON_NETWORK_COLUMNS[1].width,
+                          }}
+                        >
+                          {item.exists ? "Production Beacon" : "Development"}
+                        </TableCell>
+                      )}
 
                       <TableCell
                         sx={{ fontWeight: "bold" }}

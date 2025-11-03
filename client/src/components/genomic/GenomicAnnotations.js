@@ -27,6 +27,8 @@ export default function GenomicAnnotations() {
     setLoadingData,
     setHasSearchResult,
     setResultData,
+    selectedPathSegment,
+    setQueryDirty,
   } = useSelectedEntry();
 
   // The full list of possible annotation categorie
@@ -118,13 +120,14 @@ export default function GenomicAnnotations() {
       });
 
       // Automatically send a query to the Beacon API using only this filter
-      triggerGenomicQuery([
-        {
-          id: item.id,
-          label: value,
-          type: "filter",
-        },
-      ]);
+      // triggerGenomicQuery([
+      //   {
+      //     id: item.id,
+      //     label: value,
+      //     type: "filter",
+      //   },
+      // ]);
+      setQueryDirty(true);
       return;
     }
 
@@ -168,19 +171,20 @@ export default function GenomicAnnotations() {
     // Wait to ansure the state id updated
     // Then send the Beacon API query with this genomic filter
     // This tells the Beacon to search variants that match this query
-    setTimeout(() => {
-      triggerGenomicQuery([
-        {
-          key: item.key,
-          id: item.field || "geneId",
-          label: value,
-          value,
-          type: "genomic",
-          bgColor: "genomic",
-          queryParams: item.queryParams || {},
-        },
-      ]);
-    }, 150);
+    // setTimeout(() => {
+    //   triggerGenomicQuery([
+    //     {
+    //       key: item.key,
+    //       id: item.field || "geneId",
+    //       label: value,
+    //       value,
+    //       type: "genomic",
+    //       bgColor: "genomic",
+    //       queryParams: item.queryParams || {},
+    //     },
+    //   ]);
+    // }, 150);
+    setQueryDirty(true);
   };
 
   //  This helper function builds the actual Beacon request payload using

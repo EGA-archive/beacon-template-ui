@@ -52,6 +52,8 @@ export default function Search({
     // the text staged for the left genomic input
     genomicDraft,
     setGenomicDraft,
+    hasSearchResults,
+    setQueryDirty,
   } = useSelectedEntry();
 
   const [loading, setLoading] = useState(true);
@@ -136,13 +138,26 @@ export default function Search({
     fetchEntryTypes();
   }, []);
 
+  // const fetchConfiguration = async () => {
+  //   try {
+  //     const res = await fetch(`${config.apiUrl}/configuration`);
+  //     const data = await res.json();
+  //     const entryTypeConfig =
+  //       data.response?.entryTypes || data.entryTypes || {};
+  //     setEntryTypesConfig(entryTypeConfig);
+  //   } catch (err) {
+  //     console.error("Error fetching configuration:", err);
+  //   }
+  // };
+
   const fetchConfiguration = async () => {
     try {
       const res = await fetch(`${config.apiUrl}/configuration`);
       const data = await res.json();
-      const entryTypeConfig =
-        data.response?.entryTypes || data.entryTypes || {};
-      setEntryTypesConfig(entryTypeConfig);
+      setEntryTypesConfig({
+        entryTypes: data.response?.entryTypes || data.entryTypes || {},
+        maturityAttributes: data.response?.maturityAttributes || {},
+      });
     } catch (err) {
       console.error("Error fetching configuration:", err);
     }
@@ -182,9 +197,18 @@ export default function Search({
     }
   };
 
+  // useEffect(() => {
+  //   console.log("Entry type changed to:", selectedPathSegment);
+  //   setActiveInput(selectedPathSegment === "g_variants" ? "genomic" : "filter");
+  // }, [selectedPathSegment]);
+
   useEffect(() => {
+    console.log("Entry type changed to:", selectedPathSegment);
     setActiveInput(selectedPathSegment === "g_variants" ? "genomic" : "filter");
-  }, [selectedPathSegment]);
+    if (hasSearchResults) {
+      setQueryDirty(true);
+    }
+  }, [selectedPathSegment, hasSearchResults, setActiveInput, setQueryDirty]);
 
   const isSingleEntryType = entryTypes.length === 1;
   const onlyEntryPath = entryTypes[0]?.pathSegment;
@@ -496,6 +520,9 @@ export default function Search({
                 width: "100%",
                 justifyContent: "center",
                 gap: 8,
+              },
+              "@media (max-width: 433px)": {
+                gap: 2,
               },
             }}
           >

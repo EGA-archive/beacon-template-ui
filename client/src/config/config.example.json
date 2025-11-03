@@ -1,8 +1,6 @@
 {
-  "beaconType": "networkBeacon",
-  "apiUrl": "https://gdi-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
-  "apiUrlNetwork": "https://beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
-  "apiUrlSingle": "https://beacon-spain.ega-archive.org/api",
+  "beaconType": "singleBeacon",
+  "apiUrl": "https://beacon-network-backend-test.ega-archive.org/api",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
   "variationType": [
     { "jsonName": "SNP", "displayName": "SNP" },
@@ -14,7 +12,8 @@
     { "jsonName": "BND", "displayName": "BND" }
   ],
   "ui": {
-    "title": "EGA Beacon Network Browser",
+    "title": "EGA Beacon Browser",
+    "favicon": "/assets/logos/favicon.ico",
     "colors": {
       "primary": "#3176B1",
       "darkPrimary": "#173D5D",
@@ -59,13 +58,15 @@
         }
       ]
     },
+    "showLogin": true,
     "contact": {
-      "enabled": true,
-      "showContactPage": true,
+      "showContactPage": false,
       "apiPath": "http://localhost:5000/api/contact",
       "recipientKey": "beacon_support"
     },
-    "showLogin": true,
+
+    "showPrivacyPolicy": true,
+    "privacyPolicyFile": "privacy/privacy-policy.md",
     "entryTypesOrder": [
       "individuals",
       "g_variants",
@@ -208,28 +209,28 @@
         "showAlternateBases": true,
         "showAminoacidChange": true,
         "aminoAcidNotation": [
-          "A",
-          "C",
-          "D",
-          "E",
-          "F",
-          "G",
-          "H",
-          "I",
-          "K",
-          "L",
-          "M",
-          "N",
-          "P",
-          "Q",
-          "R",
-          "S",
-          "T",
-          "V",
-          "W",
-          "Y",
-          "X",
-          "*"
+          "Ala",
+          "Cys",
+          "Asp",
+          "Glu",
+          "Phe",
+          "Gly",
+          "His",
+          "Ile",
+          "Lys",
+          "Leu",
+          "Met",
+          "Asn",
+          "Pro",
+          "Gln",
+          "Arg",
+          "Ser",
+          "Thr",
+          "Val",
+          "Trp",
+          "Tyr",
+          "Xaa",
+          "Ter"
         ],
         "chromosomeLibrary": [
           "1",

@@ -295,7 +295,7 @@ export default function GenomicQueryBuilderDialog({
               return;
             }
 
-            // ✅ STEP 2C: update applied filters
+            // STEP 2C: update applied filters
             setSelectedFilter((prev) => {
               const next = [...prev, newFilter];
               console.log("[GQB] appliedFilters.next ➜", next);

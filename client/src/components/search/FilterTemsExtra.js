@@ -225,7 +225,7 @@ export default function FilterTermsExtra() {
             <MenuItem value=">">{">"}</MenuItem>
             <MenuItem value="=">{"="}</MenuItem>
             <MenuItem value="<">{"<"}</MenuItem>
-            <MenuItem value="!">{"is not"}</MenuItem>
+            <MenuItem value="!">{"≠"}</MenuItem>
             <MenuItem value="LIKE">{"contains"}</MenuItem>
             <MenuItem value="!LIKE">{"does not contain"}</MenuItem>
           </Select>
