@@ -101,12 +101,23 @@ export default function Navbar({ title, main, navItems }) {
                 },
               }}
             >
-              <img
-                src={main}
-                alt="Logo"
-                className="w-logo-w h-logo-h object-contain logo-small"
-                data-cy="navbar-logo"
-              />
+              {main && typeof main === "string" && main.trim() !== "" && (
+                <Box
+                  component="img"
+                  src={main}
+                  alt="Logo"
+                  data-cy="navbar-logo"
+                  sx={{
+                    maxHeight: "42px",
+                    width: "auto",
+                    objectFit: "contain",
+                  }}
+                  onError={(e) => {
+                    console.warn(`⚠️ Failed to load main logo: ${main}`);
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              )}
             </Box>
             {/* Title text linking to homepage */}
             <Typography

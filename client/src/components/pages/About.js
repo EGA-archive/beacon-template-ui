@@ -47,26 +47,33 @@ export default function About() {
             alignItems="center"
             sx={{ mt: 2, mb: 3 }}
           >
-            {logos.map((logo, index) => (
-              <Grid
-                item
-                xs={12} // full width on extra-small screens
-                sm={4} // 3 logos side by side on small+
-                key={index}
-                sx={{ textAlign: "center" }}
-              >
-                <img
-                  src={logo}
-                  alt={`About logo ${index + 1}`}
-                  style={{
-                    maxWidth: "120px",
-                    width: "100%",
-                    height: "auto",
-                    objectFit: "contain",
-                  }}
-                />
-              </Grid>
-            ))}
+            {logos
+              .filter((logo) => typeof logo === "string" && logo.trim() !== "")
+              .map((logo, index) => (
+                <Grid
+                  item
+                  xs={12}
+                  sm={4}
+                  key={`primary-logo-${index}`}
+                  sx={{ textAlign: "center" }}
+                >
+                  <Box
+                    component="img"
+                    src={logo}
+                    alt={`About logo ${index + 1}`}
+                    sx={{
+                      maxWidth: "120px",
+                      maxHeight: "55px",
+                      width: "100%",
+                      objectFit: "contain",
+                    }}
+                    onError={(e) => {
+                      console.warn(`⚠️ Failed to load logo: ${logo}`);
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                </Grid>
+              ))}
           </Grid>
 
           {/* Descriptions */}
@@ -115,26 +122,33 @@ export default function About() {
               mb: 3,
             }}
           >
-            {secondaryLogos.map((secondaryLogos, index) => (
-              <Grid
-                item
-                xs={12}
-                sm={4}
-                key={index}
-                sx={{ textAlign: "center" }}
-              >
-                <img
-                  src={secondaryLogos}
-                  alt={`About secondary logos ${index + 1}`}
-                  style={{
-                    maxWidth: "150px",
-                    width: "100%",
-                    height: "auto",
-                    objectFit: "contain",
-                  }}
-                />
-              </Grid>
-            ))}
+            {secondaryLogos
+              .filter((logo) => typeof logo === "string" && logo.trim() !== "")
+              .map((logo, index) => (
+                <Grid
+                  item
+                  xs={12}
+                  sm={4}
+                  key={`secondary-logo-${index}`}
+                  sx={{ textAlign: "center" }}
+                >
+                  <Box
+                    component="img"
+                    src={logo}
+                    alt={`Funding org logo ${index + 1}`}
+                    sx={{
+                      maxWidth: "150px",
+                      width: "100%",
+                      maxHeight: "55px",
+                      objectFit: "contain",
+                    }}
+                    onError={(e) => {
+                      console.warn(`⚠️ Failed to load logo: ${logo}`);
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                </Grid>
+              ))}
           </Grid>
         </Box>
       </Box>
