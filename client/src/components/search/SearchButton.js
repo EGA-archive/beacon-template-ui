@@ -22,6 +22,7 @@ export default function SearchButton({ setSelectedTool }) {
     setHasSearchBeenTriggered,
     setQueryDirty,
     setLastSearchedFilters,
+    setLastSearchedPathSegment,
   } = useSelectedEntry();
 
   // Main logic executed when the user clicks "Search"
@@ -46,25 +47,12 @@ export default function SearchButton({ setSelectedTool }) {
     setResultData([]);
     setHasSearchBeenTriggered(true);
     setLastSearchedFilters(selectedFilter);
+    setLastSearchedPathSegment(selectedPathSegment);
     setQueryDirty(false);
 
     try {
       const url = `${config.apiUrl}/${selectedPathSegment}`;
       let response;
-
-      // if (selectedFilter.length > 0) {
-      //   // Using shared query builder
-      //   const query = queryBuilder(selectedFilter, entryTypeId);
-      //   const requestOptions = {
-      //     method: "POST",
-      //     headers: { "Content-Type": "application/json" },
-      //     body: JSON.stringify(query),
-      //   };
-      //   response = await fetch(url, requestOptions);
-      // } else {
-      //   response = await fetch(url);
-      // }
-
       const query = queryBuilder(selectedFilter, entryTypeId);
       const requestOptions = {
         method: "POST",
@@ -82,14 +70,11 @@ export default function SearchButton({ setSelectedTool }) {
       }
 
       const data = await response.json();
-      console.log("Response data:", data);
+      // console.log("Response data:", data);
 
       // Group raw Beacon results by beacon or dataset
       const rawItems =
         data?.response?.resultSets ?? data?.response?.collections ?? [];
-
-      // console.log("[SearchButton] rawItems ➜", rawItems);
-
       const groupedArray = Object.values(
         Object.values(rawItems).reduce((acc, item) => {
           const isBeaconNetwork = !!item.beaconId;

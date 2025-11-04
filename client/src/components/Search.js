@@ -54,6 +54,7 @@ export default function Search({
     setGenomicDraft,
     hasSearchResults,
     setQueryDirty,
+    lastSearchedPathSegment,
   } = useSelectedEntry();
 
   const [loading, setLoading] = useState(true);
@@ -197,15 +198,9 @@ export default function Search({
     }
   };
 
-  // useEffect(() => {
-  //   console.log("Entry type changed to:", selectedPathSegment);
-  //   setActiveInput(selectedPathSegment === "g_variants" ? "genomic" : "filter");
-  // }, [selectedPathSegment]);
-
   useEffect(() => {
-    console.log("Entry type changed to:", selectedPathSegment);
     setActiveInput(selectedPathSegment === "g_variants" ? "genomic" : "filter");
-    if (hasSearchResults) {
+    if (hasSearchResults && selectedPathSegment !== lastSearchedPathSegment) {
       setQueryDirty(true);
     }
   }, [selectedPathSegment, hasSearchResults, setActiveInput, setQueryDirty]);
@@ -355,7 +350,15 @@ export default function Search({
             {entryTypes.map((entry) => (
               <Button
                 key={entry.id}
-                onClick={() => setSelectedPathSegment(entry.pathSegment)}
+                onClick={() => {
+                  if (entry.pathSegment !== selectedPathSegment) {
+                    setSelectedPathSegment(entry.pathSegment);
+                  } else {
+                    // console.log(
+                    //   "⚠️ Same entry type clicked again, no state update"
+                    // );
+                  }
+                }}
                 variant="outlined"
                 sx={{
                   borderRadius: "999px",

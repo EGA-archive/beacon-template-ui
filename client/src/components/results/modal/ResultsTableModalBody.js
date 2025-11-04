@@ -124,7 +124,7 @@ const ResultsTableModalBody = ({
   // Debug: inspect header vs rendered content of first row
   if (dataTable.length > 0) {
     const firstRow = dataTable[0];
-    // console.log("🧩 DEBUG — First row raw object:", firstRow);
+    // console.log("DEBUG — First row raw object:", firstRow);
 
     // console.log("🧾 Header → Rendered content comparison (first row only):");
     // sortedHeaders.forEach((col) => {

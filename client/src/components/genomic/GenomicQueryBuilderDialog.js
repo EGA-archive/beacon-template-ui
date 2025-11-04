@@ -259,7 +259,7 @@ export default function GenomicQueryBuilderDialog({
               })
               .join(" | ");
 
-            // ✅ STEP 2B: add queryParams to the filter
+            // STEP 2B: add queryParams to the filter
             const newFilter = {
               id: `genomic-${selectedQueryType}-${idLabel}`,
               label: combinedLabel,
@@ -271,7 +271,7 @@ export default function GenomicQueryBuilderDialog({
               queryParams,
             };
 
-            console.log("[GQB] newFilter created ➜", newFilter);
+            // console.log("[GQB] newFilter created ➜", newFilter);
 
             // Prevent duplicates
             const exists = selectedFilter.some((f) => f.id === newFilter.id);
@@ -298,7 +298,7 @@ export default function GenomicQueryBuilderDialog({
             // STEP 2C: update applied filters
             setSelectedFilter((prev) => {
               const next = [...prev, newFilter];
-              console.log("[GQB] appliedFilters.next ➜", next);
+              // console.log("[GQB] appliedFilters.next ➜", next);
               return next;
             });
 

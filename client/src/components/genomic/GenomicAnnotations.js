@@ -29,6 +29,7 @@ export default function GenomicAnnotations() {
     setResultData,
     selectedPathSegment,
     setQueryDirty,
+    hasSearchResults,
   } = useSelectedEntry();
 
   // The full list of possible annotation categorie
@@ -127,7 +128,10 @@ export default function GenomicAnnotations() {
       //     type: "filter",
       //   },
       // ]);
-      setQueryDirty(true);
+      if (hasSearchResults) {
+        setQueryDirty(true);
+      }
+
       return;
     }
 
@@ -184,7 +188,9 @@ export default function GenomicAnnotations() {
     //     },
     //   ]);
     // }, 150);
-    setQueryDirty(true);
+    if (hasSearchResults) {
+      setQueryDirty(true);
+    }
   };
 
   //  This helper function builds the actual Beacon request payload using
@@ -209,7 +215,7 @@ export default function GenomicAnnotations() {
 
       // Use the utility function to construct the Beacon query payload
       const builtQuery = queryBuilder(filters);
-      console.log("[GenomicAnnotations] Built query ➜", builtQuery);
+      // console.log("[GenomicAnnotations] Built query ➜", builtQuery);
 
       // Make a POST request to the Beacon API endpoint
       // `${selectedPathSegment}` is the current entry

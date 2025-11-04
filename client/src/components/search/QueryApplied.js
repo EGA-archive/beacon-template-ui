@@ -20,15 +20,10 @@ export default function QueryApplied({ variant }) {
 
   // Function to remove one specific filter
   const handleFilterRemove = (item) => {
-    // If something has changed, reload filter
-    setLoadingData(false);
-    setResultData([]);
-    setHasSearchResult(false);
-
-    // Only remove the filter with the exact id
     setSelectedFilter((prevFilters) =>
       prevFilters.filter((filter) => filter.key !== item.key)
     );
+    setHasSearchResult(true);
   };
 
   return (

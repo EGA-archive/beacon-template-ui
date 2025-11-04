@@ -140,6 +140,6 @@ export const buildGenomicParams = (queryType, values, selectedInput) => {
     }
   });
 
-  console.log("[GQB] buildGenomicParams.output ➜", params);
+  // console.log("[GQB] buildGenomicParams.output ➜", params);
   return params;
 };

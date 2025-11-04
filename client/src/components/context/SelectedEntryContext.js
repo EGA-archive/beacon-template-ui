@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useRef } from "react";
+import { createContext, useContext, useState, useRef, useEffect } from "react";
 
 /**
  * SelectedEntryContext is a shared state used across the app
@@ -54,8 +54,11 @@ export const SelectedEntryProvider = ({ children }) => {
 
   const [lastSearchedFilters, setLastSearchedFilters] = useState([]);
 
+  const [lastSearchedPathSegment, setLastSearchedPathSegment] = useState(null);
+
   const valueInputRef = useRef(null);
   const filteringTermsRef = useRef(null);
+  const prevPathSegmentRef = useRef(null);
 
   // Provide all state variables and their updaters to children
   return (
@@ -95,6 +98,9 @@ export const SelectedEntryProvider = ({ children }) => {
         setQueryDirty,
         lastSearchedFilters,
         setLastSearchedFilters,
+        lastSearchedPathSegment,
+        setLastSearchedPathSegment,
+        prevPathSegmentRef,
       }}
     >
       {children}

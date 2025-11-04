@@ -17,6 +17,9 @@ export default function QueryAppliedItems({
     setSelectedFilter,
     lastSearchedFilters,
     setQueryDirty,
+    selectedPathSegment,
+    lastSearchedPathSegment,
+    hasSearchResults,
   } = useSelectedEntry();
 
   const filtersToRender = customFilters || selectedFilter;
@@ -25,11 +28,6 @@ export default function QueryAppliedItems({
   const [expandedKey, setExpandedKey] = useState(false);
   // Error message if user tries to select the same scope twice
   const [message, setMessage] = useState(null);
-
-  useEffect(() => {
-    setQueryDirty(selectedFilter.length > 0);
-    console.log("📌 Applied filters:", selectedFilter);
-  }, [selectedFilter, setQueryDirty]);
 
   // Handle when a user changes the scope inside an expanded label
   const handleScopeChange = (keyValue, newScope) => {
@@ -80,11 +78,27 @@ export default function QueryAppliedItems({
         );
       });
 
-    const dirty = !sameContent;
-    setQueryDirty(dirty);
+    const initialEntrySelection =
+      lastSearchedPathSegment === null && selectedFilter.length === 1;
 
-    console.log("📌 Applied filters:", selectedFilter, { dirty });
-  }, [selectedFilter, lastSearchedFilters, setQueryDirty]);
+    const entryChanged =
+      lastSearchedPathSegment !== null &&
+      selectedPathSegment !== lastSearchedPathSegment;
+
+    const dirty = !sameContent || entryChanged;
+    if (initialEntrySelection) {
+      setQueryDirty(false);
+      return;
+    }
+
+    setQueryDirty(dirty);
+  }, [
+    selectedFilter,
+    lastSearchedFilters,
+    selectedPathSegment,
+    lastSearchedPathSegment,
+    setQueryDirty,
+  ]);
 
   return (
     <Box>
@@ -120,6 +134,9 @@ export default function QueryAppliedItems({
               scopes={filter.scopes}
               onDelete={() => {
                 console.log("❌ Removing filter:", filter);
+                if (hasSearchResults) {
+                  setQueryDirty(true);
+                }
                 handleFilterRemove(filter);
               }}
               onScopeChange={handleScopeChange}

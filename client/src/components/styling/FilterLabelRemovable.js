@@ -5,6 +5,7 @@ import config from "../../config/config.json";
 import { capitalize } from "../common/textFormatting";
 import { useEffect, useRef } from "react";
 import { getSelectableScopeStyles } from "../styling/selectableScopeStyles";
+import { useSelectedEntry } from "../context/SelectedEntryContext";
 
 // This component shows a label for the filter that can be removable and expandable
 export default function FilterLabelRemovable({
@@ -32,6 +33,8 @@ export default function FilterLabelRemovable({
 
   // Can expand only if it’s removable and has multiple scopes
   const isExpandable = isRemovable && scopes.length > 1;
+
+  const { hasSearchResults, setQueryDirty } = useSelectedEntry();
 
   // Base background colors depending on the type (common or other)
   const baseBgColor =
@@ -130,10 +133,27 @@ export default function FilterLabelRemovable({
             : labelToShow}
         </Typography>
         {isRemovable && (
+          // <ClearIcon
+          //   onClick={(e) => {
+          //     e.stopPropagation(); // prevent triggering expand/collapse
+          //     onDelete?.(); // run the delete function
+          //   }}
+          //   sx={{
+          //     fontSize: 18,
+          //     cursor: "pointer",
+          //     opacity: 0.6,
+          //     "&:hover": { opacity: 1 },
+          //   }}
+          // />
           <ClearIcon
             onClick={(e) => {
-              e.stopPropagation(); // prevent triggering expand/collapse
-              onDelete?.(); // run the delete function
+              e.stopPropagation();
+
+              onDelete?.();
+
+              if (hasSearchResults) {
+                setQueryDirty(true);
+              }
             }}
             sx={{
               fontSize: 18,

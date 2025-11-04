@@ -11,14 +11,21 @@ export default function ResultsFilters() {
     setLastSearchedFilters,
   } = useSelectedEntry();
 
-  const handleFilterRemove = (item) => {
-    setLoadingData(false);
-    setResultData([]);
-    setHasSearchResult(false);
+  // const handleFilterRemove = (item) => {
+  //   setLoadingData(false);
+  //   setResultData([]);
+  //   setHasSearchResult(false);
 
+  //   setLastSearchedFilters((prevFilters) =>
+  //     prevFilters.filter((filter) => filter.key !== item.key)
+  //   );
+  // };
+
+  const handleFilterRemove = (item) => {
     setLastSearchedFilters((prevFilters) =>
       prevFilters.filter((filter) => filter.key !== item.key)
     );
+    setHasSearchResult(true);
   };
 
   return (

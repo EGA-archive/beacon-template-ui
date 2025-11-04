@@ -19,7 +19,6 @@ export default function CommonFilters() {
   const filterCategories = config.ui.commonFilters.filterCategories;
   const filterLabels = config.ui.commonFilters.filterLabels;
   const {
-    setSelectedFilter,
     setExtraFilter,
     setLoadingData,
     setResultData,
@@ -27,6 +26,10 @@ export default function CommonFilters() {
     selectedPathSegment,
     extraFilter,
     valueInputRef,
+    selectedFilter,
+    setSelectedFilter,
+    hasSearchResults,
+    setQueryDirty,
   } = useSelectedEntry();
 
   const getValidLabels = (topic) =>
@@ -61,27 +64,70 @@ export default function CommonFilters() {
     setExpanded({ [panel]: isExpanded });
   };
 
+  // const handleCommonFilterChange = (item) => {
+  //   setLoadingData(false);
+  //   setResultData([]);
+  //   setHasSearchResult(false);
+  //   if (extraFilter && !extraFilter.value) {
+  //     setMessage(COMMON_MESSAGES.incompleteFilter);
+  //     setTimeout(() => {
+  //       setMessage(null);
+  //       if (valueInputRef?.current) {
+  //         valueInputRef.current.scrollIntoView({
+  //           behavior: "smooth",
+  //           block: "center",
+  //         });
+  //       }
+  //     }, 3000);
+  //     return;
+  //   }
+  //   if (item.type === "alphanumeric") {
+  //     setExtraFilter(item);
+  //     return;
+  //   }
+  //   setSelectedFilter((prevFilters) => {
+  //     const isDuplicate = prevFilters.some(
+  //       (filter) => filter.id === item.id && filter.scope === item.scope
+  //     );
+
+  //     if (isDuplicate) {
+  //       setMessage(COMMON_MESSAGES.doubleFilter);
+  //       setTimeout(() => setMessage(null), 3000);
+  //       return prevFilters;
+  //     }
+
+  //     return [...prevFilters, item];
+  //   });
+  // };
+
   const handleCommonFilterChange = (item) => {
-    setLoadingData(false);
-    setResultData([]);
-    setHasSearchResult(false);
+    if (hasSearchResults) {
+      setQueryDirty(true);
+    }
+
     if (extraFilter && !extraFilter.value) {
       setMessage(COMMON_MESSAGES.incompleteFilter);
       setTimeout(() => {
         setMessage(null);
-        if (valueInputRef?.current) {
-          valueInputRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }
+        valueInputRef?.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
       }, 3000);
       return;
     }
+
+    // if (item.type === "alphanumeric") {
+    //   setExtraFilter(item);
+    //   return;
+    // }
+
     if (item.type === "alphanumeric") {
+      if (hasSearchResults) setQueryDirty(true);
       setExtraFilter(item);
       return;
     }
+
     setSelectedFilter((prevFilters) => {
       const isDuplicate = prevFilters.some(
         (filter) => filter.id === item.id && filter.scope === item.scope
