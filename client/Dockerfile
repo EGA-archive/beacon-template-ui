@@ -13,8 +13,8 @@ COPY package.json .
 COPY yarn.lock .
 COPY public ./public
 COPY src ./src
-COPY backend ./backend
+# COPY backend ./backend
 COPY .env .
-COPY backend/.env ./backend
+# COPY backend/.env ./backend
 
 RUN yarn install --production
