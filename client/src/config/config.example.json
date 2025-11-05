@@ -17,8 +17,7 @@
     "colors": {
       "primary": "#3176B1",
       "darkPrimary": "#173D5D",
-      "secondary": "#FFE4D4",
-      "tertiary": "#B1AC31"
+      "secondary": "#FFE4D4"
     },
     "logos": {
       "main": "/assets/logos/main.svg",

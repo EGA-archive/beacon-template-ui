@@ -75,7 +75,6 @@ const schema = Joi.object({
       primary: hexColor.required(),
       darkPrimary: hexColor.required(),
       secondary: hexColor.required(),
-      tertiary: hexColor.required(),
     }).required(),
 
     logos: Joi.object({
