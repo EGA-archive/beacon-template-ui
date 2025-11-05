@@ -14,7 +14,7 @@ COPY yarn.lock .
 COPY public ./public
 COPY src ./src
 # COPY backend ./backend
-COPY .env .
+COPY auth/* .
 # COPY backend/.env ./backend
 
 RUN yarn install --production
