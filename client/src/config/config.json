@@ -1,6 +1,6 @@
 {
   "beaconType": "singleBeacon",
-  "apiUrl": "https://beacon-network-backend-test.ega-archive.org/api",
+  "apiUrl": "https://gpap.nasertic.es/beacon2/api",
   "assemblyId": ["GRCh38"],
   "variationType": [
     { "jsonName": "SNP", "displayName": "SNP" },
