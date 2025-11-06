@@ -1,40 +1,31 @@
 {
   "beaconType": "singleBeacon",
   "apiUrl": "https://beacon-network-backend-test.ega-archive.org/api",
-  "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
+  "assemblyId": ["GRCh38"],
   "variationType": [
     { "jsonName": "SNP", "displayName": "SNP" },
-    { "jsonName": "DEL", "displayName": "DEL" },
-    { "jsonName": "DUP", "displayName": "DUP" },
-    { "jsonName": "INV", "displayName": "INV" },
-    { "jsonName": "INS", "displayName": "INS" },
-    { "jsonName": "CNV", "displayName": "CNV" },
-    { "jsonName": "BND", "displayName": "BND" }
+    { "jsonName": "DEL", "displayName": "DEL" }
   ],
   "ui": {
-    "title": "EGA Beacon Browser",
+    "title": "Test Browser",
     "favicon": "/assets/logos/favicon.ico",
     "colors": {
-      "primary": "#3176B1",
-      "darkPrimary": "#173D5D",
+      "primary": "#0b9655",
+      "darkPrimary": "#0d4f30",
       "secondary": "#FFE4D4"
     },
     "logos": {
       "main": "/assets/logos/main.svg",
-      "founders": [
-        "/assets/logos/founder1.svg",
-        "/assets/logos/founder2.svg",
-        "/assets/logos/founder3.svg"
-      ]
+      "founders": ["/assets/logos/founder1.svg"]
     },
-    "showExternalNavBarLink": true,
+    "showExternalNavBarLink": false,
     "externalNavBarLink": [
       {
         "label": "AF Browser",
         "url": "https://af-beacon.ega-archive.org/"
       }
     ],
-    "showAboutPage": true,
+    "showAboutPage": false,
     "about": {
       "logos": [
         "/assets/logos/about1.svg",
@@ -50,25 +41,23 @@
           "title": "Funding Organizations",
           "logos": [
             "/assets/logos/organization1.svg",
-            "/assets/logos/organization2.svg",
-            "/assets/logos/organization3.svg",
-            "/assets/logos/organization4.svg"
+            "/assets/logos/organization2.svg"
           ]
         }
       ]
     },
-    "showLogin": true,
+    "showLogin": false,
     "contact": {
       "showContactPage": false,
       "apiPath": "http://localhost:5000/api/contact",
       "recipientKey": "beacon_support"
     },
 
-    "showPrivacyPolicy": true,
+    "showPrivacyPolicy": false,
     "privacyPolicyFile": "privacy/privacy-policy.md",
     "entryTypesOrder": [
-      "individuals",
       "g_variants",
+      "individuals",
       "biosamples",
       "runs",
       "analyses",
@@ -113,27 +102,6 @@
           }
         ],
         "Cancer": [
-          {
-            "key": "Colon adenocarcinoma",
-            "label": "Colon adenocarcinoma",
-            "type": "ontology",
-            "id": "NCIT:C4910",
-            "scopes": ["observed", "unobserved"]
-          },
-          {
-            "key": "Breast Cancer",
-            "label": "Breast Cancer",
-            "type": "ontology",
-            "id": "NCIT:C4872",
-            "scopes": ["individual", "biosample", "cohort"]
-          },
-          {
-            "key": "Radiation therapy",
-            "label": "Radiation therapy",
-            "type": "ontology",
-            "id": "NCIT:C15313",
-            "scopes": ["cohorts"]
-          },
           {
             "key": "Chemotherapy",
             "label": "Chemotherapy",
@@ -195,12 +163,7 @@
       }
     },
     "genomicAnnotations": {
-      "visibleGenomicCategories": [
-        "SNP Examples",
-        "Genomic Variant Examples",
-        "Protein Examples",
-        "Molecular Effect"
-      ]
+      "visibleGenomicCategories": ["SNP Examples"]
     },
 
     "genomicQueries": {

@@ -1,14 +1,18 @@
 import { useEffect } from "react";
 import { useAuth } from "oidc-react";
 import { CircularProgress, Box, Typography } from "@mui/material";
+import config from "../../../config/config.json";
 
 export default function Login() {
   const auth = useAuth();
 
   useEffect(() => {
-    // Automatically trigger login redirect
-    auth.signIn();
+    if (config.ui.showLogin) {
+      auth.signIn();
+    }
   }, [auth]);
+
+  if (!config.ui.showLogin) return null;
 
   return (
     <Box

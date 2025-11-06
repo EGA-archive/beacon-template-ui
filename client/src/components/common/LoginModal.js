@@ -1,12 +1,49 @@
-import {
-  Modal,
-  Box,
-  Typography,
-  Button,
-  CircularProgress,
-} from "@mui/material";
+import { Modal, Box, Typography, Button } from "@mui/material";
 import { useAuth } from "oidc-react";
-import { useState } from "react";
+import { isLoginEnabled, safeSignIn } from "../pages/login/authHelpers";
+
+// const style = {
+//   position: "absolute",
+//   top: "50%",
+//   left: "50%",
+//   transform: "translate(-50%, -50%)",
+//   width: 350,
+//   bgcolor: "background.paper",
+//   borderRadius: 2,
+//   boxShadow: 24,
+//   p: 4,
+//   textAlign: "center",
+// };
+
+// export default function LoginModal({ open, onClose }) {
+//   const auth = useAuth();
+
+//   const handleLogin = () => {
+//     onClose();
+//     auth.signIn();
+//   };
+
+//   return (
+//     <Modal open={open} onClose={onClose}>
+//       <Box sx={style}>
+//         <Typography variant="h6" gutterBottom>
+//           Login Required
+//         </Typography>
+//         <Typography variant="body2" sx={{ mb: 3 }}>
+//           You need to be logged in to use this feature.
+//         </Typography>
+//         <Button
+//           onClick={handleLogin}
+//           variant="contained"
+//           color="primary"
+//           fullWidth
+//         >
+//           Log In
+//         </Button>
+//       </Box>
+//     </Modal>
+//   );
+// }
 
 const style = {
   position: "absolute",
@@ -23,55 +60,30 @@ const style = {
 
 export default function LoginModal({ open, onClose }) {
   const auth = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+
+  if (!isLoginEnabled()) return null;
 
   const handleLogin = () => {
-    setIsLoading(true);
-    auth.signIn();
+    safeSignIn(auth, onClose);
   };
 
   return (
-    <Modal
-      open={open}
-      onClose={(event, reason) => {
-        if (reason === "backdropClick" || reason === "escapeKeyDown") return;
-        onClose();
-      }}
-    >
+    <Modal open={open} onClose={onClose}>
       <Box sx={style}>
-        {!isLoading ? (
-          <>
-            <Typography variant="h6" gutterBottom>
-              Login Required
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 3 }}>
-              You need to be logged in to use this feature.
-            </Typography>
-            <Button
-              onClick={handleLogin}
-              variant="contained"
-              color="primary"
-              fullWidth
-              data-cy="modal-login-button"
-            >
-              Log In
-            </Button>
-          </>
-        ) : (
-          <>
-            <CircularProgress />
-            <Typography
-              variant="body1"
-              sx={{
-                fontFamily: '"Open Sans", sans-serif',
-                fontSize: "14px",
-                mt: 4,
-              }}
-            >
-              You will be redirected to the login shortly
-            </Typography>
-          </>
-        )}
+        <Typography variant="h6" gutterBottom>
+          Login Required
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 3 }}>
+          You need to be logged in to use this feature.
+        </Typography>
+        <Button
+          onClick={handleLogin}
+          variant="contained"
+          color="primary"
+          fullWidth
+        >
+          Log In
+        </Button>
       </Box>
     </Modal>
   );
