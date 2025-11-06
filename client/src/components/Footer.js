@@ -2,6 +2,7 @@ import { Box, Typography, Link as MuiLink } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useAuth } from "oidc-react";
 import { Link } from "react-router-dom";
+import { isLoginEnabled } from "../components/pages/login/authHelpers";
 
 // Logos shown in the footer
 import maingrey from "../assets/logos/maingrey.svg";
@@ -17,6 +18,7 @@ import bsc from "../assets/logos/bsc.svg";
 export default function Footer() {
   const auth = useAuth();
   const isLoggedIn = !!auth?.userData; // True if user is logged in
+  const loginEnabled = isLoginEnabled();
 
   // Function to log the user out
   const handleLogout = () => {
@@ -112,44 +114,44 @@ export default function Footer() {
         </Box>
 
         {/* Right Side — Only login / logout controls */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          {/* If not logged in, show "Log in" link */}
-          {!isLoggedIn && (
-            <MuiLink
-              component={Link}
-              to="/login"
-              underline="none"
-              className="login-button"
-              sx={{
-                fontFamily: '"Open Sans", sans-serif',
-                fontSize: "14px",
-                "@media (max-width: 452px)": {
-                  fontSize: "12px",
-                },
-                color: "#333",
-                "&:hover": { textDecoration: "underline" },
-                cursor: "pointer",
-              }}
-              onClick={handleLogin}
-            >
-              Log in
-            </MuiLink>
-          )}
+        {loginEnabled && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {/* If not logged in, show "Log in" link */}
+            {!isLoggedIn && (
+              <MuiLink
+                component={Link}
+                to="/login"
+                underline="none"
+                className="login-button"
+                sx={{
+                  fontFamily: '"Open Sans", sans-serif',
+                  fontSize: "14px",
+                  "@media (max-width: 452px)": { fontSize: "12px" },
+                  color: "#333",
+                  "&:hover": { textDecoration: "underline" },
+                  cursor: "pointer",
+                }}
+                onClick={handleLogin}
+              >
+                Log in
+              </MuiLink>
+            )}
 
-          {/* If logged in, show logout icon */}
-          {isLoggedIn && (
-            <LogoutIcon
-              onClick={handleLogout}
-              sx={{
-                color: "#444",
-                cursor: "pointer",
-                fontSize: "20px",
-                "&:hover": { color: "#000" },
-              }}
-              titleAccess="Log out"
-            />
-          )}
-        </Box>
+            {/* If logged in, show logout icon */}
+            {isLoggedIn && (
+              <LogoutIcon
+                onClick={handleLogout}
+                sx={{
+                  color: "#444",
+                  cursor: "pointer",
+                  fontSize: "20px",
+                  "&:hover": { color: "#000" },
+                }}
+                titleAccess="Log out"
+              />
+            )}
+          </Box>
+        )}
       </Box>
     </Box>
   );
