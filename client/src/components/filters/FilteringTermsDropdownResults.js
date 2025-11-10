@@ -17,7 +17,6 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import useFilteringTerms from "../../hooks/useFilteringTerms";
 import Loader from "../common/Loader";
-import AddTaskIcon from "@mui/icons-material/AddTask";
 
 // Helper functions for filtering/searching terms
 import {
@@ -33,7 +32,6 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
   const [message, setMessage] = useState(null); // For validation or feedback
   const [filteredTerms, setFilteredTerms] = useState([]); // Search result terms
   const [filtering, setFiltering] = useState(false); // Loading state
-  const [addedFilters, setAddedFilters] = useState(new Set());
 
   // Get all filtering terms from API or local state
   const { filteringTerms } = useFilteringTerms();
@@ -158,11 +156,16 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
                       return;
                     }
 
+                    // setSelectedFilter((prev) => {
+                    //   const isDuplicate = prev.some(
+                    //     (filter) =>
+                    //       filter.label === item.label &&
+                    //       filter.scope === item.scope
+                    //   );
                     setSelectedFilter((prev) => {
                       const isDuplicate = prev.some(
                         (filter) =>
-                          filter.label === item.label &&
-                          filter.scope === item.scope
+                          filter.id === item.id && filter.scope === item.scope
                       );
                       if (isDuplicate) {
                         setMessage(COMMON_MESSAGES.doubleFilter);
@@ -204,9 +207,12 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
                       fontSize: "12px",
                       fontFamily: '"Open Sans", sans-serif',
                       color: "#000",
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
+                      maxWidth: "180px",
                     }}
                   >
-                    {displayLabel}
+                    {item.label}
                   </Box>
 
                   {/* Show term ID on the right */}
@@ -215,6 +221,10 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
                       fontSize: "12px",
                       fontFamily: '"Open Sans", sans-serif',
                       color: "#666",
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
+                      maxWidth: "180px",
+                      textAlign: "right",
                     }}
                   >
                     {term.id}

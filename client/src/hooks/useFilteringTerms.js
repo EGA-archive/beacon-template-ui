@@ -22,7 +22,6 @@ export default function useFilteringTerms() {
         const response = await fetch(
           `${config.apiUrl}/filtering_terms?limit=0`
         );
-        // const response = await fetch("/api.json");
         // Convert the response to JSON
         const data = await response.json();
 

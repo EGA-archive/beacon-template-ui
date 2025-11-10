@@ -27,12 +27,12 @@ export const exportCSV = async ({
           .toLowerCase();
         return rowString.includes(searchTerm.toLowerCase());
       });
-      console.log(`📄 Exporting ${results.length} filtered rows`);
+      // console.log(`📄 Exporting ${results.length} filtered rows`);
     }
 
     // Case 2: no search: fetch everything from backend
     else {
-      console.log("🌐 Fetching full dataset for export...");
+      // console.log("🌐 Fetching full dataset for export...");
       const fullQuery = queryBuilder([], entryTypeId);
       fullQuery.query.pagination = { skip: 0, limit: 10000 };
 
@@ -52,7 +52,7 @@ export const exportCSV = async ({
       const data = await response.json();
       const resultSets = data?.response?.resultSets ?? [];
       results = resultSets.flatMap((r) => r.results || []);
-      console.log(`🌍 Downloaded ${results.length} rows from backend`);
+      // console.log(`🌍 Downloaded ${results.length} rows from backend`);
     }
 
     if (!results.length) {

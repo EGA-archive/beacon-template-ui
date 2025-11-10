@@ -8,6 +8,11 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Stack,
+  Pagination,
+  Typography,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { lighten } from "@mui/material/styles";
@@ -123,14 +128,6 @@ export default function FilteringTermsTable({
 
       return newSet;
     });
-
-    setTimeout(() => {
-      setManuallySelectedScopes((prev) => {
-        const updated = { ...prev };
-        delete updated[termId];
-        return updated;
-      });
-    }, 5000);
   };
 
   // Show a loading spinner if the data is still loading
@@ -254,10 +251,16 @@ export default function FilteringTermsTable({
                               setExtraFilter({ ...item, setAddedFilters });
                               return;
                             }
+                            // setSelectedFilter((prev) => {
+                            //   const isDuplicate = prev.some(
+                            //     (filter) =>
+                            //       filter.label === item.label &&
+                            //       filter.scope === item.scope
+                            //   );
                             setSelectedFilter((prev) => {
                               const isDuplicate = prev.some(
                                 (filter) =>
-                                  filter.label === item.label &&
+                                  filter.id === item.id &&
                                   filter.scope === item.scope
                               );
                               if (isDuplicate) {
@@ -364,7 +367,7 @@ export default function FilteringTermsTable({
                               }
                             }}
                           >
-                            {/** Check whether this filter is currently applied */}
+                            {/* Check whether this filter is currently applied */}
                             {selectedFilter.some(
                               (filter) =>
                                 filter.label === item.label &&
@@ -439,6 +442,8 @@ export default function FilteringTermsTable({
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
+            showFirstButton
+            showLastButton
           />
         </Paper>
       </Box>

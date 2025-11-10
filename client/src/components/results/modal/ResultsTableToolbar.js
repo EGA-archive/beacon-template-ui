@@ -36,9 +36,9 @@ export default function ResultsTableToolbar({
     <Box
       sx={{
         display: "flex",
-        justifyContent: "flex-end",
+        justifyContent: "space-between",
+        alignItems: "center",
         mb: 2,
-        gap: 3,
       }}
     >
       <Box
@@ -47,135 +47,127 @@ export default function ResultsTableToolbar({
           fontSize: "14px",
           display: "flex",
           alignItems: "flex-end",
+          mt: "auto",
+          gap: "6px",
         }}
       >
-        Total Results: {count}
+        <b>Total Results: </b> {count}
       </Box>
 
-      {/* Column Selector */}
-      <FormControl size="small">
-        <Select
-          multiple
-          displayEmpty
-          value={visibleColumns}
-          onChange={(e) => setVisibleColumns(e.target.value)}
-          renderValue={() => (
-            <Box
-              sx={{
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 3,
+        }}
+      >
+        <FormControl size="small">
+          <Select
+            multiple
+            displayEmpty
+            value={visibleColumns}
+            onChange={(e) => setVisibleColumns(e.target.value)}
+            renderValue={() => (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <ViewWeekRoundedIcon sx={{ color: colors.darkPrimary }} />
+                <span
+                  style={{
+                    color: colors.darkPrimary,
+                    opacity: 1,
+                    fontSize: "12px",
+                  }}
+                >
+                  Select column
+                </span>
+              </Box>
+            )}
+            sx={{
+              borderRadius: "24px",
+              height: "40px",
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: colors.darkPrimary,
+              },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: colors.primary,
+              },
+              "& .MuiSelect-select": {
                 display: "flex",
                 alignItems: "center",
-                gap: 1,
-              }}
-            >
-              <ViewWeekRoundedIcon sx={{ color: colors.darkPrimary }} />
-              <span
-                style={{
-                  color: colors.darkPrimary,
-                  opacity: 1,
-                  fontSize: "12px",
-                }}
-              >
-                Select column
-              </span>
-            </Box>
-          )}
+                gap: "8px",
+                py: 0.5,
+                width: "200px",
+                height: "40px",
+              },
+            }}
+            IconComponent={KeyboardArrowDownRoundedIcon}
+          >
+            {sortedHeaders.map((col) => (
+              <MenuItem key={col.id} value={col.id}>
+                <Checkbox
+                  size="small"
+                  checked={visibleColumns.indexOf(col.id) > -1}
+                  sx={{
+                    color: colors.darkPrimary,
+                    "&.Mui-checked": { color: colors.primary },
+                  }}
+                />
+                <ListItemText
+                  primary={col.name}
+                  primaryTypographyProps={{
+                    sx: { fontSize: "13px", color: colors.darkPrimary },
+                  }}
+                />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <TextField
+          size="small"
+          placeholder="Search keywords"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           sx={{
-            borderRadius: "24px",
-            height: "40px",
-            "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: colors.darkPrimary,
-            },
-            "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: colors.primary,
-            },
-            "& .MuiSelect-select": {
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              py: 0.5,
-              width: "200px",
+            width: "237px",
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "24px",
               height: "40px",
+              "& fieldset": { borderColor: colors.darkPrimary },
+              "&:hover fieldset": { borderColor: colors.primary },
+              "& input::placeholder": {
+                color: colors.darkPrimary,
+                opacity: 1,
+                fontSize: "12px",
+              },
             },
           }}
-          IconComponent={KeyboardArrowDownRoundedIcon}
-        >
-          {sortedHeaders.map((col) => (
-            <MenuItem key={col.id} value={col.id}>
-              <Checkbox
-                size="small"
-                checked={visibleColumns.indexOf(col.id) > -1}
-                sx={{
-                  color: colors.darkPrimary,
-                  "&.Mui-checked": {
-                    color: colors.primary,
-                  },
-                }}
-              />
-              <ListItemText
-                primary={col.name}
-                primaryTypographyProps={{
-                  sx: {
-                    fontSize: "13px",
-                    color: colors.darkPrimary,
-                  },
-                }}
-              />
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start" size="small">
+                <SearchRoundedIcon sx={{ color: colors.darkPrimary }} />
+              </InputAdornment>
+            ),
+          }}
+        />
 
-      {/* Search Bar */}
-      <TextField
-        size="small"
-        placeholder="Search keywords"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        sx={{
-          width: "237px",
-          "& .MuiOutlinedInput-root": {
+        <Button
+          variant="outlined"
+          size="large"
+          sx={{
+            px: 2,
+            borderColor: colors.darkPrimary,
             borderRadius: "24px",
-            height: "40px",
-            "& fieldset": { borderColor: colors.darkPrimary },
-            "&:hover fieldset": { borderColor: colors.primary },
-            "& input::placeholder": {
-              color: colors.darkPrimary,
-              opacity: 1,
-              fontSize: "12px",
+            "& .MuiButton-startIcon": {
+              marginLeft: 0,
+              marginRight: 0,
             },
-          },
-        }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start" size="small">
-              <SearchRoundedIcon sx={{ color: colors.darkPrimary }} />
-            </InputAdornment>
-          ),
-        }}
-      />
-
-      {/* Export CSV Button */}
-      <Button
-        variant="outlined"
-        size="large"
-        sx={{
-          px: 2,
-          borderColor: colors.darkPrimary,
-          borderRadius: "24px",
-          "& .MuiButton-startIcon": {
-            marginLeft: 0,
-            marginRight: 0,
-          },
-        }}
-        startIcon={
-          <DownloadForOfflineRoundedIcon
-            sx={{
-              color: colors.darkPrimary,
-            }}
-          />
-        }
-        onClick={handleExport}
-      />
+          }}
+          startIcon={
+            <DownloadForOfflineRoundedIcon sx={{ color: colors.darkPrimary }} />
+          }
+          onClick={handleExport}
+        />
+      </Box>
     </Box>
   );
 }

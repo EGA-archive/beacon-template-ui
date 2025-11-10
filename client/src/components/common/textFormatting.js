@@ -33,6 +33,19 @@ export const sortEntries = (entries, configOrder = []) =>
       )
     : entries;
 
+// Combine config-defined order with the rest of the fetched entry types.
+export const prioritizeEntries = (entries, configOrder = []) => {
+  const prioritized = [
+    ...configOrder
+      .map((type) => entries.find((e) => e.pathSegment === type))
+      .filter(Boolean),
+    ...entries
+      .filter((e) => !configOrder.includes(e.pathSegment))
+      .sort((a, b) => a.pathSegment.localeCompare(b.pathSegment)),
+  ];
+  return prioritized;
+};
+
 // Optional label override for single entry type layout
 export const singleEntryCustomLabels = {
   g_variants: "Genomic Variants",

@@ -109,6 +109,8 @@ export default function SearchButton({ setSelectedTool }) {
       );
 
       setResultData(groupedArray);
+
+      console.log("rawItems", rawItems);
       setHasSearchResult(true);
     } catch (error) {
       console.error("❌ SearchButton error:", error);

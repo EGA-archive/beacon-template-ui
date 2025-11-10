@@ -109,6 +109,51 @@ export const BEACON_SINGLE_COLUMNS = [
   },
 ];
 
+export const COHORTS_TABLE = [
+  {
+    id: "cohort_id",
+    label: (
+      <Box display="flex" alignItems="center" ml={4}>
+        ID
+      </Box>
+    ),
+    align: "left",
+    width: "10%",
+  },
+
+  {
+    id: "cohort_name",
+    label: "Name",
+    align: "left",
+    width: "20%",
+  },
+  {
+    id: "cohort_type",
+    label: "Type",
+    align: "left",
+    numeric: true,
+    width: "10%",
+  },
+  {
+    id: "cohort_size",
+    label: "Size",
+    width: "10%",
+    align: "left",
+  },
+  {
+    id: "cohort_gender",
+    label: "Gender Distribution",
+    width: "20%",
+    align: "left",
+  },
+  {
+    id: "cohort_age_range",
+    label: "Age Range Distribution",
+    width: "20%",
+    align: "left",
+  },
+];
+
 export const FILTERING_TERMS_COLUMNS = [
   {
     id: "Select",

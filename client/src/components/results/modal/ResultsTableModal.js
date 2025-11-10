@@ -232,6 +232,8 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
                     rowsPerPage={rowsPerPage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                     rowsPerPageOptions={[5, 10, 20]}
+                    showFirstButton
+                    showLastButton
                   />
                 </Box>
               </>

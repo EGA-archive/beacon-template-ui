@@ -66,16 +66,7 @@
 
     "showPrivacyPolicy": true,
     "privacyPolicyFile": "privacy/privacy-policy.md",
-    "entryTypesOrder": [
-      "individuals",
-      "g_variants",
-      "biosamples",
-      "runs",
-      "analyses",
-      "cohorts",
-      "datasets",
-      ""
-    ],
+    "entryTypesOrder": ["biosamples", "individuals", "g_variants"],
 
     "commonFilters": {
       "filterCategories": ["Demographics", "Cancer", "Covid"],
@@ -85,19 +76,22 @@
             "key": "female",
             "id": "NCIT:C16576",
             "label": "Female",
-            "type": "ontology"
+            "type": "ontology",
+            "scopes": ["individual", "cohort"]
           },
           {
             "key": "male",
             "id": "NCIT:C20197",
             "label": "Male",
-            "type": "ontology"
+            "type": "ontology",
+            "scopes": ["cohort"]
           },
           {
-            "key": "age_of_onset",
-            "id": "age_of_onset",
-            "label": "Age Of Onset",
-            "type": "alphanumeric"
+            "key": "diseases.ageOfOnset",
+            "id": "diseases.ageOfOnset",
+            "label": "Diseases Age Of Onset",
+            "type": "alphanumeric",
+            "scopes": ["individual"]
           },
           {
             "key": "weight",
@@ -114,11 +108,11 @@
         ],
         "Cancer": [
           {
-            "key": "Colon adenocarcinoma",
-            "label": "Colon adenocarcinoma",
+            "key": "serous cystadenocarcinoma",
+            "label": "Serous Cystadenocarcinoma",
             "type": "ontology",
-            "id": "NCIT:C4910",
-            "scopes": ["observed", "unobserved"]
+            "id": "NCIT:C3778",
+            "scopes": ["biosample"]
           },
           {
             "key": "Breast Cancer",
@@ -132,20 +126,21 @@
             "label": "Radiation therapy",
             "type": "ontology",
             "id": "NCIT:C15313",
-            "scopes": ["cohorts"]
+            "scopes": ["cohort"]
           },
           {
-            "key": "Chemotherapy",
-            "label": "Chemotherapy",
+            "key": "chemotherapy procedure",
+            "label": "Chemotherapy Procedure",
             "type": "ontology",
-            "id": "NCIT:C15632",
-            "scopes": ["run", "individual", "cohort"]
+            "id": "OGMS:0000113",
+            "scopes": ["individual"]
           },
           {
-            "key": "Tumor stage I",
-            "label": "Tumor stage I",
-            "type": "ontology",
-            "id": "NCIT:C27966"
+            "key": "tumorGrade",
+            "label": "tumorGrade",
+            "type": "alphanumeric",
+            "id": "tumorGrade",
+            "scopes": ["biosample"]
           },
           {
             "key": "Oxaliplatin",
@@ -209,27 +204,27 @@
         "showAminoacidChange": true,
         "aminoAcidNotation": [
           "Ala",
-          "Cys",
+          "Arg",
+          "Asn",
           "Asp",
+          "Cys",
+          "Gln",
           "Glu",
-          "Phe",
           "Gly",
           "His",
           "Ile",
-          "Lys",
           "Leu",
+          "Lys",
           "Met",
-          "Asn",
+          "Phe",
           "Pro",
-          "Gln",
-          "Arg",
           "Ser",
+          "Ter",
           "Thr",
-          "Val",
           "Trp",
           "Tyr",
-          "Xaa",
-          "Ter"
+          "Val",
+          "Xaa"
         ],
         "chromosomeLibrary": [
           "1",

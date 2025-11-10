@@ -78,14 +78,30 @@ const ResultsTableModalBody = ({
     };
   });
 
-  console.log("indexedHeaders", indexedHeaders);
+  // console.log("indexedHeaders", indexedHeaders);
 
-  const headersArray = Object.values(indexedHeaders);
+  // Changed headers kept comments in case need to reverse
+
+  // const headersArray = Object.values(indexedHeaders);
+
+  const headersArray = Object.values(indexedHeaders)
+    // Rename "identifiers" → "Genomic variation"
+    .map((h) =>
+      h.id === "identifiers" ? { ...h, name: "Genomic variation" } : h
+    )
+    .filter((h) => h.id !== "variantInternalId");
+
   const primaryId = headersArray.find((h) => h.id === "id")
     ? "id"
-    : headersArray.find((h) => h.id === "variantInternalId")
-    ? "variantInternalId"
+    : headersArray.find((h) => h.id === "identifiers")
+    ? "identifiers"
     : null;
+
+  // const primaryId = headersArray.find((h) => h.id === "id")
+  //   ? "id"
+  //   : headersArray.find((h) => h.id === "variantInternalId")
+  //   ? "variantInternalId"
+  //   : null;
 
   const sortedHeaders = primaryId
     ? [
@@ -94,9 +110,66 @@ const ResultsTableModalBody = ({
       ]
     : headersArray;
 
+  // function renderCellContent(item, column) {
+  //   const value = item[column];
+  //   if (!value) return "-";
+
+  //   return summarizeValue(value);
+  // }
+
   function renderCellContent(item, column) {
     const value = item[column];
     if (!value) return "-";
+
+    // Apply the same logic for phenotypicFeatures and exposures
+    if (
+      (column === "phenotypicFeatures" || column === "exposures") &&
+      Array.isArray(value)
+    ) {
+      return value
+        .map((entry) => {
+          if (typeof entry !== "object" || entry === null) return entry;
+
+          const parts = Object.entries(entry)
+            .map(([key, val]) => {
+              if (!val) return null;
+              if (typeof val === "object" && !Array.isArray(val)) {
+                if (val.iso8601duration)
+                  return `Age at exposure: ${val.iso8601duration}`;
+                if (val.label) return `${key}: ${val.label}`;
+                if (val.id) return `${key}: ${val.id}`;
+                const innerLabel =
+                  val.evidenceCode?.label ||
+                  val.featureType?.label ||
+                  val.exposureCode?.label ||
+                  val.onset?.label ||
+                  val.unit?.label ||
+                  val.severity?.label;
+
+                if (innerLabel) return `${key}: ${innerLabel}`;
+                return null;
+              }
+              if (Array.isArray(val)) {
+                const labels = val
+                  .map((v) => v.label || v.id || null)
+                  .filter(Boolean);
+                return labels.length > 0
+                  ? `${key}: ${labels.join(", ")}`
+                  : null;
+              }
+              if (typeof val === "string" || typeof val === "number") {
+                return `${key}: ${val}`;
+              }
+
+              return null;
+            })
+            .filter(Boolean);
+
+          return parts.join(", ");
+        })
+        .filter(Boolean)
+        .join(" | ");
+    }
 
     return summarizeValue(value);
   }

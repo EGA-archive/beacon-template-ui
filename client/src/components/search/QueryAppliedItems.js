@@ -40,8 +40,11 @@ export default function QueryAppliedItems({
     if (!target) return;
 
     // Prevent duplicates: same label + new scope already exists
+    // const isDuplicate = selectedFilter.some(
+    //   (filter) => filter.label === target.label && filter.scope === newScope
+    // );
     const isDuplicate = selectedFilter.some(
-      (filter) => filter.label === target.label && filter.scope === newScope
+      (filter) => filter.id === target.id && filter.scope === newScope
     );
 
     if (isDuplicate) {
@@ -133,7 +136,6 @@ export default function QueryAppliedItems({
               scope={filter.scope}
               scopes={filter.scopes}
               onDelete={() => {
-                console.log("❌ Removing filter:", filter);
                 if (hasSearchResults) {
                   setQueryDirty(true);
                 }

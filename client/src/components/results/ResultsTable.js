@@ -26,15 +26,25 @@ import MailOutlineRoundedIcon from "@mui/icons-material/MailOutlineRounded";
 import config from "../../config/config.json";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import { lighten } from "@mui/system";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ResultsTableRow from "./ResultsTableRow";
+import { loadNetworkMembersWithMaturity } from "./utils/networkMembers";
+import CohortsTable from "./CohortsTable";
+
 const ResultsTableModal = lazy(() => import("./modal/ResultsTableModal"));
 
 export default function ResultsTable() {
-  const { resultData, beaconsInfo, entryTypesConfig } = useSelectedEntry();
+  const {
+    resultData,
+    beaconsInfo,
+    entryTypesConfig,
+    selectedPathSegment: selectedEntryType,
+  } = useSelectedEntry();
+
   const [expandedRow, setExpandedRow] = useState(null);
   const [selectedSubRow, setSelectedSubRow] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [networkMembers, setNetworkMembers] = useState([]);
 
   const headerCellStyle = {
     backgroundColor: config.ui.colors.primary,
@@ -79,6 +89,7 @@ export default function ResultsTable() {
   };
 
   const findBeaconIcon = (beaconId) => {
+    if (!beaconsInfo || beaconsInfo.length === 0) return null;
     let beacon = {};
     if (config.beaconType === "singleBeacon") {
       beacon = beaconsInfo[0];
@@ -88,6 +99,7 @@ export default function ResultsTable() {
         return id === beaconId;
       });
     }
+    if (!beacon) return null;
 
     const logo = beacon.response
       ? beacon.response?.organization?.logoUrl
@@ -96,6 +108,7 @@ export default function ResultsTable() {
   };
 
   const findBeaconEmail = (beaconId) => {
+    if (!beaconsInfo || beaconsInfo.length === 0) return null;
     let beacon = {};
     if (config.beaconType === "singleBeacon") {
       beacon = beaconsInfo[0];
@@ -105,6 +118,7 @@ export default function ResultsTable() {
         return id === beaconId;
       });
     }
+    if (!beacon) return null;
     const email = beacon.response
       ? beacon.response?.organization?.contactUrl
       : beacon.organization?.contactUrl;
@@ -114,6 +128,29 @@ export default function ResultsTable() {
   const handleEmail = (email) => {
     window.location.href = `mailto:${email}`;
   };
+
+  useEffect(() => {
+    async function loadMembers() {
+      const membersWithMaturity = await loadNetworkMembersWithMaturity();
+      setNetworkMembers(membersWithMaturity);
+    }
+    if (config.beaconType === "networkBeacon") {
+      loadMembers();
+    }
+  }, []);
+
+  const getBeaconStatusLabel = (status) => {
+    if (!status) return "Undefined";
+    const normalized = status.toUpperCase();
+    if (normalized === "PROD") return "Production Beacon";
+    if (normalized === "TEST") return "Test Beacon";
+    if (normalized === "DEV") return "Development Beacon";
+    return status;
+  };
+
+  if (selectedEntryType === "cohorts" || selectedEntryType === "cohort") {
+    return <CohortsTable resultData={resultData} />;
+  }
 
   return (
     <Box>
@@ -232,36 +269,24 @@ export default function ResultsTable() {
                           </span>
                         </Box>
                       </TableCell>
-                      {config.beaconType === "singleBeacon" ? (
-                        <TableCell
-                          sx={{ fontWeight: "bold" }}
-                          style={{
-                            width: BEACON_SINGLE_COLUMNS[1].width,
-                          }}
-                        >
-                          {(() => {
-                            const status =
-                              entryTypesConfig?.maturityAttributes
-                                ?.productionStatus || "Undefined";
-                            if (status.toUpperCase() === "PROD")
-                              return "Production Beacon";
-                            if (status.toUpperCase() === "TEST")
-                              return "Test Beacon";
-                            if (status.toUpperCase() === "DEV")
-                              return "Development Beacon";
-                            return status;
-                          })()}
-                        </TableCell>
-                      ) : (
-                        <TableCell
-                          sx={{ fontWeight: "bold" }}
-                          style={{
-                            width: BEACON_NETWORK_COLUMNS[1].width,
-                          }}
-                        >
-                          {item.exists ? "Production Beacon" : "Development"}
-                        </TableCell>
-                      )}
+                      <TableCell
+                        sx={{ fontWeight: "bold" }}
+                        style={{
+                          width:
+                            config.beaconType === "singleBeacon"
+                              ? BEACON_SINGLE_COLUMNS[1].width
+                              : BEACON_NETWORK_COLUMNS[1].width,
+                        }}
+                      >
+                        {(() => {
+                          const status =
+                            config.beaconType === "singleBeacon"
+                              ? entryTypesConfig?.maturityAttributes
+                                  ?.productionStatus
+                              : item.maturity || (item.exists ? "PROD" : "DEV");
+                          return getBeaconStatusLabel(status);
+                        })()}
+                      </TableCell>
 
                       <TableCell
                         sx={{ fontWeight: "bold" }}
