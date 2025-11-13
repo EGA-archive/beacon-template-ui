@@ -24,13 +24,14 @@ import {
 
 const ResultsTableModalBody = ({
   dataTable,
-  totalItems,
   entryTypeId,
   selectedPathSegment,
   beaconId,
   datasetId,
   displayedCount,
-  actualLoadedCount,
+  headers: providedHeaders = [],
+  visibleColumns,
+  setVisibleColumns,
 }) => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -65,28 +66,25 @@ const ResultsTableModalBody = ({
     color: "white",
   };
 
-  const headersSet = new Set();
-  dataTable.forEach((obj) => {
-    Object.keys(obj).forEach((key) => {
-      headersSet.add(key);
-    });
-  });
+  const rawHeaders =
+    providedHeaders && providedHeaders.length > 0
+      ? providedHeaders
+      : Array.from(
+          new Set(
+            dataTable.flatMap((obj) =>
+              obj && typeof obj === "object" ? Object.keys(obj) : []
+            )
+          )
+        );
 
-  const headers = Array.from(headersSet);
-
+  // Build indexedHeaders
   const indexedHeaders = {};
-  headers.forEach((header, index) => {
+  rawHeaders.forEach((header, index) => {
     indexedHeaders[index] = {
       id: header,
       name: formatHeaderName(header),
     };
   });
-
-  // console.log("indexedHeaders", indexedHeaders);
-
-  // Changed headers kept comments in case need to reverse
-
-  // const headersArray = Object.values(indexedHeaders);
 
   const headersArray = Object.values(indexedHeaders)
     // Rename "identifiers" → "Genomic variation"
@@ -101,12 +99,6 @@ const ResultsTableModalBody = ({
     ? "identifiers"
     : null;
 
-  // const primaryId = headersArray.find((h) => h.id === "id")
-  //   ? "id"
-  //   : headersArray.find((h) => h.id === "variantInternalId")
-  //   ? "variantInternalId"
-  //   : null;
-
   const sortedHeaders = primaryId
     ? [
         ...headersArray.filter((h) => h.id === primaryId),
@@ -114,12 +106,11 @@ const ResultsTableModalBody = ({
       ]
     : headersArray;
 
-  // function renderCellContent(item, column) {
-  //   const value = item[column];
-  //   if (!value) return "-";
-
-  //   return summarizeValue(value);
-  // }
+  useEffect(() => {
+    if (sortedHeaders.length > 0 && visibleColumns.length === 0) {
+      setVisibleColumns(sortedHeaders.map((h) => h.id));
+    }
+  }, [sortedHeaders, visibleColumns, setVisibleColumns]);
 
   function renderCellContent(item, column) {
     const value = item[column];
@@ -178,10 +169,6 @@ const ResultsTableModalBody = ({
     return summarizeValue(value);
   }
 
-  const [visibleColumns, setVisibleColumns] = useState(
-    sortedHeaders.map((h) => h.id)
-  );
-
   useEffect(() => {
     const filtered = dataTable.filter((item) => {
       if (!searchTerm) return true;
@@ -198,27 +185,6 @@ const ResultsTableModalBody = ({
     }
   }, [searchTerm, dataTable, sortedHeaders]);
 
-  // Debug: inspect header vs rendered content of first row
-  if (dataTable.length > 0) {
-    const firstRow = dataTable[0];
-    // console.log("DEBUG — First row raw object:", firstRow);
-
-    // console.log("🧾 Header → Rendered content comparison (first row only):");
-    // sortedHeaders.forEach((col) => {
-    //   const rawValue = firstRow[col.id];
-    //   const rendered = summarizeValue(rawValue);
-    //   console.log(
-    //     `${col.id}:`,
-    //     "\n   ↳ Raw:",
-    //     rawValue,
-    //     "\n   ↳ Rendered:",
-    //     rendered
-    //   );
-    // });
-  }
-
-  const displayedTotal = searchTerm ? filteredData.length : totalItems;
-
   const handleExport = useCallback(() => {
     exportCSV({
       dataTable,
@@ -229,6 +195,7 @@ const ResultsTableModalBody = ({
       entryTypeId,
       selectedPathSegment,
       queryBuilder,
+      datasetId,
     });
   }, [
     dataTable,
@@ -237,6 +204,7 @@ const ResultsTableModalBody = ({
     searchTerm,
     entryTypeId,
     selectedPathSegment,
+    datasetId,
   ]);
 
   return (
@@ -262,18 +230,7 @@ const ResultsTableModalBody = ({
           Beacon: <b>{beaconId || "—"}</b>
         </Box>
       )}
-      {/* <Box
-        sx={{
-          color: config.ui.colors.darkPrimary,
-          fontSize: "14px",
-          display: "flex",
-          alignItems: "flex-end",
-          mt: "auto",
-          gap: "6px",
-        }}
-      >
-        Dataset: <b>{datasetId || "—"}</b>
-      </Box> */}
+
       <Box
         sx={{
           color: config.ui.colors.darkPrimary,
@@ -328,16 +285,6 @@ const ResultsTableModalBody = ({
                 </StyledTableRow>
               </TableHead>
               <TableBody>
-                {/* {dataTable
-                  .filter((item) => {
-                    if (!searchTerm) return true;
-                    const rowString = sortedHeaders
-                      .map((h) => summarizeValue(item[h.id]))
-                      .join(" ")
-                      .toLowerCase();
-                    return rowString.includes(searchTerm.toLowerCase());
-                  })
-                  .map((item, index) => { */}
                 {filteredData.map((item, index) => {
                   const isExpanded = expandedRow && expandedRow?.id === item.id;
                   let id = item.id;

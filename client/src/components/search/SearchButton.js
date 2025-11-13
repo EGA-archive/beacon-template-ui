@@ -5,6 +5,17 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 import { COMMON_MESSAGES } from "../common/CommonMessage";
 import { PATH_SEGMENT_TO_ENTRY_ID } from "../../components/common/textFormatting";
 import { queryBuilder } from "./utils/queryBuilder";
+import { mockSingleBeaconResponse } from "./mockSingleBeaconResponse";
+
+const buildHeaders = (results = []) => {
+  const headerSet = new Set();
+  results.forEach((row) => {
+    if (row && typeof row === "object" && !Array.isArray(row)) {
+      Object.keys(row).forEach((key) => headerSet.add(key));
+    }
+  });
+  return Array.from(headerSet);
+};
 
 // This button triggers a search when clicked. It builds a query from selected filters and/or genomic queries,
 // sends a request to the Beacon API, handles grouping of results, and updates global state accordingly.
@@ -71,6 +82,7 @@ export default function SearchButton({ setSelectedTool }) {
       }
 
       const data = await response.json();
+      // const data = mockSingleBeaconResponse;
 
       // Group raw Beacon results by beacon or dataset
       const rawItems =
@@ -106,6 +118,8 @@ export default function SearchButton({ setSelectedTool }) {
             responseType = "Boolean";
           }
 
+          const headers = buildHeaders(item.results || []);
+
           const count = Number(item.resultsCount) || 0;
           acc[key].totalResultsCount += count;
 
@@ -115,13 +129,23 @@ export default function SearchButton({ setSelectedTool }) {
             exists: item.exists,
             resultsCount: item.resultsCount,
             responseType,
+            headers,
           });
 
           return acc;
         }, {})
       );
 
+      groupedArray.forEach((group) => {
+        group.items.forEach((ds) => {
+          if (ds.headers?.length) {
+            // console.log(`📊 Headers for ${ds.dataset}:`, ds.headers);
+          }
+        });
+      });
+
       setResultData(groupedArray);
+
       setRawItems(rawItems);
       setHasSearchResult(true);
     } catch (error) {

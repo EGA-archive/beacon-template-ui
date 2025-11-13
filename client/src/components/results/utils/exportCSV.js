@@ -14,6 +14,7 @@ export const exportCSV = async ({
   entryTypeId,
   selectedPathSegment,
   queryBuilder,
+  datasetId,
 }) => {
   try {
     let results = [];
@@ -27,14 +28,12 @@ export const exportCSV = async ({
           .toLowerCase();
         return rowString.includes(searchTerm.toLowerCase());
       });
-      // console.log(`📄 Exporting ${results.length} filtered rows`);
     }
 
     // Case 2: no search: fetch everything from backend
     else {
-      // console.log("🌐 Fetching full dataset for export...");
       const fullQuery = queryBuilder([], entryTypeId);
-      fullQuery.query.pagination = { skip: 0, limit: 10000 };
+      fullQuery.query.pagination = { skip: 0, limit: 100 };
 
       const fullUrl = `${config.apiUrl}/${selectedPathSegment}`;
       const response = await fetch(fullUrl, {
@@ -51,8 +50,15 @@ export const exportCSV = async ({
 
       const data = await response.json();
       const resultSets = data?.response?.resultSets ?? [];
-      results = resultSets.flatMap((r) => r.results || []);
-      // console.log(`🌍 Downloaded ${results.length} rows from backend`);
+      const selectedDataset = resultSets.find(
+        (r) => r.id === datasetId || r.dataset === datasetId
+      );
+
+      if (!selectedDataset) {
+        alert(`No dataset found for ID: ${datasetId}`);
+        return;
+      }
+      results = selectedDataset.results || [];
     }
 
     if (!results.length) {

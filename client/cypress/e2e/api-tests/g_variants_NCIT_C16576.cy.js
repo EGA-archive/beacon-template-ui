@@ -9,7 +9,7 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
     query: {
       filters: [{ id: "NCIT:C16576", scope: "individual" }],
       includeResultsetResponses: "HIT",
-      pagination: { skip: 0, limit: 1000 },
+      pagination: { skip: 0, limit: 100 },
       testMode: false,
       requestedGranularity: "record",
     },

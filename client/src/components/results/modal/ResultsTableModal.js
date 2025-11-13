@@ -9,22 +9,21 @@ import { InputAdornment, IconButton } from "@mui/material";
 import { useSelectedEntry } from "../../context/SelectedEntryContext";
 import Loader from "../../common/Loader";
 import { PATH_SEGMENT_TO_ENTRY_ID } from "../../common/textFormatting";
+import { mockSingleBeaconResponse } from "../../search/mockSingleBeaconResponse";
 
 /**
  * Displays a modal containing a paginated results table for the selected dataset.
  * Fetches detailed records from the Beacon API using POST requests with pagination.
  */
-const ResultsTableModal = ({ open, subRow, onClose, beaconId, datasetId }) => {
-  // console.log("🧩 [ResultsTableModal] Rendering modal:");
-  // console.log("   open:", open);
-  // console.log("   beaconId:", beaconId);
-  // console.log("   datasetId:", datasetId);
-  // console.log("   subRow beaconId:", subRow?.beaconId);
-  // console.log("   subRow id:", subRow?.id);
-  // console.log("   subRow object:", subRow);
-
-  const { selectedPathSegment, selectedFilter, actualLoadedCount } =
-    useSelectedEntry();
+const ResultsTableModal = ({
+  open,
+  subRow,
+  onClose,
+  beaconId,
+  datasetId,
+  headers,
+}) => {
+  const { selectedPathSegment, selectedFilter } = useSelectedEntry();
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
@@ -32,7 +31,14 @@ const ResultsTableModal = ({ open, subRow, onClose, beaconId, datasetId }) => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [dataTable, setDataTable] = useState([]);
   const [url, setUrl] = useState("");
+  const [visibleColumns, setVisibleColumns] = useState([]);
   const entryTypeId = PATH_SEGMENT_TO_ENTRY_ID[selectedPathSegment];
+
+  useEffect(() => {
+    if (headers && headers.length > 0 && visibleColumns.length === 0) {
+      setVisibleColumns(headers);
+    }
+  }, [headers, visibleColumns.length]);
 
   const style = {
     position: "absolute",
@@ -79,7 +85,7 @@ const ResultsTableModal = ({ open, subRow, onClose, beaconId, datasetId }) => {
         filters: [],
         requestParameters: {},
         includeResultsetResponses: "HIT",
-        pagination: { skip: 0, limit: 1000 },
+        pagination: { skip: 0, limit: 100 },
         testMode: false,
         requestedGranularity: "record",
       },
@@ -122,60 +128,6 @@ const ResultsTableModal = ({ open, subRow, onClose, beaconId, datasetId }) => {
     return filter;
   };
 
-  // Fetches data for the modal table
-  // useEffect(() => {
-  //   if (!open) return;
-  //   let active = true;
-
-  //   const fetchTableItems = async () => {
-  //     try {
-  //       setLoading(true);
-  //       const url = `${config.apiUrl}/${selectedPathSegment}`;
-  //       setUrl(url);
-
-  //       // Always use POST with pagination, even if no filters
-  //       const query = queryBuilder(page, entryTypeId);
-  //       const response = await fetch(url, {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify(query),
-  //       });
-
-  //       const data = await response.json();
-  //       if (!active) return;
-
-  //       const results = data.response?.resultSets;
-  //       if (!results?.length) return;
-
-  //       // Try to match the correct beacon by ID; otherwise, use the first
-  //       let beacon = results.find((item) => {
-  //         const id = subRow.beaconId || subRow.id;
-  //         const itemId = item.beaconId || item.id;
-  //         return id === itemId;
-  //       });
-  //       if (!beacon) beacon = results[0];
-
-  //       if (!beacon?.results) return;
-
-  //       const totalDatasetsPages = Math.ceil(beacon.resultsCount / rowsPerPage);
-  //       setTotalItems(beacon.resultsCount);
-  //       setTotalPages(totalDatasetsPages);
-  //       setDataTable(beacon.results);
-
-  //       console.log("dataTable", dataTable);
-  //     } catch (err) {
-  //       console.error("Failed to fetch modal table:", err);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchTableItems();
-  //   return () => {
-  //     active = false;
-  //   };
-  // }, [open, subRow, page, rowsPerPage]);
-
   useEffect(() => {
     if (!open) return;
     let active = true;
@@ -204,6 +156,8 @@ const ResultsTableModal = ({ open, subRow, onClose, beaconId, datasetId }) => {
         });
 
         const data = await response.json();
+        // const data = mockSingleBeaconResponse;
+
         if (!active) return;
 
         const results = data.response?.resultSets;
@@ -294,6 +248,9 @@ const ResultsTableModal = ({ open, subRow, onClose, beaconId, datasetId }) => {
                   datasetId={datasetId}
                   displayedCount={subRow?.displayedCount || 0}
                   actualLoadedCount={subRow?.actualLoadedCount || 0}
+                  headers={headers}
+                  visibleColumns={visibleColumns}
+                  setVisibleColumns={setVisibleColumns}
                 />
                 {/* Pagination moved here */}
                 <Box
