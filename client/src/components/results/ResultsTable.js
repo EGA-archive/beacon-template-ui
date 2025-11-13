@@ -30,6 +30,7 @@ import { useState, useEffect } from "react";
 import ResultsTableRow from "./ResultsTableRow";
 import { loadNetworkMembersWithMaturity } from "./utils/networkMembers";
 import CohortsTable from "./CohortsTable";
+import DatasetsTable from "./DatasetsTable";
 
 const ResultsTableModal = lazy(() => import("./modal/ResultsTableModal"));
 
@@ -69,7 +70,7 @@ export default function ResultsTable() {
       ? BEACON_SINGLE_COLUMNS
       : BEACON_NETWORK_COLUMNS;
 
-  const selectedBgColor = lighten(config.ui.colors.primary, 0.9);
+  const selectedBgColor = (theme) => theme.palette.grey[100];
 
   const handleRowClicked = (item) => {
     setSelectedSubRow(item);
@@ -142,14 +143,18 @@ export default function ResultsTable() {
   const getBeaconStatusLabel = (status) => {
     if (!status) return "Undefined";
     const normalized = status.toUpperCase();
-    if (normalized === "PROD") return "Production Beacon";
-    if (normalized === "TEST") return "Test Beacon";
-    if (normalized === "DEV") return "Development Beacon";
+    if (normalized === "PROD") return "Production";
+    if (normalized === "TEST") return "Test";
+    if (normalized === "DEV") return "Development";
     return status;
   };
 
   if (selectedEntryType === "cohorts" || selectedEntryType === "cohort") {
-    return <CohortsTable resultData={resultData} />;
+    return <CohortsTable />;
+  }
+
+  if (selectedEntryType === "datasets" || selectedEntryType === "dataset") {
+    return <DatasetsTable />;
   }
 
   return (
@@ -188,7 +193,6 @@ export default function ResultsTable() {
               {resultData.map((item, index) => {
                 const iconUrl = findBeaconIcon(item.beaconId);
                 const itemEmail = findBeaconEmail(item.beaconId);
-
                 return (
                   <React.Fragment key={index}>
                     <TableRow
@@ -300,12 +304,22 @@ export default function ResultsTable() {
                             }`
                           : "-"}
                       </TableCell>
-
                       <TableCell
-                        sx={{ fontWeight: "bold" }}
-                        data-cy="results-table-total-results"
                         style={{
                           width: BEACON_NETWORK_COLUMNS[3].width,
+                        }}
+                      >
+                        Response Type per Beacon
+                      </TableCell>
+
+                      <TableCell
+                        sx={{
+                          fontWeight: "bold",
+                          // backgroundColor: "yellow"
+                        }}
+                        data-cy="results-table-total-results"
+                        style={{
+                          width: BEACON_NETWORK_COLUMNS[4].width,
                         }}
                       >
                         {item.totalResultsCount > 0
@@ -318,14 +332,42 @@ export default function ResultsTable() {
                       {config.beaconType === "singleBeacon" && (
                         <TableCell
                           style={{
-                            width: BEACON_NETWORK_COLUMNS[3].width,
+                            width: BEACON_NETWORK_COLUMNS[4].width,
                           }}
                         >
                           {item.totalResultsCount > 0 ? (
                             <Tooltip title="View dataset details" arrow>
                               <Button
                                 data-cy="results-table-details-button"
-                                onClick={() => handleOpenModal(item)}
+                                onClick={() => {
+                                  const dsId =
+                                    item.dataset ||
+                                    item.id ||
+                                    item.items?.[0]?.dataset ||
+                                    "Undefined";
+
+                                  const totalCount =
+                                    item.totalResultsCount ||
+                                    item.items?.[0]?.totalResultsCount ||
+                                    0;
+
+                                  const loadedCount =
+                                    item.results?.length ||
+                                    item.items?.[0]?.results?.length ||
+                                    0;
+
+                                  handleOpenModal({
+                                    ...item,
+                                    datasetId: dsId,
+                                    selectedDataset: dsId,
+                                    dataTable:
+                                      item.results ||
+                                      item.items?.[0]?.results ||
+                                      [],
+                                    displayedCount: totalCount,
+                                    actualLoadedCount: loadedCount,
+                                  });
+                                }}
                                 variant="outlined"
                                 startIcon={<CalendarViewMonthIcon />}
                                 sx={{
@@ -359,7 +401,7 @@ export default function ResultsTable() {
 
                       <TableCell
                         style={{
-                          width: BEACON_NETWORK_COLUMNS[4].width,
+                          width: BEACON_NETWORK_COLUMNS[5].width,
                         }}
                       >
                         {itemEmail && (
@@ -400,7 +442,7 @@ export default function ResultsTable() {
                         <ResultsTableRow
                           item={expandedRow}
                           handleRowClicked={handleRowClicked}
-                          handleOpenModal={() => handleOpenModal(expandedRow)}
+                          handleOpenModal={handleOpenModal}
                         />
                       )}
                   </React.Fragment>
@@ -413,10 +455,13 @@ export default function ResultsTable() {
       {selectedSubRow && (
         <Suspense fallback={<div>Loading...</div>}>
           <ResultsTableModal
-            subRow={selectedSubRow}
-            handleRowClicked={handleRowClicked}
+            key={`${selectedSubRow.beaconId}-${selectedSubRow.datasetId}`}
             open={modalOpen}
-            onClose={() => handleCloseModal()}
+            subRow={selectedSubRow}
+            onClose={handleCloseModal}
+            beaconId={selectedSubRow?.beaconId}
+            datasetId={selectedSubRow?.datasetId}
+            dataTable={selectedSubRow?.dataTable || []}
           />
         </Suspense>
       )}

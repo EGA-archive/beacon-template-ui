@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Box,
   Paper,
   Table,
   TableBody,
@@ -12,17 +11,71 @@ import {
 import { lighten } from "@mui/system";
 import config from "../../config/config.json";
 import { COHORTS_TABLE } from "../../lib/constants";
+import { useSelectedEntry } from "../context/SelectedEntryContext";
 
-export default function CohortsTable({ resultData = [] }) {
+export default function CohortsTable() {
+  const { rawItems } = useSelectedEntry();
   const headerCellStyle = {
-    backgroundColor: config.ui.colors.primary,
+    backgroundColor: config.ui.colors.darkPrimary,
     fontWeight: 700,
     color: "white",
     transition: "background-color 0.3s ease",
-    "&:hover": { backgroundColor: lighten(config.ui.colors.primary, 0.1) },
+    "&:hover": {
+      backgroundColor: lighten(config.ui.colors.darkPrimary, 0.1),
+    },
+  };
+  const getGenderDistribution = (cohort) => {
+    try {
+      const genders =
+        cohort?.collectionEvents?.[0]?.eventGenders?.distribution?.genders;
+      if (!genders) return "-";
+
+      const entries = Object.entries(genders);
+
+      return (
+        <span>
+          {entries.map(([key, value], idx) => (
+            <span key={key}>
+              <strong>{key}</strong>: {value}
+              {idx < entries.length - 1 && ", "}
+            </span>
+          ))}
+        </span>
+      );
+    } catch {
+      return "-";
+    }
   };
 
-  console.log("resultData", resultData);
+  const getAgeRangeDistribution = (cohort) => {
+    try {
+      const ranges =
+        cohort?.collectionEvents?.[0]?.eventAgeRange?.distribution?.ranges;
+      if (!ranges) return "-";
+
+      const keys = Object.keys(ranges);
+      if (keys.length === 0) return "-";
+
+      const numericRanges = keys.map((key) => {
+        const parts = key.split("-");
+        const min = parseInt(parts[0].replace(/\D/g, ""), 10);
+        const maxPart = parts[1] || "";
+        const max = maxPart.includes("+")
+          ? `${maxPart}` // keep "+" as is
+          : parseInt(maxPart.replace(/\D/g, ""), 10);
+        return { min, max };
+      });
+
+      const minValue = Math.min(...numericRanges.map((r) => r.min));
+      const last = numericRanges[numericRanges.length - 1].max;
+
+      return `${minValue}–${last}`;
+    } catch (error) {
+      console.warn("getAgeRangeDistribution error:", error);
+      return "-";
+    }
+  };
+
   return (
     <Paper
       sx={{
@@ -49,12 +102,12 @@ export default function CohortsTable({ resultData = [] }) {
           </TableHead>
 
           <TableBody>
-            {resultData.map((cohort, index) => (
+            {rawItems?.map((cohort, index) => (
               <TableRow
                 key={index}
                 sx={{
                   "&:hover": {
-                    backgroundColor: lighten(config.ui.colors.primary, 0.9),
+                    backgroundColor: lighten(config.ui.colors.darkPrimary, 0.9),
                   },
                   "& td": {
                     borderBottom: "1px solid rgba(224,224,224,1)",
@@ -63,15 +116,15 @@ export default function CohortsTable({ resultData = [] }) {
                 }}
               >
                 <TableCell>
-                  <Box display="flex" alignItems="center" ml={4}>
-                    {cohort.cohort_id || "-"}
-                  </Box>
+                  <strong>{cohort.id || "-"}</strong>
                 </TableCell>
-                <TableCell>{cohort.cohort_name || "-"}</TableCell>
-                <TableCell>{cohort.cohort_type || "-"}</TableCell>
-                <TableCell>{cohort.cohort_size || "-"}</TableCell>
-                <TableCell>{cohort.cohort_gender || "-"}</TableCell>
-                <TableCell>{cohort.cohort_age_range || "-"}</TableCell>
+                <TableCell>{cohort.name || "-"}</TableCell>
+                <TableCell>{cohort.cohortType || "-"}</TableCell>
+                <TableCell>
+                  <strong>{cohort.cohortSize || "-"}</strong>
+                </TableCell>
+                <TableCell>{getGenderDistribution(cohort)}</TableCell>
+                <TableCell>{getAgeRangeDistribution(cohort)}</TableCell>
               </TableRow>
             ))}
           </TableBody>

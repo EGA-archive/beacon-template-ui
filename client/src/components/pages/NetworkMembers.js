@@ -51,7 +51,6 @@ export default function NetworkMembers() {
         setLoading(false);
       }
     };
-    console.log("beacons", beacons);
     fetchBeacons();
   }, []);
 
@@ -119,9 +118,6 @@ export default function NetworkMembers() {
               const contactLink =
                 beacon.response.organization?.contactUrl || "#";
               const beaconEnvironment = beacon.response.environment;
-
-              console.log("beacon.response", beacon.response);
-              console.log("beacon", beacon);
 
               return (
                 <Grid key={index} size={{ xs: 12, md: 6 }}>

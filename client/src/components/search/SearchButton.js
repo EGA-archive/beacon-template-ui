@@ -23,6 +23,7 @@ export default function SearchButton({ setSelectedTool }) {
     setQueryDirty,
     setLastSearchedFilters,
     setLastSearchedPathSegment,
+    setRawItems,
   } = useSelectedEntry();
 
   // Main logic executed when the user clicks "Search"
@@ -70,7 +71,6 @@ export default function SearchButton({ setSelectedTool }) {
       }
 
       const data = await response.json();
-      // console.log("Response data:", data);
 
       // Group raw Beacon results by beacon or dataset
       const rawItems =
@@ -94,23 +94,35 @@ export default function SearchButton({ setSelectedTool }) {
             };
           }
 
+          let responseType = "Boolean";
+          if (item.results) {
+            responseType = "Record";
+          } else if (
+            item.resultsCount !== undefined &&
+            item.exists !== undefined
+          ) {
+            responseType = "Count";
+          } else if (item.exists !== undefined) {
+            responseType = "Boolean";
+          }
+
           const count = Number(item.resultsCount) || 0;
           acc[key].totalResultsCount += count;
 
-          if (Array.isArray(item.results)) {
-            acc[key].items.push({
-              dataset: item.id,
-              results: item.results,
-            });
-          }
+          acc[key].items.push({
+            dataset: item.id,
+            results: item.results || [],
+            exists: item.exists,
+            resultsCount: item.resultsCount,
+            responseType,
+          });
 
           return acc;
         }, {})
       );
 
       setResultData(groupedArray);
-
-      console.log("rawItems", rawItems);
+      setRawItems(rawItems);
       setHasSearchResult(true);
     } catch (error) {
       console.error("❌ SearchButton error:", error);

@@ -1,6 +1,6 @@
 {
   "beaconType": "singleBeacon",
-  "apiUrl": "https://beacon-network-backend-test.ega-archive.org/api",
+  "apiUrl": "https://af-ega-beacon-demo.ega-archive.org/api",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
   "variationType": [
     { "jsonName": "SNP", "displayName": "SNP" },
@@ -57,7 +57,7 @@
         }
       ]
     },
-    "showLogin": true,
+    "showLogin": false,
     "contact": {
       "showContactPage": false,
       "apiPath": "http://localhost:5000/api/contact",

@@ -56,6 +56,9 @@ export const SelectedEntryProvider = ({ children }) => {
 
   const [lastSearchedPathSegment, setLastSearchedPathSegment] = useState(null);
 
+  const [rawItems, setRawItems] = useState([]);
+  const [actualLoadedCount, setActualLoadedCount] = useState(0);
+
   const valueInputRef = useRef(null);
   const filteringTermsRef = useRef(null);
   const prevPathSegmentRef = useRef(null);
@@ -101,6 +104,10 @@ export const SelectedEntryProvider = ({ children }) => {
         lastSearchedPathSegment,
         setLastSearchedPathSegment,
         prevPathSegmentRef,
+        rawItems,
+        setRawItems,
+        actualLoadedCount,
+        setActualLoadedCount,
       }}
     >
       {children}

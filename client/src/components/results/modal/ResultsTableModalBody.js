@@ -27,6 +27,10 @@ const ResultsTableModalBody = ({
   totalItems,
   entryTypeId,
   selectedPathSegment,
+  beaconId,
+  datasetId,
+  displayedCount,
+  actualLoadedCount,
 }) => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -244,14 +248,53 @@ const ResultsTableModalBody = ({
         flexDirection: "column",
       }}
     >
+      {config.beaconType === "networkBeacon" && (
+        <Box
+          sx={{
+            color: config.ui.colors.darkPrimary,
+            fontSize: "14px",
+            display: "flex",
+            alignItems: "flex-end",
+            mt: "auto",
+            gap: "6px",
+          }}
+        >
+          Beacon: <b>{beaconId || "—"}</b>
+        </Box>
+      )}
+      {/* <Box
+        sx={{
+          color: config.ui.colors.darkPrimary,
+          fontSize: "14px",
+          display: "flex",
+          alignItems: "flex-end",
+          mt: "auto",
+          gap: "6px",
+        }}
+      >
+        Dataset: <b>{datasetId || "—"}</b>
+      </Box> */}
+      <Box
+        sx={{
+          color: config.ui.colors.darkPrimary,
+          fontSize: "14px",
+          display: "flex",
+          alignItems: "flex-end",
+          mt: "auto",
+          gap: "6px",
+        }}
+      >
+        Dataset: <b>{datasetId || "—"}</b>
+      </Box>
+
       <ResultsTableToolbar
         visibleColumns={visibleColumns}
-        count={displayedTotal}
         setVisibleColumns={setVisibleColumns}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         handleExport={handleExport}
         sortedHeaders={sortedHeaders}
+        count={displayedCount}
       />
 
       <Paper

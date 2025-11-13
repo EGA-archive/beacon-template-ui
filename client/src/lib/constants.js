@@ -18,14 +18,20 @@ export const BEACON_NETWORK_COLUMNS = [
     id: "maturity",
     label: "Beacon Maturity",
     align: "left",
-    width: "20%",
+    width: "10%",
   },
   {
     id: "datasets_count",
     label: "nº of Datasets",
     align: "left",
     numeric: true,
-    width: "20%",
+    width: "15%",
+  },
+  {
+    id: "response_type",
+    label: "Response Type",
+    width: "15%",
+    align: "left",
   },
   {
     id: "response",
@@ -33,6 +39,7 @@ export const BEACON_NETWORK_COLUMNS = [
     width: "10%",
     align: "left",
   },
+
   {
     id: "contact",
     label: "Contact",
@@ -43,7 +50,7 @@ export const BEACON_NETWORK_COLUMNS = [
 
 export const BEACON_NETWORK_COLUMNS_EXPANDED = {
   beacon_dataset_name: {
-    width: "30%",
+    width: "25%",
     align: "left",
   },
   beacon_dataset_empty_one: {
@@ -51,14 +58,18 @@ export const BEACON_NETWORK_COLUMNS_EXPANDED = {
     align: "left",
   },
   beacon_dataset_empty_two: {
-    width: "20%",
+    width: "10%",
+    align: "left",
+  },
+  beacon_dataset_type_response: {
+    width: "15%",
     align: "left",
   },
   beacon_dataset_response: {
     width: "20%",
     align: "left",
   },
-  beacon_dataset_detail: {
+  beacon_empty_three: {
     width: "0%",
     align: "left",
   },
@@ -68,31 +79,37 @@ export const BEACON_SINGLE_COLUMNS = [
   {
     id: "beacon_dataset",
     label: (
-      <Box display="flex" alignItems="center" ml={4}>
+      <Box display="flex" alignItems="center">
         Dataset
       </Box>
     ),
     align: "left",
-    width: "30%",
+    width: "20%",
   },
 
   {
     id: "maturity",
     label: "Beacon Maturity",
     align: "left",
-    width: "20%",
+    width: "15%",
   },
   {
     id: "datasets_count",
     label: "nº of Datasets",
     align: "left",
     numeric: true,
-    width: "20%",
+    width: "10%",
+  },
+  {
+    id: "response_type",
+    label: "Response Type",
+    width: "15%",
+    align: "left",
   },
   {
     id: "response",
     label: "Response",
-    width: "10%",
+    width: "15%",
     align: "left",
   },
   {
@@ -113,7 +130,7 @@ export const COHORTS_TABLE = [
   {
     id: "cohort_id",
     label: (
-      <Box display="flex" alignItems="center" ml={4}>
+      <Box display="flex" alignItems="left">
         ID
       </Box>
     ),
@@ -154,6 +171,45 @@ export const COHORTS_TABLE = [
   },
 ];
 
+export const DATASETS_TABLE = [
+  {
+    id: "dataset_id",
+    label: (
+      <Box display="flex" alignItems="left">
+        ID
+      </Box>
+    ),
+    align: "left",
+    width: "10%",
+  },
+
+  {
+    id: "dataset_name",
+    label: "Name",
+    align: "left",
+    width: "20%",
+  },
+  {
+    id: "dataset_description",
+    label: "Description",
+    align: "left",
+    numeric: true,
+    width: "35%",
+  },
+  {
+    id: "dataset_external_url",
+    label: "External URL",
+    width: "20%",
+    align: "left",
+  },
+  {
+    id: "dataset_duo",
+    label: "DUO",
+    width: "25%",
+    align: "left",
+  },
+];
+
 export const FILTERING_TERMS_COLUMNS = [
   {
     id: "Select",
@@ -178,84 +234,5 @@ export const FILTERING_TERMS_COLUMNS = [
     label: "Scope",
     width: "25%",
     align: "left",
-  },
-];
-
-export const DATASET_TABLE = [
-  {
-    column: "id",
-    label: "ID",
-    width: "10%",
-  },
-  {
-    column: "name",
-    label: "Name",
-    width: "50%",
-  },
-  {
-    column: "externalUrl",
-    label: "Url",
-    width: "20%",
-  },
-  {
-    column: "version",
-    label: "Version",
-    width: "10%",
-  },
-];
-
-export const DATASET_TABLE_NETWORK = [
-  {
-    column: "id",
-    label: "Id",
-    width: "20%",
-  },
-  {
-    column: "diseases",
-    label: "Diseases",
-    width: "20%",
-  },
-  {
-    column: "geographicOrigin",
-    label: "Geographic Origin",
-    width: "20%",
-  },
-  {
-    column: "phenotypicFeatures",
-    label: "Phenotypic Features",
-    width: "20%",
-  },
-  {
-    column: "sex",
-    label: "Sex",
-    width: "20%",
-  },
-];
-
-export const DATASET_TABLE_SINGLE = [
-  {
-    column: "id",
-    label: "Id",
-    width: "20%",
-  },
-  {
-    column: "diseases",
-    label: "Diseases",
-    width: "20%",
-  },
-  {
-    column: "geographicOrigin",
-    label: "Geographic Origin",
-    width: "20%",
-  },
-  {
-    column: "phenotypicFeatures",
-    label: "Phenotypic Features",
-    width: "20%",
-  },
-  {
-    column: "sex",
-    label: "Sex",
-    width: "20%",
   },
 ];

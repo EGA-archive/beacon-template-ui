@@ -38,7 +38,7 @@ export default function ResultsTableToolbar({
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        mb: 2,
+        my: 2,
       }}
     >
       <Box
@@ -46,14 +46,21 @@ export default function ResultsTableToolbar({
           color: colors.darkPrimary,
           fontSize: "14px",
           display: "flex",
-          alignItems: "flex-end",
+          flexDirection: "column",
+          alignItems: "flex-start",
           mt: "auto",
-          gap: "6px",
+          gap: "2px",
         }}
       >
-        <b>Total Results: </b> {count}
-      </Box>
+        <Box>
+          <b>Total Results:</b>{" "}
+          {count
+            ? new Intl.NumberFormat(navigator.language).format(count)
+            : "—"}
+        </Box>
 
+        {count > 100 && <Box>Details returned for the first 100 records</Box>}
+      </Box>
       <Box
         sx={{
           display: "flex",
