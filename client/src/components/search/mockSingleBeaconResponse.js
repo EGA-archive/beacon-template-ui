@@ -10,7 +10,7 @@ export const mockSingleBeaconResponse = {
   response: {
     resultSets: [
       {
-        exists: false,
+        exists: true,
         id: "EGA0",
         setType: "dataset",
       },

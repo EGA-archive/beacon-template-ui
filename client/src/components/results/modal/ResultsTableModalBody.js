@@ -1,4 +1,11 @@
-import { useState, Fragment, useEffect, useCallback } from "react";
+import {
+  useState,
+  Fragment,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import {
   Box,
   Paper,
@@ -22,6 +29,10 @@ import {
   formatHeaderName,
 } from "../utils/tableHelpers";
 
+/**
+ * Displays paginated results inside the modal.
+ * Keeps full dataset in memory but renders only the current page slice.
+ */
 const ResultsTableModalBody = ({
   dataTable,
   entryTypeId,
@@ -32,91 +43,148 @@ const ResultsTableModalBody = ({
   headers: providedHeaders = [],
   visibleColumns,
   setVisibleColumns,
+  page,
+  rowsPerPage,
 }) => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState(dataTable);
+  const initialized = useRef(false);
 
-  const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
+  const start = page * rowsPerPage;
+  const end = start + rowsPerPage;
+
+  /** Styled Components */
+  const StyledTableCell = useMemo(
+    () =>
+      styled(TableCell)(({ theme }) => ({
+        [`&.${tableCellClasses.head}`]: {
+          backgroundColor: config.ui.colors.darkPrimary,
+          color: theme.palette.common.white,
+        },
+        [`&.${tableCellClasses.body}`]: { fontSize: 11 },
+        border: `1px solid ${config.ui.colors.darkPrimary}`,
+      })),
+    []
+  );
+
+  const StyledTableRow = useMemo(
+    () =>
+      styled(TableRow)(({ theme }) => ({
+        "&:nth-of-type(odd)": { backgroundColor: theme.palette.action.hover },
+        "&:last-child td": {
+          border: `1px solid ${config.ui.colors.darkPrimary}`,
+        },
+        "&:last-child th": { border: `1px solid white` },
+      })),
+    []
+  );
+
+  const headerCellStyle = useMemo(
+    () => ({
       backgroundColor: config.ui.colors.darkPrimary,
-      color: theme.palette.common.white,
-    },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 11,
-    },
-    border: `1px solid ${config.ui.colors.darkPrimary}`,
-  }));
+      fontWeight: 700,
+      color: "white",
+    }),
+    []
+  );
 
-  const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    "&:nth-of-type(odd)": {
-      backgroundColor: theme.palette.action.hover,
-    },
-    "&:last-child td": {
-      border: `1px solid ${config.ui.colors.darkPrimary}`,
-    },
-    "&:last-child th": {
-      border: `1px solid white`,
-    },
-  }));
-
-  const headerCellStyle = {
-    backgroundColor: config.ui.colors.darkPrimary,
-    fontWeight: 700,
-    color: "white",
-  };
-
-  const rawHeaders =
-    providedHeaders && providedHeaders.length > 0
-      ? providedHeaders
-      : Array.from(
-          new Set(
-            dataTable.flatMap((obj) =>
-              obj && typeof obj === "object" ? Object.keys(obj) : []
+  /** Build headers dynamically */
+  const headersArray = useMemo(() => {
+    const rawHeaders =
+      providedHeaders.length > 0
+        ? providedHeaders
+        : Array.from(
+            new Set(
+              dataTable.flatMap((obj) =>
+                obj && typeof obj === "object" ? Object.keys(obj) : []
+              )
             )
-          )
-        );
+          );
 
-  // Build indexedHeaders
-  const indexedHeaders = {};
-  rawHeaders.forEach((header, index) => {
-    indexedHeaders[index] = {
+    const indexedHeaders = rawHeaders.map((header) => ({
       id: header,
-      name: formatHeaderName(header),
-    };
-  });
+      name:
+        header === "identifiers"
+          ? "Genomic variation"
+          : formatHeaderName(header),
+    }));
 
-  const headersArray = Object.values(indexedHeaders)
-    // Rename "identifiers" → "Genomic variation"
-    .map((h) =>
-      h.id === "identifiers" ? { ...h, name: "Genomic variation" } : h
-    )
-    .filter((h) => h.id !== "variantInternalId");
+    return indexedHeaders.filter((h) => h.id !== "variantInternalId");
+  }, [dataTable, providedHeaders]);
 
-  const primaryId = headersArray.find((h) => h.id === "id")
-    ? "id"
-    : headersArray.find((h) => h.id === "identifiers")
-    ? "identifiers"
-    : null;
+  const sortedHeaders = useMemo(() => {
+    const primaryId =
+      headersArray.find((h) => h.id === "id")?.id ||
+      headersArray.find((h) => h.id === "identifiers")?.id;
 
-  const sortedHeaders = primaryId
-    ? [
-        ...headersArray.filter((h) => h.id === primaryId),
-        ...headersArray.filter((h) => h.id !== primaryId),
-      ]
-    : headersArray;
+    if (!primaryId) return headersArray;
+    return [
+      ...headersArray.filter((h) => h.id === primaryId),
+      ...headersArray.filter((h) => h.id !== primaryId),
+    ];
+  }, [headersArray]);
 
+  /** Initialize visible columns once (no eslint disable, no re-runs) */
   useEffect(() => {
-    if (sortedHeaders.length > 0 && visibleColumns.length === 0) {
+    if (
+      !initialized.current &&
+      sortedHeaders.length > 0 &&
+      visibleColumns.length === 0
+    ) {
       setVisibleColumns(sortedHeaders.map((h) => h.id));
+      initialized.current = true;
     }
-  }, [sortedHeaders, visibleColumns, setVisibleColumns]);
+  }, [sortedHeaders, visibleColumns.length, setVisibleColumns]);
 
-  function renderCellContent(item, column) {
+  /** Filter data by search term */
+  useEffect(() => {
+    const filtered = dataTable.filter((item) => {
+      if (!searchTerm) return true;
+      const rowString = sortedHeaders
+        .map((h) => summarizeValue(item[h.id]))
+        .join(" ")
+        .toLowerCase();
+      return rowString.includes(searchTerm.toLowerCase());
+    });
+    setFilteredData(filtered);
+  }, [searchTerm, dataTable, sortedHeaders]);
+
+  /** Slice visible rows for current page */
+
+  const visibleRows = useMemo(
+    () => filteredData.slice(start, end),
+    [filteredData, start, end]
+  );
+
+  /** Export CSV */
+  const handleExport = useCallback(() => {
+    exportCSV({
+      dataTable,
+      sortedHeaders,
+      visibleColumns,
+      summarizeValue,
+      searchTerm,
+      entryTypeId,
+      selectedPathSegment,
+      queryBuilder,
+      datasetId,
+    });
+  }, [
+    dataTable,
+    sortedHeaders,
+    visibleColumns,
+    searchTerm,
+    entryTypeId,
+    selectedPathSegment,
+    datasetId,
+  ]);
+
+  /** Render table cell content */
+  const renderCellContent = useCallback((item, column) => {
     const value = item[column];
     if (!value) return "-";
 
-    // Apply the same logic for phenotypicFeatures and exposures
     if (
       (column === "phenotypicFeatures" || column === "exposures") &&
       Array.isArray(value)
@@ -140,26 +208,19 @@ const ResultsTableModalBody = ({
                   val.onset?.label ||
                   val.unit?.label ||
                   val.severity?.label;
-
-                if (innerLabel) return `${key}: ${innerLabel}`;
-                return null;
+                return innerLabel ? `${key}: ${innerLabel}` : null;
               }
               if (Array.isArray(val)) {
                 const labels = val
                   .map((v) => v.label || v.id || null)
                   .filter(Boolean);
-                return labels.length > 0
-                  ? `${key}: ${labels.join(", ")}`
-                  : null;
+                return labels.length ? `${key}: ${labels.join(", ")}` : null;
               }
-              if (typeof val === "string" || typeof val === "number") {
-                return `${key}: ${val}`;
-              }
-
-              return null;
+              return typeof val === "string" || typeof val === "number"
+                ? `${key}: ${val}`
+                : null;
             })
             .filter(Boolean);
-
           return parts.join(", ");
         })
         .filter(Boolean)
@@ -167,46 +228,9 @@ const ResultsTableModalBody = ({
     }
 
     return summarizeValue(value);
-  }
+  }, []);
 
-  useEffect(() => {
-    const filtered = dataTable.filter((item) => {
-      if (!searchTerm) return true;
-      const rowString = sortedHeaders
-        .map((h) => summarizeValue(item[h.id]))
-        .join(" ")
-        .toLowerCase();
-      return rowString.includes(searchTerm.toLowerCase());
-    });
-
-    // Only update if the number of visible rows actually changes
-    if (filtered.length !== filteredData.length) {
-      setFilteredData(filtered);
-    }
-  }, [searchTerm, dataTable, sortedHeaders]);
-
-  const handleExport = useCallback(() => {
-    exportCSV({
-      dataTable,
-      sortedHeaders,
-      visibleColumns,
-      summarizeValue,
-      searchTerm,
-      entryTypeId,
-      selectedPathSegment,
-      queryBuilder,
-      datasetId,
-    });
-  }, [
-    dataTable,
-    sortedHeaders,
-    visibleColumns,
-    searchTerm,
-    entryTypeId,
-    selectedPathSegment,
-    datasetId,
-  ]);
-
+  /** Render */
   return (
     <Box
       sx={{
@@ -265,109 +289,81 @@ const ResultsTableModalBody = ({
           flexDirection: "column",
         }}
       >
-        <>
-          <TableContainer
-            sx={{
-              maxHeight: "60vh",
-              overflowY: "auto",
-            }}
-          >
-            <Table stickyHeader aria-label="Results table">
-              <TableHead>
-                <StyledTableRow>
-                  {sortedHeaders
-                    .filter((col) => visibleColumns.includes(col.id))
-                    .map((column) => (
-                      <TableCell key={column.id} sx={headerCellStyle}>
-                        {column.name}
-                      </TableCell>
-                    ))}
-                </StyledTableRow>
-              </TableHead>
-              <TableBody>
-                {filteredData.map((item, index) => {
-                  const isExpanded = expandedRow && expandedRow?.id === item.id;
-                  let id = item.id;
-                  const parsedInfo = cleanAndParseInfo(item.info);
-                  if (parsedInfo?.sampleID) {
-                    id += `_${parsedInfo.sampleID}`;
-                  } else {
-                    id += `_${index}`;
-                  }
+        <TableContainer sx={{ maxHeight: "60vh", overflowY: "auto" }}>
+          <Table stickyHeader aria-label="Results table">
+            <TableHead>
+              <StyledTableRow>
+                {sortedHeaders
+                  .filter((col) => visibleColumns.includes(col.id))
+                  .map((column) => (
+                    <TableCell key={column.id} sx={headerCellStyle}>
+                      {column.name}
+                    </TableCell>
+                  ))}
+              </StyledTableRow>
+            </TableHead>
+            <TableBody>
+              {visibleRows.map((item, index) => {
+                // const isExpanded = expandedRow?.id === item.id;
+                const isExpanded =
+                  expandedRow !== null && expandedRow.id === item.id;
 
-                  return (
-                    <Fragment key={id}>
-                      <StyledTableRow
-                        key={`row-${id}`}
-                        hover
-                        sx={{
-                          "&.MuiTableRow-root": {
-                            transition: "background-color 0.2s ease",
-                          },
-                          "& td": {
-                            borderBottom: "1px solid rgba(224, 224, 224, 1)",
-                            py: 1.5,
-                          },
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {Object.values(sortedHeaders)
-                          .filter((colConfig) =>
-                            visibleColumns.includes(colConfig.id)
-                          )
-                          .map((colConfig) => (
-                            <StyledTableCell
-                              key={`${id}-${colConfig.id}`}
-                              data-cy={
-                                colConfig.id === "variantInternalId"
-                                  ? "variant-internal-id-cell"
-                                  : undefined
-                              }
-                              sx={{
-                                fontSize: "11px",
+                const parsedInfo = cleanAndParseInfo(item.info);
+                const id = `${item.id || `row_${index}`}${
+                  parsedInfo?.sampleID ? `_${parsedInfo.sampleID}` : ""
+                }`;
 
-                                ...(colConfig.id === "variantInternalId"
-                                  ? {
-                                      whiteSpace: "wrap",
-                                      wordBreak: "break-word",
-                                      overflowWrap: "anywhere",
-                                      verticalAlign: "top",
-                                      lineHeight: 1.4,
-                                      paddingTop: "6px",
-                                      paddingBottom: "6px",
-                                    }
-                                  : {
-                                      whiteSpace: "wrap",
-                                      overflowWrap: "anywhere",
-                                      verticalAlign: "top",
-                                    }),
-                              }}
-                              style={{
-                                width: colConfig.width || "auto",
-                                maxWidth:
-                                  colConfig.id === "variantInternalId"
-                                    ? "300px"
-                                    : "250px",
-                              }}
-                            >
-                              {renderCellContent(item, colConfig.id)}
-                            </StyledTableCell>
-                          ))}
-                      </StyledTableRow>
+                return (
+                  <Fragment key={id}>
+                    <StyledTableRow
+                      hover
+                      sx={{
+                        "&.MuiTableRow-root": {
+                          transition: "background-color 0.2s ease",
+                        },
+                        "& td": {
+                          borderBottom: "1px solid rgba(224,224,224,1)",
+                          py: 1.5,
+                        },
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {sortedHeaders
+                        .filter((col) => visibleColumns.includes(col.id))
+                        .map((col) => (
+                          <StyledTableCell
+                            key={`${id}-${col.id}`}
+                            sx={{
+                              fontSize: "11px",
+                              whiteSpace: "wrap",
+                              overflowWrap: "anywhere",
+                              verticalAlign: "top",
+                            }}
+                            style={{
+                              width: col.width || "auto",
+                              maxWidth:
+                                col.id === "variantInternalId"
+                                  ? "300px"
+                                  : "250px",
+                            }}
+                          >
+                            {renderCellContent(item, col.id)}
+                          </StyledTableCell>
+                        ))}
+                    </StyledTableRow>
 
-                      {isExpanded && (
-                        <ResultsTableModalRow
-                          key={`expanded-${id}`}
-                          item={expandedRow}
-                        />
-                      )}
-                    </Fragment>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </>
+                    {isExpanded && (
+                      <ResultsTableModalRow
+                        key={`expanded-${id}`}
+                        item={expandedRow}
+                      />
+                    )}
+                  </Fragment>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Paper>
     </Box>
   );

@@ -58,6 +58,7 @@ export const SelectedEntryProvider = ({ children }) => {
 
   const [rawItems, setRawItems] = useState([]);
   const [actualLoadedCount, setActualLoadedCount] = useState(0);
+  const [responseMeta, setResponseMeta] = useState(null);
 
   const valueInputRef = useRef(null);
   const filteringTermsRef = useRef(null);
@@ -108,6 +109,8 @@ export const SelectedEntryProvider = ({ children }) => {
         setRawItems,
         actualLoadedCount,
         setActualLoadedCount,
+        responseMeta,
+        setResponseMeta,
       }}
     >
       {children}

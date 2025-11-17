@@ -1,5 +1,8 @@
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
-import { Box } from "@mui/material";
+import { Box, Tooltip } from "@mui/material";
+import config from "../config/config.json";
+
+const primaryColor = config.ui.colors.primary;
 
 export const BEACON_NETWORK_COLUMNS = [
   {
@@ -18,25 +21,74 @@ export const BEACON_NETWORK_COLUMNS = [
     id: "maturity",
     label: "Beacon Maturity",
     align: "left",
-    width: "10%",
+    width: "15%",
   },
   {
     id: "datasets_count",
-    label: "nº of Datasets",
+    label: (
+      <Box display="flex" alignItems="center" gap={1}>
+        nº of Datasets
+        <Tooltip
+          title={
+            <Box
+              sx={{
+                p: 1,
+                fontFamily: '"Open Sans", sans-serif',
+              }}
+            >
+              Beacons that restrict dataset-level responses, return only
+              Beacon-level data aggregated across datasets.
+            </Box>
+          }
+          placement="top-start"
+          arrow
+          componentsProps={{
+            tooltip: {
+              sx: {
+                backgroundColor: "#fff",
+                color: "#000",
+                border: "1px solid black",
+                maxWidth: "300px",
+              },
+            },
+            arrow: {
+              sx: {
+                color: "#fff",
+                "&::before": { border: "1px solid black" },
+              },
+            },
+          }}
+        >
+          <Box
+            component="span"
+            sx={{
+              cursor: "pointer",
+              width: "18px",
+              height: "18px",
+              borderRadius: "50%",
+              backgroundColor: "white",
+              color: primaryColor,
+              textAlign: "center",
+              fontSize: "12px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            i
+          </Box>
+        </Tooltip>
+      </Box>
+    ),
     align: "left",
     numeric: true,
-    width: "15%",
+    width: "20%",
   },
-  {
-    id: "response_type",
-    label: "Response Type",
-    width: "15%",
-    align: "left",
-  },
+
   {
     id: "response",
     label: "Response",
-    width: "10%",
+    width: "15%",
     align: "left",
   },
 
@@ -58,15 +110,12 @@ export const BEACON_NETWORK_COLUMNS_EXPANDED = {
     align: "left",
   },
   beacon_dataset_empty_two: {
-    width: "10%",
-    align: "left",
-  },
-  beacon_dataset_type_response: {
-    width: "15%",
-    align: "left",
-  },
-  beacon_dataset_response: {
     width: "20%",
+    align: "left",
+  },
+
+  beacon_dataset_response: {
+    width: "25%",
     align: "left",
   },
   beacon_empty_three: {
@@ -93,29 +142,71 @@ export const BEACON_SINGLE_COLUMNS = [
     align: "left",
     width: "15%",
   },
-  {
-    id: "datasets_count",
-    label: "nº of Datasets",
-    align: "left",
-    numeric: true,
-    width: "10%",
-  },
-  {
-    id: "response_type",
-    label: "Response Type",
-    width: "15%",
-    align: "left",
-  },
+
   {
     id: "response",
-    label: "Response",
-    width: "15%",
+    label: (
+      <Box display="flex" alignItems="center" gap={1}>
+        Response
+        <Tooltip
+          title={
+            <Box
+              sx={{
+                p: 1,
+                fontFamily: '"Open Sans", sans-serif',
+              }}
+            >
+              The response can be a Boolean (yes/no), a count, or records at the
+              dataset level.
+            </Box>
+          }
+          placement="top-start"
+          arrow
+          componentsProps={{
+            tooltip: {
+              sx: {
+                backgroundColor: "#fff",
+                color: "#000",
+                border: "1px solid black",
+                maxWidth: "300px",
+              },
+            },
+            arrow: {
+              sx: {
+                color: "#fff",
+                "&::before": { border: "1px solid black" },
+              },
+            },
+          }}
+        >
+          <Box
+            component="span"
+            sx={{
+              cursor: "pointer",
+              width: "18px",
+              height: "18px",
+              borderRadius: "50%",
+              backgroundColor: "white",
+              color: primaryColor,
+              textAlign: "center",
+              fontSize: "12px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            i
+          </Box>
+        </Tooltip>
+      </Box>
+    ),
+    width: "20%",
     align: "left",
   },
   {
     id: "details",
     label: "Details",
-    width: "10%",
+    width: "15%",
     align: "left",
   },
   {

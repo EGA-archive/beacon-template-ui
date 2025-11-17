@@ -1,6 +1,6 @@
 {
-  "beaconType": "singleBeacon",
-  "apiUrl": "https://af-ega-beacon-demo.ega-archive.org/api",
+  "beaconType": "networkBeacon",
+  "apiUrl": "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
   "variationType": [
     { "jsonName": "SNP", "displayName": "SNP" },

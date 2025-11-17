@@ -14,6 +14,7 @@ import DownloadForOfflineRoundedIcon from "@mui/icons-material/DownloadForOfflin
 import ViewWeekRoundedIcon from "@mui/icons-material/ViewWeekRounded";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import config from "../../../config/config.json";
+import { useSelectedEntry } from "../../../components/context/SelectedEntryContext";
 
 /**
  * Toolbar for the Results Table, it contains:
@@ -30,7 +31,10 @@ export default function ResultsTableToolbar({
   sortedHeaders,
   count,
 }) {
+  const { responseMeta } = useSelectedEntry();
   const colors = config.ui.colors;
+
+  const limit = responseMeta?.receivedRequestSummary?.pagination?.limit;
 
   return (
     <Box
@@ -59,7 +63,9 @@ export default function ResultsTableToolbar({
             : "—"}
         </Box>
 
-        {count > 100 && <Box>Details returned for the first 100 records</Box>}
+        {count > limit && (
+          <Box>Details returned for the first {limit} records</Box>
+        )}
       </Box>
       <Box
         sx={{

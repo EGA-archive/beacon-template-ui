@@ -35,6 +35,8 @@ export default function SearchButton({ setSelectedTool }) {
     setLastSearchedFilters,
     setLastSearchedPathSegment,
     setRawItems,
+    responseMeta,
+    setResponseMeta,
   } = useSelectedEntry();
 
   // Main logic executed when the user clicks "Search"
@@ -64,7 +66,6 @@ export default function SearchButton({ setSelectedTool }) {
 
     try {
       const url = `${config.apiUrl}/${selectedPathSegment}`;
-      let response;
       const query = queryBuilder(selectedFilter, entryTypeId);
       const requestOptions = {
         method: "POST",
@@ -72,7 +73,7 @@ export default function SearchButton({ setSelectedTool }) {
         body: JSON.stringify(query),
       };
 
-      response = await fetch(url, requestOptions);
+      const response = await fetch(url, requestOptions);
 
       if (!response.ok) {
         console.error("Fetch failed:", response.status);
@@ -84,11 +85,14 @@ export default function SearchButton({ setSelectedTool }) {
       const data = await response.json();
       // const data = mockSingleBeaconResponse;
 
-      // Group raw Beacon results by beacon or dataset
-      const rawItems =
+      setResponseMeta(data.meta);
+
+      // Group resultSets by beaconId (network) or by dataset id (single beacon)
+      // Correctly identifies: Record Beacon / Count Beacon / Boolean Beacon
+      const resultSets =
         data?.response?.resultSets ?? data?.response?.collections ?? [];
       const groupedArray = Object.values(
-        Object.values(rawItems).reduce((acc, item) => {
+        resultSets.reduce((acc, item) => {
           const isBeaconNetwork = !!item.beaconId;
           const key = isBeaconNetwork ? item.beaconId : item.id;
 
@@ -106,31 +110,23 @@ export default function SearchButton({ setSelectedTool }) {
             };
           }
 
-          let responseType = "Boolean";
-          if (item.results) {
-            responseType = "Record";
-          } else if (
-            item.resultsCount !== undefined &&
-            item.exists !== undefined
-          ) {
-            responseType = "Count";
-          } else if (item.exists !== undefined) {
-            responseType = "Boolean";
-          }
-
           const headers = buildHeaders(item.results || []);
 
           const count = Number(item.resultsCount) || 0;
           acc[key].totalResultsCount += count;
 
-          acc[key].items.push({
-            dataset: item.id,
-            results: item.results || [],
-            exists: item.exists,
-            resultsCount: item.resultsCount,
-            responseType,
-            headers,
-          });
+          const datasetIdentifier = item.id || item.datasetId;
+
+          // Only push into items if this resultSet represents a real dataset
+          if (datasetIdentifier) {
+            acc[key].items.push({
+              dataset: datasetIdentifier,
+              results: item.results || [],
+              exists: item.exists,
+              resultsCount: item.resultsCount,
+              headers,
+            });
+          }
 
           return acc;
         }, {})
@@ -146,7 +142,7 @@ export default function SearchButton({ setSelectedTool }) {
 
       setResultData(groupedArray);
 
-      setRawItems(rawItems);
+      setRawItems(resultSets);
       setHasSearchResult(true);
     } catch (error) {
       console.error("❌ SearchButton error:", error);

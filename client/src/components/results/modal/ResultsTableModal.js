@@ -23,7 +23,9 @@ const ResultsTableModal = ({
   datasetId,
   headers,
 }) => {
-  const { selectedPathSegment, selectedFilter } = useSelectedEntry();
+  const { selectedPathSegment, selectedFilter, responseMeta } =
+    useSelectedEntry();
+
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
@@ -33,6 +35,8 @@ const ResultsTableModal = ({
   const [url, setUrl] = useState("");
   const [visibleColumns, setVisibleColumns] = useState([]);
   const entryTypeId = PATH_SEGMENT_TO_ENTRY_ID[selectedPathSegment];
+
+  const limit = responseMeta?.receivedRequestSummary?.pagination?.limit;
 
   useEffect(() => {
     if (headers && headers.length > 0 && visibleColumns.length === 0) {
@@ -161,6 +165,7 @@ const ResultsTableModal = ({
         if (!active) return;
 
         const results = data.response?.resultSets;
+
         if (!results?.length) return;
 
         // Try to match the correct beacon by ID; otherwise, use the first
@@ -234,7 +239,7 @@ const ResultsTableModal = ({
             {!loading && dataTable.length > 0 && (
               <>
                 <ResultsTableModalBody
-                  dataTable={visibleRows}
+                  dataTable={dataTable}
                   totalItems={totalItems}
                   page={page}
                   rowsPerPage={rowsPerPage}
@@ -262,7 +267,8 @@ const ResultsTableModal = ({
                 >
                   <TablePagination
                     component="div"
-                    count={subRow?.actualLoadedCount}
+                    // count={subRow?.actualLoadedCount}
+                    count={limit}
                     page={page}
                     onPageChange={handleChangePage}
                     rowsPerPage={rowsPerPage}
