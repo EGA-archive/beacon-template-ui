@@ -25,9 +25,22 @@ export default function SingleBeaconBanner() {
   const [localDatasets, setLocalDatasets] = useState([]);
   const [selectedDataset, setSelectedDataset] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { entryTypes, beaconsInfo } = useSelectedEntry();
+  const { entryTypes, beaconsInfo, entryTypesConfig } = useSelectedEntry();
 
   const beaconInfo = beaconsInfo?.[0];
+
+  const getBeaconStatusLabel = (status) => {
+    if (!status) return "Undefined";
+    const normalized = status.toUpperCase();
+    if (normalized === "PROD") return "Production";
+    if (normalized === "TEST") return "Test";
+    if (normalized === "DEV") return "Development";
+    return status;
+  };
+
+  const maturityStatus = getBeaconStatusLabel(
+    entryTypesConfig?.maturityAttributes?.productionStatus
+  );
 
   // Function for the tab selection on top of the banner
   const handleChange = (event, newValue) => {
@@ -213,6 +226,16 @@ export default function SingleBeaconBanner() {
                       >
                         {beaconInfo.welcomeUrl}
                       </Link>
+                    </Typography>
+
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: '"Open Sans", sans-serif',
+                        fontSize: "14px",
+                      }}
+                    >
+                      <strong>Beacon Maturity:</strong> {maturityStatus}
                     </Typography>
 
                     <Typography

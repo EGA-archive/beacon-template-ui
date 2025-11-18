@@ -136,12 +136,12 @@ export const BEACON_SINGLE_COLUMNS = [
     width: "20%",
   },
 
-  {
-    id: "maturity",
-    label: "Beacon Maturity",
-    align: "left",
-    width: "15%",
-  },
+  // {
+  //   id: "maturity",
+  //   label: "Beacon Maturity",
+  //   align: "left",
+  //   width: "15%",
+  // },
 
   {
     id: "response",

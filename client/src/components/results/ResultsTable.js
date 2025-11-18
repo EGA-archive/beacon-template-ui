@@ -272,24 +272,6 @@ export default function ResultsTable() {
                           </span>
                         </Box>
                       </TableCell>
-                      <TableCell
-                        sx={{ fontWeight: "bold" }}
-                        style={{
-                          width:
-                            config.beaconType === "singleBeacon"
-                              ? BEACON_SINGLE_COLUMNS[1].width
-                              : BEACON_NETWORK_COLUMNS[1].width,
-                        }}
-                      >
-                        {(() => {
-                          const status =
-                            config.beaconType === "singleBeacon"
-                              ? entryTypesConfig?.maturityAttributes
-                                  ?.productionStatus
-                              : item.maturity || (item.exists ? "PROD" : "DEV");
-                          return getBeaconStatusLabel(status);
-                        })()}
-                      </TableCell>
 
                       {config.beaconType !== "singleBeacon" && (
                         <TableCell
