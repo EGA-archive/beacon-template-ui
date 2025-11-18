@@ -20,16 +20,36 @@ export function getBeaconAggregationInfo(item) {
 }
 
 export function getDatasetType(ds) {
-  // 1. Real dataset with identifier → Record Beacon dataset
-  if (ds.dataset) {
-    return "record";
+  if (!ds) return "unavailable";
+
+  const hasCount = typeof ds.resultsCount === "number";
+  const hasResults = Array.isArray(ds.results);
+  const hasNonEmptyResults = hasResults && ds.results.length > 0;
+
+  // CASE 1: exists only → Boolean
+  if (!hasCount && !hasResults && ds.exists === true) {
+    return "boolean";
   }
 
-  // 2. Dataset-less count → Count Beacon dataset
-  if (typeof ds.resultsCount === "number" && ds.resultsCount > 0) {
+  // CASE 2: exists + id only → Boolean
+  if (!hasCount && !hasResults && ds.id && ds.exists === true) {
+    return "boolean";
+  }
+
+  // CASE 3: exists + resultsCount only → Count
+  if (hasCount && !hasResults) {
     return "count";
   }
 
-  // 3. Dataset-less boolean → Boolean Beacon dataset
-  return "boolean";
+  // CASE 4: exists + resultsCount + empty results → Count
+  if (hasCount && hasResults && !hasNonEmptyResults) {
+    return "count";
+  }
+
+  // CASE 5: exists + resultsCount + filled results → Record
+  if (hasCount && hasNonEmptyResults) {
+    return "record";
+  }
+
+  return "unavailable";
 }

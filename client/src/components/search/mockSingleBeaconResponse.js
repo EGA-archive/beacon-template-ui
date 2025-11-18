@@ -11,13 +11,29 @@ export const mockSingleBeaconResponse = {
     resultSets: [
       {
         exists: true,
-        id: "EGA0",
+        setType: "dataset",
+      },
+      {
+        exists: false,
+        setType: "dataset",
+      },
+      {
+        exists: true,
+        id: "EGA00",
         setType: "dataset",
       },
       {
         exists: true,
         id: "EGA1",
         resultsCount: 8,
+        setType: "dataset",
+      },
+
+      {
+        exists: true,
+        id: "EGA3",
+        resultsCount: 4,
+        results: [],
         setType: "dataset",
       },
       {
@@ -28,13 +44,6 @@ export const mockSingleBeaconResponse = {
           { id: "record_1", something: "value" },
           { id: "record_2", something: "value" },
         ],
-        setType: "dataset",
-      },
-      {
-        exists: true,
-        id: "EGA3",
-        resultsCount: 4,
-        results: [],
         setType: "dataset",
       },
     ],

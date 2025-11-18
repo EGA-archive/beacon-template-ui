@@ -159,8 +159,8 @@ const ResultsTableModal = ({
           body: JSON.stringify(query),
         });
 
-        const data = await response.json();
-        // const data = mockSingleBeaconResponse;
+        // const data = await response.json();
+        const data = mockSingleBeaconResponse;
 
         if (!active) return;
 
