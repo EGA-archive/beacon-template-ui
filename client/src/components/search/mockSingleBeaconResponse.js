@@ -49,3 +49,27 @@ export const mockSingleBeaconResponse = {
     ],
   },
 };
+
+
+export const mockMapNoDatasets = {
+  meta: { apiVersion: "2.0" },
+  response: {
+    entryTypes: [
+      {
+        id: "individuals",
+        name: "Individuals",
+        pathSegment: "individuals"
+      },
+      {
+        id: "biosamples",
+        name: "Biosamples",
+        pathSegment: "biosamples"
+      },
+      {
+        id: "g_variants",
+        name: "Genomic Variants",
+        pathSegment: "g_variants"
+      }
+    ]
+  }
+};

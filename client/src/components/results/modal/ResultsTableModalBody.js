@@ -45,14 +45,25 @@ const ResultsTableModalBody = ({
   setVisibleColumns,
   page,
   rowsPerPage,
+  setSearchTerm,
+  searchTerm,
+  setSearchCount,
 }) => {
   const [expandedRow, setExpandedRow] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState(dataTable);
+  // const [filteredData, setFilteredData] = useState(dataTable);
+
+  const [filteredData, setFilteredData] = useState([]);
   const initialized = useRef(false);
 
   const start = page * rowsPerPage;
   const end = start + rowsPerPage;
+
+  console.log("🔵 [ModalBody] Full dataTable length:", dataTable.length);
+  console.log("🔵 [ModalBody] Current page slice:", { start, end });
+
+  useEffect(() => {
+    setFilteredData(dataTable);
+  }, [dataTable]);
 
   /** Styled Components */
   const StyledTableCell = useMemo(
@@ -138,7 +149,21 @@ const ResultsTableModalBody = ({
   }, [sortedHeaders, visibleColumns.length, setVisibleColumns]);
 
   /** Filter data by search term */
+  // useEffect(() => {
+  //   const filtered = dataTable.filter((item) => {
+  //     if (!searchTerm) return true;
+  //     const rowString = sortedHeaders
+  //       .map((h) => summarizeValue(item[h.id]))
+  //       .join(" ")
+  //       .toLowerCase();
+  //     return rowString.includes(searchTerm.toLowerCase());
+  //   });
+  //   setFilteredData(filtered);
+  // }, [searchTerm, dataTable, sortedHeaders]);
+
   useEffect(() => {
+    console.log("🟣 [SEARCH] Raw search term:", searchTerm);
+
     const filtered = dataTable.filter((item) => {
       if (!searchTerm) return true;
       const rowString = sortedHeaders
@@ -147,7 +172,14 @@ const ResultsTableModalBody = ({
         .toLowerCase();
       return rowString.includes(searchTerm.toLowerCase());
     });
+
+    console.log("🟢 [SEARCH] Filtered results count:", filtered.length);
+
     setFilteredData(filtered);
+
+    if (setSearchCount) {
+      setSearchCount(filtered.length);
+    }
   }, [searchTerm, dataTable, sortedHeaders]);
 
   /** Slice visible rows for current page */
@@ -156,6 +188,9 @@ const ResultsTableModalBody = ({
     () => filteredData.slice(start, end),
     [filteredData, start, end]
   );
+
+  console.log("🟡 [PAGINATION] Visible rows:", visibleRows);
+  console.log("🟡 [PAGINATION] Visible rows count:", visibleRows.length);
 
   /** Export CSV */
   const handleExport = useCallback(() => {
@@ -235,7 +270,7 @@ const ResultsTableModalBody = ({
     <Box
       sx={{
         maxHeight: "70vh",
-        overflow: "hidden",
+        // overflow: "hidden",
         display: "flex",
         flexDirection: "column",
       }}
@@ -282,14 +317,20 @@ const ResultsTableModalBody = ({
         sx={{
           width: "100%",
           flexGrow: 1,
-          overflow: "hidden",
+          // overflow: "hidden",
           boxShadow: "none",
           borderRadius: 0,
           display: "flex",
           flexDirection: "column",
         }}
       >
-        <TableContainer sx={{ maxHeight: "60vh", overflowY: "auto" }}>
+        <TableContainer
+          sx={{
+            maxHeight: "60vh",
+            overflow: "visible",
+            // overflowY: "auto"
+          }}
+        >
           <Table stickyHeader aria-label="Results table">
             <TableHead>
               <StyledTableRow>

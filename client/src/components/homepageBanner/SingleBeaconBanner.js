@@ -42,6 +42,11 @@ export default function SingleBeaconBanner() {
     entryTypesConfig?.maturityAttributes?.productionStatus
   );
 
+  // Detect whether this Beacon exposes a dataset entry type
+  const hasDatasetEntryType = entryTypes?.some(
+    (e) => e.id === "dataset" || e.id === "datasets"
+  );
+
   // Function for the tab selection on top of the banner
   const handleChange = (event, newValue) => {
     setTabValue(newValue);
@@ -110,24 +115,26 @@ export default function SingleBeaconBanner() {
             },
           }}
         />
-        <Tab
-          label="Datasets Information"
-          sx={{
-            textTransform: "none",
-            fontSize: "13px",
-            fontWeight: tabValue === 1 ? "bold" : "normal",
-            color: tabValue === 1 ? "#000" : "#9E9E9E",
-            backgroundColor: tabValue === 1 ? "#fff" : "transparent",
-            borderRadius: "8px 8px 0 0",
-            px: 2,
-            "&:hover": {
-              backgroundColor: tabValue === 1 ? "#fff" : "#e0e0e0",
-            },
-            "&.Mui-selected": {
-              color: "#000",
-            },
-          }}
-        />
+        {hasDatasetEntryType && (
+          <Tab
+            label="Datasets Information"
+            sx={{
+              textTransform: "none",
+              fontSize: "13px",
+              fontWeight: tabValue === 1 ? "bold" : "normal",
+              color: tabValue === 1 ? "#000" : "#9E9E9E",
+              backgroundColor: tabValue === 1 ? "#fff" : "transparent",
+              borderRadius: "8px 8px 0 0",
+              px: 2,
+              "&:hover": {
+                backgroundColor: tabValue === 1 ? "#fff" : "#e0e0e0",
+              },
+              "&.Mui-selected": {
+                color: "#000",
+              },
+            }}
+          />
+        )}
       </Tabs>
 
       {/* Content Box */}
@@ -293,7 +300,7 @@ export default function SingleBeaconBanner() {
           </TabPanel>
         )}
 
-        {beaconInfo && (
+        {hasDatasetEntryType && beaconInfo && (
           <TabPanel value={tabValue} index={1}>
             {loading ? (
               <Loader />

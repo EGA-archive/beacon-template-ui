@@ -83,6 +83,7 @@ export default function SearchButton({ setSelectedTool }) {
       }
 
       const data = await response.json();
+
       // const data = mockSingleBeaconResponse;
 
       setResponseMeta(data.meta);
@@ -119,13 +120,29 @@ export default function SearchButton({ setSelectedTool }) {
 
           // Only push into items if this resultSet represents a real dataset
           if (datasetIdentifier) {
-            acc[key].items.push({
+            // acc[key].items.push({
+            //   dataset: datasetIdentifier,
+            //   results: item.results || [],
+            //   exists: item.exists,
+            //   resultsCount: item.resultsCount,
+            //   headers,
+            // });
+            const datasetEntry = {
               dataset: datasetIdentifier,
-              results: item.results || [],
               exists: item.exists,
-              resultsCount: item.resultsCount,
-              headers,
-            });
+              setType: item.setType,
+            };
+
+            if ("results" in item) {
+              datasetEntry.results = item.results;
+              datasetEntry.headers = headers;
+            }
+
+            if ("resultsCount" in item) {
+              datasetEntry.resultsCount = item.resultsCount;
+            }
+
+            acc[key].items.push(datasetEntry);
           }
 
           return acc;

@@ -156,8 +156,8 @@ export const BEACON_SINGLE_COLUMNS = [
                 fontFamily: '"Open Sans", sans-serif',
               }}
             >
-              The response can be a Boolean (yes/no), a count, or records at the
-              dataset level.
+              The response can be a Boolean (yes/no), a count or detailed
+              records.
             </Box>
           }
           placement="top-start"

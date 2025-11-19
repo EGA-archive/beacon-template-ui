@@ -53,3 +53,10 @@ export function getDatasetType(ds) {
 
   return "unavailable";
 }
+
+export function getDatasetResponse(ds) {
+  if (typeof ds.resultsCount === "number" && ds.resultsCount > 0) {
+    return ds.resultsCount;
+  }
+  return "Yes";
+}
