@@ -58,9 +58,6 @@ const ResultsTableModalBody = ({
   const start = page * rowsPerPage;
   const end = start + rowsPerPage;
 
-  console.log("🔵 [ModalBody] Full dataTable length:", dataTable.length);
-  console.log("🔵 [ModalBody] Current page slice:", { start, end });
-
   useEffect(() => {
     setFilteredData(dataTable);
   }, [dataTable]);
@@ -149,21 +146,7 @@ const ResultsTableModalBody = ({
   }, [sortedHeaders, visibleColumns.length, setVisibleColumns]);
 
   /** Filter data by search term */
-  // useEffect(() => {
-  //   const filtered = dataTable.filter((item) => {
-  //     if (!searchTerm) return true;
-  //     const rowString = sortedHeaders
-  //       .map((h) => summarizeValue(item[h.id]))
-  //       .join(" ")
-  //       .toLowerCase();
-  //     return rowString.includes(searchTerm.toLowerCase());
-  //   });
-  //   setFilteredData(filtered);
-  // }, [searchTerm, dataTable, sortedHeaders]);
-
   useEffect(() => {
-    console.log("🟣 [SEARCH] Raw search term:", searchTerm);
-
     const filtered = dataTable.filter((item) => {
       if (!searchTerm) return true;
       const rowString = sortedHeaders
@@ -172,8 +155,6 @@ const ResultsTableModalBody = ({
         .toLowerCase();
       return rowString.includes(searchTerm.toLowerCase());
     });
-
-    console.log("🟢 [SEARCH] Filtered results count:", filtered.length);
 
     setFilteredData(filtered);
 
@@ -188,9 +169,6 @@ const ResultsTableModalBody = ({
     () => filteredData.slice(start, end),
     [filteredData, start, end]
   );
-
-  console.log("🟡 [PAGINATION] Visible rows:", visibleRows);
-  console.log("🟡 [PAGINATION] Visible rows count:", visibleRows.length);
 
   /** Export CSV */
   const handleExport = useCallback(() => {

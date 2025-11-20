@@ -102,18 +102,18 @@ const proteinExamples = [
 
 const molecularEffectLabels = [
   {
-    key: "SO:0001583",
-    id: "SO:0001583",
-    value: "SO:0001583",
-    label: "Missense Variant",
-    type: "filter",
+    key: "ENSGLOSSARY:0000174",
+    id: "ENSGLOSSARY:0000174",
+    label: "intergenic_region",
+    type: "ontology",
+    scope: "genomicVariation",
   },
   {
-    key: "SO:0002322",
-    id: "SO:0002322",
-    value: "SO:0002322",
-    label: "Stop gained NMD escaping",
-    type: "filter",
+    key: "ENSGLOSSARY:0000150",
+    id: "ENSGLOSSARY:0000150",
+    label: "missense_variant",
+    type: "ontology",
+    scope: "genomicVariation",
   },
 ];
 

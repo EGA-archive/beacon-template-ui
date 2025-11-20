@@ -59,6 +59,7 @@ export const SelectedEntryProvider = ({ children }) => {
   const [rawItems, setRawItems] = useState([]);
   const [actualLoadedCount, setActualLoadedCount] = useState(0);
   const [responseMeta, setResponseMeta] = useState(null);
+  const [molecularEffects, setMolecularEffects] = useState([]);
 
   const valueInputRef = useRef(null);
   const filteringTermsRef = useRef(null);
@@ -111,6 +112,8 @@ export const SelectedEntryProvider = ({ children }) => {
         setActualLoadedCount,
         responseMeta,
         setResponseMeta,
+        molecularEffects,
+        setMolecularEffects,
       }}
     >
       {children}
