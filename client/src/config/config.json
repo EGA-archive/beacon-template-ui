@@ -1,6 +1,6 @@
 {
   "beaconType": "singleBeacon",
-  "apiUrl": "https://gpap.nasertic.es/beacon2/api",
+  "apiUrl": "https://beacon-images-test.ega-archive.org/beacon2/api",
   "assemblyId": ["GRCh38"],
   "variationType": [
     { "jsonName": "SNP", "displayName": "SNP" },
@@ -74,19 +74,22 @@
             "key": "female",
             "id": "NCIT:C16576",
             "label": "Female",
-            "type": "ontology"
+            "type": "ontology",
+            "scopes": ["individual", "cohort"]
           },
           {
             "key": "male",
             "id": "NCIT:C20197",
             "label": "Male",
-            "type": "ontology"
+            "type": "ontology",
+            "scopes": ["cohort"]
           },
           {
-            "key": "age_of_onset",
-            "id": "age_of_onset",
-            "label": "Age Of Onset",
-            "type": "alphanumeric"
+            "key": "diseases.ageOfOnset",
+            "id": "diseases.ageOfOnset",
+            "label": "Diseases Age Of Onset",
+            "type": "alphanumeric",
+            "scopes": ["individual"]
           },
           {
             "key": "weight",
@@ -103,17 +106,18 @@
         ],
         "Cancer": [
           {
-            "key": "Chemotherapy",
-            "label": "Chemotherapy",
+            "key": "chemotherapy procedure",
+            "label": "Chemotherapy Procedure",
             "type": "ontology",
-            "id": "NCIT:C15632",
-            "scopes": ["run", "individual", "cohort"]
+            "id": "OGMS:0000113",
+            "scopes": ["individual"]
           },
           {
-            "key": "Tumor stage I",
-            "label": "Tumor stage I",
-            "type": "ontology",
-            "id": "NCIT:C27966"
+            "key": "tumorGrade",
+            "label": "tumorGrade",
+            "type": "alphanumeric",
+            "id": "tumorGrade",
+            "scopes": ["biosample"]
           },
           {
             "key": "Oxaliplatin",
@@ -172,27 +176,27 @@
         "showAminoacidChange": true,
         "aminoAcidNotation": [
           "Ala",
-          "Cys",
+          "Arg",
+          "Asn",
           "Asp",
+          "Cys",
+          "Gln",
           "Glu",
-          "Phe",
           "Gly",
           "His",
           "Ile",
-          "Lys",
           "Leu",
+          "Lys",
           "Met",
-          "Asn",
+          "Phe",
           "Pro",
-          "Gln",
-          "Arg",
           "Ser",
+          "Ter",
           "Thr",
-          "Val",
           "Trp",
           "Tyr",
-          "Xaa",
-          "Ter"
+          "Val",
+          "Xaa"
         ],
         "chromosomeLibrary": [
           "1",

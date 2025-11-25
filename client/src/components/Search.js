@@ -21,6 +21,7 @@ import {
   formatEntryLabel,
   sortEntries,
   singleEntryCustomLabels,
+  prioritizeEntries,
 } from "../components/common/textFormatting";
 
 export default function Search({
@@ -83,8 +84,6 @@ export default function Search({
     }
   }, [onHeightChange]);
 
-  const configuredOrder = config.ui.entryTypesOrder;
-
   useEffect(() => {
     const fetchEntryTypes = async () => {
       try {
@@ -120,8 +119,11 @@ export default function Search({
             return true;
           });
 
-        const sorted = sortEntries(entries, configuredOrder);
+        const configuredOrder = config.ui.entryTypesOrder || [];
+
+        const sorted = prioritizeEntries(entries, configuredOrder);
         setEntryTypes(sorted);
+
         if (sorted.length > 0) {
           setSelectedPathSegment(sorted[0].pathSegment);
         }
@@ -138,18 +140,6 @@ export default function Search({
 
     fetchEntryTypes();
   }, []);
-
-  // const fetchConfiguration = async () => {
-  //   try {
-  //     const res = await fetch(`${config.apiUrl}/configuration`);
-  //     const data = await res.json();
-  //     const entryTypeConfig =
-  //       data.response?.entryTypes || data.entryTypes || {};
-  //     setEntryTypesConfig(entryTypeConfig);
-  //   } catch (err) {
-  //     console.error("Error fetching configuration:", err);
-  //   }
-  // };
 
   const fetchConfiguration = async () => {
     try {
@@ -541,6 +531,7 @@ export default function Search({
                     handleClickOpen();
                   }}
                   selected={selectedTool === "genomicQueryBuilder"}
+                  selectedFilter={selectedFilter}
                 />
                 <GenomicQueryBuilderDialog
                   open={open}

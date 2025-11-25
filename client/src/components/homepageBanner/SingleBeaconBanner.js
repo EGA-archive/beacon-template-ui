@@ -25,16 +25,32 @@ export default function SingleBeaconBanner() {
   const [localDatasets, setLocalDatasets] = useState([]);
   const [selectedDataset, setSelectedDataset] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { entryTypes, beaconsInfo } = useSelectedEntry();
+  const { entryTypes, beaconsInfo, entryTypesConfig } = useSelectedEntry();
 
   const beaconInfo = beaconsInfo?.[0];
+
+  const getBeaconStatusLabel = (status) => {
+    if (!status) return "Undefined";
+    const normalized = status.toUpperCase();
+    if (normalized === "PROD") return "Production";
+    if (normalized === "TEST") return "Test";
+    if (normalized === "DEV") return "Development";
+    return status;
+  };
+
+  const maturityStatus = getBeaconStatusLabel(
+    entryTypesConfig?.maturityAttributes?.productionStatus
+  );
+
+  // Detect whether this Beacon exposes a dataset entry type
+  const hasDatasetEntryType = entryTypes?.some(
+    (e) => e.id === "dataset" || e.id === "datasets"
+  );
 
   // Function for the tab selection on top of the banner
   const handleChange = (event, newValue) => {
     setTabValue(newValue);
   };
-
-  // console.log("localDatasets", localDatasets);
 
   // Fetch datasets on component mount
   // Saves the full list to local state and preselects the first dataset
@@ -49,6 +65,8 @@ export default function SingleBeaconBanner() {
         if (datasets.length > 0) {
           setSelectedDataset(datasets[0]);
         }
+
+        console.log(datasets);
       } catch (err) {
         console.error("❌ Error fetching datasets:", err);
       } finally {
@@ -99,24 +117,26 @@ export default function SingleBeaconBanner() {
             },
           }}
         />
-        <Tab
-          label="Datasets Information"
-          sx={{
-            textTransform: "none",
-            fontSize: "13px",
-            fontWeight: tabValue === 1 ? "bold" : "normal",
-            color: tabValue === 1 ? "#000" : "#9E9E9E",
-            backgroundColor: tabValue === 1 ? "#fff" : "transparent",
-            borderRadius: "8px 8px 0 0",
-            px: 2,
-            "&:hover": {
-              backgroundColor: tabValue === 1 ? "#fff" : "#e0e0e0",
-            },
-            "&.Mui-selected": {
-              color: "#000",
-            },
-          }}
-        />
+        {hasDatasetEntryType && (
+          <Tab
+            label="Datasets Information"
+            sx={{
+              textTransform: "none",
+              fontSize: "13px",
+              fontWeight: tabValue === 1 ? "bold" : "normal",
+              color: tabValue === 1 ? "#000" : "#9E9E9E",
+              backgroundColor: tabValue === 1 ? "#fff" : "transparent",
+              borderRadius: "8px 8px 0 0",
+              px: 2,
+              "&:hover": {
+                backgroundColor: tabValue === 1 ? "#fff" : "#e0e0e0",
+              },
+              "&.Mui-selected": {
+                color: "#000",
+              },
+            }}
+          />
+        )}
       </Tabs>
 
       {/* Content Box */}
@@ -222,6 +242,16 @@ export default function SingleBeaconBanner() {
                       sx={{
                         fontFamily: '"Open Sans", sans-serif',
                         fontSize: "14px",
+                      }}
+                    >
+                      <strong>Beacon Maturity:</strong> {maturityStatus}
+                    </Typography>
+
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: '"Open Sans", sans-serif',
+                        fontSize: "14px",
                         color: "#000",
                       }}
                     >
@@ -272,7 +302,7 @@ export default function SingleBeaconBanner() {
           </TabPanel>
         )}
 
-        {beaconInfo && (
+        {hasDatasetEntryType && beaconInfo && (
           <TabPanel value={tabValue} index={1}>
             {loading ? (
               <Loader />

@@ -19,7 +19,7 @@ export const COMMON_MESSAGES = {
   invalidChromosome: "Invalid chromosome name in the query.",
   invalidBases: "Invalid DNA base. Only A, C, G, or T are allowed.",
   invalidFormat:
-    "Unrecognized genomic query format. Please use 17-7674945-G-A or 17:7674945G>A.",
+    "Unrecognized genomic query format. Please use 17-7674945-G-A or 17:7674945G>A",
 };
 
 // Reusable component to display messages (error or success)

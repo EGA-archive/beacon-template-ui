@@ -16,10 +16,11 @@ import CancelIcon from "@mui/icons-material/Cancel";
 
 // FilterTermsExtra allows users to add a custom numeric filter
 // It provides:
-// - a dropdown to select the operator (> = <)
+// - a dropdown to select the operator (> = < ≠ contains does-not-contain)
 // - an input field to enter the value
 // - a "+" button to confirm and add the filter
-// - basic validation to prevent empty submissions
+// - a "x" button to delete the insertion of the filter
+// - basic validation to prevent empty submissions and duplicates
 
 export default function FilterTermsExtra() {
   // Access global state and setters from context
@@ -97,6 +98,7 @@ export default function FilterTermsExtra() {
         formattedOperator = selectedOperator === "LIKE" ? "=" : "!";
       }
 
+      // Display-friendly operator text
       const operatorDisplay =
         selectedOperator === "!"
           ? "is not"
@@ -106,6 +108,7 @@ export default function FilterTermsExtra() {
           ? "does not contain"
           : selectedOperator;
 
+      // Construct the new filter object
       const extraFilterCustom = {
         id: extraFilter.id,
         key: uniqueId,
@@ -116,6 +119,9 @@ export default function FilterTermsExtra() {
         scopes: extraFilter.scopes || [],
         type: extraFilter.type || "alphanumeric",
         originalKey: extraFilter.key,
+        bgColor: extraFilter.scope?.includes("genomicVariation")
+          ? "genomic"
+          : undefined,
       };
 
       // Used to track recently added filters
@@ -174,7 +180,7 @@ export default function FilterTermsExtra() {
         flexWrap: "wrap",
       }}
     >
-      {/* Label */}
+      {/* Label showing which filter the user is filling in */}
       <Box>
         <Typography
           sx={{
@@ -189,7 +195,7 @@ export default function FilterTermsExtra() {
         </Typography>
       </Box>
 
-      {/* Operator selector */}
+      {/* Operator dropdown */}
       <Box>
         <FormControl
           sx={{
@@ -231,7 +237,7 @@ export default function FilterTermsExtra() {
           </Select>
         </FormControl>
       </Box>
-      {/* Input field for numeric value */}
+      {/* Input field for alphanumeric value */}
       <Box
         sx={{
           display: "flex",
@@ -255,7 +261,7 @@ export default function FilterTermsExtra() {
           }}
         />
       </Box>
-      {/* Add button */}
+      {/* Add + Cancel buttons */}
       <Box
         sx={{
           display: "flex",

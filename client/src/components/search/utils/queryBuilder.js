@@ -31,7 +31,7 @@ export const queryBuilder = (params = [], entryId) => {
     includeResultsetResponses: "HIT",
     pagination: {
       skip: 0,
-      limit: 1000,
+      limit: 100,
     },
     testMode: false,
     requestedGranularity: "record",
@@ -42,6 +42,5 @@ export const queryBuilder = (params = [], entryId) => {
     query: queryBody,
   };
 
-  // console.log("[queryBuilder] output ➜", filter);
   return filter;
 };

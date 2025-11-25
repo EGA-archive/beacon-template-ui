@@ -62,7 +62,7 @@ export default function SearchGenomicInput({
           detectedAssembly =
             assemblies[assembliesLower.indexOf(lastToken.toLowerCase())];
           tokens.pop(); // remove assembly from end
-          raw = tokens.join("");
+          raw = tokens.join("-");
         }
       }
     }
@@ -242,10 +242,7 @@ export default function SearchGenomicInput({
 
       // If nothing matches any known pattern, fallback to format error
       if (errors.length === 0) {
-        errors.push(
-          COMMON_MESSAGES.invalidFormat +
-            " Use formats like 17-7674945-G-A or 17:7674945G>A."
-        );
+        errors.push(COMMON_MESSAGES.invalidFormat);
       }
 
       setMessage(errors.join(" "));

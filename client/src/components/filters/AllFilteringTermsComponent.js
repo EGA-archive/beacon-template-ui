@@ -52,18 +52,7 @@ export default function AllFilteringTermsComponent() {
   useEffect(() => {
     const fetchFilteringTerms = async () => {
       try {
-        const res = await fetch(`${config.apiUrl}/filtering_terms`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "auth-key": AUTH_KEY,
-          },
-        });
-
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-
+        const res = await fetch(`${config.apiUrl}/filtering_terms?limit=0`);
         const data = await res.json();
         setFilteringTerms(data);
       } catch (err) {

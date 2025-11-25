@@ -71,7 +71,7 @@ export default function ResultsContainer() {
             {loadingData && <Loader message={COMMON_MESSAGES.loadingData} />}
 
             {!loadingData && hasSearchResults && resultData.length === 0 && (
-              <ResultsEmpty message={message || "We don't have results"} />
+              <ResultsEmpty message={message || "No results"} />
             )}
 
             {!loadingData && hasSearchResults && resultData.length > 0 && (

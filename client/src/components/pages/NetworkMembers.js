@@ -35,7 +35,7 @@ export default function NetworkMembers() {
         const response = await fetch(`${config.apiUrl}/`);
         const data = await response.json();
 
-        // Save top-level network logo (agnostic — comes from API)
+        // Save top-level network logo
         setNetworkLogoUrl(data?.response?.organization?.logoUrl || null);
 
         // Use "responses" array from the API if present
@@ -51,7 +51,6 @@ export default function NetworkMembers() {
         setLoading(false);
       }
     };
-
     fetchBeacons();
   }, []);
 
@@ -121,7 +120,11 @@ export default function NetworkMembers() {
               const beaconEnvironment = beacon.response.environment;
 
               return (
-                <Grid key={index} size={{ xs: 12, md: 6 }}>
+                <Grid
+                  key={index}
+                  data-cy="network-beacon-card"
+                  size={{ xs: 12, md: 6 }}
+                >
                   <Card
                     sx={{
                       height: "100%",

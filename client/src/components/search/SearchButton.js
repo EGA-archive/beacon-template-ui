@@ -5,6 +5,17 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 import { COMMON_MESSAGES } from "../common/CommonMessage";
 import { PATH_SEGMENT_TO_ENTRY_ID } from "../../components/common/textFormatting";
 import { queryBuilder } from "./utils/queryBuilder";
+import { mockSingleBeaconResponse } from "./mockSingleBeaconResponse";
+
+const buildHeaders = (results = []) => {
+  const headerSet = new Set();
+  results.forEach((row) => {
+    if (row && typeof row === "object" && !Array.isArray(row)) {
+      Object.keys(row).forEach((key) => headerSet.add(key));
+    }
+  });
+  return Array.from(headerSet);
+};
 
 // This button triggers a search when clicked. It builds a query from selected filters and/or genomic queries,
 // sends a request to the Beacon API, handles grouping of results, and updates global state accordingly.
@@ -23,6 +34,9 @@ export default function SearchButton({ setSelectedTool }) {
     setQueryDirty,
     setLastSearchedFilters,
     setLastSearchedPathSegment,
+    setRawItems,
+    responseMeta,
+    setResponseMeta,
   } = useSelectedEntry();
 
   // Main logic executed when the user clicks "Search"
@@ -52,7 +66,6 @@ export default function SearchButton({ setSelectedTool }) {
 
     try {
       const url = `${config.apiUrl}/${selectedPathSegment}`;
-      let response;
       const query = queryBuilder(selectedFilter, entryTypeId);
       const requestOptions = {
         method: "POST",
@@ -60,7 +73,7 @@ export default function SearchButton({ setSelectedTool }) {
         body: JSON.stringify(query),
       };
 
-      response = await fetch(url, requestOptions);
+      const response = await fetch(url, requestOptions);
 
       if (!response.ok) {
         console.error("Fetch failed:", response.status);
@@ -70,13 +83,17 @@ export default function SearchButton({ setSelectedTool }) {
       }
 
       const data = await response.json();
-      // console.log("Response data:", data);
 
-      // Group raw Beacon results by beacon or dataset
-      const rawItems =
+      // const data = mockSingleBeaconResponse;
+
+      setResponseMeta(data.meta);
+
+      // Group resultSets by beaconId (network) or by dataset id (single beacon)
+      // Correctly identifies: Record Beacon / Count Beacon / Boolean Beacon
+      const resultSets =
         data?.response?.resultSets ?? data?.response?.collections ?? [];
       const groupedArray = Object.values(
-        Object.values(rawItems).reduce((acc, item) => {
+        resultSets.reduce((acc, item) => {
           const isBeaconNetwork = !!item.beaconId;
           const key = isBeaconNetwork ? item.beaconId : item.id;
 
@@ -94,21 +111,55 @@ export default function SearchButton({ setSelectedTool }) {
             };
           }
 
+          const headers = buildHeaders(item.results || []);
+
           const count = Number(item.resultsCount) || 0;
           acc[key].totalResultsCount += count;
 
-          if (Array.isArray(item.results)) {
-            acc[key].items.push({
-              dataset: item.id,
-              results: item.results,
-            });
+          const datasetIdentifier = item.id || item.datasetId;
+
+          // Only push into items if this resultSet represents a real dataset
+          if (datasetIdentifier) {
+            // acc[key].items.push({
+            //   dataset: datasetIdentifier,
+            //   results: item.results || [],
+            //   exists: item.exists,
+            //   resultsCount: item.resultsCount,
+            //   headers,
+            // });
+            const datasetEntry = {
+              dataset: datasetIdentifier,
+              exists: item.exists,
+              setType: item.setType,
+            };
+
+            if ("results" in item) {
+              datasetEntry.results = item.results;
+              datasetEntry.headers = headers;
+            }
+
+            if ("resultsCount" in item) {
+              datasetEntry.resultsCount = item.resultsCount;
+            }
+
+            acc[key].items.push(datasetEntry);
           }
 
           return acc;
         }, {})
       );
 
+      groupedArray.forEach((group) => {
+        group.items.forEach((ds) => {
+          if (ds.headers?.length) {
+            // console.log(`📊 Headers for ${ds.dataset}:`, ds.headers);
+          }
+        });
+      });
+
       setResultData(groupedArray);
+
+      setRawItems(resultSets);
       setHasSearchResult(true);
     } catch (error) {
       console.error("❌ SearchButton error:", error);

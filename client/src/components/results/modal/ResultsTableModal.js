@@ -9,21 +9,42 @@ import { InputAdornment, IconButton } from "@mui/material";
 import { useSelectedEntry } from "../../context/SelectedEntryContext";
 import Loader from "../../common/Loader";
 import { PATH_SEGMENT_TO_ENTRY_ID } from "../../common/textFormatting";
+import { mockSingleBeaconResponse } from "../../search/mockSingleBeaconResponse";
 
 /**
  * Displays a modal containing a paginated results table for the selected dataset.
  * Fetches detailed records from the Beacon API using POST requests with pagination.
  */
-const ResultsTableModal = ({ open, subRow, onClose }) => {
-  const { selectedPathSegment, selectedFilter } = useSelectedEntry();
+const ResultsTableModal = ({
+  open,
+  subRow,
+  onClose,
+  beaconId,
+  datasetId,
+  headers,
+}) => {
+  const { selectedPathSegment, selectedFilter, responseMeta } =
+    useSelectedEntry();
+
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [dataTable, setDataTable] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [url, setUrl] = useState("");
+  const [visibleColumns, setVisibleColumns] = useState([]);
+  const [searchCount, setSearchCount] = useState(null);
   const entryTypeId = PATH_SEGMENT_TO_ENTRY_ID[selectedPathSegment];
+
+  const limit = responseMeta?.receivedRequestSummary?.pagination?.limit;
+
+  useEffect(() => {
+    if (headers && headers.length > 0 && visibleColumns.length === 0) {
+      setVisibleColumns(headers);
+    }
+  }, [headers, visibleColumns.length]);
 
   const style = {
     position: "absolute",
@@ -39,7 +60,8 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
-    overflowY: "auto",
+    // overflow: "hidden",
+    // overflowY: "auto",
     p: 4,
   };
 
@@ -54,6 +76,7 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
   };
 
   const handleClose = () => {
+    setSearchTerm("");
     setPage(0);
     setTotalPages(0);
     setTotalItems(0);
@@ -70,7 +93,7 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
         filters: [],
         requestParameters: {},
         includeResultsetResponses: "HIT",
-        pagination: { skip: 0, limit: 1000 },
+        pagination: { skip: 0, limit: 100 },
         testMode: false,
         requestedGranularity: "record",
       },
@@ -113,12 +136,21 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
     return filter;
   };
 
-  // Fetches data for the modal table
   useEffect(() => {
     if (!open) return;
     let active = true;
 
+    // Use preloaded data if available (first open only)
+    if (page === 0 && subRow?.dataTable?.length > 0) {
+      setDataTable(subRow.dataTable);
+      setTotalItems(subRow.dataTable.length);
+      setTotalPages(Math.ceil(subRow.dataTable.length / rowsPerPage));
+      setLoading(false);
+      return; // Skip fetchTableItems for this case
+    }
+
     const fetchTableItems = async () => {
+      if (subRow?.dataTable?.length > 0) return;
       try {
         setLoading(true);
         const url = `${config.apiUrl}/${selectedPathSegment}`;
@@ -133,9 +165,12 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
         });
 
         const data = await response.json();
+        // const data = mockSingleBeaconResponse;
+
         if (!active) return;
 
         const results = data.response?.resultSets;
+
         if (!results?.length) return;
 
         // Try to match the correct beacon by ID; otherwise, use the first
@@ -150,6 +185,7 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
 
         const totalDatasetsPages = Math.ceil(beacon.resultsCount / rowsPerPage);
         setTotalItems(beacon.resultsCount);
+
         setTotalPages(totalDatasetsPages);
         setDataTable(beacon.results);
       } catch (err) {
@@ -165,19 +201,15 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
     };
   }, [open, subRow, page, rowsPerPage]);
 
-  const start = page * rowsPerPage;
-  const end = start + rowsPerPage;
-  const visibleRows = dataTable.slice(start, end);
+  useEffect(() => {
+    setPage(0);
+  }, [searchTerm]);
 
   return (
-    <Modal
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
-    >
+    <Modal open={open} onClose={handleClose}>
       <Fade in={open}>
         <Box sx={style}>
+          {/* Close button top left */}
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <InputAdornment position="end">
               <IconButton
@@ -190,52 +222,75 @@ const ResultsTableModal = ({ open, subRow, onClose }) => {
             </InputAdornment>
           </Box>
 
-          <Box>
-            <Typography
-              id="modal-modal-title"
-              sx={{
-                fontWeight: "bold",
-                fontSize: "17px",
-                paddingBottom: "10px",
-                color: config.ui.colors.darkPrimary,
-              }}
-            >
-              Results detailed table
-            </Typography>
+          {/* Title  */}
+          <Typography
+            id="modal-modal-title"
+            sx={{
+              fontWeight: "bold",
+              fontSize: "17px",
+              mb: 2,
+              color: config.ui.colors.darkPrimary,
+            }}
+          >
+            Results detailed table
+          </Typography>
+
+          {/* Scrollable Table with the details results */}
+          <Box
+            sx={{
+              flex: 1,
+              overflowY: "auto",
+              minHeight: 0,
+              pr: 1,
+            }}
+          >
+            {loading && <Loader message="Loading data..." />}
+
+            {!loading && dataTable.length > 0 && (
+              <ResultsTableModalBody
+                dataTable={dataTable}
+                totalItems={totalItems}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                totalPages={totalPages}
+                handleChangePage={handleChangePage}
+                handleChangeRowsPerPage={handleChangeRowsPerPage}
+                primary={config.ui.colors.primary}
+                entryTypeId={entryTypeId}
+                selectedPathSegment={selectedPathSegment}
+                beaconId={beaconId}
+                datasetId={datasetId}
+                displayedCount={subRow?.displayedCount || 0}
+                actualLoadedCount={subRow?.actualLoadedCount || 0}
+                headers={headers}
+                visibleColumns={visibleColumns}
+                setVisibleColumns={setVisibleColumns}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                setSearchCount={setSearchCount}
+              />
+            )}
           </Box>
 
-          <Box>
-            {loading && <Loader message="Loading data..." />}
-            {!loading && dataTable.length > 0 && (
-              <>
-                <ResultsTableModalBody
-                  dataTable={visibleRows}
-                  totalItems={totalItems}
-                  page={page}
-                  rowsPerPage={rowsPerPage}
-                  totalPages={totalPages}
-                  handleChangePage={handleChangePage}
-                  handleChangeRowsPerPage={handleChangeRowsPerPage}
-                  primary={config.ui.colors.primary}
-                  entryTypeId={entryTypeId}
-                  selectedPathSegment={selectedPathSegment}
-                />
-                {/* Pagination moved here */}
-                <Box
-                  sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}
-                >
-                  <TablePagination
-                    component="div"
-                    count={totalItems}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    rowsPerPage={rowsPerPage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    rowsPerPageOptions={[5, 10, 20]}
-                  />
-                </Box>
-              </>
-            )}
+          {/* Fixed Pagination at the bottom of the modal */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              mt: 1,
+            }}
+          >
+            <TablePagination
+              component="div"
+              count={searchTerm ? searchCount ?? 0 : totalItems}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              rowsPerPageOptions={[5, 10, 20]}
+              showFirstButton
+              showLastButton
+            />
           </Box>
         </Box>
       </Fade>

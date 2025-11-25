@@ -64,6 +64,7 @@ export default function QueryApplied({ variant }) {
           >
             Query Applied
           </Typography>
+
           <Box
             sx={{
               color: config.ui.colors.primary,

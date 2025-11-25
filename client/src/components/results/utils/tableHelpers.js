@@ -9,7 +9,7 @@ export function cleanAndParseInfo(infoString) {
     const cleaned = infoString.replace(/"|"/g, '"');
     return JSON.parse(cleaned);
   } catch (error) {
-    console.log("Failed to parse item.info:", error);
+    // console.log("Failed to parse item.info:", error);
     return null;
   }
 }

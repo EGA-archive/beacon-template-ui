@@ -5,294 +5,273 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import { useState, useMemo } from "react";
+
+import config from "../../config/config.json";
+import { useSelectedEntry } from "../context/SelectedEntryContext";
 import CommonMessage, {
   COMMON_MESSAGES,
 } from "../../components/common/CommonMessage";
-import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import { useState } from "react";
-import config from "../../config/config.json";
-import { useSelectedEntry } from "../context/SelectedEntryContext";
 import FilterLabelRemovable from "../styling/FilterLabelRemovable";
-import { queryBuilder } from "../search/utils/queryBuilder";
 import { filterLabels } from "../genomic/utils/GenomicFilterLabels";
 
-// This component of predefined genomic example queries inside collapsible sections
-// We can look at it as quick access menu
+/**
+ * GenomicAnnotations
+ * Renders predefined genomic example queries inside collapsible sections.
+ * Includes dynamic Molecular Effect examples taken from /filtering_terms.
+ */
 export default function GenomicAnnotations() {
   const [message, setMessage] = useState(null);
 
-  // Extract from context the functions that update the app's global state
   const {
     setSelectedFilter,
-    setLoadingData,
-    setHasSearchResult,
-    setResultData,
-    selectedPathSegment,
     setQueryDirty,
     hasSearchResults,
+    molecularEffects,
+    setExtraFilter,
   } = useSelectedEntry();
 
-  // The full list of possible annotation categorie
-  const allGenomicCategories = [
+  // Only molecular effects with these IDs are allowed to appear in the UI
+  const ALLOWED_IDS = [
+    "ENSGLOSSARY:0000150",
+    "ENSGLOSSARY:0000161",
+    "SO:0001631",
+    "SO:0001623",
+    "SO:0001819",
+    "SO:0001632",
+    "SO:0001792",
+    "SO:0001988",
+    "SO:0001630",
+    "SO:0000605",
+    "SO:0001575",
+    "SO:0001624",
+    "SO:0001574",
+    "SO:0001567",
+    "SO:0001580",
+  ];
+
+  // Filter molecular effects coming from the backend to keep only items in the allowed list
+  const filteredBackendEffects = useMemo(
+    () => molecularEffects.filter((t) => ALLOWED_IDS.includes(t.id)),
+    [molecularEffects]
+  );
+
+  /**
+   * STEP 2:
+   * Build the list of molecular effect items to display
+   * Rules:
+   * - Use backend versions of predefined labels when available
+   * - Always show at least two items if backend contains enough
+   */
+  const molecularEffectsToRender = useMemo(() => {
+    const predefined = filterLabels["Molecular Effect"] || [];
+    const predefinedIds = predefined.map((p) => p.id);
+
+    // Try to match predefined molecular effect IDs with backend results
+    const matches = predefinedIds
+      .map((id) => filteredBackendEffects.find((t) => t.id === id))
+      .filter(Boolean);
+
+    if (matches.length > 0) {
+      const result = [...matches];
+
+      // If fewer than 2, fill from backend
+      if (result.length < 2) {
+        const remaining = filteredBackendEffects.filter(
+          (b) => !predefinedIds.includes(b.id)
+        );
+        return [...result, ...remaining.slice(0, 2 - result.length)];
+      }
+      return result;
+    }
+
+    // If predefined items are missing, fallback to first 2 backend molecular effects
+    return filteredBackendEffects.slice(0, 2);
+  }, [filteredBackendEffects]);
+
+  // All possible genomic annotation categories available in the UI
+  const allCategories = [
     "SNP Examples",
     "Genomic Variant Examples",
     "Protein Examples",
     "Molecular Effect",
   ];
 
-  // Read from the config file which categories should actually be visible in the UI
-  // This allows hiding entire sections via configuration, without editing the code
-  const genomicVisibleCategories =
+  // Categories that the deployer chose to show in the UI (defined in config.json)
+  const visibleFromConfig =
     config.ui.genomicAnnotations?.visibleGenomicCategories || [];
 
-  // From the full list, keep only those that are marked as visible in the config
-  const filterCategories = allGenomicCategories.filter((cat) =>
-    genomicVisibleCategories.includes(cat)
-  );
+  // Filter categories based on deployer configuration and backend availability
+  const categoriesToRender = allCategories.filter((cat) => {
+    if (cat === "Molecular Effect" && filteredBackendEffects.length === 0)
+      return false;
+    return visibleFromConfig.includes(cat);
+  });
 
-  // When the component first loads:
-  // - Automatically open the first section that actually has content
-  // - Keep all others closed
+  // Tracks which accordion category is open
+  // The first valid one opens by default
   const [expanded, setExpanded] = useState(() => {
     const initial = {};
-    let first = false;
-    allGenomicCategories.forEach((t) => {
-      const valid = filterLabels[t]?.filter((l) => l.label?.trim()) || [];
-      if (valid.length && !first) {
-        initial[t] = true;
-        first = true;
-      } else initial[t] = false;
+    let opened = false;
+
+    allCategories.forEach((cat) => {
+      const labels = filterLabels[cat]?.filter((l) => l.label?.trim()) || [];
+      if (!opened && labels.length > 0) {
+        initial[cat] = true;
+        opened = true;
+      } else {
+        initial[cat] = false;
+      }
     });
     return initial;
   });
 
-  // Function that runs when a user clicks to open or close a section
-  // It updates the "expanded" state to show only one accordion open at a time
-  const handleChange = (panel) => (_, isExpanded) =>
-    setExpanded({ [panel]: isExpanded });
+  // Handles accordion expand/collapse state by replacing the whole state with one open panel
+  const handleAccordion = (cat) => (_, isExpanded) =>
+    setExpanded({ [cat]: isExpanded });
 
-  // Styling for the accordion headers to make it fit to the UI
-  const summarySx = {
-    px: 0,
-    "& .MuiAccordionSummary-expandIconWrapper": {
-      marginLeft: "auto",
-      transition: "transform 0.2s ease-in-out",
-    },
-    "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
-      transform: "rotate(90deg)",
-    },
-    "& .MuiAccordionSummary-content": { mr: 1 },
-  };
+  // Main click handler for selecting molecular effects or genomic example filters
+  // This function decides WHAT to do depending on the type of the clicked filter.
+  // It supports three cases:
+  // 1) Items that need an extra user input (alphanumeric)
+  // 2) Simple ontology terms (e.g. molecular effects)
+  // 3) Full genomic queries (e.g. SNP positions)
 
-  // Main interaction handler of the component, it is called everytime a chip is clicked
-  // Item is an object that represents that clicked chip
-  const handleGenomicFilterChange = (item) => {
-    // Take the label or id of the clicked chip and remove accidental extra spaces
-    const value = (item.label || item.id)?.trim();
+  const handleGenomicFilter = (item) => {
+    // Case 1: simple alphanumeric filter (opens input box)
+    if (item.type === "alphanumeric") {
+      setExtraFilter(item);
+      return;
+    }
 
-    // Check whether the item has "queryParams" or not
-    // If it doesn’t, we assume this is a filtering term  ("Missense Variant") instead of a genomic query
+    // Case 2: filtering term (ontology)
+    // These items do NOT contain queryParams. They represent a simple keyword.
     const isFilterTerm =
       !item.queryParams || Object.keys(item.queryParams).length === 0;
-
-    //  Case 1. Filteting Term (This is a case specific example for the Molecual Effects)
     if (isFilterTerm) {
-      // Update the global filter list stored in context
-      // First, check if this filter already exists — if it does, show an error message and skip adding it
       setSelectedFilter((prev = []) => {
-        const isDuplicate = prev.some((f) => f.id === item.id);
-        if (isDuplicate) {
+        if (prev.some((f) => f.id === item.id)) {
+          // Avoid duplicates
           setMessage(COMMON_MESSAGES.doubleValue);
           setTimeout(() => setMessage(null), 3000);
           return prev;
         }
-
-        // After the check passes, then the filter gets added to the list
-        return [
-          ...prev,
-          {
-            key: item.key,
-            id: item.id,
-            label: value,
-            value,
-            type: "filter",
-          },
-        ];
+        // Add the ontology term as a simple filter
+        return [...prev, { ...item, bgColor: "genomic" }];
       });
 
-      // Automatically send a query to the Beacon API using only this filter
-      // triggerGenomicQuery([
-      //   {
-      //     id: item.id,
-      //     label: value,
-      //     type: "filter",
-      //   },
-      // ]);
-      if (hasSearchResults) {
-        setQueryDirty(true);
-      }
-
+      // If a search already exists, mark the UI as "dirty" as the user will see a message
+      if (hasSearchResults) setQueryDirty(true);
       return;
     }
 
-    // Case 2. All the others Genomic Queries
-    // Add the selected genomic filter to the context
+    // Case 3: The item is a full genomic query example.
+    // These include queryParams
+    // Only ONE genomic query can be active at a time
     setSelectedFilter((prev = []) => {
-      // Check if the exact same genomic filter already exists. If yes, we won't add it
-      const isDuplicate = prev.some(
-        (f) => f.type === "genomic" && f.id === item.field && f.label === value
+      const alreadyGenomic = prev.some((f) => f.type === "genomic");
+      const duplicate = prev.some(
+        (f) => f.type === "genomic" && f.id === item.field
       );
-      if (isDuplicate) {
-        setMessage(COMMON_MESSAGES.doubleValue);
-        setTimeout(() => setMessage(null), 3000);
-        return prev;
-      }
 
-      // Check if there’s already another genomic query active
-      // The app only allows one genomic query at a time
-      const alreadyHasGenomic = prev.some((f) => f.type === "genomic");
-      if (alreadyHasGenomic) {
+      // Avoid having more than one genomic query at the same time
+      if (alreadyGenomic) {
         setMessage(COMMON_MESSAGES.singleGenomicQuery);
         setTimeout(() => setMessage(null), 3000);
         return prev;
       }
 
-      // If it’s not a duplicate and no other genomic query exists, add the genomic query finally
+      // Prevent the user from adding the exact same genomic query again
+      if (duplicate) {
+        setMessage(COMMON_MESSAGES.doubleValue);
+        setTimeout(() => setMessage(null), 3000);
+        return prev;
+      }
+
+      // Add the genomic query
       return [
         ...prev,
         {
-          key: item.key,
-          id: item.field || "geneId",
-          label: value,
-          value,
+          id: item.field,
+          label: item.label,
+          value: item.label,
           type: "genomic",
           bgColor: "genomic",
-          queryParams: item.queryParams || {},
+          queryParams: item.queryParams,
         },
       ];
     });
 
-    // Wait to ansure the state id updated
-    // Then send the Beacon API query with this genomic filter
-    // This tells the Beacon to search variants that match this query
-    // setTimeout(() => {
-    //   triggerGenomicQuery([
-    //     {
-    //       key: item.key,
-    //       id: item.field || "geneId",
-    //       label: value,
-    //       value,
-    //       type: "genomic",
-    //       bgColor: "genomic",
-    //       queryParams: item.queryParams || {},
-    //     },
-    //   ]);
-    // }, 150);
-    if (hasSearchResults) {
-      setQueryDirty(true);
-    }
+    // Mark search results as outdated if a new query is added
+    if (hasSearchResults) setQueryDirty(true);
   };
 
-  //  This helper function builds the actual Beacon request payload using
-  //  the `queryBuilder()` utility and sends it to the backend
-  //  It handles both genomic queries and filter-based queries
-  const triggerGenomicQuery = async (filters) => {
-    // Check if the list of filters contains at least one genomic query
-    const genomic = filters.find((f) => f.type === "genomic");
-
-    // Check if there are any filter-type terms, in this case Molecular Effects
-    const hasFilterTerms = filters.some((f) => f.type === "filter");
-
-    // If nothing is found, we do not query anything
-    if (!genomic && !hasFilterTerms) {
-      return;
-    }
-
-    try {
-      setLoadingData(true);
-      setHasSearchResult(false);
-      setResultData([]);
-
-      // Use the utility function to construct the Beacon query payload
-      const builtQuery = queryBuilder(filters);
-      // console.log("[GenomicAnnotations] Built query ➜", builtQuery);
-
-      // Make a POST request to the Beacon API endpoint
-      // `${selectedPathSegment}` is the current entry
-      const response = await fetch(`${config.apiUrl}/${selectedPathSegment}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(builtQuery),
-      });
-
-      // Parse the Beacon response
-      const data = await response.json();
-
-      if (data && Object.keys(data).length > 0) {
-        setResultData(data);
-        setHasSearchResult(true);
-      }
-    } catch (err) {
-      console.warn("[GenomicAnnotations] Query request failed:", err);
-    } finally {
-      setLoadingData(false);
-    }
-  };
-
+  // Render collapsible categories and their labels as clickable filter chips
   return (
     <Box>
-      {/* If there's an error show it above the filters */}
+      {/* Display error message if the user tries to add a duplicate */}
       {message && (
         <Box sx={{ mt: 2 }}>
           <CommonMessage text={message} type="error" />
         </Box>
       )}
 
-      {/* Loop through each visible category and render the content */}
-      {filterCategories.map((topic) => {
-        const valid = filterLabels[topic]?.filter((l) => l.label?.trim());
-        if (!valid?.length) return null;
+      {/* Loop through each genomic category that should be shown in the UI */}
+      {categoriesToRender.map((topic) => {
+        // Static labels come from predefined lists in filterLabels (excluding dynamic molecular effects)
+        const staticLabels = filterLabels[topic]?.filter((l) =>
+          l.label?.trim()
+        );
+        const items =
+          topic === "Molecular Effect"
+            ? molecularEffectsToRender
+            : staticLabels || [];
 
+        // Skip this category if there are no items to display
+        if (!items.length) return null;
+
+        // Each category is wrapped inside its own collapsible accordion section
         return (
           <Accordion
             key={topic}
-            expanded={!!expanded[topic]} // Open/close status
-            onChange={handleChange(topic)} // Clicking toggles the accordion
+            expanded={expanded[topic]}
+            onChange={handleAccordion(topic)}
             disableGutters
             elevation={0}
-            sx={{
-              backgroundColor: "transparent",
-              boxShadow: "none",
-              "&::before": { display: "none" },
-            }}
+            sx={{ background: "transparent", "&::before": { display: "none" } }}
           >
-            {/* Accordion Header */}
+            {/* Accordion header showing the category title */}
             <AccordionSummary
               expandIcon={<KeyboardArrowRightIcon />}
-              sx={summarySx}
+              sx={{
+                px: 0,
+                "& .MuiAccordionSummary-expandIconWrapper": {
+                  marginLeft: "auto",
+                  transition: "transform 0.2s",
+                },
+                "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
+                  transform: "rotate(90deg)",
+                },
+              }}
             >
-              <Typography
-                translate="no"
-                sx={{ fontStyle: "italic", fontSize: "14px" }}
-              >
+              <Typography sx={{ fontStyle: "italic", fontSize: "14px" }}>
                 {topic}
               </Typography>
             </AccordionSummary>
 
-            {/* Accordion Body */}
             <AccordionDetails sx={{ px: 0, pt: 0, mb: 3 }}>
+              {/* Render all filter chips for this category, shown as selectable labels */}
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {/* For each label, render a clickable chip */}
-                {valid.map((item) => (
+                {items.map((item) => (
                   <FilterLabelRemovable
+                    key={item.id || item.label}
                     variant="simple"
-                    key={item.label}
                     label={item.label}
-                    // When clicked, call the main handler with this item’s data
-                    onClick={() =>
-                      handleGenomicFilterChange({ ...item, bgColor: "genomic" })
-                    }
                     bgColor="genomic"
+                    onClick={() =>
+                      handleGenomicFilter({ ...item, bgColor: "genomic" })
+                    }
                   />
                 ))}
               </Box>

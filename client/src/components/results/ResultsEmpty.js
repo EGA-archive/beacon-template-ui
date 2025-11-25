@@ -20,7 +20,7 @@ export default function ResultsEmpty({ message }) {
           fontSize: "16px",
         }}
       >
-        {message || "We don't have results"}
+        {message || "No results"}
       </Typography>
     </Box>
   );
