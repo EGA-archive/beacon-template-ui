@@ -15,6 +15,19 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
     },
   };
 
+  const normalize = (value) => {
+    if (!value) return "";
+
+    return (
+      value
+        .toString()
+        .trim()
+        .toLowerCase()
+        // remove assembly version: NC_000001.10 → nc_1
+        .replace(/nc_0+(\d+)\.(\d+)/, "nc_$1")
+    );
+  };
+
   it("compares backend variantInternalIds with UI table", () => {
     // STEP 1: Detect entry type from apiUrl
     const entryType = apiUrl.split("/").pop();
@@ -35,23 +48,38 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
       const backend = res.body;
       const resultSets = backend?.response?.resultSets || [];
 
-      const backendVariantIds = resultSets.flatMap((set) =>
+      // Extract identifiers instead of variantInternalId
+      const backendIdentifiers = resultSets.flatMap((set) =>
         (set.results || [])
-          .map((r) => r.variantInternalId?.toString().toLowerCase())
+          .map((r) => {
+            const ids = r.identifiers || {};
+            const raw =
+              ids.genomicHGVS ||
+              ids.hgvs ||
+              ids.genomicHGVSId ||
+              JSON.stringify(ids);
+
+            return normalize(raw);
+          })
           .filter(Boolean)
       );
-      cy.wrap(backendVariantIds).as("backendVariantIds");
+
+      cy.wrap(backendIdentifiers).as("backendIdentifiers");
+
       // STEP 3: Open the application
       cy.visit("/");
+
       // STEP 4: Select correct entry type in UI from the apiUrl
       cy.contains("button", entryTypeLabel, { timeout: 20000 })
         .should("be.visible")
         .click();
+
       cy.contains("button", entryTypeLabel)
         .should("have.css", "background-color")
         .then((bg) => {
           expect(bg).not.to.eq("rgb(255, 255, 255)");
         });
+
       // STEP 5: Apply filters and verify
       const filters = query.query.filters || [];
       if (filters.length > 0) {
@@ -59,10 +87,12 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
           const filterId = filter.id;
           let label;
           let idText;
+
           cy.get('[data-testid="filtering-input"]', { timeout: 15000 })
             .should("be.visible")
             .click()
             .type(filterId, { delay: 100 });
+
           cy.get(".MuiListItem-root", { timeout: 20000 })
             .should("have.length.greaterThan", 0)
             .first()
@@ -81,6 +111,7 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
             });
 
           cy.wait(1000);
+
           cy.get('[data-cy="query-applied-container"]', {
             timeout: 20000,
           }).should("be.visible");
@@ -89,6 +120,7 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
             const texts = [...$chips].map((el) =>
               el.innerText.trim().toLowerCase()
             );
+
             const cleanLabel = label?.toLowerCase().split(" | ")[0].trim();
             const cleanId = idText?.toLowerCase().trim();
 
@@ -135,8 +167,10 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
                       .should("be.visible")
                       .click({ force: true });
 
-                    cy.get("@backendVariantIds").then((backendVariantIds) => {
-                      cy.get('[data-cy="results-table"]', { timeout: 30000 })
+                    cy.get("@backendIdentifiers").then(() => {
+                      cy.get('[data-cy="results-table"]', {
+                        timeout: 30000,
+                      })
                         .should("be.visible")
                         .and("not.contain.text", "Loading");
 
@@ -151,13 +185,13 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
                       const allVariantIds = [];
 
                       function collectVariantIdsAndPaginate() {
-                        cy.get('[data-cy="variant-internal-id-cell"]', {
+                        cy.get('[data-cy="variant-identifiers-cell"]', {
                           timeout: 20000,
                         })
                           .should("have.length.greaterThan", 0)
                           .then(($cells) => {
                             const uiVariantIds = [...$cells].map((el) =>
-                              el.innerText.trim().toLowerCase()
+                              normalize(el.innerText)
                             );
                             allVariantIds.push(...uiVariantIds);
 
@@ -169,6 +203,7 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
                               const nextButton = $body.find(
                                 'button[aria-label="Go to next page"]:not(:disabled)'
                               );
+
                               if (nextButton.length > 0) {
                                 cy.get('button[aria-label="Go to next page"]')
                                   .scrollIntoView()
@@ -180,7 +215,7 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
                                 collectVariantIdsAndPaginate();
                               } else {
                                 cy.log(
-                                  `Collected ${allVariantIds.length} UI Variant Internal IDs`
+                                  `Collected ${allVariantIds.length} UI Variant Identifiers`
                                 );
                                 cy.wrap(allVariantIds).as("uiVariantIds");
                               }
@@ -199,32 +234,34 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
 
     // STEP 9: Final comparison
     cy.then(function () {
-      const backendVariantIds = this.backendVariantIds;
+      const backendIdentifiers = this.backendIdentifiers;
       const uiVariantIds = this.uiVariantIds;
 
-      if (!backendVariantIds || !uiVariantIds) {
+      if (!backendIdentifiers || !uiVariantIds) {
         throw new Error("Missing backend or UI variant IDs for comparison");
       }
 
       cy.log(
-        `Comparing ${uiVariantIds.length} UI IDs vs ${backendVariantIds.length} backend IDs`
+        `Comparing ${uiVariantIds.length} UI Identifiers vs ${backendIdentifiers.length} backend Identifiers`
       );
 
       const missing = uiVariantIds.filter(
-        (id) => !backendVariantIds.includes(id)
+        (id) => !backendIdentifiers.includes(id)
       );
 
       if (missing.length > 0) {
         throw new Error(
-          `Mismatch detected: ${
+          `Mismatch detected (after normalization): ${
             missing.length
-          } UI variant IDs not found in backend.\nMissing examples: ${JSON.stringify(
-            missing.slice(0, 10)
+          } UI variant identifiers not found in backend.\nMissing examples:\n${JSON.stringify(
+            missing.slice(0, 10),
+            null,
+            2
           )}`
         );
       }
 
-      cy.log("All UI variantInternalIds successfully matched backend data");
+      cy.log("All UI identifiers successfully matched backend data");
     });
   });
 });

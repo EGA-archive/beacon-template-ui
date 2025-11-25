@@ -107,7 +107,21 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
                         }}
                       >
                         <Box sx={{ display: "flex", pl: 9 }}>
-                          <Typography sx={{ pl: 6.5 }} variant="body2">
+                          <Typography
+                            sx={{
+                              pl: 6.5,
+                              whiteSpace: "normal",
+                              wordWrap: "break-word",
+                              maxWidth: {
+                                xs: "250px",
+                                sm: "350px",
+                                md: "450px",
+                                lg: "550px",
+                                xl: "650px",
+                              },
+                            }}
+                            variant="body2"
+                          >
                             {dataset.dataset ? (
                               dataset.dataset
                             ) : (

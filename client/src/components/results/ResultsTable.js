@@ -447,6 +447,7 @@ export default function ResultsTable() {
                                       })
                                     }
                                     variant="outlined"
+                                    data-cy="results-table-details-button"
                                     startIcon={<CalendarViewMonthIcon />}
                                     disabled={!hasData}
                                     sx={{

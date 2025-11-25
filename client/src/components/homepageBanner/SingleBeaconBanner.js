@@ -65,6 +65,8 @@ export default function SingleBeaconBanner() {
         if (datasets.length > 0) {
           setSelectedDataset(datasets[0]);
         }
+
+        console.log(datasets);
       } catch (err) {
         console.error("❌ Error fetching datasets:", err);
       } finally {

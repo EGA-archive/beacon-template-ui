@@ -120,7 +120,11 @@ export default function NetworkMembers() {
               const beaconEnvironment = beacon.response.environment;
 
               return (
-                <Grid key={index} size={{ xs: 12, md: 6 }}>
+                <Grid
+                  key={index}
+                  data-cy="network-beacon-card"
+                  size={{ xs: 12, md: 6 }}
+                >
                   <Card
                     sx={{
                       height: "100%",

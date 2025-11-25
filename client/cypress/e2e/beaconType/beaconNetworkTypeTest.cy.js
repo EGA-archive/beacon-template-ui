@@ -27,5 +27,11 @@ describe("Beacon Network rendering", () => {
     cy.get('[data-cy="navbar-links"]', { timeout: 1000 })
       .contains("Network Members")
       .should("be.visible");
+
+    cy.get('[data-cy="navbar-links"]', { timeout: 10000 })
+      .contains("Network Members")
+      .click({ force: true });
+
+    cy.url().should("include", "/network-members");
   });
 });
