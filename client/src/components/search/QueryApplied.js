@@ -13,6 +13,7 @@ export default function QueryApplied({ variant }) {
     setLoadingData,
     setResultData,
     setHasSearchResult,
+    setQueryDirty,
   } = useSelectedEntry();
 
   // Get the primary color from config file
@@ -23,7 +24,15 @@ export default function QueryApplied({ variant }) {
     setSelectedFilter((prevFilters) =>
       prevFilters.filter((filter) => filter.key !== item.key)
     );
-    setHasSearchResult(true);
+    setQueryDirty(true);
+    // setHasSearchResult(true);
+  };
+
+  const handleClearAll = () => {
+    // Clear all filters
+    setSelectedFilter([]);
+
+    setQueryDirty(true);
   };
 
   return (
@@ -72,13 +81,7 @@ export default function QueryApplied({ variant }) {
           >
             {/* Clear All button */}
             <Button
-              onClick={() => {
-                // Clear all filters and reset result state
-                setSelectedFilter([]);
-                setResultData([]);
-                setLoadingData(false);
-                setHasSearchResult(false);
-              }}
+              onClick={handleClearAll}
               sx={{
                 textTransform: "none",
                 fontSize: "14px",

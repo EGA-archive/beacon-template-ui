@@ -35,8 +35,8 @@ export default function SearchButton({ setSelectedTool }) {
     setLastSearchedFilters,
     setLastSearchedPathSegment,
     setRawItems,
-    responseMeta,
     setResponseMeta,
+    isExtraFilterValid,
   } = useSelectedEntry();
 
   // Main logic executed when the user clicks "Search"
@@ -120,13 +120,6 @@ export default function SearchButton({ setSelectedTool }) {
 
           // Only push into items if this resultSet represents a real dataset
           if (datasetIdentifier) {
-            // acc[key].items.push({
-            //   dataset: datasetIdentifier,
-            //   results: item.results || [],
-            //   exists: item.exists,
-            //   resultsCount: item.resultsCount,
-            //   headers,
-            // });
             const datasetEntry = {
               dataset: datasetIdentifier,
               exists: item.exists,
@@ -177,6 +170,7 @@ export default function SearchButton({ setSelectedTool }) {
       data-cy="search-button"
       variant="contained"
       fullWidth
+      disabled={!isExtraFilterValid}
       sx={{
         borderRadius: "999px",
         textTransform: "none",
@@ -188,6 +182,12 @@ export default function SearchButton({ setSelectedTool }) {
           backgroundColor: "white",
           border: `1px solid ${config.ui.colors.primary}`,
           color: config.ui.colors.primary,
+        },
+        "&.Mui-disabled": {
+          backgroundColor: "#d3d3d3w",
+          color: "#888",
+          border: "1px solid #ccc",
+          opacity: 1,
         },
       }}
       startIcon={<SearchIcon />}

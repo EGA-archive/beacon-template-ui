@@ -1,5 +1,5 @@
 {
-  "beaconType": "networkBeacon",
+  "beaconType": "singleBeacon",
   "apiUrl": "https://beacon-network-backend-test.ega-archive.org/api",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
   "variationType": [
@@ -66,7 +66,15 @@
 
     "showPrivacyPolicy": true,
     "privacyPolicyFile": "privacy/privacy-policy.md",
-    "entryTypesOrder": ["biosamples", "individuals", "g_variants"],
+    "entryTypesOrder": [
+      "g_variants",
+      "individuals",
+      "biosamples",
+      "runs",
+      "analyses",
+      "datasets",
+      "cohorts"
+    ],
 
     "commonFilters": {
       "filterCategories": ["Demographics", "Cancer", "Covid"],
