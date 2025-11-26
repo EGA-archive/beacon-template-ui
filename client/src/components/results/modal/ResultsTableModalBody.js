@@ -198,13 +198,6 @@ const ResultsTableModalBody = ({
     const value = item[column];
     if (!value) return "-";
 
-    if (column === "identifiers") {
-      console.log("---- IDENTIFIERS DEBUG ----");
-      console.log("RAW identifiers:", value);
-      console.log("Rendered identifiers:", summarizeValue(value));
-      console.log("---------------------------");
-    }
-
     if (
       (column === "phenotypicFeatures" || column === "exposures") &&
       Array.isArray(value)

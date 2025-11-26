@@ -69,7 +69,10 @@ export default function SearchButton({ setSelectedTool }) {
       const query = queryBuilder(selectedFilter, entryTypeId);
       const requestOptions = {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "auth-key": process.env.REACT_APP_BEACON_AUTH_TOKEN,
+        },
         body: JSON.stringify(query),
       };
 
@@ -152,7 +155,6 @@ export default function SearchButton({ setSelectedTool }) {
       groupedArray.forEach((group) => {
         group.items.forEach((ds) => {
           if (ds.headers?.length) {
-            // console.log(`📊 Headers for ${ds.dataset}:`, ds.headers);
           }
         });
       });

@@ -160,7 +160,10 @@ const ResultsTableModal = ({
         const query = queryBuilder(page, entryTypeId);
         const response = await fetch(url, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "auth-key": process.env.REACT_APP_BEACON_AUTH_TOKEN,
+          },
           body: JSON.stringify(query),
         });
 

@@ -7,25 +7,25 @@
     { "jsonName": "DEL", "displayName": "DEL" }
   ],
   "ui": {
-    "title": "Test Browser",
+    "title": "NASERTIC Beacon Browser",
     "favicon": "/assets/logos/favicon.ico",
     "colors": {
-      "primary": "#0b9655",
-      "darkPrimary": "#0d4f30",
-      "secondary": "#FFE4D4"
+      "primary": "#c8212c",
+      "darkPrimary": "#9a3021",
+      "secondary": "#f4a472"
     },
     "logos": {
-      "main": "/assets/logos/main.svg",
+      "main": "/assets/logos/main.png",
       "founders": ["/assets/logos/founder1.svg"]
     },
-    "showExternalNavBarLink": false,
+    "showExternalNavBarLink": true,
     "externalNavBarLink": [
       {
-        "label": "AF Browser",
-        "url": "https://af-beacon.ega-archive.org/"
+        "label": "Our website",
+        "url": "https://www.nasertic.es/es"
       }
     ],
-    "showAboutPage": false,
+    "showAboutPage": true,
     "about": {
       "logos": [
         "/assets/logos/about1.svg",
@@ -73,35 +73,16 @@
           {
             "key": "female",
             "id": "NCIT:C16576",
-            "label": "Female",
+            "label": "female",
             "type": "ontology",
-            "scopes": ["individual", "cohort"]
+            "scopes": ["individuals"]
           },
           {
             "key": "male",
             "id": "NCIT:C20197",
-            "label": "Male",
+            "label": "male",
             "type": "ontology",
-            "scopes": ["cohort"]
-          },
-          {
-            "key": "diseases.ageOfOnset",
-            "id": "diseases.ageOfOnset",
-            "label": "Diseases Age Of Onset",
-            "type": "alphanumeric",
-            "scopes": ["individual"]
-          },
-          {
-            "key": "weight",
-            "id": "weight",
-            "label": "Weight",
-            "type": "alphanumeric"
-          },
-          {
-            "key": "height",
-            "id": "height",
-            "label": "Height",
-            "type": "alphanumeric"
+            "scopes": ["individuals"]
           }
         ],
         "Cancer": [

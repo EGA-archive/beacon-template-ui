@@ -38,7 +38,10 @@ export const exportCSV = async ({
       const fullUrl = `${config.apiUrl}/${selectedPathSegment}`;
       const response = await fetch(fullUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "auth-key": process.env.REACT_APP_BEACON_AUTH_TOKEN,
+        },
         body: JSON.stringify(fullQuery),
       });
 
