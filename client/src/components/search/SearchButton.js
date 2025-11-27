@@ -145,7 +145,7 @@ export default function SearchButton({ setSelectedTool }) {
       groupedArray.forEach((group) => {
         group.items.forEach((ds) => {
           if (ds.headers?.length) {
-            // console.log(`📊 Headers for ${ds.dataset}:`, ds.headers);
+            // console.log(`Headers for ${ds.dataset}:`, ds.headers);
           }
         });
       });

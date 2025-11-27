@@ -16,7 +16,7 @@ function loadConfig(configPath = "config.example.json") {
   const { isValid, error, config: validatedConfig } = validateConfig(config);
   if (!isValid) throw new Error(`Config validation failed:\n${error}`);
 
-  // console.log("✅ Config loaded successfully:");
+  // console.log("Config loaded successfully:");
   // console.log(`- API_URL: ${validatedConfig.apiUrl}`);
   // console.log(`- BeaconType: ${validatedConfig.beaconType}`);
 
