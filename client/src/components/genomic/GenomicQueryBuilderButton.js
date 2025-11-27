@@ -4,6 +4,7 @@ import { ReactComponent as DnaIcon } from "../../assets/logos/dna.svg";
 import PropTypes from "prop-types";
 import { Box } from "@mui/material";
 import { filterLabels } from "../genomic/utils/GenomicFilterLabels";
+import config from "../../config/config.json";
 
 /**
  * Button that opens the Genomic Query Builder modal.
@@ -44,7 +45,15 @@ export default function GenomicQueryBuilderButton({
   return (
     <Box>
       <StyledButton
-        icon={<DnaIcon />}
+        icon={
+          <DnaIcon
+            className="dnaIcon"
+            style={{
+              "--dna-primary-color": config.ui.colors.primary,
+              "--dna-secondary-color": config.ui.colors.darkPrimary,
+            }}
+          />
+        }
         label="Genomic Query Builder"
         // Disable click if incompatible filters are active
         onClick={!isDisabled ? onClick : undefined}

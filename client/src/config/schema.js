@@ -7,13 +7,13 @@ const hexColor = Joi.string().pattern(/^#[0-9A-Fa-f]{6}$/);
 // Might need to re-think it because of the free text entryTypes
 // TODO
 const allowedEntryTypes = [
-  "analyses",
-  "biosamples",
-  "cohorts",
-  "datasets",
   "g_variants",
   "individuals",
+  "biosamples",
   "runs",
+  "analyses",
+  "datasets",
+  "cohorts",
 ];
 
 const schema = Joi.object({

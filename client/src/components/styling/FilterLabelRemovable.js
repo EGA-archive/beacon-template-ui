@@ -47,17 +47,33 @@ export default function FilterLabelRemovable({
       ? alpha(config.ui.colors.primary, 0.15)
       : alpha(config.ui.colors.secondary, 0.6);
 
-  // If selected, use a stronger background
-  const activeBgColor = stateSelected
+  // Multi-scope chip flag (used for coloring rules)
+  const isMultiScopeChip = isRemovable && scopes.length > 1;
+
+  // Background for applied multi-scope chip
+  const activeBgColor = isMultiScopeChip
+    ? alpha(config.ui.colors.darkPrimary, 0.35)
+    : stateSelected
     ? alpha(config.ui.colors.primary, 0.25)
     : baseBgColor;
 
-  // Final color changes if simple, expanded, or selected
+  // Background when chip is expanded and is multi-scope
+  const expandedMultiScopeBg =
+    isExpanded && scopes.length > 1
+      ? alpha(config.ui.colors.darkPrimary, 0.35)
+      : null;
+
+  // Final chip background depending on simple/expanded/selected state
   const finalBgColor = isSimple
     ? baseBgColor
     : isExpanded
     ? hoverColor
     : activeBgColor;
+
+  // Hover color specifically for multi-scope chips
+  const multiScopeHoverBg = isMultiScopeChip
+    ? alpha(config.ui.colors.darkPrimary, 0.5)
+    : null;
 
   // Show scope inside label only if there are multiple
   const labelToShow =
@@ -96,22 +112,32 @@ export default function FilterLabelRemovable({
         padding: isSimple ? "4px 12px" : isExpanded ? "9px 12px" : "4px 12px",
         borderRadius: "8px",
         border: "1px solid black",
-        backgroundColor: `${finalBgColor} !important`,
+
+        // If expanded & multi-scope, use darkPrimary background
+        backgroundColor: expandedMultiScopeBg
+          ? `${expandedMultiScopeBg} !important`
+          : `${finalBgColor} !important`,
+
         fontSize: "14px",
         fontWeight: 400,
         cursor: isSimple || isRemovable ? "pointer" : "default",
         transition: "background-color 0.2s ease",
+
         "&:hover": {
-          backgroundColor: `${hoverColor} !important`,
+          // Darker hover when multi-scope, otherwise default hover
+          backgroundColor: isMultiScopeChip
+            ? `${multiScopeHoverBg} !important`
+            : `${hoverColor} !important`,
         },
+
         maxWidth: isExpanded ? "400px" : "auto",
         height: isExpanded ? "auto" : "fit-content", // auto height only if expanded
       }}
       onClick={() => {
         if (isSimple && typeof onClick === "function") {
-          onClick(); // for simple variant, trigger the provided onClick
+          onClick(); // for simple variant, trigger onClick
         } else if (isExpandable && typeof setExpandedKey === "function") {
-          // toggle expansion
+          // toggle expansion only when multiple scopes exist
           setExpandedKey(isExpanded ? null : keyValue);
         }
       }}
@@ -133,18 +159,6 @@ export default function FilterLabelRemovable({
             : labelToShow}
         </Typography>
         {isRemovable && (
-          // <ClearIcon
-          //   onClick={(e) => {
-          //     e.stopPropagation(); // prevent triggering expand/collapse
-          //     onDelete?.(); // run the delete function
-          //   }}
-          //   sx={{
-          //     fontSize: 18,
-          //     cursor: "pointer",
-          //     opacity: 0.6,
-          //     "&:hover": { opacity: 1 },
-          //   }}
-          // />
           <ClearIcon
             onClick={(e) => {
               e.stopPropagation();
@@ -165,7 +179,8 @@ export default function FilterLabelRemovable({
         )}
       </Box>
 
-      {/* Expanded content: scope selector */}
+      {/* Expanded content: scope selector.  
+          Shown only when chip has multiple scopes */}
       {isExpandable && isExpanded && (
         <Box mt={1} sx={{ width: "100%" }}>
           <Divider
@@ -183,7 +198,8 @@ export default function FilterLabelRemovable({
             Select the scope:
           </Typography>
 
-          {/* List of scope buttons */}
+          {/* Buttons for each available scope */}
+          {/* Clicking a button changes the scope for this filter */}
           <Box display="flex" gap={1} flexWrap="wrap">
             {scopes.map((s) => {
               const isSelected = s === scope;

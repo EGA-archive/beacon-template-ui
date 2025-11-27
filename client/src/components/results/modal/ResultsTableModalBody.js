@@ -26,6 +26,7 @@ import { exportCSV } from "../utils/exportCSV";
 import {
   cleanAndParseInfo,
   summarizeValue,
+  truncateCaseLevelData,
   formatHeaderName,
 } from "../utils/tableHelpers";
 
@@ -238,6 +239,10 @@ const ResultsTableModalBody = ({
         })
         .filter(Boolean)
         .join(" | ");
+    }
+
+    if (column === "caseLevelData") {
+      return truncateCaseLevelData(value, 20);
     }
 
     return summarizeValue(value);

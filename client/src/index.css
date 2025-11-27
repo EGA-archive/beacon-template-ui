@@ -52,3 +52,17 @@
 .table-icon {
   width: 35px;
 }
+
+.filterIcon * {
+  fill: var(--icon-color) !important;
+}
+
+.dnaIcon path[fill="#3176B1"] {
+  fill: var(--dna-primary-color) !important;
+}
+
+.dnaIcon path[fill="#023452"],
+.dnaIcon path[stroke="#023452"] {
+  fill: var(--dna-secondary-color) !important;
+  stroke: var(--dna-secondary-color) !important;
+}

@@ -66,13 +66,15 @@ export default function FilteringTermsTable({
 
   // A mapping to make scope names more human-readable
   const scopeAlias = {
-    individuals: "individual",
+    individuals: "individuals",
+    individual: "individual",
     biosamples: "biosample",
     analyses: "analysis",
     cohorts: "cohort",
     datasets: "dataset",
     g_variants: "Genomic Variation",
     genomicVariations: "Genomic Variation",
+    genomicVariation: "Genomic Variation",
   };
 
   // When the filtering terms or the default scope changes, this code figures out which scope should be selected by default for each filtering term, and then stores that in state.

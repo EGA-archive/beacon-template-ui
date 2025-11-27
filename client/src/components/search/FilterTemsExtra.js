@@ -24,7 +24,12 @@ import CancelIcon from "@mui/icons-material/Cancel";
 
 export default function FilterTermsExtra() {
   // Access global state and setters from context
-  const { extraFilter, setExtraFilter, setSelectedFilter } = useSelectedEntry();
+  const {
+    extraFilter,
+    setExtraFilter,
+    setSelectedFilter,
+    setIsExtraFilterValid,
+  } = useSelectedEntry();
 
   // Local state to hold operator, input value, and error message
   const [selectedOperator, setSelectedOperator] = useState(">");
@@ -167,6 +172,17 @@ export default function FilterTermsExtra() {
     // Remove the pending extra filter from global context
     setExtraFilter(null);
   };
+
+  // This effect updates the global "isExtraFilterValid" state based on the current extraFilter type and the user's input.
+  // This ensures the validation applies ONLY to alphanumeric filters.
+  useEffect(() => {
+    if (!extraFilter || extraFilter.type !== "alphanumeric") {
+      setIsExtraFilterValid(true);
+      return;
+    }
+
+    setIsExtraFilterValid(selectedValue.trim() !== "");
+  }, [extraFilter, selectedValue, setIsExtraFilterValid]);
 
   return (
     <Box

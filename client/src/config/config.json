@@ -65,6 +65,15 @@
       "datasets",
       ""
     ],
+    "entryTypesOrder": [
+      "g_variants",
+      "individuals",
+      "biosamples",
+      "runs",
+      "analyses",
+      "datasets",
+      "cohorts"
+    ],
 
     "commonFilters": {
       "filterCategories": ["Demographics", "Cancer", "Covid"],
