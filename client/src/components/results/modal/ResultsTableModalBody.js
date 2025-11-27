@@ -26,6 +26,7 @@ import { exportCSV } from "../utils/exportCSV";
 import {
   cleanAndParseInfo,
   summarizeValue,
+  truncateCaseLevelData,
   formatHeaderName,
 } from "../utils/tableHelpers";
 
@@ -198,13 +199,6 @@ const ResultsTableModalBody = ({
     const value = item[column];
     if (!value) return "-";
 
-    if (column === "identifiers") {
-      console.log("---- IDENTIFIERS DEBUG ----");
-      console.log("RAW identifiers:", value);
-      console.log("Rendered identifiers:", summarizeValue(value));
-      console.log("---------------------------");
-    }
-
     if (
       (column === "phenotypicFeatures" || column === "exposures") &&
       Array.isArray(value)
@@ -245,6 +239,10 @@ const ResultsTableModalBody = ({
         })
         .filter(Boolean)
         .join(" | ");
+    }
+
+    if (column === "caseLevelData") {
+      return truncateCaseLevelData(value, 20);
     }
 
     return summarizeValue(value);
