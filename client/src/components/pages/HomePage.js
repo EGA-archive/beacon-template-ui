@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "oidc-react";
 import { Box, Button } from "@mui/material";
 import Founders from "../Founders";
 import FiltersContainer from "../filters/FiltersContainer";
@@ -9,6 +8,7 @@ import ResultsContainer from "../results/ResultsContainer";
 import config from "../../config/config.json";
 import BeaconTypeBanner from "../homepageBanner/BeaconTypeBanner";
 import { useLocation } from "react-router-dom";
+import { useAuthSafe as useAuth } from "../pages/login/useAuthSafe";
 
 // Import context to access whether a search was triggered
 import { useSelectedEntry } from "../context/SelectedEntryContext";

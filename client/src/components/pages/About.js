@@ -1,19 +1,25 @@
 import { Box, Typography, Grid } from "@mui/material";
 import config from "../../config/config.json";
+import { logosHelper } from "../../lib/logosHelper";
 
 /**
- * About page for the Beacon instance or network.
- * Uses config.json to render About info: logos, descriptions, etc.
+ * About page for the Beacon or Beacon Network.
+ * Reads all content (logos, descriptions, funding orgs) from config.json.
  */
-
 export default function About() {
+  // Primary logos shown at top (supports external + static paths)
   const logos = config.ui.about?.logos || [];
+
+  // List of paragraph descriptions supporting <b> tags
   const descriptions = config.ui.about?.descriptions || [];
+
+  // Funding organizations title + secondary logos
   const secondTitle = config.ui.about?.fundingOrgs?.[0]?.title || "";
   const secondaryLogos = config.ui.about?.fundingOrgs?.[0]?.logos || [];
 
   return (
     <>
+      {/* Main container with padding and centered content */}
       <Box
         sx={{
           mt: 5,
@@ -26,6 +32,7 @@ export default function About() {
           borderRadius: 3,
         }}
       >
+        {/* Limits content width for cleaner layout */}
         <Box sx={{ width: "80%" }}>
           {/* Page title */}
           <Typography
@@ -39,7 +46,7 @@ export default function About() {
             About
           </Typography>
 
-          {/* Logos row */}
+          {/* Row of primary logos */}
           <Grid
             container
             spacing={2}
@@ -57,9 +64,10 @@ export default function About() {
                   key={`primary-logo-${index}`}
                   sx={{ textAlign: "center" }}
                 >
+                  {/* Logo images */}
                   <Box
                     component="img"
-                    src={logo}
+                    src={logosHelper(logo)}
                     alt={`About logo ${index + 1}`}
                     sx={{
                       maxWidth: "120px",
@@ -68,15 +76,14 @@ export default function About() {
                       objectFit: "contain",
                     }}
                     onError={(e) => {
-                      console.warn(`⚠️ Failed to load logo: ${logo}`);
-                      e.currentTarget.style.display = "none";
+                      e.currentTarget.style.display = "none"; // hide broken logos
                     }}
                   />
                 </Grid>
               ))}
           </Grid>
 
-          {/* Descriptions */}
+          {/* Descriptions section */}
           <Box>
             {descriptions.map((text, index) => (
               <Typography
@@ -95,6 +102,8 @@ export default function About() {
               ></Typography>
             ))}
           </Box>
+
+          {/* Funding organizations title */}
           <Typography
             variant="h5"
             sx={{
@@ -106,7 +115,8 @@ export default function About() {
           >
             {secondTitle}
           </Typography>
-          {/* Logos row */}
+
+          {/* Secondary logos row */}
           <Grid
             container
             spacing={{
@@ -132,9 +142,10 @@ export default function About() {
                   key={`secondary-logo-${index}`}
                   sx={{ textAlign: "center" }}
                 >
+                  {/* Funding org logo */}
                   <Box
                     component="img"
-                    src={logo}
+                    src={logosHelper(logo)}
                     alt={`Funding org logo ${index + 1}`}
                     sx={{
                       maxWidth: "150px",
@@ -143,8 +154,7 @@ export default function About() {
                       objectFit: "contain",
                     }}
                     onError={(e) => {
-                      console.warn(`⚠️ Failed to load logo: ${logo}`);
-                      e.currentTarget.style.display = "none";
+                      e.currentTarget.style.display = "none"; // remove broken images
                     }}
                   />
                 </Grid>

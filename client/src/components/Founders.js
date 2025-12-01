@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
 import config from "../config/config.json";
+import { logosHelper } from "../lib/logosHelper";
 
 // Get the founders' logos array from config.json
 // If it's not defined, default to an empty array
@@ -26,7 +27,7 @@ export default function Founders() {
           <Box
             key={`logo-${index}`}
             component="img"
-            src={logo}
+            src={logosHelper(logo)}
             alt={`Founder ${index + 1}`}
             sx={{
               maxHeight: "37px",
