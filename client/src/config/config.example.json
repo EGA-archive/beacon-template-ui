@@ -1,6 +1,6 @@
 {
-  "beaconType": "singleBeacon",
-  "apiUrl": "https://beacon-network-backend-test.ega-archive.org/api",
+  "beaconType": "networkBeacon",
+  "apiUrl": "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
   "variationType": [
     { "jsonName": "SNP", "displayName": "SNP" },
@@ -34,6 +34,19 @@
         "url": "https://af-beacon.ega-archive.org/"
       }
     ],
+    "showLogin": true,
+    "auth": {
+      "providerType": "private",
+      "oidc": {
+        "authority": "https://login.aai.lifescience-ri.eu/oidc",
+        "autoSignIn": false,
+        "responseType": "code",
+        "automaticSilentRenew": true,
+        "redirectUri": "http://localhost:3000/",
+        "scope": "openid profile email ga4gh_passport_v1 offline_access",
+        "revokeAccessTokenOnSignout": true
+      }
+    },
     "showAboutPage": true,
     "about": {
       "logos": [
@@ -57,7 +70,7 @@
         }
       ]
     },
-    "showLogin": true,
+
     "contact": {
       "showContactPage": false,
       "apiPath": "http://localhost:5000/api/contact",
@@ -66,7 +79,15 @@
 
     "showPrivacyPolicy": true,
     "privacyPolicyFile": "privacy/privacy-policy.md",
-    "entryTypesOrder": ["biosamples", "individuals", "g_variants"],
+    "entryTypesOrder": [
+      "g_variants",
+      "individuals",
+      "biosamples",
+      "runs",
+      "analyses",
+      "datasets",
+      "cohorts"
+    ],
 
     "commonFilters": {
       "filterCategories": ["Demographics", "Cancer", "Covid"],
@@ -89,7 +110,7 @@
           {
             "key": "diseases.ageOfOnset",
             "id": "diseases.ageOfOnset",
-            "label": "diseases.ageOfOnset",
+            "label": "Diseases Age Of Onset",
             "type": "alphanumeric",
             "scopes": ["individual"]
           },
@@ -109,7 +130,7 @@
         "Cancer": [
           {
             "key": "serous cystadenocarcinoma",
-            "label": "serous cystadenocarcinoma",
+            "label": "Serous Cystadenocarcinoma",
             "type": "ontology",
             "id": "NCIT:C3778",
             "scopes": ["biosample"]
@@ -130,7 +151,7 @@
           },
           {
             "key": "chemotherapy procedure",
-            "label": "chemotherapy procedure",
+            "label": "Chemotherapy Procedure",
             "type": "ontology",
             "id": "OGMS:0000113",
             "scopes": ["individual"]
@@ -199,6 +220,13 @@
     },
 
     "genomicQueries": {
+      "genomicQueryTypes": {
+        "sequenceQuery": true,
+        "geneId": true,
+        "rangeQuery": true,
+        "bracketQuery": true,
+        "hgvsQuery": true
+      },
       "genomicQueryBuilder": {
         "showAlternateBases": true,
         "showAminoacidChange": true,
