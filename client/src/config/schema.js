@@ -70,6 +70,21 @@ const schema = Joi.object({
 
   ui: Joi.object({
     title: Joi.string().min(3).max(100).required(),
+    favicon: Joi.string()
+      .custom((value, helpers) => {
+        const isRelative = value.startsWith("/");
+        const isAbsolute = /^https?:\/\/.+/.test(value);
+
+        if (!isRelative && !isAbsolute) {
+          return helpers.error("any.invalid");
+        }
+        return value;
+      })
+      .optional()
+      .messages({
+        "any.invalid":
+          "favicon must be a relative path (e.g., /assets/favicon.ico) or a full URL (https://...)",
+      }),
 
     colors: Joi.object({
       primary: hexColor.required(),
@@ -158,6 +173,24 @@ const schema = Joi.object({
     }),
 
     showLogin: Joi.boolean().default(true),
+    auth: Joi.object({
+      providerType: Joi.string().valid("private", "public", "none").required(),
+      oidc: Joi.object({
+        authority: Joi.string()
+          .pattern(/^https:\/\/.+/)
+          .required()
+          .messages({
+            "string.pattern.base": "OIDC authority must be a valid HTTPS URL",
+          }),
+
+        autoSignIn: Joi.boolean().optional(),
+        responseType: Joi.string().valid("code").required(),
+        automaticSilentRenew: Joi.boolean().optional(),
+        redirectUri: Joi.string().uri().required(),
+        scope: Joi.string().min(1).required(),
+        revokeAccessTokenOnSignout: Joi.boolean().optional(),
+      }).required(),
+    }).optional(),
 
     contact: Joi.object({
       showContactPage: Joi.boolean().optional(),
@@ -247,6 +280,13 @@ const schema = Joi.object({
     // This is also optional
     // The default value will always be true if not set false explicitly
     genomicQueries: Joi.object({
+      genomicQueryTypes: Joi.object({
+        sequenceQuery: Joi.boolean().default(true),
+        geneId: Joi.boolean().default(true),
+        rangeQuery: Joi.boolean().default(true),
+        bracketQuery: Joi.boolean().default(true),
+        hgvsQuery: Joi.boolean().default(true),
+      }).optional(),
       genomicQueryBuilder: Joi.object({
         showAlternateBases: Joi.boolean().default(true),
         showAminoacidChange: Joi.boolean().default(true),

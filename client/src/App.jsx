@@ -38,13 +38,16 @@ export default function App() {
       document.title = config.ui.title;
     }
 
-    const faviconUrl = config.ui?.favicon || "/favicon.ico";
-    let link = document.querySelector("link[rel~='icon']");
+    // enforce favicon to be a relative/static file
+    const faviconUrl = logosHelper(config.ui?.favicon || "/favicon.ico");
+
+    let link = document.querySelector("link[rel='icon']");
     if (!link) {
       link = document.createElement("link");
       link.rel = "icon";
       document.head.appendChild(link);
     }
+
     link.href = faviconUrl;
   }, []);
 
