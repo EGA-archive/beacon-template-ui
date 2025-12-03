@@ -77,7 +77,7 @@
       "recipientKey": "beacon_support"
     },
 
-    "showPrivacyPolicy": true,
+    "showPrivacyPolicy": false,
     "privacyPolicyFile": "privacy/privacy-policy.md",
     "entryTypesOrder": [
       "g_variants",

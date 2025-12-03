@@ -34,19 +34,6 @@
         "url": "https://af-beacon.ega-archive.org/"
       }
     ],
-    "showLogin": true,
-    "auth": {
-      "providerType": "private",
-      "oidc": {
-        "authority": "https://login.aai.lifescience-ri.eu/oidc",
-        "autoSignIn": false,
-        "responseType": "code",
-        "automaticSilentRenew": true,
-        "redirectUri": "http://localhost:3000/",
-        "scope": "openid profile email ga4gh_passport_v1 offline_access",
-        "revokeAccessTokenOnSignout": true
-      }
-    },
     "showAboutPage": true,
     "about": {
       "logos": [
@@ -71,13 +58,27 @@
       ]
     },
 
+    "showLogin": true,
+    "auth": {
+      "providerType": "private",
+      "oidc": {
+        "authority": "https://login.aai.lifescience-ri.eu/oidc",
+        "autoSignIn": false,
+        "responseType": "code",
+        "automaticSilentRenew": true,
+        "redirectUri": "http://localhost:3000/",
+        "scope": "openid profile email ga4gh_passport_v1 offline_access",
+        "revokeAccessTokenOnSignout": true
+      }
+    },
+
     "contact": {
       "showContactPage": false,
       "apiPath": "http://localhost:5000/api/contact",
       "recipientKey": "beacon_support"
     },
 
-    "showPrivacyPolicy": true,
+    "showPrivacyPolicy": false,
     "privacyPolicyFile": "privacy/privacy-policy.md",
     "entryTypesOrder": [
       "g_variants",
