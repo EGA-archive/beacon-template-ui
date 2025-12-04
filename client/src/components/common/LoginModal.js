@@ -1,6 +1,7 @@
 import { Modal, Box, Typography, Button } from "@mui/material";
-import { useAuth } from "oidc-react";
+
 import { isLoginEnabled, safeSignIn } from "../pages/login/authHelpers";
+import { useAuthSafe as useAuth } from "../pages/login/useAuthSafe";
 
 const style = {
   position: "absolute",

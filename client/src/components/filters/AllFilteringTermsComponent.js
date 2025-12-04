@@ -44,11 +44,8 @@ export default function AllFilteringTermsComponent() {
     setPage(0);
   };
 
-  const AUTH_KEY = process.env.REACT_APP_API_AUTH_KEY;
-
   // This hook loads the filtering terms from the backend once when the page loads, saves them in state, and updates a loading flag when finished.
   //  Runs on components mount
-
   useEffect(() => {
     const fetchFilteringTerms = async () => {
       try {

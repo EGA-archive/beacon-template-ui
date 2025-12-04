@@ -10,6 +10,7 @@ import { CssBaseline, Box } from "@mui/material";
 import config from "./config/config.json";
 import { useState, useEffect } from "react";
 import LoginModal from "./components/common/LoginModal";
+import { logosHelper } from "./lib/logosHelper";
 
 import {
   BrowserRouter as Router,
@@ -37,13 +38,16 @@ export default function App() {
       document.title = config.ui.title;
     }
 
-    const faviconUrl = config.ui?.favicon || "/favicon.ico";
-    let link = document.querySelector("link[rel~='icon']");
+    // enforce favicon to be a relative/static file
+    const faviconUrl = logosHelper(config.ui?.favicon || "/favicon.ico");
+
+    let link = document.querySelector("link[rel='icon']");
     if (!link) {
       link = document.createElement("link");
       link.rel = "icon";
       document.head.appendChild(link);
     }
+
     link.href = faviconUrl;
   }, []);
 
@@ -85,7 +89,7 @@ export default function App() {
           <CssBaseline />
           <Navbar
             title={config.ui.title}
-            main={config.ui.logos.main}
+            main={logosHelper(config.ui.logos.main)}
             navItems={navItems}
           />
 

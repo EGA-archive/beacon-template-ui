@@ -15,7 +15,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import PropTypes from "prop-types";
 import config from "../config/config.json";
 import { Link } from "react-router-dom";
-import { useAuth } from "oidc-react";
+import { useAuthSafe as useAuth } from "../components/pages/login/useAuthSafe";
 
 /**
  * Displays a responsive navigation bar with a title, logo, and links.
@@ -24,6 +24,8 @@ import { useAuth } from "oidc-react";
  */
 
 export default function Navbar({ title, main, navItems }) {
+  console.log("NAVBAR RECEIVED main =", main);
+
   // State to control mobile drawer open/close
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -119,6 +121,7 @@ export default function Navbar({ title, main, navItems }) {
                 />
               )}
             </Box>
+
             {/* Title text linking to homepage */}
             <Typography
               data-cy="navbar-title"

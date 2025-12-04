@@ -1,8 +1,8 @@
 import { Box, Typography, Link as MuiLink } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { useAuth } from "oidc-react";
 import { Link } from "react-router-dom";
 import { isLoginEnabled } from "../components/pages/login/authHelpers";
+import { useAuthSafe as useAuth } from "../components/pages/login/useAuthSafe";
 
 // Logos shown in the footer
 import maingrey from "../assets/logos/maingrey.svg";

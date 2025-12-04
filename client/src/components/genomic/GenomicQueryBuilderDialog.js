@@ -37,16 +37,27 @@ import {
   genomicHGVSshortForm,
   geneId,
 } from "../genomic/genomicQueryBuilderValidator";
+import config from "../../config/config.json";
 
 // List of all query types shown as options in the UI
 // Used to display the selection buttons and control which form is shown
-const genomicQueryTypes = [
-  "Sequence Query",
-  "Gene ID",
-  "Range Query",
-  "Bracket Query",
-  "Genomic Allele Query (HGVS)",
-];
+// This list comes from the configuration file
+const QUERY_TYPE_LABELS = {
+  sequenceQuery: "Sequence Query",
+  geneId: "Gene ID",
+  rangeQuery: "Range Query",
+  bracketQuery: "Bracket Query",
+  hgvsQuery: "Genomic Allele Query (HGVS)",
+};
+
+const enabledQueryTypes = Object.entries(
+  config.ui.genomicQueries.genomicQueryTypes
+)
+  .filter(([_, enabled]) => enabled)
+  .map(([key]) => ({
+    key,
+    label: QUERY_TYPE_LABELS[key],
+  }));
 
 export default function GenomicQueryBuilderDialog({
   open,
@@ -56,7 +67,7 @@ export default function GenomicQueryBuilderDialog({
 }) {
   // This selectes on load the first query type, without user's interaction
   const [selectedQueryType, setSelectedQueryType] = useState(
-    genomicQueryTypes[0]
+    enabledQueryTypes[0]?.label
   );
   const [selectedInput, setSelectedInput] = useState("variationType");
   const [duplicateMessage, setDuplicateMessage] = useState("");
@@ -311,15 +322,21 @@ export default function GenomicQueryBuilderDialog({
               <Form>
                 {/* Render the selectable query type buttons */}
                 {/* When a user clicks a button, the form type changes and the form is reset */}
-                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-                  {genomicQueryTypes.map((label, index) => (
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 2,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  {enabledQueryTypes.map(({ key, label }) => (
                     <StyledGenomicLabels
-                      key={index}
+                      key={key}
                       label={label}
                       selected={selectedQueryType === label}
                       onClick={() => {
                         setSelectedQueryType(label);
-                        resetForm(); // Clears the form when switching query type
+                        resetForm();
                       }}
                     />
                   ))}
