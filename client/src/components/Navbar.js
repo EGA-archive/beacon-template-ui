@@ -24,8 +24,6 @@ import { useAuthSafe as useAuth } from "../components/pages/login/useAuthSafe";
  */
 
 export default function Navbar({ title, main, navItems }) {
-  console.log("NAVBAR RECEIVED main =", main);
-
   // State to control mobile drawer open/close
   const [mobileOpen, setMobileOpen] = useState(false);
 
