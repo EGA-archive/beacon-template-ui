@@ -2,7 +2,7 @@
 
 describe("g_variants — NCIT:C16576 consistency check", () => {
   const apiUrl =
-    "https://beacon-network-backend-test.ega-archive.org/api/g_variants";
+    "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0/g_variants";
 
   const query = {
     meta: { apiVersion: "2.0" },
