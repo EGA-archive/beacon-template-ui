@@ -200,6 +200,7 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
                                     !dataset.results ||
                                     dataset.results.length === 0
                                   }
+                                  data-cy="results-table-details-button"
                                   sx={{
                                     textTransform: "none",
                                     fontSize: "13px",

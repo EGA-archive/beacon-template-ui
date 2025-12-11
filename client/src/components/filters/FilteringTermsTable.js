@@ -164,7 +164,7 @@ export default function FilteringTermsTable({
             <Table stickyHeader aria-label="filtering terms table">
               {/* Table header */}
               <TableHead>
-                <TableRow>
+                <TableRow data-cy="filtering-term-row">
                   {FILTERING_TERMS_COLUMNS.map((col) => (
                     <TableCell
                       key={col.id}
@@ -392,26 +392,32 @@ export default function FilteringTermsTable({
                           </TableCell>
 
                           {/* Column 2: ID */}
-                          <TableCell>{term.id}</TableCell>
+                          <TableCell data-cy="filtering-term-id">
+                            {term.id}
+                          </TableCell>
                           {/* Column 3: Label + Type */}
-                          <TableCell>{`${item.label}`}</TableCell>
+                          <TableCell data-cy="filtering-term-label">{`${item.label}`}</TableCell>
                           {/* <TableCell>{`${item.label} (${item.type})`}</TableCell>  */}
                           {/* Column 4: Available scopes as selectable chips */}
-                          <TableCell>
+                          <TableCell data-cy="filtering-term-scope">
                             {item.scopes.length > 0 &&
                               item.scopes.map((scope, i) => {
                                 const isSelected =
                                   selectedScopes[term.id] === scope;
+
                                 return (
                                   <Box
                                     key={i}
                                     component="span"
-                                    // When the user clicks this scope "pill"
+                                    data-cy={
+                                      isSelected
+                                        ? "scope-pill-selected"
+                                        : "scope-pill"
+                                    }
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      handleScopeClick(term.id, scope); // Update the selected scope for this term
+                                      handleScopeClick(term.id, scope);
                                     }}
-                                    // Apply dynamic styles based on whether this scope is selected or not
                                     sx={getSelectableScopeStyles(isSelected)}
                                   >
                                     {capitalize(scopeAlias[scope] || scope)}
