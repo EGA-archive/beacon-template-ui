@@ -233,7 +233,8 @@ export default function FilteringTermsTable({
 
                       return (
                         <TableRow
-                          key={item.key}
+                          // key={item.key}
+                          key={term.id}
                           onClick={() => {
                             if (extraFilter && !extraFilter.value) {
                               setMessage(COMMON_MESSAGES.incompleteFilter);

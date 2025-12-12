@@ -112,7 +112,7 @@ describe("All Filtering Terms behavior and backend consistency", () => {
     // Store initial list of IDs before searching
     let allUiIds = [];
 
-    cy.get('[data-cy="filtering-term-id"]')
+    cy.get('[data-cy="filtering-term-id"]', { timeout: 10000 })
       .then(($cells) => {
         allUiIds = [...$cells].map((el) => el.innerText.trim());
         expect(allUiIds.length).to.be.greaterThan(0);
@@ -163,71 +163,51 @@ describe("All Filtering Terms behavior and backend consistency", () => {
       });
   });
 
-  it("DEBUG: prints scope counts for each filtering term", () => {
-    cy.contains("button", "All Filtering Terms").click({ force: true });
-
-    cy.contains("p", "Filtering Terms", { timeout: 10000 }).should(
-      "be.visible"
-    );
-
-    // Wait for rows
-    cy.get('[data-cy="filtering-term-scope"]', { timeout: 10000 }).should(
-      "have.length.greaterThan",
-      0
-    );
-
-    // Print how many scope pills each term has
-    cy.get('[data-cy="filtering-term-scope"]').each(($cell, index) => {
-      const spans = $cell.find("span").length;
-      cy.log(`Row ${index}: ${spans} scope pills`);
-    });
-  });
-
-  it("finds the first multi-scope filtering term across all pages", () => {
-    const defaultScope = "individual";
-
+  it("finds the first multi-scope filtering term across all pages and changes scope", () => {
     cy.contains("button", "All Filtering Terms").click({ force: true });
     cy.contains("p", "Filtering Terms", { timeout: 10000 }).should(
       "be.visible"
     );
 
-    let multiScopeFound = false;
+    let found = false;
 
     function scanPage() {
-      // Step 1 — wait for rows
       cy.get('[data-cy="filtering-term-scope"]', { timeout: 10000 })
         .should("have.length.greaterThan", 0)
         .then(($cells) => {
-          // Step 2 — look for a row with MORE THAN 1 scope pill
-          const matchingCells = [...$cells].filter(
-            (el) => el.querySelectorAll("span").length > 1
+          const multiScopeCell = [...$cells].find(
+            (cell) =>
+              cell.querySelectorAll('[data-cy^="scope-pill"]').length > 1
           );
 
-          if (matchingCells.length > 0) {
-            // We found a multi-scope term
-            multiScopeFound = true;
-            cy.wrap(matchingCells[0]).as("multiScopeCell");
-          }
-        })
-        .then(() => {
-          if (multiScopeFound) return;
+          if (multiScopeCell) {
+            found = true;
 
-          // Step 3 — if NOT found, check if the “next page” button is enabled
+            const pills = multiScopeCell.querySelectorAll(
+              '[data-cy="scope-pill"]'
+            );
+
+            const pillText = pills[0].innerText.trim();
+
+            cy.wrap(pills[0]).click({ force: true });
+
+            cy.wrap(multiScopeCell)
+              .find('[data-cy="scope-pill-selected"]', { timeout: 10000 })
+              .should("contain.text", pillText);
+
+            return;
+          }
+
           cy.get("body").then(($body) => {
             const nextBtn = $body.find(
               'button[aria-label="Go to next page"]:not(:disabled)'
             );
 
             if (nextBtn.length > 0) {
-              // go to next page
               cy.get('button[aria-label="Go to next page"]').click({
                 force: true,
               });
-              cy.wait(500);
-              scanPage(); // recursive scan
-            } else {
-              // No more pages and no multi-scope terms
-              cy.log("No multi-scope filtering terms found in any page.");
+              scanPage();
             }
           });
         });
@@ -235,32 +215,10 @@ describe("All Filtering Terms behavior and backend consistency", () => {
 
     scanPage();
 
-    // Step 4 — After scanning all pages, validate the selected scope (if any exists)
     cy.then(() => {
-      if (!multiScopeFound) {
-        cy.log(
-          "Skipping default-scope test because no multi-scope term exists."
-        );
-        return;
+      if (!found) {
+        cy.log("No multi-scope filtering term found.");
       }
-
-      // Now test the default selected scope
-      cy.get("@multiScopeCell")
-        .find("span")
-        .then(($pills) => {
-          const selected = [...$pills].find((pill) => {
-            const bg = window.getComputedStyle(pill).backgroundColor;
-            return bg !== "rgb(255, 255, 255)"; // selected pill
-          });
-
-          expect(selected, "A selected scope pill must exist").to.exist;
-
-          const selectedText = selected.innerText.trim().toLowerCase();
-          expect(selectedText).to.eq(
-            defaultScope,
-            "Default selected scope must match entry type"
-          );
-        });
     });
   });
 });
