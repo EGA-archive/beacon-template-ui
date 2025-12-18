@@ -19,7 +19,6 @@ import SearchFiltersInput from "../components/search/SearchFiltersInput";
 import SearchGenomicInput from "../components/search/SearchGenomicInput";
 import {
   formatEntryLabel,
-  sortEntries,
   singleEntryCustomLabels,
   prioritizeEntries,
 } from "../components/common/textFormatting";
@@ -276,6 +275,7 @@ export default function Search({
               title={
                 <Box
                   component="ul"
+                  data-testid="entrytypes-tooltip-content"
                   sx={{
                     pl: { xs: "5px", lg: "20px" },
                     fontFamily: '"Open Sans", sans-serif',
@@ -314,6 +314,7 @@ export default function Search({
             >
               <Box
                 component="span"
+                data-testid="entrytypes-tooltip-trigger"
                 sx={{
                   cursor: "pointer",
                   ml: 3,
@@ -336,17 +337,17 @@ export default function Search({
         {loading || !isLoaded ? (
           <CircularProgress />
         ) : !isSingleEntryType ? (
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+          <Box
+            data-testid="entrytype-buttons"
+            sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}
+          >
             {entryTypes.map((entry) => (
               <Button
                 key={entry.id}
+                data-testid={`entrytype-${entry.pathSegment}`}
                 onClick={() => {
                   if (entry.pathSegment !== selectedPathSegment) {
                     setSelectedPathSegment(entry.pathSegment);
-                  } else {
-                    // console.log(
-                    //   "⚠️ Same entry type clicked again, no state update"
-                    // );
                   }
                 }}
                 variant="outlined"

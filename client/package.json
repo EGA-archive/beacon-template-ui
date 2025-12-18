@@ -40,8 +40,12 @@
     ]
   },
   "devDependencies": {
+    "@cypress/code-coverage": "^3.14.7",
     "autoprefixer": "10.4.17",
+    "babel-plugin-istanbul": "^7.0.1",
     "cypress": "^15.2.0",
+    "istanbul-lib-coverage": "^3.2.2",
+    "nyc": "^17.1.0",
     "postcss": "8.4.35",
     "tailwindcss": "3.4.1"
   }

@@ -251,9 +251,9 @@ export default function ResultsTable() {
                             item.beaconId &&
                             (expandedRow &&
                             expandedRow.beaconId === item.beaconId ? (
-                              <KeyboardArrowDownIcon />
+                              <KeyboardArrowDownIcon data-cy="results-row-collapse-icon" />
                             ) : (
-                              <KeyboardArrowUpIcon />
+                              <KeyboardArrowUpIcon data-cy="results-row-expand-icon" />
                             ))}
 
                           {iconUrl && (
