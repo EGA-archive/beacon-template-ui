@@ -70,15 +70,12 @@ export const SelectedEntryProvider = ({ children }) => {
   const filteringButtonRef = useRef(null);
 
   const resetHomeState = () => {
-    console.log("🏠 [Context] resetHomeState");
-
     // Core search state
     setSelectedFilter([]);
     setExtraFilter(null);
     setGenomicDraft("");
     setResultData([]);
     setHasSearchResult(false);
-    setHasSearchBeenTriggered(false);
 
     // Query lifecycle
     setHasQueryStarted(false);
@@ -91,6 +88,10 @@ export const SelectedEntryProvider = ({ children }) => {
     setMessage(null);
     setLastSearchedFilters([]);
     setLastSearchedPathSegment(null);
+
+    setIsFilteringTermsOpen(false);
+    setHasSearchBeenTriggered(false);
+    setIsExtraFilterValid(true);
   };
 
   // Provide all state variables and their updaters to children

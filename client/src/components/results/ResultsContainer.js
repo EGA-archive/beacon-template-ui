@@ -37,7 +37,6 @@ export default function ResultsContainer() {
         >
           {queryDirty &&
             (() => {
-              // console.log("Dirty query banner is VISIBLE on screen");
               return (
                 <Box
                   sx={{

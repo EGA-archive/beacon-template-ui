@@ -260,7 +260,7 @@ export default function GenomicAnnotations() {
               </Typography>
             </AccordionSummary>
 
-            <AccordionDetails sx={{ px: 0, pt: 0, mb: 3 }}>
+            <AccordionDetails sx={{ px: 0, pt: 0, mb: 3, pb: 0 }}>
               {/* Render all filter chips for this category, shown as selectable labels */}
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                 {items.map((item) => (

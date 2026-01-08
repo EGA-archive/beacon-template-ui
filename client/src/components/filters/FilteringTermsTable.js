@@ -17,7 +17,6 @@ import Loader from "../common/Loader";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import { FILTERING_TERMS_COLUMNS } from "../../lib/constants";
 import { capitalize } from "../common/textFormatting";
-import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
@@ -123,7 +122,7 @@ export default function FilteringTermsTable({
           updated.delete(scopeKey);
           return updated;
         });
-      }, 1000);
+      }, 5000);
 
       return newSet;
     });
@@ -204,16 +203,6 @@ export default function FilteringTermsTable({
                         allScopes?.[0] ||
                         null;
 
-                      // const item = {
-                      //   key: term.id,
-                      //   label: displayLabel?.trim()
-                      //     ? displayLabel
-                      //     : term.label || term.id,
-                      //   type: term.type,
-                      //   scope: activeScope,
-                      //   scopes: allScopes || [],
-                      // };
-
                       const uniqueId = `common-free-${Date.now().toString(
                         36
                       )}-${Math.random().toString(36).slice(2, 7)}`;
@@ -227,6 +216,8 @@ export default function FilteringTermsTable({
                         scope: activeScope,
                         scopes: allScopes || [],
                       };
+
+                      const hasMultipleScopes = item.scopes.length > 1;
 
                       return (
                         <TableRow
@@ -422,15 +413,19 @@ export default function FilteringTermsTable({
                                   </Box>
                                 );
                               })}
-
-                            {changedScopes.has(`${item.id}-${item.scope}`) && (
-                              <ChangeCircleIcon
-                                sx={{
-                                  color: config.ui.colors.primary,
-                                  fontSize: "20px",
-                                }}
-                              />
-                            )}
+                            {hasMultipleScopes &&
+                              changedScopes.has(`${item.id}-${item.scope}`) && (
+                                <Box
+                                  sx={{
+                                    mt: 2,
+                                    fontSize: "12px",
+                                    fontStyle: "italic",
+                                    color: config.ui.colors.primary,
+                                  }}
+                                >
+                                  New scope applied
+                                </Box>
+                              )}
                           </TableCell>
                         </TableRow>
                       );

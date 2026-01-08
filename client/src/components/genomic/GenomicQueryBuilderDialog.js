@@ -282,8 +282,6 @@ export default function GenomicQueryBuilderDialog({
               queryParams,
             };
 
-            // console.log("[GQB] newFilter created ➜", newFilter);
-
             // Prevent duplicates
             const exists = selectedFilter.some((f) => f.id === newFilter.id);
             if (exists) {
@@ -309,7 +307,6 @@ export default function GenomicQueryBuilderDialog({
             // STEP 2C: update applied filters
             setSelectedFilter((prev) => {
               const next = [...prev, newFilter];
-              // console.log("[GQB] appliedFilters.next ➜", next);
               return next;
             });
 

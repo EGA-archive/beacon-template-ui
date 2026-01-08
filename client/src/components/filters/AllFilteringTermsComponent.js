@@ -11,7 +11,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import { searchFilteringTerms } from "../common/filteringTermsHelpers";
 
 // Component: Displays a searchable and paginated list of filtering terms
-export default function AllFilteringTermsComponent({ setSelectedTool }) {
+export default function AllFilteringTermsComponent({
+  setSelectedTool,
+  selectedTool,
+}) {
   // Store all filtering terms fetched from API with id, label, scope, scopes, type
   const [filteringTerms, setFilteringTerms] = useState([]);
 
@@ -26,12 +29,12 @@ export default function AllFilteringTermsComponent({ setSelectedTool }) {
     filteringButtonRef,
   } = useSelectedEntry();
 
-  console.log("[Table] render | isFilteringTermsOpen:", isFilteringTermsOpen);
-
   // Ensure the panel opens whenever the tool becomes active
   useEffect(() => {
-    setIsFilteringTermsOpen(true);
-  }, [setIsFilteringTermsOpen]);
+    if (selectedTool === "allFilteringTerms") {
+      setIsFilteringTermsOpen(true);
+    }
+  }, [selectedTool, setIsFilteringTermsOpen]);
 
   // Filtered list of terms after applying search
   const [filteredTerms, setFilteredTerms] = useState([]);
@@ -92,7 +95,6 @@ export default function AllFilteringTermsComponent({ setSelectedTool }) {
   // if (!isFilteringTermsOpen) return null;
 
   if (!isFilteringTermsOpen) {
-    console.log("[Table] returning null (closed)");
     return null;
   }
 

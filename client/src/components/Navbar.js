@@ -24,7 +24,7 @@ import { useSelectedEntry } from "../components/context/SelectedEntryContext";
  * On larger screens, links are shown directly in the toolbar.
  */
 
-export default function Navbar({ title, main, navItems }) {
+export default function Navbar({ title, main, navItems, setSelectedTool }) {
   // State to control mobile drawer open/close
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -131,9 +131,9 @@ export default function Navbar({ title, main, navItems }) {
               data-cy="navbar-title"
               className="font-sans"
               onClick={() => {
-                console.log("👆 [Navbar] Home clicked");
                 resetHomeState();
                 navigate("/");
+                setSelectedTool(null);
                 setMobileOpen(false);
               }}
               sx={{

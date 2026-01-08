@@ -76,6 +76,11 @@ export default function HomePage({
   // Get from context whether the user already submitted a search
   const { hasSearchBeenTriggered } = useSelectedEntry();
 
+  const showBeaconBanner =
+    !hasSearchBeenTriggered && selectedTool !== "allFilteringTerms";
+
+  const showAllFilteringTerms = selectedTool === "allFilteringTerms";
+
   // Check if Genomic Annotations filters should be shown based on the config file
   const hasGenomicAnnotationsConfig =
     !!config.ui?.genomicAnnotations?.visibleGenomicCategories;
@@ -172,12 +177,14 @@ export default function HomePage({
         )}
 
         {/* Banner only shown before a search is triggered and if the user isn't on "allFilteringTerms" tool */}
-        {!hasSearchBeenTriggered && selectedTool !== "allFilteringTerms" && (
+        {/* {!hasSearchBeenTriggered && selectedTool !== "allFilteringTerms" && (
           <BeaconTypeBanner />
-        )}
+        )} */}
+        {showBeaconBanner && <BeaconTypeBanner />}
       </Box>
 
       {/* Show All Filtering Terms view if selected */}
+
       <Box>
         {selectedTool === "allFilteringTerms" && (
           <Box
@@ -189,7 +196,10 @@ export default function HomePage({
               marginBottom: { lg: "30px", md: "30px", sm: "30px", xs: "30px" },
             }}
           >
-            <AllFilteringTermsComponent setSelectedTool={setSelectedTool} />
+            <AllFilteringTermsComponent
+              setSelectedTool={setSelectedTool}
+              selectedTool={selectedTool}
+            />
           </Box>
         )}
       </Box>

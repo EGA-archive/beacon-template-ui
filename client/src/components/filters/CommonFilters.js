@@ -20,13 +20,9 @@ export default function CommonFilters() {
   const filterLabels = config.ui.commonFilters.filterLabels;
   const {
     setExtraFilter,
-    setLoadingData,
-    setResultData,
-    setHasSearchResult,
     selectedPathSegment,
     extraFilter,
     valueInputRef,
-    selectedFilter,
     setSelectedFilter,
     hasSearchResults,
     setQueryDirty,
@@ -80,11 +76,6 @@ export default function CommonFilters() {
       }, 3000);
       return;
     }
-
-    // if (item.type === "alphanumeric") {
-    //   setExtraFilter(item);
-    //   return;
-    // }
 
     if (item.type === "alphanumeric") {
       if (hasSearchResults) setQueryDirty(true);
@@ -158,7 +149,7 @@ export default function CommonFilters() {
                   {topic.charAt(0).toUpperCase() + topic.slice(1)}
                 </Typography>
               </AccordionSummary>
-              <AccordionDetails sx={{ px: 0, pt: 0 }}>
+              <AccordionDetails sx={{ px: 0, pt: 0, pb: 0 }}>
                 <Box
                   sx={{
                     display: "flex",
