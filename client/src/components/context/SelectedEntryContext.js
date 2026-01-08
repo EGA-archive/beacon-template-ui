@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useRef, useEffect } from "react";
+import { createContext, useContext, useState, useRef } from "react";
 
 /**
  * SelectedEntryContext is a shared state used across the app
@@ -59,12 +59,39 @@ export const SelectedEntryProvider = ({ children }) => {
   const [rawItems, setRawItems] = useState([]);
   const [actualLoadedCount, setActualLoadedCount] = useState(0);
   const [responseMeta, setResponseMeta] = useState(null);
+
   const [molecularEffects, setMolecularEffects] = useState([]);
   const [isExtraFilterValid, setIsExtraFilterValid] = useState(true);
+  const [isFilteringTermsOpen, setIsFilteringTermsOpen] = useState(false);
 
   const valueInputRef = useRef(null);
   const filteringTermsRef = useRef(null);
   const prevPathSegmentRef = useRef(null);
+  const filteringButtonRef = useRef(null);
+
+  const resetHomeState = () => {
+    console.log("🏠 [Context] resetHomeState");
+
+    // Core search state
+    setSelectedFilter([]);
+    setExtraFilter(null);
+    setGenomicDraft("");
+    setResultData([]);
+    setHasSearchResult(false);
+    setHasSearchBeenTriggered(false);
+
+    // Query lifecycle
+    setHasQueryStarted(false);
+    setQueryDirty(false);
+    setRawItems([]);
+    setActualLoadedCount(0);
+    setResponseMeta(null);
+
+    // UI state
+    setMessage(null);
+    setLastSearchedFilters([]);
+    setLastSearchedPathSegment(null);
+  };
 
   // Provide all state variables and their updaters to children
   return (
@@ -117,6 +144,10 @@ export const SelectedEntryProvider = ({ children }) => {
         setMolecularEffects,
         isExtraFilterValid,
         setIsExtraFilterValid,
+        resetHomeState,
+        isFilteringTermsOpen,
+        setIsFilteringTermsOpen,
+        filteringButtonRef,
       }}
     >
       {children}

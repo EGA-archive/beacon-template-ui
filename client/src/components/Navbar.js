@@ -14,8 +14,9 @@ import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PropTypes from "prop-types";
 import config from "../config/config.json";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthSafe as useAuth } from "../components/pages/login/useAuthSafe";
+import { useSelectedEntry } from "../components/context/SelectedEntryContext";
 
 /**
  * Displays a responsive navigation bar with a title, logo, and links.
@@ -26,6 +27,11 @@ import { useAuthSafe as useAuth } from "../components/pages/login/useAuthSafe";
 export default function Navbar({ title, main, navItems }) {
   // State to control mobile drawer open/close
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const { resetHomeState } = useSelectedEntry();
 
   // Retrieves the authentication context provided by the oidc-react context
   const auth = useAuth();
@@ -124,8 +130,12 @@ export default function Navbar({ title, main, navItems }) {
             <Typography
               data-cy="navbar-title"
               className="font-sans"
-              component={Link}
-              to="/"
+              onClick={() => {
+                console.log("👆 [Navbar] Home clicked");
+                resetHomeState();
+                navigate("/");
+                setMobileOpen(false);
+              }}
               sx={{
                 fontWeight: "bold",
                 fontFamily: '"Open Sans", sans-serif',
@@ -133,12 +143,8 @@ export default function Navbar({ title, main, navItems }) {
                 cursor: "pointer",
                 fontSize: "15px",
                 whiteSpace: "nowrap",
-                "@media (max-width: 410px)": {
-                  fontSize: "14px",
-                },
-                "@media (min-width: 768px)": {
-                  fontSize: "16px",
-                },
+                "@media (max-width: 410px)": { fontSize: "14px" },
+                "@media (min-width: 768px)": { fontSize: "16px" },
                 "@media (max-width: 930px) and (min-width: 900px)": {
                   fontSize: "15.7px",
                 },
@@ -178,6 +184,7 @@ export default function Navbar({ title, main, navItems }) {
               {navItems
                 .filter((item) => item.label && item.label.trim() !== "")
                 .map((item) => {
+                  const isActive = location.pathname === item.url;
                   // Hide "Log in" in drawer if logged in
                   if (item.label.toLowerCase() === "log in" && isLoggedIn)
                     return null;
@@ -186,7 +193,15 @@ export default function Navbar({ title, main, navItems }) {
 
                   const buttonProps = {
                     key: item.label,
-                    sx: { ...textStyle, textTransform: "none" },
+                    sx: {
+                      ...textStyle,
+                      textTransform: "none",
+                      fontWeight: isActive ? 700 : 400,
+                      color: isActive ? config.ui.colors.primary : "white",
+                      backgroundColor: isActive ? "white" : "none",
+                      padding: isActive ? 1.5 : "none",
+                      borderRadius: isActive ? "6px" : "none",
+                    },
                     className: isLogin ? "login-button" : undefined,
                     children: item.label,
                   };
@@ -260,6 +275,7 @@ export default function Navbar({ title, main, navItems }) {
           {navItems
             .filter((item) => item.label && item.label.trim() !== "")
             .map((item) => {
+              const isActive = location.pathname === item.url;
               if (item.label.toLowerCase() === "log in" && isLoggedIn)
                 return null;
 
@@ -293,15 +309,23 @@ export default function Navbar({ title, main, navItems }) {
                       component={Link}
                       to={item.url}
                       className={isLogin ? "login-button" : undefined}
+                      // Here
                       sx={{
                         px: 3,
                         py: 1,
                         justifyContent: "flex-start",
                         textTransform: "none",
                         fontFamily: '"Open Sans", sans-serif',
-                        fontWeight: 400,
+                        fontWeight: isActive ? 700 : 400,
                         fontSize: "16px",
-                        color: config.ui.colors.primary,
+                        color: isActive ? "white" : config.ui.colors.primary,
+                        backgroundColor: isActive
+                          ? config.ui.colors.primary
+                          : "white",
+                        padding: isActive ? 1 : "none",
+                        width: isActive ? "80%" : "none",
+                        marginLeft: isActive ? "17px" : "none",
+                        borderRadius: isActive ? "6px" : "none",
                       }}
                     >
                       {item.label}

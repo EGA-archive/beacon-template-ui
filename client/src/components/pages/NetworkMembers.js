@@ -212,9 +212,11 @@ export default function NetworkMembers() {
                             mb: 1,
                           }}
                         >
-                          <Box sx={{ display: "flex", gap: 5 }}>
+                          <Box sx={{ display: "flex", gap: 2 }}>
                             <Chip
-                              label={beacon?.meta?.apiVersion || "Undefined"}
+                              label={` API version: ${
+                                beacon?.meta?.apiVersion || "Undefined"
+                              }`}
                               color="primary"
                               size="small"
                               sx={{

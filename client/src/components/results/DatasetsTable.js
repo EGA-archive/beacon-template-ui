@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Paper,
@@ -18,6 +18,7 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 
 export default function DatasetsTable() {
   const { rawItems } = useSelectedEntry();
+  const [expandedRows, setExpandedRows] = useState({});
 
   const headerCellStyle = {
     backgroundColor: config.ui.colors.darkPrimary,
@@ -96,34 +97,44 @@ export default function DatasetsTable() {
                   }}
                 >
                   {dataset.description ? (
-                    dataset.description.length > 200 ? (
-                      <Tooltip
-                        title={dataset.description}
-                        arrow
-                        placement="bottom-start"
-                        componentsProps={{
-                          tooltip: {
-                            sx: {
-                              fontSize: "0.7rem",
-                              minWidth: 1000,
-                              backgroundColor: lighten(
-                                config.ui.colors.darkPrimary,
-                                0.1
-                              ),
-                              color: "white",
-                            },
-                          },
-                        }}
-                      >
-                        <span>{`${dataset.description.slice(0, 200)}…`}</span>
-                      </Tooltip>
-                    ) : (
-                      dataset.description
-                    )
+                    <>
+                      {expandedRows[index] ? (
+                        dataset.description
+                      ) : (
+                        <>
+                          {dataset.description.slice(0, 200)}
+                          {dataset.description.length > 200 && "..."}
+                        </>
+                      )}
+
+                      {dataset.description.length > 200 && (
+                        <Box
+                          component="button"
+                          onClick={() =>
+                            setExpandedRows((prev) => ({
+                              ...prev,
+                              [index]: !prev[index],
+                            }))
+                          }
+                          sx={{
+                            display: "inline",
+                            ml: 0.5,
+                            background: "none",
+                            color: config.ui.colors.primary,
+                            cursor: "pointer",
+                            fontSize: "0.75rem",
+                            fontStyle: "italic",
+                          }}
+                        >
+                          {expandedRows[index] ? "Read less" : "Read more"}
+                        </Box>
+                      )}
+                    </>
                   ) : (
                     "-"
                   )}
                 </TableCell>
+
                 <TableCell
                   sx={{
                     minWidth: "100px",

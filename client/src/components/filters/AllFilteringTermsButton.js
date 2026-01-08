@@ -6,10 +6,13 @@ import config from "../../config/config.json";
 
 // This component renders a reusable styled button labeled "All Filtering Terms".
 // It uses a custom icon (FilterIcon) and relies on a shared StyledButton component.
-export default function AllFilteringTermsButton({ onClick, selected }) {
-  const { filteringTermsRef } = useSelectedEntry();
+export default function AllFilteringTermsButton({ onClick }) {
+  const { filteringTermsRef, isFilteringTermsOpen, setIsFilteringTermsOpen } =
+    useSelectedEntry();
 
   const handleClick = () => {
+    // Toggle open / close state shared with the table
+    setIsFilteringTermsOpen((prev) => !prev);
     if (onClick) onClick();
     setTimeout(() => {
       if (filteringTermsRef?.current) {
@@ -20,7 +23,6 @@ export default function AllFilteringTermsButton({ onClick, selected }) {
       }
     }, 100);
   };
-
   return (
     <StyledButton
       icon={
@@ -33,7 +35,7 @@ export default function AllFilteringTermsButton({ onClick, selected }) {
       }
       label="All Filtering Terms"
       onClick={handleClick}
-      selected={selected}
+      selected={isFilteringTermsOpen}
     />
   );
 }

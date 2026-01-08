@@ -55,6 +55,9 @@ export default function Search({
     hasSearchResults,
     setQueryDirty,
     lastSearchedPathSegment,
+    isLoaded,
+    setIsLoaded,
+    filteringButtonRef,
   } = useSelectedEntry();
 
   const [loading, setLoading] = useState(true);
@@ -63,7 +66,6 @@ export default function Search({
   const [message, setMessage] = useState(null);
   const searchRef = useRef(null);
   const inputRef = useRef(null);
-  const { isLoaded, setIsLoaded } = useSelectedEntry();
 
   useEffect(() => {
     if (activeInput === "genomic" && inputRef.current) {
@@ -542,10 +544,16 @@ export default function Search({
                 />
               </>
             )}
-            <AllFilteringTermsButton
+            {/* <AllFilteringTermsButton
               onClick={handleAllFilteringClick}
               selected={selectedTool === "allFilteringTerms"}
-            />
+            /> */}
+            <Box ref={filteringButtonRef}>
+              <AllFilteringTermsButton
+                onClick={handleAllFilteringClick}
+                selected={selectedTool === "allFilteringTerms"}
+              />
+            </Box>
           </Box>
           <Box>
             <SearchButton

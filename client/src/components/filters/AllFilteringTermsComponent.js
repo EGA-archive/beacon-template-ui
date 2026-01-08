@@ -5,21 +5,33 @@ import SearchIcon from "@mui/icons-material/Search";
 import { alpha } from "@mui/material/styles";
 import FilteringTermsTable from "./FilteringTermsTable";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
-
 import { InputAdornment, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
 import { searchFilteringTerms } from "../common/filteringTermsHelpers";
 
 // Component: Displays a searchable and paginated list of filtering terms
-export default function AllFilteringTermsComponent() {
+export default function AllFilteringTermsComponent({ setSelectedTool }) {
   // Store all filtering terms fetched from API with id, label, scope, scopes, type
   const [filteringTerms, setFilteringTerms] = useState([]);
 
   // Track loading state during fetch
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const { selectedPathSegment, filteringTermsRef } = useSelectedEntry();
+  const {
+    selectedPathSegment,
+    filteringTermsRef,
+    isFilteringTermsOpen,
+    setIsFilteringTermsOpen,
+    filteringButtonRef,
+  } = useSelectedEntry();
+
+  console.log("[Table] render | isFilteringTermsOpen:", isFilteringTermsOpen);
+
+  // Ensure the panel opens whenever the tool becomes active
+  useEffect(() => {
+    setIsFilteringTermsOpen(true);
+  }, [setIsFilteringTermsOpen]);
 
   // Filtered list of terms after applying search
   const [filteredTerms, setFilteredTerms] = useState([]);
@@ -76,6 +88,14 @@ export default function AllFilteringTermsComponent() {
     }
   }, [searchQuery, filteringTerms]);
 
+  // Hide the entire section when the user closes it
+  // if (!isFilteringTermsOpen) return null;
+
+  if (!isFilteringTermsOpen) {
+    console.log("[Table] returning null (closed)");
+    return null;
+  }
+
   // UI: search bar + table of filtering terms
   return (
     <Box
@@ -95,16 +115,42 @@ export default function AllFilteringTermsComponent() {
         marginBottom: "20px",
       }}
     >
-      {/* Section title */}
-      <Typography
+      {/* Section for title and closure button of the table */}
+      <Box
         sx={{
-          color: "black",
-          fontWeight: 700,
-          fontSize: "16px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 2,
         }}
       >
-        Filtering Terms
-      </Typography>
+        <Typography
+          sx={{
+            color: "black",
+            fontWeight: 700,
+            fontSize: "16px",
+          }}
+        >
+          Filtering Terms
+        </Typography>
+
+        <IconButton
+          size="small"
+          onClick={() => {
+            setIsFilteringTermsOpen(false);
+            setSelectedTool(null);
+
+            setTimeout(() => {
+              filteringButtonRef?.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }, 0);
+          }}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </Box>
 
       {/* Search bar aligned to the right */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>

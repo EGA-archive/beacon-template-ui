@@ -8,11 +8,6 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Stack,
-  Pagination,
-  Typography,
-  Select,
-  MenuItem,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { lighten } from "@mui/material/styles";
@@ -31,6 +26,7 @@ import {
   getDisplayLabelAndScope,
 } from "../common/filteringTermsHelpers";
 import { getSelectableScopeStyles } from "../styling/selectableScopeStyles";
+import { alpha } from "@mui/material/styles";
 
 // This component displays a table of filtering terms.
 // It also lets users select a scope (like individual or biosample) when a filtering term is linked to multiple scopes.
@@ -99,6 +95,7 @@ export default function FilteringTermsTable({
 
   // Lighten the primary color from config for table styling
   const bgPrimary = lighten(config.ui.colors.primary, 0.8);
+  const bgPrimaryLight = alpha(config.ui.colors.primary, 0.05);
 
   // Make sure filteringTerms is not undefined
   const allFilteringTerms = filteringTerms?.response?.filteringTerms ?? [];
@@ -308,7 +305,7 @@ export default function FilteringTermsTable({
                             transition:
                               "opacity 0.2s ease, background-color 0.2s ease-in-out",
                             "&:hover td": {
-                              backgroundColor: bgPrimary,
+                              backgroundColor: bgPrimaryLight,
                             },
                           }}
                         >

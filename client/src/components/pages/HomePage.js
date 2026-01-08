@@ -189,7 +189,7 @@ export default function HomePage({
               marginBottom: { lg: "30px", md: "30px", sm: "30px", xs: "30px" },
             }}
           >
-            <AllFilteringTermsComponent />
+            <AllFilteringTermsComponent setSelectedTool={setSelectedTool} />
           </Box>
         )}
       </Box>
