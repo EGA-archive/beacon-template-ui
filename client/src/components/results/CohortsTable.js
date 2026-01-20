@@ -20,9 +20,6 @@ export default function CohortsTable() {
     fontWeight: 700,
     color: "white",
     transition: "background-color 0.3s ease",
-    "&:hover": {
-      backgroundColor: lighten(config.ui.colors.darkPrimary, 0.1),
-    },
   };
   const getGenderDistribution = (cohort) => {
     try {

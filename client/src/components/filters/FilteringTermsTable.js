@@ -242,12 +242,6 @@ export default function FilteringTermsTable({
                               setExtraFilter({ ...item, setAddedFilters });
                               return;
                             }
-                            // setSelectedFilter((prev) => {
-                            //   const isDuplicate = prev.some(
-                            //     (filter) =>
-                            //       filter.label === item.label &&
-                            //       filter.scope === item.scope
-                            //   );
                             setSelectedFilter((prev) => {
                               const isDuplicate = prev.some(
                                 (filter) =>
@@ -385,9 +379,13 @@ export default function FilteringTermsTable({
                             {term.id}
                           </TableCell>
                           {/* Column 3: Label + Type */}
-                          <TableCell data-cy="filtering-term-label">{`${item.label}`}</TableCell>
-                          {/* <TableCell>{`${item.label} (${item.type})`}</TableCell>  */}
-                          {/* Column 4: Available scopes as selectable chips */}
+                          <TableCell data-cy="filtering-term-label">
+                            {" "}
+                            {displayLabel?.trim() ? item.label : "–"}
+                          </TableCell>
+                          {/* Column 4: Rendering Filter Types*/}
+                          <TableCell>{capitalize(item.type)}</TableCell>
+                          {/* Column 5: Available scopes as selectable chips */}
                           <TableCell data-cy="filtering-term-scope">
                             {item.scopes.length > 0 &&
                               item.scopes.map((scope, i) => {

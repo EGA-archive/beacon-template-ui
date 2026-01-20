@@ -30,6 +30,8 @@ export default function GenomicAnnotations() {
     hasSearchResults,
     molecularEffects,
     setExtraFilter,
+    openGenomicQueryBuilder,
+    setGenomicPrefill,
   } = useSelectedEntry();
 
   // Only molecular effects with these IDs are allowed to appear in the UI
@@ -139,13 +141,20 @@ export default function GenomicAnnotations() {
   // 3) Full genomic queries (e.g. SNP positions)
 
   const handleGenomicFilter = (item) => {
+    // Case 2: Genomic annotation example opens the Genomic Query Builder tool
+    if (item.type === "genomic" && item.queryParams) {
+      setGenomicPrefill(item);
+      openGenomicQueryBuilder();
+      return;
+    }
+
     // Case 1: simple alphanumeric filter (opens input box)
     if (item.type === "alphanumeric") {
       setExtraFilter(item);
       return;
     }
 
-    // Case 2: filtering term (ontology)
+    // Case 3: filtering term (ontology)
     // These items do NOT contain queryParams. They represent a simple keyword.
     const isFilterTerm =
       !item.queryParams || Object.keys(item.queryParams).length === 0;
@@ -166,45 +175,7 @@ export default function GenomicAnnotations() {
       return;
     }
 
-    // Case 3: The item is a full genomic query example.
-    // These include queryParams
-    // Only ONE genomic query can be active at a time
-    setSelectedFilter((prev = []) => {
-      const alreadyGenomic = prev.some((f) => f.type === "genomic");
-      const duplicate = prev.some(
-        (f) => f.type === "genomic" && f.id === item.field
-      );
-
-      // Avoid having more than one genomic query at the same time
-      if (alreadyGenomic) {
-        setMessage(COMMON_MESSAGES.singleGenomicQuery);
-        setTimeout(() => setMessage(null), 3000);
-        return prev;
-      }
-
-      // Prevent the user from adding the exact same genomic query again
-      if (duplicate) {
-        setMessage(COMMON_MESSAGES.doubleValue);
-        setTimeout(() => setMessage(null), 3000);
-        return prev;
-      }
-
-      // Add the genomic query
-      return [
-        ...prev,
-        {
-          id: item.field,
-          label: item.label,
-          value: item.label,
-          type: "genomic",
-          bgColor: "genomic",
-          queryParams: item.queryParams,
-        },
-      ];
-    });
-
-    // Mark search results as outdated if a new query is added
-    if (hasSearchResults) setQueryDirty(true);
+    return;
   };
 
   // Render collapsible categories and their labels as clickable filter chips

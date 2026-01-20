@@ -59,15 +59,21 @@ export const SelectedEntryProvider = ({ children }) => {
   const [rawItems, setRawItems] = useState([]);
   const [actualLoadedCount, setActualLoadedCount] = useState(0);
   const [responseMeta, setResponseMeta] = useState(null);
+  const [openGenomicQueryBuilder, setOpenGenomicQueryBuilder] = useState(null);
 
   const [molecularEffects, setMolecularEffects] = useState([]);
   const [isExtraFilterValid, setIsExtraFilterValid] = useState(true);
   const [isFilteringTermsOpen, setIsFilteringTermsOpen] = useState(false);
+  const [genomicPrefill, setGenomicPrefill] = useState(null);
 
   const valueInputRef = useRef(null);
   const filteringTermsRef = useRef(null);
   const prevPathSegmentRef = useRef(null);
   const filteringButtonRef = useRef(null);
+
+  const clearGenomicPrefill = () => {
+    setGenomicPrefill(null);
+  };
 
   const resetHomeState = () => {
     // Core search state
@@ -149,6 +155,11 @@ export const SelectedEntryProvider = ({ children }) => {
         isFilteringTermsOpen,
         setIsFilteringTermsOpen,
         filteringButtonRef,
+        setOpenGenomicQueryBuilder,
+        openGenomicQueryBuilder,
+        genomicPrefill,
+        setGenomicPrefill,
+        clearGenomicPrefill,
       }}
     >
       {children}

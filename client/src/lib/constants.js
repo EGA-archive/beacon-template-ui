@@ -36,8 +36,8 @@ export const BEACON_NETWORK_COLUMNS = [
                 fontFamily: '"Open Sans", sans-serif',
               }}
             >
-              Beacons that restrict dataset-level responses, return only
-              Beacon-level data aggregated across datasets.
+              If dataset-level response is not enabled, the Beacon only returns
+              boolean or count response summarized across datasets.
             </Box>
           }
           placement="top-start"
@@ -305,7 +305,7 @@ export const FILTERING_TERMS_COLUMNS = [
   {
     id: "Select",
     label: "Select",
-    width: "5%",
+    width: "10%",
     align: "left",
   },
   {
@@ -317,13 +317,19 @@ export const FILTERING_TERMS_COLUMNS = [
   {
     id: "label",
     label: "Label",
-    width: "45%",
+    width: "30%",
+    align: "left",
+  },
+  {
+    id: "Type",
+    label: "Filter Type",
+    width: "15%",
     align: "left",
   },
   {
     id: "scope",
     label: "Scope",
-    width: "25%",
+    width: "20%",
     align: "left",
   },
 ];

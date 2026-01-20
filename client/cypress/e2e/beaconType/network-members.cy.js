@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-describe("Network Members Page — core rendering tests", () => {
+describe("Network Members Page - core rendering tests", () => {
   const pageUrl = "/network-members";
 
   let backendBeacons = [];

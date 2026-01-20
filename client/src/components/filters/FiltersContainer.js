@@ -2,7 +2,39 @@ import { useState, useEffect } from "react";
 import { Box, Tabs, Tab, Typography } from "@mui/material";
 import CommonFilters from "./CommonFilters";
 import GenomicAnnotations from "../genomic/GenomicAnnotations";
+import { ReactComponent as DnaIcon } from "../../assets/logos/dna.svg";
+import { ReactComponent as FilterIcon } from "../../assets/logos/filteringterms.svg";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
+import config from "../../config/config.json";
+
+const buildGenomicAnnotationsTab = (setActiveInput) => ({
+  label: "Genomic Annotations",
+  component: <GenomicAnnotations setActiveInput={setActiveInput} />,
+  title: "Genomic Query Builder Examples",
+  titleIcon: (
+    <DnaIcon
+      className="dnaIcon"
+      style={{
+        "--dna-primary-color": config.ui.colors.primary,
+        "--dna-secondary-color": config.ui.colors.darkPrimary,
+      }}
+    />
+  ),
+});
+
+const buildCommonFiltersTab = () => ({
+  label: "Common Filters",
+  component: <CommonFilters />,
+  title: "Most Common Filters",
+  titleIcon: (
+    <FilterIcon
+      className="filterIcon"
+      style={{
+        "--icon-color": config.ui.colors.darkPrimary,
+      }}
+    />
+  ),
+});
 
 function TabPanel(props) {
   // Reusable wrapper that renders the content of each tab when active
@@ -61,38 +93,26 @@ export default function FiltersContainer({
   // Case 1: user is currently viewing "Genomic Variants"
   if (hasGenomic && isGenomicSelected) {
     // If config allows Genomic Annotations → add this tab first
-    if (hasGenomicAnnotationsConfig)
-      tabs.push({
-        label: "Genomic Annotations", // tab title shown in UI
-        component: <GenomicAnnotations setActiveInput={setActiveInput} />, // actual component to render
-        title: "Genomic Annotations", // heading inside the panel
-      });
+    if (hasGenomicAnnotationsConfig) {
+      tabs.push(buildGenomicAnnotationsTab(setActiveInput));
+    }
 
     // If config allows Common Filters → add this tab after Genomic Annotations
-    if (hasCommonFiltersConfig)
-      tabs.push({
-        label: "Common Filters",
-        component: <CommonFilters />,
-        title: "Most Common Filters",
-      });
+    if (hasCommonFiltersConfig) {
+      tabs.push(buildCommonFiltersTab());
+    }
 
     // Case 2: user is on a different entry type (not "Genomic Variants")
   } else {
     // Add Common Filters first (if enabled in config)
-    if (hasCommonFiltersConfig)
-      tabs.push({
-        label: "Common Filters",
-        component: <CommonFilters />,
-        title: "Most Common Filters",
-      });
+    if (hasCommonFiltersConfig) {
+      tabs.push(buildCommonFiltersTab());
+    }
 
     // Add Genomic Annotations second (but only if the beacon supports genomics)
-    if (hasGenomic && hasGenomicAnnotationsConfig)
-      tabs.push({
-        label: "Genomic Annotations",
-        component: <GenomicAnnotations setActiveInput={setActiveInput} />,
-        title: "Genomic Annotations",
-      });
+    if (hasGenomic && hasGenomicAnnotationsConfig) {
+      tabs.push(buildGenomicAnnotationsTab(setActiveInput));
+    }
   }
 
   // If no tabs were added (both configs are false) → don't render anything
@@ -194,7 +214,7 @@ export default function FiltersContainer({
         {tabs.map((tab, i) => (
           <TabPanel value={tabValue} index={i} key={tab.label}>
             <Box sx={{ padding: "20px" }}>
-              <Typography
+              {/* <Typography
                 variant="body1"
                 sx={{
                   fontWeight: "bold",
@@ -205,7 +225,26 @@ export default function FiltersContainer({
                 }}
               >
                 {tab.title}
+              </Typography> */}
+
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "14px",
+                  lineHeight: "19px",
+                  color: "black",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  mb: 0.5,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {tab.titleIcon}
+                {tab.title}
               </Typography>
+
               {tab.component}
             </Box>
           </TabPanel>

@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-describe("g_variants — NCIT:C16576 consistency check", () => {
+describe("g_variants: NCIT:C16576 consistency check", () => {
   const apiUrl =
     "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0/g_variants";
 
@@ -208,7 +208,7 @@ describe("g_variants — NCIT:C16576 consistency check", () => {
                         .then((len) => {
                           if (len === 0) {
                             cy.log(
-                              "No details button found after expansion — skipping modal test"
+                              "No details button found after expansion, then skipping modal test"
                             );
                             return;
                           }

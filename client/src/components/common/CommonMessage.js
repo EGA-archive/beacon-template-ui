@@ -17,7 +17,8 @@ export const COMMON_MESSAGES = {
   incompleteFilter:
     "Please fill in the current filter value before adding a new one.",
   invalidChromosome: "Invalid chromosome name in the query.",
-  invalidBases: "Invalid DNA base. Only A, C, G, or T are allowed.",
+  invalidBases:
+    "Invalid query. The following symbols are allowed: A, C, G, T, U, N, R, Y, S, W, K, M, B, D, H, V.",
   invalidFormat:
     "Unrecognized genomic query format. Please use 17-7674945-G-A or 17:7674945G>A",
 };

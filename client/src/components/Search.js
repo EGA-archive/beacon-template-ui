@@ -21,6 +21,9 @@ import {
   formatEntryLabel,
   singleEntryCustomLabels,
   prioritizeEntries,
+  entryTypeDescriptions,
+  GenomicQueryLabel,
+  FilteringTermsLabel,
 } from "../components/common/textFormatting";
 
 export default function Search({
@@ -58,6 +61,7 @@ export default function Search({
     isLoaded,
     setIsLoaded,
     filteringButtonRef,
+    setOpenGenomicQueryBuilder,
   } = useSelectedEntry();
 
   const [loading, setLoading] = useState(true);
@@ -212,16 +216,6 @@ export default function Search({
   const primaryDarkColor = config.ui.colors.darkPrimary;
   const selectedBgColor = lighten(primaryDarkColor, 0.9);
 
-  const entryTypeDescriptions = {
-    analyses: "query analysis metadata (e.g. analysis pipelines, methods)",
-    biosamples: "query biosample data (e.g. histological samples)",
-    cohorts: "query cohort-level data (e.g. shared traits, study groups)",
-    datasets: "query datasets-level data (e.g. name, description)",
-    g_variants: "query genomic variants across a population",
-    individuals: "query individual-level data (e.g. phenotypes, treatment)",
-    runs: "query sequencing run details (e.g. platform, run date)",
-  };
-
   const handleAllFilteringClick = () => {
     setSelectedTool((prev) =>
       prev === "allFilteringTerms" ? null : "allFilteringTerms"
@@ -236,6 +230,15 @@ export default function Search({
     setOpen(false);
     setSelectedTool(null);
   };
+
+  const openGenomicQueryBuilder = () => {
+    setSelectedTool("genomicQueryBuilder");
+    setOpen(true);
+  };
+
+  useEffect(() => {
+    setOpenGenomicQueryBuilder(() => openGenomicQueryBuilder);
+  }, [setOpenGenomicQueryBuilder]);
 
   return (
     <>
@@ -392,7 +395,7 @@ export default function Search({
               variant="body1"
               sx={{ fontFamily: '"Open Sans", sans-serif', fontSize: "14px" }}
             >
-              Add the <b>Filtering Terms</b> you need for your search:
+              Add the {FilteringTermsLabel} you need for your search.
             </Typography>
           ) : (
             <Typography
@@ -400,17 +403,16 @@ export default function Search({
               sx={{ fontFamily: '"Open Sans", sans-serif', fontSize: "14px" }}
             >
               {isSingleEntryType ? "" : "2. "}
-              Use the search bar on the left to add{" "}
-              <b>
-                {isGenomicFirstOrOnly ? "Genomic query" : "Filtering terms"}
-              </b>{" "}
-              or the search bar on the right to add a{" "}
-              <b>
-                {isGenomicFirstOrOnly ? "Filtering terms" : "Genomic query"}:
-              </b>
+              Use the following search bars to narrow down your search using{" "}
+              {isGenomicFirstOrOnly
+                ? GenomicQueryLabel
+                : FilteringTermsLabel}{" "}
+              and/or{" "}
+              {isGenomicFirstOrOnly ? FilteringTermsLabel : GenomicQueryLabel}.
             </Typography>
           )}
         </Box>
+
         <Box
           sx={{
             display: "flex",

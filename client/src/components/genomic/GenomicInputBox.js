@@ -35,6 +35,7 @@ export default function GenomicInputBox({
   customPaddingTop,
   disabled = false,
   variant,
+  containerSx,
 }) {
   // Connect this field to Formik (value, error, helpers)
   const [field, meta, helpers] = useField(name);
@@ -161,17 +162,9 @@ export default function GenomicInputBox({
 
   // Final return: wrapper box with label and dynamic input
   return (
-    // <Box
-    //   sx={{
-    //     border: `1px solid ${primaryDarkColor}`,
-    //     borderRadius: "10px",
-    //     padding: "12px",
-    //     backgroundColor: isDisabled ? "#F0F0F0" : "white",
-    //     opacity: isDisabled ? 0.5 : 1,
-    //   }}
-    // >
     <Box
       sx={{
+        height: "auto",
         border: `1px solid ${
           isUnavailable
             ? "#E0E0E0" // pale border for unavailable
@@ -190,13 +183,13 @@ export default function GenomicInputBox({
         opacity: isUnavailable ? 0.4 : 1,
         cursor: isInactiveSelectable ? "pointer" : "default",
         transition: "all 0.2s ease",
-
         "&:hover": isInactiveSelectable
           ? {
               borderColor: primaryDarkColor,
               backgroundColor: "#fff",
             }
           : {},
+        ...(containerSx || {}),
       }}
       onClick={() => {
         if (isInactiveSelectable) onSelect(); // make selectable boxes clickable
