@@ -2,6 +2,8 @@ import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRigh
 import { Box, Tooltip } from "@mui/material";
 import config from "../config/config.json";
 
+// This is a helper component for the tables' structure
+
 const primaryColor = config.ui.colors.primary;
 
 export const BEACON_NETWORK_COLUMNS = [
@@ -135,14 +137,6 @@ export const BEACON_SINGLE_COLUMNS = [
     align: "left",
     width: "20%",
   },
-
-  // {
-  //   id: "maturity",
-  //   label: "Beacon Maturity",
-  //   align: "left",
-  //   width: "15%",
-  // },
-
   {
     id: "response",
     label: (

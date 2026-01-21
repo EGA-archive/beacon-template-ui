@@ -219,7 +219,6 @@ export default function GenomicLocationRage({
           <Typography
             sx={{
               ...mainBoxTypography,
-              // Sara
               mt: 7.5,
             }}
           >

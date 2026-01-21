@@ -7,24 +7,22 @@ import {
 } from "@mui/material";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import { useState, useMemo } from "react";
-
 import config from "../../config/config.json";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
-import CommonMessage, {
-  COMMON_MESSAGES,
-} from "../../components/common/CommonMessage";
+import CommonMessage from "../../components/common/CommonMessage";
 import FilterLabelRemovable from "../styling/FilterLabelRemovable";
 import { filterLabels } from "../genomic/utils/GenomicFilterLabels";
+import { useGenomicAnnotationClick } from "../genomic/utils/useGenomicAnnotationClick";
 
 /**
- * GenomicAnnotations
- * Renders predefined genomic example queries inside collapsible sections.
- * Includes dynamic Molecular Effect examples taken from /filtering_terms.
+ * This component renders predefined genomic example queries inside collapsible sections
+ * Includes dynamic Molecular Effect examples taken from /filtering_terms
  */
 export default function GenomicAnnotations() {
   const [message, setMessage] = useState(null);
 
   const {
+    selectedFilter,
     setSelectedFilter,
     setQueryDirty,
     hasSearchResults,
@@ -140,43 +138,14 @@ export default function GenomicAnnotations() {
   // 2) Simple ontology terms (e.g. molecular effects)
   // 3) Full genomic queries (e.g. SNP positions)
 
-  const handleGenomicFilter = (item) => {
-    // Case 2: Genomic annotation example opens the Genomic Query Builder tool
-    if (item.type === "genomic" && item.queryParams) {
-      setGenomicPrefill(item);
-      openGenomicQueryBuilder();
-      return;
-    }
-
-    // Case 1: simple alphanumeric filter (opens input box)
-    if (item.type === "alphanumeric") {
-      setExtraFilter(item);
-      return;
-    }
-
-    // Case 3: filtering term (ontology)
-    // These items do NOT contain queryParams. They represent a simple keyword.
-    const isFilterTerm =
-      !item.queryParams || Object.keys(item.queryParams).length === 0;
-    if (isFilterTerm) {
-      setSelectedFilter((prev = []) => {
-        if (prev.some((f) => f.id === item.id)) {
-          // Avoid duplicates
-          setMessage(COMMON_MESSAGES.doubleValue);
-          setTimeout(() => setMessage(null), 3000);
-          return prev;
-        }
-        // Add the ontology term as a simple filter
-        return [...prev, { ...item, bgColor: "genomic" }];
-      });
-
-      // If a search already exists, mark the UI as "dirty" as the user will see a message
-      if (hasSearchResults) setQueryDirty(true);
-      return;
-    }
-
-    return;
-  };
+  const handleGenomicFilter = useGenomicAnnotationClick({
+    selectedFilter,
+    setMessage,
+    setQueryDirty,
+    hasSearchResults,
+    setGenomicPrefill,
+    openGenomicQueryBuilder,
+  });
 
   // Render collapsible categories and their labels as clickable filter chips
   return (
@@ -240,9 +209,7 @@ export default function GenomicAnnotations() {
                     variant="simple"
                     label={item.label}
                     bgColor="genomic"
-                    onClick={() =>
-                      handleGenomicFilter({ ...item, bgColor: "genomic" })
-                    }
+                    onClick={() => handleGenomicFilter(item)}
                   />
                 ))}
               </Box>

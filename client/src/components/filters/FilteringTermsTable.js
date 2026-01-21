@@ -15,7 +15,7 @@ import config from "../../config/config.json";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import Loader from "../common/Loader";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
-import { FILTERING_TERMS_COLUMNS } from "../../lib/constants";
+import { FILTERING_TERMS_COLUMNS } from "../../lib/tableConstants";
 import { capitalize } from "../common/textFormatting";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";

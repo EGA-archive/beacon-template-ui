@@ -6,6 +6,8 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useRef, useEffect } from "react";
 import config from "../../config/config.json";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 // This component renders an input bar for adding free-text genomic queries.
 // It includes a dropdown for selecting the genome assembly coming from the config,
@@ -350,7 +352,11 @@ export default function SearchGenomicInput({
         <Box sx={{ position: "relative", flex: 1 }}>
           <InputBase
             inputRef={inputRef}
-            placeholder="Search by Genomic Query. Examples: 17-7674945-G-A or 17:7674945G>A"
+            placeholder={
+              activeInput === "genomic"
+                ? "Search by Genomic Query. Examples: 17-7674945-G-A or 17:7674945G>A"
+                : "Search by Genomic Query."
+            }
             fullWidth
             value={genomicDraft}
             onChange={(e) => setGenomicDraft(e.target.value)}
@@ -458,6 +464,12 @@ export default function SearchGenomicInput({
                 py: 1,
               }}
             >
+              <RadioButtonUncheckedIcon
+                sx={{
+                  color: "grey",
+                  fontSize: 16,
+                }}
+              />
               {isVariant ? (
                 <>
                   Add <b>genomic variant:</b> <code>{cleanedValue}</code>

@@ -128,6 +128,10 @@ const mapQueryParamsToFormik = (queryType, queryParams = {}) => {
         ...base,
         assemblyId: queryParams.assemblyId || "",
         chromosome: queryParams.referenceName || "",
+        startMin: queryParams.start?.[0] ?? "",
+        startMax: queryParams.start?.[1] ?? "",
+        endMin: queryParams.end?.[0] ?? "",
+        endMax: queryParams.end?.[1] ?? "",
       };
 
     default:

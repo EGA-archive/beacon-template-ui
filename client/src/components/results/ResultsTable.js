@@ -1,7 +1,7 @@
 import {
   BEACON_NETWORK_COLUMNS,
   BEACON_SINGLE_COLUMNS,
-} from "../../lib/constants";
+} from "../../lib/tableConstants";
 import React, { lazy, Suspense } from "react";
 import {
   Box,
@@ -23,6 +23,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
 import LocalPostOfficeRoundedIcon from "@mui/icons-material/LocalPostOfficeRounded";
+import LocalPostOfficeOutlinedIcon from "@mui/icons-material/LocalPostOfficeOutlined";
 import config from "../../config/config.json";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import { useState, useEffect } from "react";
@@ -498,34 +499,37 @@ export default function ResultsTable() {
                           }}
                         >
                           {itemEmail && (
-                            <Tooltip title="Contact this beacon" arrow>
-                              <Button
-                                variant="text"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEmail(itemEmail);
-                                }}
-                                sx={{
-                                  textTransform: "none",
-                                  fontSize: "14px",
-                                  fontWeight: 400,
-                                  fontFamily: '"Open Sans", sans-serif',
-                                  backgroundColor: "transparent",
-                                  color: config.ui.colors.darkPrimary,
-                                  width: "50px",
-                                  height: "30px",
-                                  minWidth: "30px",
-                                  minHeight: "30px",
-                                  padding: 0,
-                                  transition: "all 0.3s ease",
-                                  "&:hover": {
-                                    color: config.ui.colors.primary,
-                                  },
-                                }}
-                              >
-                                <LocalPostOfficeRoundedIcon />
-                              </Button>
-                            </Tooltip>
+                            <Button
+                              variant="text"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEmail(itemEmail);
+                              }}
+                              sx={{
+                                textTransform: "none",
+                                fontSize: "14px",
+                                fontWeight: 400,
+                                fontFamily: '"Open Sans", sans-serif',
+                                backgroundColor: "transparent",
+                                color: config.ui.colors.primary,
+                                width: "50px",
+                                height: "30px",
+                                minWidth: "30px",
+                                minHeight: "30px",
+                                padding: 0,
+                                transition: "all 0.3s ease",
+                                backgroundColor: "transparent",
+                                "&:hover": { backgroundColor: "transparent" },
+                                "& .hoverIcon": { display: "none" },
+                                "&:hover .hoverIcon": {
+                                  display: "inline-flex",
+                                },
+                                "&:hover .defaultIcon": { display: "none" },
+                              }}
+                            >
+                              <LocalPostOfficeRoundedIcon className="hoverIcon" />
+                              <LocalPostOfficeOutlinedIcon className="defaultIcon" />
+                            </Button>
                           )}
                         </TableCell>
                       </TableRow>
