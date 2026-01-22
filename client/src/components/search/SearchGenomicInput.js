@@ -421,7 +421,7 @@ export default function SearchGenomicInput({
               sx={{
                 width: "100%",
                 backgroundColor: "#F1F1F1",
-                px: 3,
+                px: 6,
                 py: 1,
               }}
             >
@@ -462,14 +462,50 @@ export default function SearchGenomicInput({
                 width: "100%",
                 px: 3,
                 py: 1,
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
               }}
             >
-              <RadioButtonUncheckedIcon
+              <Box
                 sx={{
-                  color: "grey",
-                  fontSize: 16,
+                  position: "relative",
+                  width: 16,
+                  height: 16,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: isVariant ? "pointer" : "default",
+                  "& .unchecked": {
+                    display: "block",
+                  },
+                  "& .checked": {
+                    display: "none",
+                  },
+                  "&:hover .unchecked": {
+                    display: isVariant ? "none" : "block",
+                  },
+                  "&:hover .checked": {
+                    display: isVariant ? "block" : "none",
+                  },
                 }}
-              />
+              >
+                <RadioButtonUncheckedIcon
+                  className="unchecked"
+                  sx={{
+                    color: isVariant ? config.ui.colors.primary : "grey",
+                    fontSize: 16,
+                  }}
+                />
+                <CheckCircleIcon
+                  className="checked"
+                  sx={{
+                    color: alpha(config.ui.colors.primary, 0.6),
+                    fontSize: 16,
+                  }}
+                />
+              </Box>
+
               {isVariant ? (
                 <>
                   Add <b>genomic variant:</b> <code>{cleanedValue}</code>

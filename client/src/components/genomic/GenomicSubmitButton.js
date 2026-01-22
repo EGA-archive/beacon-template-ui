@@ -2,8 +2,6 @@ import { useFormikContext } from "formik";
 import { Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import config from "../../config/config.json";
-import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 // Define and export the GenomicSubmitButton component
 export default function GenomicSubmitButton({ disabled }) {
@@ -37,7 +35,6 @@ export default function GenomicSubmitButton({ disabled }) {
       }}
     >
       {/* Button label */}
-      <RadioButtonUncheckedIcon />
       Add Genomic Query
     </Button>
   );
