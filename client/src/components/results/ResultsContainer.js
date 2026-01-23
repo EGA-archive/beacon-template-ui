@@ -21,9 +21,13 @@ export default function ResultsContainer() {
     }
   }, [loadingData]);
 
-  const positiveResults = resultData.filter(
-    (item) => item.exists === true && !item.info?.error
-  );
+  const positiveResults = resultData.filter((item) => {
+    if (item.exists !== undefined) {
+      return item.exists === true && !item.info?.error;
+    }
+
+    return !item.info?.error;
+  });
 
   return (
     <>

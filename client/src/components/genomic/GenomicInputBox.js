@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Box, TextField, Select, MenuItem, Typography } from "@mui/material";
 import { useField } from "formik";
 import config from "../../config/config.json";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
+import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
 import {
   selectStyle,
   textFieldStyle,
@@ -39,6 +41,8 @@ export default function GenomicInputBox({
 }) {
   // Connect this field to Formik (value, error, helpers)
   const [field, meta, helpers] = useField(name);
+
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
 
   // Show error only if user touched the field
   const error = meta.touched && meta.error;
@@ -92,10 +96,16 @@ export default function GenomicInputBox({
       return (
         <Select
           fullWidth
-          IconComponent={KeyboardArrowDownIcon}
+          IconComponent={
+            isOptionsOpen
+              ? KeyboardArrowUpRoundedIcon
+              : KeyboardArrowRightRoundedIcon
+          }
           displayEmpty
           value={field.value}
           onChange={(e) => helpers.setValue(e.target.value)}
+          onOpen={() => setIsOptionsOpen(true)}
+          onClose={() => setIsOptionsOpen(false)}
           error={!!error}
           disabled={isDisabled}
           sx={{

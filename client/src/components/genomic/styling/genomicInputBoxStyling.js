@@ -110,7 +110,6 @@ export const FieldHeader = ({
     return primaryDarkColor; // normal dark primary
   };
 
-  // color: unavailableColor,
   return (
     <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
       {isSelectable && (
