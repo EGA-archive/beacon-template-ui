@@ -71,15 +71,6 @@
         "revokeAccessTokenOnSignout": true
       }
     },
-
-    "contact": {
-      "showContactPage": false,
-      "apiPath": "http://localhost:5000/api/contact",
-      "recipientKey": "beacon_support"
-    },
-
-    "showPrivacyPolicy": false,
-    "privacyPolicyFile": "privacy/privacy-policy.md",
     "entryTypesOrder": [
       "g_variants",
       "individuals",

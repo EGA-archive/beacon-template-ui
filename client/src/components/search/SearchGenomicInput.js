@@ -3,7 +3,9 @@ import { alpha } from "@mui/system";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { useRef, useEffect } from "react";
+import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
+import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
+import { useRef, useEffect, useState } from "react";
 import config from "../../config/config.json";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
@@ -291,6 +293,15 @@ export default function SearchGenomicInput({
     setGenomicDraft("");
   };
 
+  const [isAssemblyOpen, setIsAssemblyOpen] = useState(false);
+
+  const AssemblyArrowIcon = (props) =>
+    isAssemblyOpen ? (
+      <KeyboardArrowDownIcon {...props} />
+    ) : (
+      <KeyboardArrowRightRoundedIcon {...props} />
+    );
+
   return (
     <Box
       sx={{
@@ -317,9 +328,11 @@ export default function SearchGenomicInput({
           <Select
             value={assembly}
             onChange={(e) => setAssembly(e.target.value)}
+            onOpen={() => setIsAssemblyOpen(true)}
+            onClose={() => setIsAssemblyOpen(false)}
             variant="standard"
             disableUnderline
-            IconComponent={KeyboardArrowDownIcon}
+            IconComponent={AssemblyArrowIcon}
             sx={{
               backgroundColor: "black",
               color: "#fff",
@@ -333,6 +346,7 @@ export default function SearchGenomicInput({
               borderTopLeftRadius: "999px",
               borderBottomLeftRadius: "999px",
               ".MuiSelect-icon": { color: "#fff", mr: 1 },
+              ".MuiSelect-iconOpen": { transform: "none" },
             }}
           >
             {config.assemblyId.map((id) => (
