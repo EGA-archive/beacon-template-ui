@@ -53,8 +53,8 @@ export default function CaseLevelDataCell({ value }) {
       {truncated && (
         <Box sx={{ mt: 0.5, fontSize: "11px" }}>
           <b>
-            List truncated for readability. The complete set of case-level
-            records is not shown.
+            List truncated for readability. Please download the dataset for the
+            complete set of case-level records at this position.
           </b>
         </Box>
       )}

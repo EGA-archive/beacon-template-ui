@@ -119,6 +119,15 @@ export default function NetworkMembers() {
                 beacon.response.organization?.contactUrl || "#";
               const beaconEnvironment = beacon.response.environment;
 
+              const actionLinks = [
+                // { label: "Information", link: informationLink },
+                { label: "Website", link: websiteLink },
+                { label: "Beacon API", link: beaconApiLink },
+                { label: "Contact", link: contactLink },
+              ].filter(
+                ({ link }) => typeof link === "string" && link.trim() !== ""
+              );
+
               return (
                 <Grid
                   key={index}
@@ -274,12 +283,7 @@ export default function NetworkMembers() {
                           pb: 2,
                         }}
                       >
-                        {[
-                          { label: "Information", link: informationLink },
-                          { label: "Website", link: websiteLink },
-                          { label: "Beacon API", link: beaconApiLink },
-                          { label: "Contact", link: contactLink },
-                        ].map(({ label, link }) => (
+                        {actionLinks.map(({ label, link }) => (
                           <Button
                             key={label}
                             variant="outlined"
@@ -288,7 +292,6 @@ export default function NetworkMembers() {
                             href={link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            disabled={!link || link === "#"}
                             sx={{
                               borderRadius: "999px",
                               fontWeight: 700,

@@ -368,7 +368,7 @@ export default function SearchGenomicInput({
             inputRef={inputRef}
             placeholder={
               activeInput === "genomic"
-                ? "Search by Genomic Query. Examples: 17-7674945-G-A or 17:7674945G>A"
+                ? "Search by Genomic Query. Examples: 22-16050527-C-A or 22:16050527C>A"
                 : "Search by Genomic Query."
             }
             fullWidth
@@ -443,7 +443,7 @@ export default function SearchGenomicInput({
               <span
                 onClick={(e) => {
                   e.stopPropagation();
-                  setGenomicDraft("17-7674945-G-A");
+                  setGenomicDraft("22-16050527-C-A");
                 }}
                 style={{
                   color: config.ui.colors.primary,
@@ -452,13 +452,13 @@ export default function SearchGenomicInput({
                   fontWeight: 600,
                 }}
               >
-                17-7674945-G-A
+                22-16050527-C-A
               </span>
               &nbsp;or&nbsp;
               <span
                 onClick={(e) => {
                   e.stopPropagation();
-                  setGenomicDraft("17:7674945G>A");
+                  setGenomicDraft("22:16050527C>A");
                 }}
                 style={{
                   color: config.ui.colors.primary,
@@ -467,7 +467,7 @@ export default function SearchGenomicInput({
                   fontWeight: 600,
                 }}
               >
-                17:7674945G&gt;A
+                22:16050527C&gt;A
               </span>
             </Box>
 

@@ -75,10 +75,10 @@
       "g_variants",
       "individuals",
       "biosamples",
-      "runs",
       "analyses",
+      "cohorts",
       "datasets",
-      "cohorts"
+      "runs"
     ],
 
     "commonFilters": {

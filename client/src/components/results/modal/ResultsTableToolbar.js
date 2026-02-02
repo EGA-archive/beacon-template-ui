@@ -29,6 +29,7 @@ export default function ResultsTableToolbar({
   setSearchTerm,
   sortedHeaders,
   count,
+  handleExport,
 }) {
   const { responseMeta } = useSelectedEntry();
   const colors = config.ui.colors;
@@ -131,7 +132,6 @@ export default function ResultsTableToolbar({
                 height: "40px",
               },
             }}
-            // Sara
             IconComponent={KeyboardArrowDownRoundedIcon}
           >
             {sortedHeaders.map((col) => (
@@ -199,6 +199,8 @@ export default function ResultsTableToolbar({
               marginRight: 0,
             },
           }}
+          // onClick={() => console.log("Download clicked")}
+          onClick={handleExport}
           startIcon={<DownloadRoundedIcon sx={{ color: colors.darkPrimary }} />}
         />
       </Box>

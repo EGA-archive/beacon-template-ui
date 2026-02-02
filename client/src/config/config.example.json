@@ -75,10 +75,10 @@
       "g_variants",
       "individuals",
       "biosamples",
-      "runs",
       "analyses",
+      "cohorts",
       "datasets",
-      "cohorts"
+      "runs"
     ],
 
     "commonFilters": {
@@ -97,7 +97,7 @@
             "id": "NCIT:C20197",
             "label": "Male",
             "type": "ontology",
-            "scopes": ["cohort"]
+            "scopes": ["individual", "cohort", "individuals"]
           },
           {
             "key": "diseases.ageOfOnset",
