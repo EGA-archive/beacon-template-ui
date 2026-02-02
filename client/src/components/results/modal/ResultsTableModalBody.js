@@ -337,59 +337,6 @@ const ResultsTableModalBody = ({
                         }}
                       >
                         {column.name}
-
-                        {column.id === "caseLevelData" && (
-                          <Tooltip
-                            title={
-                              <Box
-                                sx={{
-                                  p: 1,
-                                  fontFamily: '"Open Sans", sans-serif',
-                                }}
-                              >
-                                Associated to a specific Biosample Id.
-                              </Box>
-                            }
-                            placement="top-start"
-                            arrow
-                            componentsProps={{
-                              tooltip: {
-                                sx: {
-                                  backgroundColor: "#fff",
-                                  color: "#000",
-                                  border: "1px solid black",
-                                  maxWidth: "300px",
-                                },
-                              },
-                              arrow: {
-                                sx: {
-                                  color: "#fff",
-                                  "&::before": { border: "1px solid black" },
-                                },
-                              },
-                            }}
-                          >
-                            <Box
-                              component="span"
-                              sx={{
-                                cursor: "pointer",
-                                width: "16px",
-                                height: "16px",
-                                borderRadius: "50%",
-                                backgroundColor: "#fff",
-                                color: config.ui.colors.darkPrimary,
-                                fontSize: "11px",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                border: "1px solid currentColor",
-                                lineHeight: 1,
-                              }}
-                            >
-                              i
-                            </Box>
-                          </Tooltip>
-                        )}
                       </Box>
                     </TableCell>
                   ))}

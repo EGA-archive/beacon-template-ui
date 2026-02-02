@@ -88,14 +88,14 @@
           {
             "key": "female",
             "id": "NCIT:C16576",
-            "label": "Female",
+            "label": "female",
             "type": "ontology",
-            "scopes": ["individual", "cohort"]
+            "scopes": ["individual", "cohort", "individuals"]
           },
           {
             "key": "male",
             "id": "NCIT:C20197",
-            "label": "Male",
+            "label": "male",
             "type": "ontology",
             "scopes": ["individual", "cohort", "individuals"]
           },
