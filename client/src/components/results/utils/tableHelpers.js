@@ -13,11 +13,26 @@ export function cleanAndParseInfo(infoString) {
   }
 }
 
+import { formatMeasures } from "../modal/formatters/measuresFormatter";
+import { formatInfo } from "../modal/formatters/infoFormatter";
+import { formatInterventionsOrProcedures } from "../modal/formatters/interventionsOrProceduresFormatter";
+import { formatMolecularAttributes } from "../modal/formatters/molecularAttributesFormatter";
+import { formatVariation } from "../modal/formatters/variationFormatter";
+import { formatCaseLevelData } from "../modal/formatters/caseLevelDataFormatter";
+
 /**
  * Recursively summarizes nested or complex values
  * (arrays, objects, labels, ids) into readable strings for table display.
  */
-export function summarizeValue(value) {
+export function summarizeValue(value, field) {
+  if (field === "measures") return formatMeasures(value);
+  if (field === "info") return formatInfo(value);
+  if (field === "interventionsOrProcedures")
+    return formatInterventionsOrProcedures(value);
+  if (field === "molecularAttributes") return formatMolecularAttributes(value);
+  if (field === "variation") return formatVariation(value);
+  if (field === "caseLevelData") return formatCaseLevelData(value);
+
   if (value == null) return "-";
 
   if (Array.isArray(value)) {

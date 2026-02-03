@@ -23,7 +23,7 @@ export const exportCSV = async ({
     if (searchTerm.trim()) {
       results = dataTable.filter((item) => {
         const rowString = sortedHeaders
-          .map((h) => summarizeValue(item[h.id]))
+          .map((h) => summarizeValue(item[h.id], h.id))
           .join(" ")
           .toLowerCase();
         return rowString.includes(searchTerm.toLowerCase());
@@ -78,19 +78,21 @@ export const exportCSV = async ({
       headerLabels.join(","),
       ...results.map((row) =>
         headers
-          .map((field) =>
-            JSON.stringify(
-              summarizeValue(
-                row[field] !== undefined && row[field] !== null
-                  ? row[field]
-                  : ""
-              )
-            )
-          )
+          .map((field) => {
+            const value = summarizeValue(
+              row[field] !== undefined && row[field] !== null ? row[field] : "",
+              field
+            );
+
+            if (typeof value === "string") {
+              return `"${value.replace(/"/g, '""')}"`;
+            }
+
+            return value;
+          })
           .join(",")
       ),
     ];
-
     const csvContent = csvRows.join("\n");
 
     // Create file
