@@ -16,7 +16,7 @@ export const chromosomeValidator = Yup.string()
   .required("Chromosome is required")
   .test(
     "valid-chromosome",
-    "Invalid chromosome — must match the available list",
+    "Invalid chromosome. It must match the available list",
     function (input) {
       if (!input) return false;
 
@@ -178,3 +178,29 @@ export const bracketRangeValidator = Yup.object({
       }
     ),
 });
+
+export const aminoAcidChangeGroupValidator = Yup.object().test(
+  "aminoacid-change-complete",
+  "All inputs must be filled.",
+  function (values) {
+    const normalize = (v) =>
+      v === undefined || v === null || String(v).trim() === "" ? undefined : v;
+
+    const refAa = normalize(values.refAa);
+    const altAa = normalize(values.altAa);
+    const aaPosition = normalize(values.aaPosition);
+
+    const filledCount = [refAa, altAa, aaPosition].filter(Boolean).length;
+
+    // none filled
+    if (filledCount === 0) return true;
+
+    // all three filled
+    if (filledCount === 3) return true;
+
+    return this.createError({
+      path: "aaPosition",
+      message: "All inputs must be filled.",
+    });
+  }
+);

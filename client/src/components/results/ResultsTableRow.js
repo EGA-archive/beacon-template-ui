@@ -10,7 +10,7 @@ import {
   Button,
   Tooltip,
 } from "@mui/material";
-import { BEACON_NETWORK_COLUMNS_EXPANDED } from "../../lib/constants";
+import { BEACON_NETWORK_COLUMNS_EXPANDED } from "../../lib/tableConstants";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import config from "../../config/config.json";
@@ -200,6 +200,7 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
                                     !dataset.results ||
                                     dataset.results.length === 0
                                   }
+                                  data-cy="results-table-details-button"
                                   sx={{
                                     textTransform: "none",
                                     fontSize: "13px",

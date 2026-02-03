@@ -10,11 +10,11 @@ import {
   InputAdornment,
 } from "@mui/material";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
-import DownloadForOfflineRoundedIcon from "@mui/icons-material/DownloadForOfflineRounded";
-import ViewWeekRoundedIcon from "@mui/icons-material/ViewWeekRounded";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import config from "../../../config/config.json";
 import { useSelectedEntry } from "../../../components/context/SelectedEntryContext";
+import { ReactComponent as SelectColumn } from "../../../assets/logos/SelectColumn.svg";
 
 /**
  * Toolbar for the Results Table, it contains:
@@ -27,9 +27,9 @@ export default function ResultsTableToolbar({
   setVisibleColumns,
   searchTerm,
   setSearchTerm,
-  handleExport,
   sortedHeaders,
   count,
+  handleExport,
 }) {
   const { responseMeta } = useSelectedEntry();
   const colors = config.ui.colors;
@@ -43,6 +43,9 @@ export default function ResultsTableToolbar({
         justifyContent: "space-between",
         alignItems: "center",
         my: 2,
+        flexDirection: { xs: "column", md: "row" },
+        alignItems: { xs: "flex-start", md: "center" },
+        gap: { xs: 2, md: 0 },
       }}
     >
       <Box
@@ -67,11 +70,17 @@ export default function ResultsTableToolbar({
           <Box>Details returned for the first {limit} records</Box>
         )}
       </Box>
+
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: 3,
+          gap: {
+            xs: 1,
+            sm: 1,
+            md: 2,
+            lg: 3,
+          },
         }}
       >
         <FormControl size="small">
@@ -81,8 +90,14 @@ export default function ResultsTableToolbar({
             value={visibleColumns}
             onChange={(e) => setVisibleColumns(e.target.value)}
             renderValue={() => (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <ViewWeekRoundedIcon sx={{ color: colors.darkPrimary }} />
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <SelectColumn sx={{ color: colors.darkPrimary }} />
                 <span
                   style={{
                     color: colors.darkPrimary,
@@ -108,7 +123,12 @@ export default function ResultsTableToolbar({
                 alignItems: "center",
                 gap: "8px",
                 py: 0.5,
-                width: "200px",
+                width: {
+                  xs: "120px",
+                  sm: "150px",
+                  md: "150px",
+                  lg: "200px",
+                },
                 height: "40px",
               },
             }}
@@ -134,14 +154,18 @@ export default function ResultsTableToolbar({
             ))}
           </Select>
         </FormControl>
-
         <TextField
           size="small"
           placeholder="Search keywords"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           sx={{
-            width: "237px",
+            width: {
+              xs: "160px",
+              sm: "170px",
+              md: "170px",
+              lg: "237px",
+            },
             "& .MuiOutlinedInput-root": {
               borderRadius: "24px",
               height: "40px",
@@ -175,10 +199,9 @@ export default function ResultsTableToolbar({
               marginRight: 0,
             },
           }}
-          startIcon={
-            <DownloadForOfflineRoundedIcon sx={{ color: colors.darkPrimary }} />
-          }
+          // onClick={() => console.log("Download clicked")}
           onClick={handleExport}
+          startIcon={<DownloadRoundedIcon sx={{ color: colors.darkPrimary }} />}
         />
       </Box>
     </Box>

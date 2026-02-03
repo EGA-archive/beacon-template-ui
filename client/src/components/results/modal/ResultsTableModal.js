@@ -5,7 +5,7 @@ import Fade from "@mui/material/Fade";
 import ResultsTableModalBody from "./ResultsTableModalBody";
 import config from "../../../config/config.json";
 import CloseIcon from "@mui/icons-material/Close";
-import { InputAdornment, IconButton } from "@mui/material";
+import { IconButton } from "@mui/material";
 import { useSelectedEntry } from "../../context/SelectedEntryContext";
 import Loader from "../../common/Loader";
 import { PATH_SEGMENT_TO_ENTRY_ID } from "../../common/textFormatting";
@@ -209,31 +209,34 @@ const ResultsTableModal = ({
     <Modal open={open} onClose={handleClose}>
       <Fade in={open}>
         <Box sx={style}>
-          {/* Close button top left */}
-          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-            <InputAdornment position="end">
-              <IconButton
-                onClick={handleClose}
-                size="small"
-                sx={{ color: config.ui.colors.darkPrimary }}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </InputAdornment>
-          </Box>
-
-          {/* Title  */}
-          <Typography
-            id="modal-modal-title"
+          {/* Header: title (left) + close button (right) */}
+          <Box
             sx={{
-              fontWeight: "bold",
-              fontSize: "17px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
               mb: 2,
-              color: config.ui.colors.darkPrimary,
             }}
           >
-            Results detailed table
-          </Typography>
+            <Typography
+              id="modal-modal-title"
+              sx={{
+                fontWeight: "bold",
+                fontSize: "17px",
+                color: config.ui.colors.darkPrimary,
+              }}
+            >
+              Results detailed table
+            </Typography>
+
+            <IconButton
+              onClick={handleClose}
+              size="small"
+              sx={{ color: config.ui.colors.darkPrimary }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
 
           {/* Scrollable Table with the details results */}
           <Box

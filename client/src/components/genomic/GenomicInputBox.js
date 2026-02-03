@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Box, TextField, Select, MenuItem, Typography } from "@mui/material";
 import { useField } from "formik";
 import config from "../../config/config.json";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
+import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
 import {
   selectStyle,
   textFieldStyle,
@@ -35,9 +37,12 @@ export default function GenomicInputBox({
   customPaddingTop,
   disabled = false,
   variant,
+  containerSx,
 }) {
   // Connect this field to Formik (value, error, helpers)
   const [field, meta, helpers] = useField(name);
+
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
 
   // Show error only if user touched the field
   const error = meta.touched && meta.error;
@@ -91,10 +96,16 @@ export default function GenomicInputBox({
       return (
         <Select
           fullWidth
-          IconComponent={KeyboardArrowDownIcon}
+          IconComponent={
+            isOptionsOpen
+              ? KeyboardArrowUpRoundedIcon
+              : KeyboardArrowRightRoundedIcon
+          }
           displayEmpty
           value={field.value}
           onChange={(e) => helpers.setValue(e.target.value)}
+          onOpen={() => setIsOptionsOpen(true)}
+          onClose={() => setIsOptionsOpen(false)}
           error={!!error}
           disabled={isDisabled}
           sx={{
@@ -161,17 +172,9 @@ export default function GenomicInputBox({
 
   // Final return: wrapper box with label and dynamic input
   return (
-    // <Box
-    //   sx={{
-    //     border: `1px solid ${primaryDarkColor}`,
-    //     borderRadius: "10px",
-    //     padding: "12px",
-    //     backgroundColor: isDisabled ? "#F0F0F0" : "white",
-    //     opacity: isDisabled ? 0.5 : 1,
-    //   }}
-    // >
     <Box
       sx={{
+        height: "auto",
         border: `1px solid ${
           isUnavailable
             ? "#E0E0E0" // pale border for unavailable
@@ -190,13 +193,13 @@ export default function GenomicInputBox({
         opacity: isUnavailable ? 0.4 : 1,
         cursor: isInactiveSelectable ? "pointer" : "default",
         transition: "all 0.2s ease",
-
         "&:hover": isInactiveSelectable
           ? {
               borderColor: primaryDarkColor,
               backgroundColor: "#fff",
             }
           : {},
+        ...(containerSx || {}),
       }}
       onClick={() => {
         if (isInactiveSelectable) onSelect(); // make selectable boxes clickable

@@ -139,7 +139,5 @@ export const buildGenomicParams = (queryType, values, selectedInput) => {
       delete params[key];
     }
   });
-
-  // console.log("[GQB] buildGenomicParams.output ➜", params);
   return params;
 };

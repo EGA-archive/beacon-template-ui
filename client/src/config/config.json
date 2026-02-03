@@ -58,7 +58,7 @@
       ]
     },
 
-    "showLogin": true,
+    "showLogin": false,
     "auth": {
       "providerType": "private",
       "oidc": {
@@ -71,142 +71,118 @@
         "revokeAccessTokenOnSignout": true
       }
     },
-
-    "contact": {
-      "showContactPage": false,
-      "apiPath": "http://localhost:5000/api/contact",
-      "recipientKey": "beacon_support"
-    },
-
-    "showPrivacyPolicy": false,
-    "privacyPolicyFile": "privacy/privacy-policy.md",
     "entryTypesOrder": [
       "g_variants",
       "individuals",
       "biosamples",
-      "runs",
       "analyses",
+      "cohorts",
       "datasets",
-      "cohorts"
+      "runs"
     ],
 
     "commonFilters": {
-      "filterCategories": ["Demographics", "Cancer", "Covid"],
+      "filterCategories": [
+        "Demographics",
+        "Metabolic Diseases",
+        "Mental Diseases"
+      ],
       "filterLabels": {
         "Demographics": [
           {
             "key": "female",
             "id": "NCIT:C16576",
-            "label": "Female",
+            "label": "female",
             "type": "ontology",
-            "scopes": ["individual", "cohort"]
+            "scopes": ["individual", "cohort", "individuals"]
           },
           {
             "key": "male",
             "id": "NCIT:C20197",
-            "label": "Male",
+            "label": "male",
             "type": "ontology",
-            "scopes": ["cohort"]
-          },
-          {
-            "key": "diseases.ageOfOnset",
-            "id": "diseases.ageOfOnset",
-            "label": "Diseases Age Of Onset",
-            "type": "alphanumeric",
-            "scopes": ["individual"]
+            "scopes": ["individual", "cohort", "individuals"]
           },
           {
             "key": "weight",
             "id": "weight",
-            "label": "Weight",
+            "label": "weight",
             "type": "alphanumeric"
           },
           {
-            "key": "height",
-            "id": "height",
-            "label": "Height",
-            "type": "alphanumeric"
+            "key": "ethnicity",
+            "id": "ethnicity",
+            "label": "ethnicity",
+            "type": "alphanumeric",
+            "scopes": ["individual"]
+          },
+
+          {
+            "key": "Asian or Asian British",
+            "id": "NCIT:C41260",
+            "label": "Asian or Asian British",
+            "type": "ontology",
+            "scopes": ["individual"]
           }
         ],
-        "Cancer": [
+        "Metabolic Diseases": [
           {
-            "key": "serous cystadenocarcinoma",
-            "label": "Serous Cystadenocarcinoma",
+            "key": "obesity",
+            "label": "obesity",
+            "id": "ICD10:E66",
             "type": "ontology",
-            "id": "NCIT:C3778",
-            "scopes": ["biosample"]
-          },
-          {
-            "key": "Breast Cancer",
-            "label": "Breast Cancer",
-            "type": "ontology",
-            "id": "NCIT:C4872",
-            "scopes": ["individual", "biosample", "cohort"]
-          },
-          {
-            "key": "Radiation therapy",
-            "label": "Radiation therapy",
-            "type": "ontology",
-            "id": "NCIT:C15313",
-            "scopes": ["cohort"]
-          },
-          {
-            "key": "chemotherapy procedure",
-            "label": "Chemotherapy Procedure",
-            "type": "ontology",
-            "id": "OGMS:0000113",
             "scopes": ["individual"]
           },
           {
-            "key": "tumorGrade",
-            "label": "tumorGrade",
-            "type": "alphanumeric",
-            "id": "tumorGrade",
-            "scopes": ["biosample"]
+            "key": "gastro-oesophageal reflux disease",
+            "label": "gastro-oesophageal reflux disease",
+            "id": "ICD10:K21",
+            "type": "ontology",
+            "scopes": ["individual"]
           },
           {
-            "key": "Oxaliplatin",
-            "label": "Oxaliplatin",
+            "key": "insulin-dependent diabetes mellitus",
+            "label": "insulin-dependent diabetes mellitus",
+            "id": "ICD10:E10",
             "type": "ontology",
-            "id": "NCIT:C65110"
+            "scopes": ["individual"]
+          },
+          {
+            "key": "thyroiditis",
+            "label": "thyroiditis",
+            "id": "ICD10:E06",
+            "type": "ontology",
+            "scopes": ["individual"]
+          },
+          {
+            "key": "iron deficiency anaemia",
+            "label": "iron deficiency anaemia",
+            "id": "ICD10:D50",
+            "type": "ontology",
+            "scopes": ["individual"]
           }
         ],
-        "Covid": [
+        "Mental Diseases": [
           {
-            "key": "COVID-19",
-            "label": "COVID-19",
+            "key": "schizophrenia",
+            "label": "schizophrenia",
+            "id": "ICD10:F20",
             "type": "ontology",
-            "id": "NCIT:C171222"
+            "scopes": ["individual"]
           },
           {
-            "key": "Immunocompromised",
-            "label": "Immunocompromised",
+            "key": "eating disorders",
+            "label": "eating disorders",
+            "id": "ICD10:F50",
             "type": "ontology",
-            "id": "NCIT:C2851"
+            "scopes": ["individual"]
           },
           {
-            "key": "Asthma",
-            "label": "Asthma",
+            "key": "bipolar affective disorder",
+            "label": "bipolar affective disorder",
+            "id": "ICD10:F3181",
             "type": "ontology",
-            "id": "NCIT:C2985"
-          },
-          {
-            "key": "Hospitalization",
-            "label": "Hospitalization",
-            "type": "ontology",
-            "id": "NCIT:C25179"
-          },
-          {
-            "key": "Intubation",
-            "label": "Intubation",
-            "type": "ontology",
-            "id": "NCIT:C38097"
-          },
-          {
-            "key": "Intensive Care Unit Stay",
-            "label": "Intensive Care Unit Stay",
-            "type": "ontology",
-            "id": "NCIT:C25463"
+            "scopes": ["individual"]
           }
         ]
       }

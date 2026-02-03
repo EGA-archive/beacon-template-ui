@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { lighten } from "@mui/system";
 import config from "../../config/config.json";
-import { COHORTS_TABLE } from "../../lib/constants";
+import { COHORTS_TABLE } from "../../lib/tableConstants";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 
 export default function CohortsTable() {
@@ -20,9 +20,6 @@ export default function CohortsTable() {
     fontWeight: 700,
     color: "white",
     transition: "background-color 0.3s ease",
-    "&:hover": {
-      backgroundColor: lighten(config.ui.colors.darkPrimary, 0.1),
-    },
   };
   const getGenderDistribution = (cohort) => {
     try {

@@ -57,6 +57,10 @@
   fill: var(--icon-color) !important;
 }
 
+.dnaIcon path {
+  stroke-width: 0.5px !important;
+}
+
 .dnaIcon path[fill="#3176B1"] {
   fill: var(--dna-primary-color) !important;
 }

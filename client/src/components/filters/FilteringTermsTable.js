@@ -8,11 +8,6 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Stack,
-  Pagination,
-  Typography,
-  Select,
-  MenuItem,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { lighten } from "@mui/material/styles";
@@ -20,9 +15,8 @@ import config from "../../config/config.json";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import Loader from "../common/Loader";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
-import { FILTERING_TERMS_COLUMNS } from "../../lib/constants";
+import { FILTERING_TERMS_COLUMNS } from "../../lib/tableConstants";
 import { capitalize } from "../common/textFormatting";
-import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
@@ -31,6 +25,7 @@ import {
   getDisplayLabelAndScope,
 } from "../common/filteringTermsHelpers";
 import { getSelectableScopeStyles } from "../styling/selectableScopeStyles";
+import { alpha } from "@mui/material/styles";
 
 // This component displays a table of filtering terms.
 // It also lets users select a scope (like individual or biosample) when a filtering term is linked to multiple scopes.
@@ -99,6 +94,7 @@ export default function FilteringTermsTable({
 
   // Lighten the primary color from config for table styling
   const bgPrimary = lighten(config.ui.colors.primary, 0.8);
+  const bgPrimaryLight = alpha(config.ui.colors.primary, 0.05);
 
   // Make sure filteringTerms is not undefined
   const allFilteringTerms = filteringTerms?.response?.filteringTerms ?? [];
@@ -126,7 +122,7 @@ export default function FilteringTermsTable({
           updated.delete(scopeKey);
           return updated;
         });
-      }, 1000);
+      }, 5000);
 
       return newSet;
     });
@@ -164,7 +160,7 @@ export default function FilteringTermsTable({
             <Table stickyHeader aria-label="filtering terms table">
               {/* Table header */}
               <TableHead>
-                <TableRow>
+                <TableRow data-cy="filtering-term-row">
                   {FILTERING_TERMS_COLUMNS.map((col) => (
                     <TableCell
                       key={col.id}
@@ -207,16 +203,6 @@ export default function FilteringTermsTable({
                         allScopes?.[0] ||
                         null;
 
-                      // const item = {
-                      //   key: term.id,
-                      //   label: displayLabel?.trim()
-                      //     ? displayLabel
-                      //     : term.label || term.id,
-                      //   type: term.type,
-                      //   scope: activeScope,
-                      //   scopes: allScopes || [],
-                      // };
-
                       const uniqueId = `common-free-${Date.now().toString(
                         36
                       )}-${Math.random().toString(36).slice(2, 7)}`;
@@ -231,9 +217,12 @@ export default function FilteringTermsTable({
                         scopes: allScopes || [],
                       };
 
+                      const hasMultipleScopes = item.scopes.length > 1;
+
                       return (
                         <TableRow
-                          key={item.key}
+                          // key={item.key}
+                          key={term.id}
                           onClick={() => {
                             if (extraFilter && !extraFilter.value) {
                               setMessage(COMMON_MESSAGES.incompleteFilter);
@@ -253,12 +242,6 @@ export default function FilteringTermsTable({
                               setExtraFilter({ ...item, setAddedFilters });
                               return;
                             }
-                            // setSelectedFilter((prev) => {
-                            //   const isDuplicate = prev.some(
-                            //     (filter) =>
-                            //       filter.label === item.label &&
-                            //       filter.scope === item.scope
-                            //   );
                             setSelectedFilter((prev) => {
                               const isDuplicate = prev.some(
                                 (filter) =>
@@ -307,7 +290,7 @@ export default function FilteringTermsTable({
                             transition:
                               "opacity 0.2s ease, background-color 0.2s ease-in-out",
                             "&:hover td": {
-                              backgroundColor: bgPrimary,
+                              backgroundColor: bgPrimaryLight,
                             },
                           }}
                         >
@@ -392,41 +375,55 @@ export default function FilteringTermsTable({
                           </TableCell>
 
                           {/* Column 2: ID */}
-                          <TableCell>{term.id}</TableCell>
+                          <TableCell data-cy="filtering-term-id">
+                            {term.id}
+                          </TableCell>
                           {/* Column 3: Label + Type */}
-                          <TableCell>{`${item.label}`}</TableCell>
-                          {/* <TableCell>{`${item.label} (${item.type})`}</TableCell>  */}
-                          {/* Column 4: Available scopes as selectable chips */}
-                          <TableCell>
+                          <TableCell data-cy="filtering-term-label">
+                            {" "}
+                            {displayLabel?.trim() ? item.label : "–"}
+                          </TableCell>
+                          {/* Column 4: Rendering Filter Types*/}
+                          <TableCell>{capitalize(item.type)}</TableCell>
+                          {/* Column 5: Available scopes as selectable chips */}
+                          <TableCell data-cy="filtering-term-scope">
                             {item.scopes.length > 0 &&
                               item.scopes.map((scope, i) => {
                                 const isSelected =
                                   selectedScopes[term.id] === scope;
+
                                 return (
                                   <Box
                                     key={i}
                                     component="span"
-                                    // When the user clicks this scope "pill"
+                                    data-cy={
+                                      isSelected
+                                        ? "scope-pill-selected"
+                                        : "scope-pill"
+                                    }
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      handleScopeClick(term.id, scope); // Update the selected scope for this term
+                                      handleScopeClick(term.id, scope);
                                     }}
-                                    // Apply dynamic styles based on whether this scope is selected or not
                                     sx={getSelectableScopeStyles(isSelected)}
                                   >
                                     {capitalize(scopeAlias[scope] || scope)}
                                   </Box>
                                 );
                               })}
-
-                            {changedScopes.has(`${item.id}-${item.scope}`) && (
-                              <ChangeCircleIcon
-                                sx={{
-                                  color: config.ui.colors.primary,
-                                  fontSize: "20px",
-                                }}
-                              />
-                            )}
+                            {hasMultipleScopes &&
+                              changedScopes.has(`${item.id}-${item.scope}`) && (
+                                <Box
+                                  sx={{
+                                    mt: 2,
+                                    fontSize: "12px",
+                                    fontStyle: "italic",
+                                    color: config.ui.colors.primary,
+                                  }}
+                                >
+                                  New scope applied
+                                </Box>
+                              )}
                           </TableCell>
                         </TableRow>
                       );

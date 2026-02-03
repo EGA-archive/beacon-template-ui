@@ -54,6 +54,7 @@ export const textFieldStyle = {
     fontSize: "14px",
     color: primaryDarkColor,
     padding: "12px 16px",
+    height: "auto",
   },
 };
 
@@ -94,42 +95,6 @@ export const FieldLabel = ({
  * - Used at the top of each form field section
  * - Can show a label and optionally a radio button to select the field
  */
-// export const FieldHeader = ({
-//   label, // Text of the section
-//   required, // Whether to show a * next to label
-//   isSelectable, // If true, shows a radio button
-//   isSelected, // Whether the radio is selected
-//   onSelect, // Function to call when selected
-// }) => (
-//   <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-//     {isSelectable && (
-//       <Radio
-//         checked={isSelected}
-//         onClick={onSelect}
-//         value={label}
-//         sx={{
-//           padding: "0 8px 0 0",
-//           color: primaryDarkColor,
-//           "&.Mui-checked": {
-//             color: primaryDarkColor,
-//           },
-//         }}
-//       />
-//     )}
-//     <Typography
-//       sx={{
-//         fontFamily: '"Open Sans", sans-serif',
-//         fontWeight: 700,
-//         fontSize: "14px",
-//         color: primaryDarkColor,
-//       }}
-//     >
-//       {label}
-//       {required && <span style={{ color: primaryDarkColor }}>*</span>}
-//     </Typography>
-//   </Box>
-// );
-
 export const FieldHeader = ({
   label,
   required,
@@ -145,7 +110,6 @@ export const FieldHeader = ({
     return primaryDarkColor; // normal dark primary
   };
 
-  // color: unavailableColor,
   return (
     <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
       {isSelectable && (

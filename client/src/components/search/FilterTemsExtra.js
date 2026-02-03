@@ -153,6 +153,7 @@ export default function FilterTermsExtra() {
       }
 
       // Step 4. Reset all local inputs after successfully adding the filter
+      setIsExtraFilterValid(true);
       setExtraFilter(null);
       setSelectedOperator(">");
       setSelectedValue("");
@@ -171,18 +172,30 @@ export default function FilterTermsExtra() {
 
     // Remove the pending extra filter from global context
     setExtraFilter(null);
+    setIsExtraFilterValid(true);
   };
 
   // This effect updates the global "isExtraFilterValid" state based on the current extraFilter type and the user's input.
   // This ensures the validation applies ONLY to alphanumeric filters.
+  // useEffect(() => {
+  //   if (!extraFilter || extraFilter.type !== "alphanumeric") {
+  //     setIsExtraFilterValid(true);
+  //     return;
+  //   }
+
+  //   setIsExtraFilterValid(selectedValue.trim() !== "");
+  // }, [extraFilter, selectedValue, setIsExtraFilterValid]);
+
   useEffect(() => {
-    if (!extraFilter || extraFilter.type !== "alphanumeric") {
-      setIsExtraFilterValid(true);
+    // If an alphanumeric extra filter is active (not yet added), disable Search
+    if (extraFilter?.type === "alphanumeric") {
+      setIsExtraFilterValid(false);
       return;
     }
 
-    setIsExtraFilterValid(selectedValue.trim() !== "");
-  }, [extraFilter, selectedValue, setIsExtraFilterValid]);
+    // Otherwise Search can be enabled (unless other logic disables it elsewhere)
+    setIsExtraFilterValid(true);
+  }, [extraFilter, setIsExtraFilterValid]);
 
   return (
     <Box

@@ -44,7 +44,7 @@ export default function FilterLabelRemovable({
 
   const hoverColor =
     bgColor === "common"
-      ? alpha(config.ui.colors.primary, 0.15)
+      ? alpha(config.ui.colors.primary, 0.05)
       : alpha(config.ui.colors.secondary, 0.6);
 
   // Multi-scope chip flag (used for coloring rules)
@@ -52,7 +52,7 @@ export default function FilterLabelRemovable({
 
   // Background for applied multi-scope chip
   const activeBgColor = isMultiScopeChip
-    ? alpha(config.ui.colors.darkPrimary, 0.35)
+    ? alpha(config.ui.colors.primary, 0.2)
     : stateSelected
     ? alpha(config.ui.colors.primary, 0.25)
     : baseBgColor;
@@ -60,7 +60,7 @@ export default function FilterLabelRemovable({
   // Background when chip is expanded and is multi-scope
   const expandedMultiScopeBg =
     isExpanded && scopes.length > 1
-      ? alpha(config.ui.colors.darkPrimary, 0.35)
+      ? alpha(config.ui.colors.primary, 0.2)
       : null;
 
   // Final chip background depending on simple/expanded/selected state
@@ -72,7 +72,7 @@ export default function FilterLabelRemovable({
 
   // Hover color specifically for multi-scope chips
   const multiScopeHoverBg = isMultiScopeChip
-    ? alpha(config.ui.colors.darkPrimary, 0.5)
+    ? alpha(config.ui.colors.primary, 0.3)
     : null;
 
   // Show scope inside label only if there are multiple

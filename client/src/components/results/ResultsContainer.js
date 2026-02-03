@@ -21,6 +21,14 @@ export default function ResultsContainer() {
     }
   }, [loadingData]);
 
+  const positiveResults = resultData.filter((item) => {
+    if (item.exists !== undefined) {
+      return item.exists === true && !item.info?.error;
+    }
+
+    return !item.info?.error;
+  });
+
   return (
     <>
       {showBox && (
@@ -37,7 +45,6 @@ export default function ResultsContainer() {
         >
           {queryDirty &&
             (() => {
-              // console.log("Dirty query banner is VISIBLE on screen");
               return (
                 <Box
                   sx={{
@@ -70,11 +77,13 @@ export default function ResultsContainer() {
           >
             {loadingData && <Loader message={COMMON_MESSAGES.loadingData} />}
 
-            {!loadingData && hasSearchResults && resultData.length === 0 && (
-              <ResultsEmpty message={message || "No results"} />
-            )}
+            {!loadingData &&
+              hasSearchResults &&
+              positiveResults.length === 0 && (
+                <ResultsEmpty message={message || "No results"} />
+              )}
 
-            {!loadingData && hasSearchResults && resultData.length > 0 && (
+            {!loadingData && hasSearchResults && positiveResults.length > 0 && (
               <ResultsBox />
             )}
           </Box>

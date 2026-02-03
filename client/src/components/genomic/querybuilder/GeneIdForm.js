@@ -1,13 +1,29 @@
 import { Box, Typography } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useFormikContext } from "formik";
 import config from "../../../config/config.json";
 import GenomicInputBox from "../GenomicInputBox";
-import { mainBoxTypography } from "../styling/genomicInputBoxStyling";
+import {
+  mainBoxTypography,
+  textFieldStyle,
+} from "../styling/genomicInputBoxStyling";
 import { normalizeVariationType } from "../../genomic/utils/variationType";
 
 export default function GeneIdForm({ selectedInput, setSelectedInput }) {
   const { values, setFieldValue } = useFormikContext();
+  const hasAutoSelectedRef = useRef(false);
+
+  useEffect(() => {
+    if (hasAutoSelectedRef.current) return;
+
+    const hasAminoAcidChange =
+      values.refAa || values.aaPosition || values.altAa;
+
+    if (hasAminoAcidChange) {
+      setSelectedInput("aminoacidChange");
+      hasAutoSelectedRef.current = true;
+    }
+  }, [values.refAa, values.aaPosition, values.altAa, setSelectedInput]);
 
   const isSNP = normalizeVariationType(values?.variationType) === "SNP";
   const lengthEnabled = !isSNP;
@@ -64,6 +80,11 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
             label="Gene ID"
             placeholder="ex. BRAF"
             required
+            containerSx={
+              {
+                // height: "135px",
+              }
+            }
           />
         </Box>
 

@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useFormikContext } from "formik";
 import config from "../../../config/config.json";
 import GenomicInputBox from "../GenomicInputBox";
@@ -14,6 +14,20 @@ export default function GenomicLocationRage({
   setSelectedInput,
 }) {
   const { values, setFieldValue } = useFormikContext();
+
+  const hasAutoSelectedRef = useRef(false);
+
+  useEffect(() => {
+    if (hasAutoSelectedRef.current) return;
+
+    const hasAminoAcidChange =
+      values.refAa || values.aaPosition || values.altAa;
+
+    if (hasAminoAcidChange) {
+      setSelectedInput("aminoacidChange");
+      hasAutoSelectedRef.current = true;
+    }
+  }, [values.refAa, values.aaPosition, values.altAa, setSelectedInput]);
 
   const isSNP = normalizeVariationType(values?.variationType) === "SNP";
   const lengthEnabled = !isSNP;
@@ -202,7 +216,12 @@ export default function GenomicLocationRage({
           </Box>
 
           {/* Min and Max variant length are not exclusive, both can be filled */}
-          <Typography sx={mainBoxTypography}>
+          <Typography
+            sx={{
+              ...mainBoxTypography,
+              mt: 7.5,
+            }}
+          >
             You can add the Variant Length:
           </Typography>
 

@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -30,14 +30,14 @@ import {
   altAaValidator,
   minVariantLength,
   maxVariantLength,
-  assemblyIdOptional,
   requiredRefBases,
   requiredAltBases,
   nonRequiredAltBases,
   genomicHGVSshortForm,
-  geneId,
+  aminoAcidChangeGroupValidator,
 } from "../genomic/genomicQueryBuilderValidator";
 import config from "../../config/config.json";
+import { useSelectedEntry } from "../context/SelectedEntryContext";
 
 // List of all query types shown as options in the UI
 // Used to display the selection buttons and control which form is shown
@@ -59,6 +59,86 @@ const enabledQueryTypes = Object.entries(
     label: QUERY_TYPE_LABELS[key],
   }));
 
+// Helper, most probably will need to move it
+const EMPTY_INITIAL_VALUES = {
+  geneId: "",
+  assemblyId: "",
+  chromosome: "",
+  start: "",
+  end: "",
+  variationType: "",
+  alternateBases: "",
+  refBases: "",
+  altBases: "",
+  aminoacidChange: "",
+  minVariantLength: "",
+  maxVariantLength: "",
+  genomicHGVSshortForm: "",
+  startMin: "",
+  startMax: "",
+  endMin: "",
+  endMax: "",
+  refAa: "",
+  altAa: "",
+  aaPosition: "",
+};
+
+const mapQueryParamsToFormik = (queryType, queryParams = {}) => {
+  const base = { ...EMPTY_INITIAL_VALUES };
+  const firstOrEmpty = (v) => (Array.isArray(v) ? v[0] ?? "" : v ?? "");
+  const hasEnd = queryParams.end !== undefined && queryParams.end !== null;
+
+  switch (queryType) {
+    case "Gene ID":
+      return {
+        ...base,
+        geneId: queryParams.geneId || "",
+        refAa: queryParams.refAa || "",
+        aaPosition: queryParams.aaPosition || "",
+        altAa: queryParams.altAa || "",
+      };
+
+    case "Genomic Allele Query (HGVS)":
+      return {
+        ...base,
+        genomicHGVSshortForm: queryParams.genomicAlleleShortForm || "",
+      };
+
+    case "Sequence Query":
+      return {
+        ...base,
+        assemblyId: queryParams.assemblyId || "",
+        chromosome: queryParams.referenceName || "",
+        start: firstOrEmpty(queryParams.start),
+        refBases: queryParams.referenceBases || "",
+        alternateBases: queryParams.alternateBases || "",
+      };
+
+    case "Range Query":
+      return {
+        ...base,
+        assemblyId: queryParams.assemblyId || "",
+        chromosome: queryParams.referenceName || "",
+        start: firstOrEmpty(queryParams.start),
+        end: hasEnd ? firstOrEmpty(queryParams.end) : "",
+      };
+
+    case "Bracket Query":
+      return {
+        ...base,
+        assemblyId: queryParams.assemblyId || "",
+        chromosome: queryParams.referenceName || "",
+        startMin: queryParams.start?.[0] ?? "",
+        startMax: queryParams.start?.[1] ?? "",
+        endMin: queryParams.end?.[0] ?? "",
+        endMax: queryParams.end?.[1] ?? "",
+      };
+
+    default:
+      return base;
+  }
+};
+
 export default function GenomicQueryBuilderDialog({
   open,
   handleClose,
@@ -71,6 +151,7 @@ export default function GenomicQueryBuilderDialog({
   );
   const [selectedInput, setSelectedInput] = useState("variationType");
   const [duplicateMessage, setDuplicateMessage] = useState("");
+  const { genomicPrefill, clearGenomicPrefill } = useSelectedEntry();
 
   // This map links each query type label to the corresponding form component
   // It tells the app which form to display based on the user's selection
@@ -104,7 +185,7 @@ export default function GenomicQueryBuilderDialog({
       aaPosition: aaPositionValidator,
       minVariantLength,
       maxVariantLength,
-    }),
+    }).concat(aminoAcidChangeGroupValidator),
 
     // This form requires more positional data and variation info
     "Range Query": Yup.object({
@@ -118,7 +199,7 @@ export default function GenomicQueryBuilderDialog({
       aaPosition: aaPositionValidator,
       minVariantLength,
       maxVariantLength,
-    }),
+    }).concat(aminoAcidChangeGroupValidator),
 
     // Bracket query uses a simpler schema, just needs the chromosome + location range
     "Bracket Query": bracketRangeValidator.shape({
@@ -136,11 +217,36 @@ export default function GenomicQueryBuilderDialog({
   // This is used to render the correct form in the UI based on user's selection
   const SelectedFormComponent = formComponentsMap[selectedQueryType];
 
+  // Compute initial values: ONLY the tab matching genomicPrefill.queryType gets values
+  const initialValues =
+    open &&
+    genomicPrefill?.queryType &&
+    genomicPrefill?.queryParams &&
+    selectedQueryType === genomicPrefill.queryType
+      ? mapQueryParamsToFormik(selectedQueryType, genomicPrefill.queryParams)
+      : EMPTY_INITIAL_VALUES;
+
+  useEffect(() => {
+    if (open && genomicPrefill?.queryType) {
+      setSelectedQueryType(genomicPrefill.queryType);
+    }
+  }, [open, genomicPrefill]);
+
+  const resetBuilderState = () => {
+    setSelectedQueryType(enabledQueryTypes[0]?.label);
+    setSelectedInput("variationType");
+    setDuplicateMessage("");
+  };
+
   return (
     // This is the empty dialog
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={() => {
+        resetBuilderState();
+        clearGenomicPrefill();
+        handleClose();
+      }}
       disablePortal={false}
       disableAutoFocus={false}
       disableEnforceFocus={false}
@@ -150,6 +256,7 @@ export default function GenomicQueryBuilderDialog({
         sx: {
           borderRadius: "10px",
           padding: "20px",
+          height: "75%",
         },
       }}
     >
@@ -175,7 +282,12 @@ export default function GenomicQueryBuilderDialog({
         <IconButton
           edge="start"
           color="inherit"
-          onClick={handleClose}
+          // onClick={handleClose}
+          onClick={() => {
+            resetBuilderState();
+            clearGenomicPrefill();
+            handleClose();
+          }}
           aria-label="close"
           sx={{ mr: 1 }}
         >
@@ -193,29 +305,10 @@ export default function GenomicQueryBuilderDialog({
         it uses dynamic initial values as empty and validation schemas based on the
         selected query type */}
         <Formik
+          key={selectedQueryType}
           enableReinitialize
           validateOnMount
-          initialValues={{
-            geneId: "",
-            assemblyId: "",
-            chromosome: "",
-            start: "",
-            end: "",
-            variationType: "",
-            alternateBases: "",
-            refBases: "",
-            altBases: "",
-            aminoacidChange: "",
-            minVariantLength: "",
-            maxVariantLength: "",
-            genomicHGVSshortForm: "",
-            startMin: "",
-            startMax: "",
-            endMin: "",
-            endMax: "",
-            refAa: "",
-            altAa: "",
-          }}
+          initialValues={initialValues}
           validationSchema={validationSchemaMap[selectedQueryType]}
           onSubmit={(values) => {
             if (values.chromosome) {
@@ -249,7 +342,13 @@ export default function GenomicQueryBuilderDialog({
 
             const validEntries = Object.entries(values).filter(
               ([key, value]) => {
-                if (!value || value.trim() === "") return false;
+                if (
+                  value === undefined ||
+                  value === null ||
+                  (typeof value === "string" && value.trim() === "")
+                ) {
+                  return false;
+                }
                 if (allExclusiveKeys.includes(key)) {
                   if (selectedQueryType === "Sequence Query") return true;
                   if (!selectedInput) return true;
@@ -282,8 +381,6 @@ export default function GenomicQueryBuilderDialog({
               queryParams,
             };
 
-            // console.log("[GQB] newFilter created ➜", newFilter);
-
             // Prevent duplicates
             const exists = selectedFilter.some((f) => f.id === newFilter.id);
             if (exists) {
@@ -309,15 +406,24 @@ export default function GenomicQueryBuilderDialog({
             // STEP 2C: update applied filters
             setSelectedFilter((prev) => {
               const next = [...prev, newFilter];
-              // console.log("[GQB] appliedFilters.next ➜", next);
               return next;
             });
 
             setDuplicateMessage("");
+            resetBuilderState();
+            clearGenomicPrefill();
             handleClose();
           }}
         >
           {({ resetForm, isValid, dirty, values, errors }) => {
+            console.log("[GQB DEBUG]", {
+              selectedQueryType,
+              isValid,
+              dirty,
+              values,
+              initialValues,
+            });
+
             return (
               <Form>
                 {/* Render the selectable query type buttons */}
@@ -336,13 +442,17 @@ export default function GenomicQueryBuilderDialog({
                       selected={selectedQueryType === label}
                       onClick={() => {
                         setSelectedQueryType(label);
-                        resetForm();
+                        resetForm({ values: EMPTY_INITIAL_VALUES });
                       }}
                     />
                   ))}
                 </Box>
                 {/* Render the selected form based on the current query type based on user's selection */}
-                <Box sx={{ mt: 4 }}>
+                <Box
+                  sx={{
+                    mt: 4,
+                  }}
+                >
                   {SelectedFormComponent && (
                     <SelectedFormComponent
                       selectedInput={selectedInput}
@@ -359,7 +469,7 @@ export default function GenomicQueryBuilderDialog({
                 <Box
                   sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}
                 >
-                  <GenomicSubmitButton disabled={!isValid || !dirty} />
+                  <GenomicSubmitButton disabled={!isValid} />
                 </Box>
               </Form>
             );

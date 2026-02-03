@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Box, Select, MenuItem, TextField } from "@mui/material";
 import { useFormikContext, useField } from "formik";
 import config from "../../../config/config.json";
@@ -6,7 +7,8 @@ import {
   textFieldStyle,
   FieldLabel,
 } from "../styling/genomicInputBoxStyling";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
+import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
 
 /*
    This component renders the Amino Acid Change (deployer needs to decide whether to show case this input filed or not) fields in the Genomic Query Builder.
@@ -26,6 +28,7 @@ export default function AminoAcidChangeFields({
   const [positionField, aaPositionMeta] = useField("aaPosition");
   const [refAaField, refAaMeta] = useField("refAa");
   const [altAaField, altAaMeta] = useField("altAa");
+  const [openSelect, setOpenSelect] = useState(null);
 
   // The amino acid list from configuration
   const aminoAcidList =
@@ -49,8 +52,14 @@ export default function AminoAcidChangeFields({
             value={values.refAa || ""}
             onChange={(e) => setFieldValue("refAa", e.target.value)}
             onBlur={() => refAaField.onBlur({ target: { name: "refAa" } })}
+            onOpen={() => setOpenSelect("ref")}
+            onClose={() => setOpenSelect(null)}
             disabled={isDisabled}
-            IconComponent={KeyboardArrowDownIcon}
+            IconComponent={
+              openSelect === "ref"
+                ? KeyboardArrowUpRoundedIcon
+                : KeyboardArrowRightRoundedIcon
+            }
             sx={selectStyle}
           >
             {aminoAcidList.map((aa) => (
@@ -94,8 +103,14 @@ export default function AminoAcidChangeFields({
             value={values.altAa || ""}
             onChange={(e) => setFieldValue("altAa", e.target.value)}
             onBlur={() => altAaField.onBlur({ target: { name: "altAa" } })}
+            onOpen={() => setOpenSelect("alt")}
+            onClose={() => setOpenSelect(null)}
             disabled={isDisabled}
-            IconComponent={KeyboardArrowDownIcon}
+            IconComponent={
+              openSelect === "alt"
+                ? KeyboardArrowUpRoundedIcon
+                : KeyboardArrowRightRoundedIcon
+            }
             sx={selectStyle}
           >
             {aminoAcidList.map((aa) => (

@@ -2,6 +2,8 @@ import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRigh
 import { Box, Tooltip } from "@mui/material";
 import config from "../config/config.json";
 
+// This is a helper component for the tables' structure
+
 const primaryColor = config.ui.colors.primary;
 
 export const BEACON_NETWORK_COLUMNS = [
@@ -36,8 +38,8 @@ export const BEACON_NETWORK_COLUMNS = [
                 fontFamily: '"Open Sans", sans-serif',
               }}
             >
-              Beacons that restrict dataset-level responses, return only
-              Beacon-level data aggregated across datasets.
+              If dataset-level response is not enabled, the Beacon only returns
+              boolean or count response summarized across datasets.
             </Box>
           }
           placement="top-start"
@@ -135,14 +137,6 @@ export const BEACON_SINGLE_COLUMNS = [
     align: "left",
     width: "20%",
   },
-
-  // {
-  //   id: "maturity",
-  //   label: "Beacon Maturity",
-  //   align: "left",
-  //   width: "15%",
-  // },
-
   {
     id: "response",
     label: (
@@ -305,7 +299,7 @@ export const FILTERING_TERMS_COLUMNS = [
   {
     id: "Select",
     label: "Select",
-    width: "5%",
+    width: "10%",
     align: "left",
   },
   {
@@ -317,13 +311,19 @@ export const FILTERING_TERMS_COLUMNS = [
   {
     id: "label",
     label: "Label",
-    width: "45%",
+    width: "30%",
+    align: "left",
+  },
+  {
+    id: "Type",
+    label: "Filter Type",
+    width: "15%",
     align: "left",
   },
   {
     id: "scope",
     label: "Scope",
-    width: "25%",
+    width: "20%",
     align: "left",
   },
 ];

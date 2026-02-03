@@ -9,16 +9,30 @@ export function cleanAndParseInfo(infoString) {
     const cleaned = infoString.replace(/"|"/g, '"');
     return JSON.parse(cleaned);
   } catch (error) {
-    // console.log("Failed to parse item.info:", error);
     return null;
   }
 }
+
+import { formatMeasures } from "../modal/formatters/measuresFormatter";
+import { formatInfo } from "../modal/formatters/infoFormatter";
+import { formatInterventionsOrProcedures } from "../modal/formatters/interventionsOrProceduresFormatter";
+import { formatMolecularAttributes } from "../modal/formatters/molecularAttributesFormatter";
+import { formatVariation } from "../modal/formatters/variationFormatter";
+import { formatCaseLevelData } from "../modal/formatters/caseLevelDataFormatter";
 
 /**
  * Recursively summarizes nested or complex values
  * (arrays, objects, labels, ids) into readable strings for table display.
  */
-export function summarizeValue(value) {
+export function summarizeValue(value, field) {
+  if (field === "measures") return formatMeasures(value);
+  if (field === "info") return formatInfo(value);
+  if (field === "interventionsOrProcedures")
+    return formatInterventionsOrProcedures(value);
+  if (field === "molecularAttributes") return formatMolecularAttributes(value);
+  if (field === "variation") return formatVariation(value);
+  if (field === "caseLevelData") return formatCaseLevelData(value);
+
   if (value == null) return "-";
 
   if (Array.isArray(value)) {
@@ -56,55 +70,25 @@ export function formatHeaderName(header) {
  * Truncates long case-level data to avoid layout issues in the modal table.
  */
 export function truncateCaseLevelData(value, limit = 20) {
-  if (value == null) return "-";
-
-  // Case 1: array of case-level entries (most common)
-  if (Array.isArray(value)) {
-    const formattedEntries = value
-      .map((entry) => summarizeValue(entry))
-      .filter(Boolean);
-
-    if (formattedEntries.length <= limit) {
-      return formattedEntries.join(", ");
-    }
-
-    return (
-      <>
-        {formattedEntries.slice(0, limit).join(", ")} … ( +
-        {formattedEntries.length - limit} more)
-        <br></br>
-        <b>
-          List truncated for readability. The complete set of case-level records
-          is not shown.
-        </b>
-      </>
-    );
+  if (value == null) {
+    return { entries: [], truncated: false };
   }
 
-  // Case 2: single value (string/number/object)
-  const summarized = summarizeValue(value);
+  // Normalize input to array of strings
+  const entries = Array.isArray(value)
+    ? value.map((v) => summarizeValue(v)).filter(Boolean)
+    : [summarizeValue(value)].filter(Boolean);
 
-  if (typeof summarized !== "string") {
-    return summarized;
+  if (entries.length <= limit) {
+    return {
+      entries,
+      truncated: false,
+    };
   }
 
-  const parts = summarized
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  if (parts.length <= limit) {
-    return parts.join(", ");
-  }
-
-  return (
-    <>
-      {parts.slice(0, limit).join(", ")} … ( +{parts.length - limit} more){" "}
-      <br></br>
-      <b>
-        List truncated for readability. The complete set of case-level records
-        is not shown.
-      </b>
-    </>
-  );
+  return {
+    entries: entries.slice(0, limit),
+    truncated: true,
+    total: entries.length,
+  };
 }

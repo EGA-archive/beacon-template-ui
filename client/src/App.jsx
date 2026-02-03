@@ -91,6 +91,7 @@ export default function App() {
             title={config.ui.title}
             main={logosHelper(config.ui.logos.main)}
             navItems={navItems}
+            setSelectedTool={setSelectedTool}
           />
 
           <Box

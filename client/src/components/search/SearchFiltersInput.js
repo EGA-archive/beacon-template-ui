@@ -36,7 +36,11 @@ export default function SearchFiltersInput({ activeInput, setActiveInput }) {
           <SearchIcon sx={{ color: primaryDarkColor, mr: 1 }} />
           <InputBase
             data-testid="filtering-input"
-            placeholder="Search by Filtering Terms (min. 1 letter required)"
+            placeholder={
+              activeInput === "filter"
+                ? "Search by Filtering Terms. Examples: sex, breast cancer"
+                : "Search by Filtering Terms."
+            }
             fullWidth
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)} // Update local state as user types

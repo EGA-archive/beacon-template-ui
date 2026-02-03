@@ -1,6 +1,9 @@
 /* Contains helpers and fixed values used in the app for data formatting and validation of certain biological codes.
  */
 
+import { Tooltip, Box } from "@mui/material";
+import config from "../../config/config.json";
+
 // Capitalizes the first letter of a word and makes the rest lowercase
 export function capitalize(word) {
   return word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
@@ -67,3 +70,119 @@ export const entryTypeDescriptions = {
   individuals: "query individual-level data (e.g. phenotypes, treatment)",
   runs: "query sequencing run details (e.g. platform, run date)",
 };
+
+// Underlined inline label with tooltip
+export const GenomicQueryLabel = (
+  <Tooltip
+    component="ul"
+    title={
+      <Box
+        sx={{
+          pl: { xs: "5px", lg: "20px" },
+          fontFamily: '"Open Sans", sans-serif',
+        }}
+      >
+        <div>
+          <li>
+            Query for variants at a specific genomic location or within a
+            defined region.
+          </li>
+        </div>
+        <div>
+          <li>
+            {" "}
+            Compile complex genomic queries using the{" "}
+            <b>“Genomic Query Builder”</b>.
+          </li>
+        </div>
+      </Box>
+    }
+    placement="top-start"
+    arrow
+    componentsProps={{
+      tooltip: {
+        sx: {
+          backgroundColor: "#fff",
+          color: "#000",
+          border: "1px solid black",
+          minWidth: {
+            xs: "361px",
+            sm: "400px",
+          },
+        },
+      },
+      arrow: {
+        sx: {
+          color: "#fff",
+          "&::before": { border: "1px solid black" },
+        },
+      },
+    }}
+  >
+    <Box
+      component="span"
+      sx={{
+        textDecoration: "underline",
+        fontWeight: 600,
+      }}
+    >
+      Genomic Query
+    </Box>
+  </Tooltip>
+);
+
+export const FilteringTermsLabel = (
+  <Tooltip
+    component="ul"
+    title={
+      <Box
+        sx={{
+          pl: { xs: "5px", lg: "20px" },
+          fontFamily: '"Open Sans", sans-serif',
+        }}
+      >
+        <div>
+          <li> Use filtering terms to refine Beacon responses.</li>
+        </div>
+        <div>
+          <li>
+            {" "}
+            Review all filtering terms available across datasets in{" "}
+            <b>“All Filtering Terms”</b>.
+          </li>
+        </div>
+      </Box>
+    }
+    placement="top-start"
+    arrow
+    componentsProps={{
+      tooltip: {
+        sx: {
+          backgroundColor: "#fff",
+          color: "#000",
+          border: "1px solid black",
+          minWidth: {
+            xs: "361px",
+            sm: "400px",
+          },
+        },
+      },
+      arrow: {
+        sx: {
+          color: "#fff",
+          "&::before": { border: "1px solid black" },
+        },
+      },
+    }}
+  >
+    <Box
+      component="span"
+      sx={{
+        textDecoration: "underline",
+        fontWeight: 600,
+      }}
+    >
+      Filtering Terms
+    </Box>
+  </Tooltip>
+);

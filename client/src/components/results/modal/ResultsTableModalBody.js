@@ -16,6 +16,7 @@ import {
   TableHead,
   TableRow,
   tableCellClasses,
+  Tooltip,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import config from "../../../config/config.json";
@@ -26,9 +27,14 @@ import { exportCSV } from "../utils/exportCSV";
 import {
   cleanAndParseInfo,
   summarizeValue,
-  truncateCaseLevelData,
   formatHeaderName,
 } from "../utils/tableHelpers";
+import InterventionsOrProceduresCell from "../modal/cellRenderers/InterventionsOrProceduresCell";
+import MeasuresCell from "../modal/cellRenderers/MeasuresCell";
+import InfoCell from "../modal/cellRenderers/InfoCell";
+import MolecularAttributesCell from "../modal/cellRenderers/MolecularAttributesCell";
+import VariationCell from "../modal/cellRenderers/VariationCell";
+import CaseLevelDataCell from "../modal/cellRenderers/CaseLevelDataCell";
 
 /**
  * Displays paginated results inside the modal.
@@ -51,8 +57,6 @@ const ResultsTableModalBody = ({
   setSearchCount,
 }) => {
   const [expandedRow, setExpandedRow] = useState(null);
-  // const [filteredData, setFilteredData] = useState(dataTable);
-
   const [filteredData, setFilteredData] = useState([]);
   const initialized = useRef(false);
 
@@ -63,7 +67,6 @@ const ResultsTableModalBody = ({
     setFilteredData(dataTable);
   }, [dataTable]);
 
-  /** Styled Components */
   const StyledTableCell = useMemo(
     () =>
       styled(TableCell)(({ theme }) => ({
@@ -194,6 +197,15 @@ const ResultsTableModalBody = ({
     datasetId,
   ]);
 
+  const CELL_RENDERERS = {
+    interventionsOrProcedures: InterventionsOrProceduresCell,
+    measures: MeasuresCell,
+    info: InfoCell,
+    molecularAttributes: MolecularAttributesCell,
+    variation: VariationCell,
+    caseLevelData: CaseLevelDataCell,
+  };
+
   /** Render table cell content */
   const renderCellContent = useCallback((item, column) => {
     const value = item[column];
@@ -239,10 +251,6 @@ const ResultsTableModalBody = ({
         })
         .filter(Boolean)
         .join(" | ");
-    }
-
-    if (column === "caseLevelData") {
-      return truncateCaseLevelData(value, 20);
     }
 
     return summarizeValue(value);
@@ -321,7 +329,15 @@ const ResultsTableModalBody = ({
                   .filter((col) => visibleColumns.includes(col.id))
                   .map((column) => (
                     <TableCell key={column.id} sx={headerCellStyle}>
-                      {column.name}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                      >
+                        {column.name}
+                      </Box>
                     </TableCell>
                   ))}
               </StyledTableRow>
@@ -376,7 +392,14 @@ const ResultsTableModalBody = ({
                                   : "250px",
                             }}
                           >
-                            {renderCellContent(item, col.id)}
+                            {(() => {
+                              const Renderer = CELL_RENDERERS[col.id];
+                              return Renderer ? (
+                                <Renderer value={item[col.id]} />
+                              ) : (
+                                renderCellContent(item, col.id)
+                              );
+                            })()}
                           </StyledTableCell>
                         ))}
                     </StyledTableRow>

@@ -36,6 +36,7 @@ export default function Footer() {
     // Main footer container with background and padding
     <Box
       component="footer"
+      data-testid="footer"
       sx={{
         backgroundColor: "#eee",
         py: 2,
@@ -60,6 +61,7 @@ export default function Footer() {
       >
         {/* Left Side — Text and institution logos */}
         <Box
+          data-testid="footer-left"
           sx={{
             display: "flex",
             gap: { xs: 2, md: 3 },
@@ -74,6 +76,7 @@ export default function Footer() {
         >
           {/* Small credit text */}
           <Typography
+            data-testid="footer-credit-text"
             variant="body2"
             color="black"
             sx={{
@@ -91,6 +94,7 @@ export default function Footer() {
 
           {/* Logos with links to partner websites */}
           <MuiLink
+            data-testid="footer-logo-ega"
             href="https://ega-archive.org/"
             target="_blank"
             rel="noopener noreferrer"
@@ -98,6 +102,7 @@ export default function Footer() {
             <img src={maingrey} alt="EGA Logo" style={{ height: 34 }} />
           </MuiLink>
           <MuiLink
+            data-testid="footer-logo-crg"
             href="https://www.crg.eu/"
             target="_blank"
             rel="noopener noreferrer"
@@ -105,6 +110,7 @@ export default function Footer() {
             <img src={crg} alt="CRG Logo" style={{ height: 34 }} />
           </MuiLink>
           <MuiLink
+            data-testid="footer-logo-bsc"
             href="https://www.bsc.es/"
             target="_blank"
             rel="noopener noreferrer"
@@ -115,10 +121,14 @@ export default function Footer() {
 
         {/* Right Side — Only login / logout controls */}
         {loginEnabled && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box
+            data-testid="footer-right"
+            sx={{ display: "flex", alignItems: "center", gap: 2 }}
+          >
             {/* If not logged in, show "Log in" link */}
             {!isLoggedIn && (
               <MuiLink
+                data-testid="footer-login-button"
                 component={Link}
                 to="/login"
                 underline="none"
@@ -140,6 +150,7 @@ export default function Footer() {
             {/* If logged in, show logout icon */}
             {isLoggedIn && (
               <LogoutIcon
+                data-testid="footer-logout-icon"
                 onClick={handleLogout}
                 sx={{
                   color: "#444",

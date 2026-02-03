@@ -1,10 +1,18 @@
+const parseAminoAcidChange = (value = "") => {
+  const match = value.match(/^([A-Za-z]+)(\d+)([A-Za-z]+)$/);
+  if (!match) return null;
+
+  const [, refAa, aaPosition, altAa] = match;
+  return { refAa, aaPosition, altAa };
+};
+
 const snpExamples = [
   {
     key: "TP53",
     id: "TP53",
     label: "TP53",
     type: "genomic",
-    field: "geneId",
+    queryType: "Gene ID",
     queryParams: { geneId: "TP53" },
   },
   {
@@ -12,6 +20,7 @@ const snpExamples = [
     id: "GRCh38:17:7661960T>C",
     label: "GRCh38:17:7661960T>C",
     type: "genomic",
+    queryType: "Sequence Query",
     queryParams: {
       assemblyId: "GRCh38",
       referenceName: "17",
@@ -25,6 +34,7 @@ const snpExamples = [
     id: "NC_000017.11:g.43057063G>A",
     label: "NC_000017.11:g.43057063G>A",
     type: "genomic",
+    queryType: "Genomic Allele Query (HGVS)",
     queryParams: {
       genomicAlleleShortForm: "NC_000017.11:g.43057063G>A",
     },
@@ -37,9 +47,10 @@ const genomicVariantExamples = [
     id: "BRCA1:Pro1856Ser",
     label: "BRCA1:p.Pro1856Ser",
     type: "genomic",
+    queryType: "Gene ID",
     queryParams: {
       geneId: "BRCA1",
-      aminoacidChange: "Pro1856Ser",
+      ...parseAminoAcidChange("Pro1856Ser"),
     },
   },
   {
@@ -47,6 +58,7 @@ const genomicVariantExamples = [
     id: "NC_000008.10:g.467881_467885delinsA",
     label: "NC_000008.10:g.467881_467885delinsA",
     type: "genomic",
+    queryType: "Genomic Allele Query (HGVS)",
     queryParams: {
       genomicAlleleShortForm: "NC_000008.10:g.467881_467885delinsA",
     },
@@ -56,6 +68,7 @@ const genomicVariantExamples = [
     id: "NC_000017.10:g.43045703_43045705",
     label: "NC_000017.10:g.43045703_43045705",
     type: "genomic",
+    queryType: "Bracket Query",
     queryParams: {
       assemblyId: "GRCh37",
       referenceName: "17",
@@ -68,6 +81,7 @@ const genomicVariantExamples = [
     id: "GRCh37:2:343675-345681",
     label: "GRCh37:2:343675-345681",
     type: "genomic",
+    queryType: "Range Query",
     queryParams: {
       assemblyId: "GRCh37",
       referenceName: "2",
@@ -83,9 +97,10 @@ const proteinExamples = [
     id: "NP_009225.1:p.Glu1817Ter",
     label: "NP_009225.1:p.Glu1817Ter",
     type: "genomic",
+    queryType: "Gene ID",
     queryParams: {
       geneId: "BRCA1",
-      aminoacidChange: "Glu1817Ter",
+      ...parseAminoAcidChange("Glu1817Ter"),
     },
   },
   {
@@ -93,9 +108,10 @@ const proteinExamples = [
     id: "LRG 199p1:p.Val25Gly",
     label: "LRG 199p1:p.Val25Gly",
     type: "genomic",
+    queryType: "Gene ID",
     queryParams: {
       geneId: "BRCA2",
-      aminoacidChange: "Val25Gly",
+      ...parseAminoAcidChange("Val25Gly"),
     },
   },
 ];

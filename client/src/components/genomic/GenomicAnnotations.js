@@ -7,29 +7,29 @@ import {
 } from "@mui/material";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import { useState, useMemo } from "react";
-
 import config from "../../config/config.json";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
-import CommonMessage, {
-  COMMON_MESSAGES,
-} from "../../components/common/CommonMessage";
+import CommonMessage from "../../components/common/CommonMessage";
 import FilterLabelRemovable from "../styling/FilterLabelRemovable";
 import { filterLabels } from "../genomic/utils/GenomicFilterLabels";
+import { useGenomicAnnotationClick } from "../genomic/utils/useGenomicAnnotationClick";
 
 /**
- * GenomicAnnotations
- * Renders predefined genomic example queries inside collapsible sections.
- * Includes dynamic Molecular Effect examples taken from /filtering_terms.
+ * This component renders predefined genomic example queries inside collapsible sections
+ * Includes dynamic Molecular Effect examples taken from /filtering_terms
  */
 export default function GenomicAnnotations() {
   const [message, setMessage] = useState(null);
 
   const {
+    selectedFilter,
     setSelectedFilter,
     setQueryDirty,
     hasSearchResults,
     molecularEffects,
     setExtraFilter,
+    openGenomicQueryBuilder,
+    setGenomicPrefill,
   } = useSelectedEntry();
 
   // Only molecular effects with these IDs are allowed to appear in the UI
@@ -138,74 +138,14 @@ export default function GenomicAnnotations() {
   // 2) Simple ontology terms (e.g. molecular effects)
   // 3) Full genomic queries (e.g. SNP positions)
 
-  const handleGenomicFilter = (item) => {
-    // Case 1: simple alphanumeric filter (opens input box)
-    if (item.type === "alphanumeric") {
-      setExtraFilter(item);
-      return;
-    }
-
-    // Case 2: filtering term (ontology)
-    // These items do NOT contain queryParams. They represent a simple keyword.
-    const isFilterTerm =
-      !item.queryParams || Object.keys(item.queryParams).length === 0;
-    if (isFilterTerm) {
-      setSelectedFilter((prev = []) => {
-        if (prev.some((f) => f.id === item.id)) {
-          // Avoid duplicates
-          setMessage(COMMON_MESSAGES.doubleValue);
-          setTimeout(() => setMessage(null), 3000);
-          return prev;
-        }
-        // Add the ontology term as a simple filter
-        return [...prev, { ...item, bgColor: "genomic" }];
-      });
-
-      // If a search already exists, mark the UI as "dirty" as the user will see a message
-      if (hasSearchResults) setQueryDirty(true);
-      return;
-    }
-
-    // Case 3: The item is a full genomic query example.
-    // These include queryParams
-    // Only ONE genomic query can be active at a time
-    setSelectedFilter((prev = []) => {
-      const alreadyGenomic = prev.some((f) => f.type === "genomic");
-      const duplicate = prev.some(
-        (f) => f.type === "genomic" && f.id === item.field
-      );
-
-      // Avoid having more than one genomic query at the same time
-      if (alreadyGenomic) {
-        setMessage(COMMON_MESSAGES.singleGenomicQuery);
-        setTimeout(() => setMessage(null), 3000);
-        return prev;
-      }
-
-      // Prevent the user from adding the exact same genomic query again
-      if (duplicate) {
-        setMessage(COMMON_MESSAGES.doubleValue);
-        setTimeout(() => setMessage(null), 3000);
-        return prev;
-      }
-
-      // Add the genomic query
-      return [
-        ...prev,
-        {
-          id: item.field,
-          label: item.label,
-          value: item.label,
-          type: "genomic",
-          bgColor: "genomic",
-          queryParams: item.queryParams,
-        },
-      ];
-    });
-
-    // Mark search results as outdated if a new query is added
-    if (hasSearchResults) setQueryDirty(true);
-  };
+  const handleGenomicFilter = useGenomicAnnotationClick({
+    selectedFilter,
+    setMessage,
+    setQueryDirty,
+    hasSearchResults,
+    setGenomicPrefill,
+    openGenomicQueryBuilder,
+  });
 
   // Render collapsible categories and their labels as clickable filter chips
   return (
@@ -260,7 +200,7 @@ export default function GenomicAnnotations() {
               </Typography>
             </AccordionSummary>
 
-            <AccordionDetails sx={{ px: 0, pt: 0, mb: 3 }}>
+            <AccordionDetails sx={{ px: 0, pt: 0, mb: 3, pb: 0 }}>
               {/* Render all filter chips for this category, shown as selectable labels */}
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                 {items.map((item) => (
@@ -269,9 +209,7 @@ export default function GenomicAnnotations() {
                     variant="simple"
                     label={item.label}
                     bgColor="genomic"
-                    onClick={() =>
-                      handleGenomicFilter({ ...item, bgColor: "genomic" })
-                    }
+                    onClick={() => handleGenomicFilter(item)}
                   />
                 ))}
               </Box>
