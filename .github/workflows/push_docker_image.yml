@@ -35,8 +35,8 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            pattern={{version}},prefix=V
-            pattern={{major}}.{{minor}},prefix=V
+            type=semver,pattern={{version}},prefix=V
+            type=semver,pattern={{major}}.{{minor}},prefix=V
             # set latest tag for master branch
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
       - name: Set up Docker Buildx
