@@ -11,4 +11,8 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ./client:/usr/src/app
+      - ./client/src/config/config.json:/client/src/config/config.json
+      - ./client/.env:/client/.env
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
