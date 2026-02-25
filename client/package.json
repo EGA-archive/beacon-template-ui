@@ -2,6 +2,7 @@
   "name": "beacon-template-ui",
   "version": "1.0.0",
   "main": "index.js",
+  "proxy": "http://feedback-file:4010",
   "repository": "https://github.com/EGA-archive/beacon-template-ui",
   "author": "<giulia.cellerino@icloud.com>",
   "license": "MIT",

@@ -62,7 +62,7 @@
     "disableLogin": true,
     "demoMode": true,
     "auth": {
-      "providerType": "private",
+      "providerType": "public",
       "oidc": {
         "authority": "https://login.aai.lifescience-ri.eu/oidc",
         "autoSignIn": false,

@@ -2,6 +2,9 @@
 
 # version: "3.8"
 
+networks:
+  singlebeacondemo:
+
 services:
   client:
     build:
@@ -16,3 +19,17 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
+    networks:
+      - singlebeacondemo
+
+  feedback-file:
+    build:
+      context: ./feedback-file
+    command: node /opt/yarn-v1.22.22/bin/yarn.js start
+    container_name: feedback-file
+    expose:
+      - 4010
+    volumes:
+      - ./feedback-file/feedback.txt:/feedback-file/feedback.txt
+    networks:
+      - singlebeacondemo
