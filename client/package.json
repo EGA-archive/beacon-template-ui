@@ -2,7 +2,6 @@
   "name": "beacon-template-ui",
   "version": "1.0.0",
   "main": "index.js",
-  "proxy": "http://feedback-file:4010",
   "repository": "https://github.com/EGA-archive/beacon-template-ui",
   "author": "<giulia.cellerino@icloud.com>",
   "license": "MIT",
@@ -10,7 +9,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "serve": "node server/server.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -27,7 +27,10 @@
     "react-router-dom": "^7.5.0",
     "react-scripts": "5.0.1",
     "resend": "^6.0.1",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.0"
   },
   "browserslist": {
     "production": [

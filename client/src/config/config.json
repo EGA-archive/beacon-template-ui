@@ -1,6 +1,6 @@
 {
   "beaconType": "singleBeacon",
-  "apiUrl": "https://beacon-spain-demo.ega-archive.org/api",
+  "apiUrl": "https://beacon-apis-test.ega-archive.org/api",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
   "variationType": [
     { "jsonName": "SNP", "displayName": "SNP" },
@@ -84,105 +84,101 @@
     ],
 
     "commonFilters": {
-      "filterCategories": [
-        "Demographics",
-        "Metabolic Diseases",
-        "Mental Diseases"
-      ],
+      "filterCategories": ["Demographics", "Cancer", "Treatment"],
       "filterLabels": {
         "Demographics": [
           {
-            "key": "female",
-            "id": "NCIT:C16576",
-            "label": "female",
-            "type": "ontology",
-            "scopes": ["individual", "cohort", "individuals"]
+            "key": "Height-standing",
+            "id": "Height-standing",
+            "label": "Height-standing",
+            "type": "alphanumeric",
+            "scopes": ["individual"]
           },
           {
             "key": "male",
             "id": "NCIT:C20197",
             "label": "male",
             "type": "ontology",
-            "scopes": ["individual", "cohort", "individuals"]
+            "scopes": ["individual"]
           },
           {
-            "key": "weight",
-            "id": "weight",
-            "label": "weight",
-            "type": "alphanumeric"
+            "key": "female",
+            "id": "NCIT:C16576",
+            "label": "female",
+            "type": "ontology",
+            "scopes": ["individual"]
           },
           {
-            "key": "ethnicity",
-            "id": "ethnicity",
-            "label": "ethnicity",
+            "key": "sex",
+            "id": "sex",
+            "label": "sex",
             "type": "alphanumeric",
             "scopes": ["individual"]
           },
-
           {
-            "key": "Asian or Asian British",
+            "key": "diseases.ageOfOnset",
+            "id": "diseases.ageOfOnset",
+            "label": "diseases.ageOfOnset",
+            "type": "alphanumeric",
+            "scopes": ["individual"]
+          },
+          {
+            "key": "Asian",
             "id": "NCIT:C41260",
-            "label": "Asian or Asian British",
+            "label": "Asian",
             "type": "ontology",
             "scopes": ["individual"]
           }
         ],
-        "Metabolic Diseases": [
+        "Cancer": [
           {
-            "key": "obesity",
-            "label": "obesity",
-            "id": "ICD10:E66",
+            "key": "digestive system carcinoma",
+            "label": "digestive system carcinoma",
+            "id": "MONDO:0006181",
             "type": "ontology",
             "scopes": ["individual"]
           },
           {
-            "key": "gastro-oesophageal reflux disease",
-            "label": "gastro-oesophageal reflux disease",
-            "id": "ICD10:K21",
+            "key": "Intestinal-Type Adenocarcinoma",
+            "label": "Intestinal-Type Adenocarcinoma",
+            "id": "NCIT:C4126",
+            "type": "ontology",
+            "scopes": ["biosample"]
+          },
+          {
+            "key": "breast lymphoma",
+            "label": "breast lymphoma",
+            "id": "MONDO:0003661",
             "type": "ontology",
             "scopes": ["individual"]
           },
           {
-            "key": "insulin-dependent diabetes mellitus",
-            "label": "insulin-dependent diabetes mellitus",
-            "id": "ICD10:E10",
+            "key": "Cervix cancer",
+            "label": "Cervix cancer",
+            "id": "HP:0030079",
             "type": "ontology",
             "scopes": ["individual"]
           },
           {
-            "key": "thyroiditis",
-            "label": "thyroiditis",
-            "id": "ICD10:E06",
-            "type": "ontology",
-            "scopes": ["individual"]
-          },
-          {
-            "key": "iron deficiency anaemia",
-            "label": "iron deficiency anaemia",
-            "id": "ICD10:D50",
+            "key": "breast carcinoma",
+            "label": "breast carcinoma",
+            "id": "MONDO:0004989",
             "type": "ontology",
             "scopes": ["individual"]
           }
         ],
-        "Mental Diseases": [
+        "Treatment": [
           {
-            "key": "schizophrenia",
-            "label": "schizophrenia",
-            "id": "ICD10:F20",
+            "key": "radiation therapy procedure",
+            "label": "radiation therapy procedure",
+            "id": "OGMS:0000116",
             "type": "ontology",
             "scopes": ["individual"]
           },
           {
-            "key": "eating disorders",
-            "label": "eating disorders",
-            "id": "ICD10:F50",
-            "type": "ontology",
-            "scopes": ["individual"]
-          },
-          {
-            "key": "bipolar affective disorder",
-            "label": "bipolar affective disorder",
-            "id": "ICD10:F3181",
+            "key": "chemotherapy procedure",
+            "label": "chemotherapy procedure",
+            "id": "OGMS:0000113",
             "type": "ontology",
             "scopes": ["individual"]
           }

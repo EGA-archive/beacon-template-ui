@@ -1,12 +1,14 @@
-import express from "express";
-import fs from "fs";
-import path from "path";
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
+const cors = require("cors");
 
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
-const feedbackFile =
-  process.env.FEEDBACK_FILE_PATH || path.join(process.cwd(), "feedback.txt");
+const feedbackFile = path.join(process.cwd(), "data", "feedback.txt");
 
 app.post("/api/feedback", (req, res) => {
   const { rating, comment } = req.body;
@@ -31,6 +33,16 @@ Comment: ${comment || ""}
   });
 });
 
-app.listen(4010, () => {
-  console.log("Feedback API running on port 4010");
+const buildPath = path.join(process.cwd(), "build");
+
+app.use(express.static(buildPath));
+
+app.get("*", (_, res) => {
+  res.sendFile(path.join(buildPath, "index.html"));
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Production server running on port ${PORT}`);
 });
