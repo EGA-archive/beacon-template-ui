@@ -90,7 +90,7 @@
           {
             "key": "Height-standing",
             "id": "Height-standing",
-            "label": "Height-standing",
+            "label": "Height",
             "type": "alphanumeric",
             "scopes": ["individual"]
           },
@@ -118,7 +118,7 @@
           {
             "key": "diseases.ageOfOnset",
             "id": "diseases.ageOfOnset",
-            "label": "diseases.ageOfOnset",
+            "label": "Age Of Onset",
             "type": "alphanumeric",
             "scopes": ["individual"]
           },
