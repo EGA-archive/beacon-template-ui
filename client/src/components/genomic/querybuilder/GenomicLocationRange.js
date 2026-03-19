@@ -43,7 +43,7 @@ export default function GenomicLocationRage({
       {/* Main container split in two sections: Main and Optional parameters */}
       <Box
         sx={{
-          mt: 2,
+          mt: 0,
           display: "flex",
           gap: 6,
           width: "100%",

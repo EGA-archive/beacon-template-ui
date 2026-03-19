@@ -65,6 +65,7 @@ export const SelectedEntryProvider = ({ children }) => {
   const [isExtraFilterValid, setIsExtraFilterValid] = useState(true);
   const [isFilteringTermsOpen, setIsFilteringTermsOpen] = useState(false);
   const [genomicPrefill, setGenomicPrefill] = useState(null);
+  const [editingGenomicFilter, setEditingGenomicFilter] = useState(null);
 
   const valueInputRef = useRef(null);
   const filteringTermsRef = useRef(null);
@@ -160,6 +161,8 @@ export const SelectedEntryProvider = ({ children }) => {
         genomicPrefill,
         setGenomicPrefill,
         clearGenomicPrefill,
+        editingGenomicFilter,
+        setEditingGenomicFilter,
       }}
     >
       {children}

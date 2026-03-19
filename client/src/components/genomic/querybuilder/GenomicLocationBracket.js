@@ -11,7 +11,7 @@ export default function GenomicLocationBracket() {
       {/* Main layout: two columns (left for required, right for optional fields) */}
       <Box
         sx={{
-          mt: 2,
+          mt: 0,
           display: "flex",
           gap: 6,
           width: "100%",

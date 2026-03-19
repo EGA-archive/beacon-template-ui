@@ -19,7 +19,7 @@ export default function GenomicSubmitButton({ disabled }) {
       disabled={isButtonDisabled}
       startIcon={<AddIcon />}
       sx={{
-        mt: 4,
+        mt: 0,
         borderRadius: "999px",
         textTransform: "none",
         fontFamily: '"Open Sans", sans-serif',

@@ -11,7 +11,7 @@ export default function GenomicAlleleQuery() {
       {/* Inner layout box to define spacing and flex structure */}
       <Box
         sx={{
-          mt: 2,
+          mt: 0,
           display: "flex",
           gap: 6, // Space between columns (if more were added)
           width: "100%",

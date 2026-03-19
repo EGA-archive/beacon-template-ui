@@ -25,8 +25,25 @@ export const queryBuilder = (params = [], entryId) => {
         };
       }
     }),
+    // ...(hasGenomicParams
+    //   ? { requestParameters: genomicQuery.queryParams }
+    //   : {}),
     ...(hasGenomicParams
-      ? { requestParameters: genomicQuery.queryParams }
+      ? {
+          requestParameters: (() => {
+            const { refAa, aaPosition, altAa, ...rest } =
+              genomicQuery.queryParams;
+
+            if (refAa && aaPosition && altAa) {
+              return {
+                ...rest,
+                aminoacidChange: `${refAa}${aaPosition}${altAa}`,
+              };
+            }
+
+            return genomicQuery.queryParams;
+          })(),
+        }
       : {}),
     includeResultsetResponses: "HIT",
     pagination: {

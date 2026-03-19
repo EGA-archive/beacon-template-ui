@@ -22,9 +22,19 @@
     "logos": {
       "main": "/assets/logos/main.svg",
       "founders": [
-        "/assets/logos/founder1.svg",
-        "/assets/logos/founder2.svg",
-        "/assets/logos/founder3.svg"
+        {
+          "src": "/assets/logos/founder1.svg",
+          "url": "https://elixir-europe.org/"
+        },
+
+        {
+          "src": "/assets/logos/founder2.svg",
+          "url": "https://european-union.europa.eu/index_en"
+        },
+        {
+          "src": "/assets/logos/founder3.svg",
+          "url": "https://fundacionlacaixa.org/es/"
+        }
       ]
     },
     "showExternalNavBarLink": true,

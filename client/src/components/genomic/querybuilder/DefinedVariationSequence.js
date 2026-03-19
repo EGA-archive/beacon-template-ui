@@ -11,7 +11,7 @@ export default function DefinedVariationSequence() {
       {/* Wrapper Box for layout spacing */}
       <Box
         sx={{
-          mt: 2,
+          mt: 0,
           display: "flex",
           flexDirection: "column",
           width: "100%",
