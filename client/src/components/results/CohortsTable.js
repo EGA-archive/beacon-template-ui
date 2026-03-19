@@ -23,8 +23,7 @@ export default function CohortsTable() {
   };
   const getGenderDistribution = (cohort) => {
     try {
-      const genders =
-        cohort?.collectionEvents?.[0]?.eventGenders?.distribution?.genders;
+      const genders = cohort?.collectionEvents?.[0]?.eventGenders?.distribution;
       if (!genders) return "-";
 
       const entries = Object.entries(genders);
@@ -44,34 +43,58 @@ export default function CohortsTable() {
     }
   };
 
-  const getAgeRangeDistribution = (cohort) => {
+  const getDiseasesDistribution = (cohort) => {
     try {
-      const ranges =
-        cohort?.collectionEvents?.[0]?.eventAgeRange?.distribution?.ranges;
-      if (!ranges) return "-";
+      const diseases =
+        cohort?.collectionEvents?.[0]?.eventDiseases?.distribution;
+      if (!diseases) return "-";
 
-      const keys = Object.keys(ranges);
-      if (keys.length === 0) return "-";
+      const entries = Object.entries(diseases);
 
-      const numericRanges = keys.map((key) => {
-        const parts = key.split("-");
-        const min = parseInt(parts[0].replace(/\D/g, ""), 10);
-        const maxPart = parts[1] || "";
-        const max = maxPart.includes("+")
-          ? `${maxPart}` // keep "+" as is
-          : parseInt(maxPart.replace(/\D/g, ""), 10);
-        return { min, max };
-      });
-
-      const minValue = Math.min(...numericRanges.map((r) => r.min));
-      const last = numericRanges[numericRanges.length - 1].max;
-
-      return `${minValue}–${last}`;
-    } catch (error) {
-      console.warn("getAgeRangeDistribution error:", error);
+      return (
+        <span>
+          {entries.map(([key, value], idx) => (
+            <span key={key}>
+              <strong>{key}</strong>: {value}
+              {idx < entries.length - 1 && ", "}
+            </span>
+          ))}
+        </span>
+      );
+    } catch {
       return "-";
     }
   };
+
+  // const getAgeRangeDistribution = (cohort) => {
+  //   try {
+  //     const ranges =
+  //       //  Here change for diseas - cohort?.collectionEvents?.[0]?.eventAgeRange?.distribution?.ranges;
+  //       cohort?.collectionEvents?.[0]?.eventAgeRange??.distribution?.ranges;
+  //     if (!ranges) return "-";
+
+  //     const keys = Object.keys(ranges);
+  //     if (keys.length === 0) return "-";
+
+  //     const numericRanges = keys.map((key) => {
+  //       const parts = key.split("-");
+  //       const min = parseInt(parts[0].replace(/\D/g, ""), 10);
+  //       const maxPart = parts[1] || "";
+  //       const max = maxPart.includes("+")
+  //         ? `${maxPart}` // keep "+" as is
+  //         : parseInt(maxPart.replace(/\D/g, ""), 10);
+  //       return { min, max };
+  //     });
+
+  //     const minValue = Math.min(...numericRanges.map((r) => r.min));
+  //     const last = numericRanges[numericRanges.length - 1].max;
+
+  //     return `${minValue}–${last}`;
+  //   } catch (error) {
+  //     console.warn("getAgeRangeDistribution error:", error);
+  //     return "-";
+  //   }
+  // };
 
   return (
     <Paper
@@ -121,7 +144,7 @@ export default function CohortsTable() {
                   <strong>{cohort.cohortSize || "-"}</strong>
                 </TableCell>
                 <TableCell>{getGenderDistribution(cohort)}</TableCell>
-                <TableCell>{getAgeRangeDistribution(cohort)}</TableCell>
+                <TableCell>{getDiseasesDistribution(cohort)}</TableCell>
               </TableRow>
             ))}
           </TableBody>

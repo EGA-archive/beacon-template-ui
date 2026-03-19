@@ -9,7 +9,6 @@ import { IconButton } from "@mui/material";
 import { useSelectedEntry } from "../../context/SelectedEntryContext";
 import Loader from "../../common/Loader";
 import { PATH_SEGMENT_TO_ENTRY_ID } from "../../common/textFormatting";
-import { mockSingleBeaconResponse } from "../../search/mockSingleBeaconResponse";
 
 /**
  * Displays a modal containing a paginated results table for the selected dataset.
