@@ -15,6 +15,7 @@ export const exportCSV = async ({
   selectedPathSegment,
   queryBuilder,
   datasetId,
+  authHeaders,
 }) => {
   try {
     let results = [];
@@ -38,7 +39,7 @@ export const exportCSV = async ({
       const fullUrl = `${config.apiUrl}/${selectedPathSegment}`;
       const response = await fetch(fullUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders,
         body: JSON.stringify(fullQuery),
       });
 

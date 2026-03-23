@@ -7,21 +7,32 @@ import nodemailer from "nodemailer";
 // This Express server exposes a single POST endpint that
 // 1. receives the contact form data,
 // 2. validates the input,
-// 3. map a recipientKey to a real email address,
-// 4. then it sends a message using Nodemailer and
+// 3. sends the message to the configured contact email,
+// 4. using Nodemailer and
 // 5. finally reponds with success or error
 
 dotenv.config();
 const app = express();
 app.use(express.json());
 
-app.use(cors());
-const recipientMap = JSON.parse(process.env.RECIPIENT_MAP_JSON || "{}");
+// CORS configuration
+// Allows requests only from the origins defined in the .env file
+// Multiple origins can be provided separated by commas
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
+  : [];
 
-// This connects to the SMTP provider (for example: Gmail) using the credentials in the .env file
+app.use(
+  cors({
+    origin: allowedOrigins,
+  })
+);
+
+// This connects to the SMTP provider (for example: Gmail, CRG, AWS SMTP)
+// using the credentials in the .env file
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
+  port: Number(process.env.SMTP_PORT),
   secure: false,
   auth: {
     user: process.env.SMTP_USER,
@@ -30,31 +41,30 @@ const transporter = nodemailer.createTransport({
 });
 
 // Defines the /api/contact route for sending messages
-app.post("/api/contact", async (req, res) => {
+app.post("/contact", async (req, res) => {
   try {
     // Request validation
-    const { name, email, subject, message, recipientKey } = req.body;
-    if (!name || !email || !message || !recipientKey) {
+    const { name, email, subject, message } = req.body;
+    if (!name || !email || !message) {
       // It rejects any incomplete submissions
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // This ensures that the provided key maps to a real email address
-    const toEmail = recipientMap[recipientKey];
-    if (!toEmail) {
-      return res.status(400).json({ error: "Invalid recipient key" });
-    }
-
     // Creates the email and sends it
     await transporter.sendMail({
-      from: `${name} <${process.env.SENDER_EMAIL || "no-reply@example.com"}>`,
-      to: toEmail,
-      subject: subject || "Contact Form Submission",
+      from: `Beacon Contact Form <${process.env.SENDER_EMAIL}>`,
+      replyTo: email,
+      to: process.env.CONTACT_EMAIL,
+      subject: subject || "Beacon Contact Form Submission",
       text: `
-        Name: ${name}
-        Email: ${email}
-        Message: ${message}
-      `,
+Contact Form Submission
+
+Name: ${name}
+Email: ${email}
+
+Message:
+${message}
+`,
     });
 
     // If successful

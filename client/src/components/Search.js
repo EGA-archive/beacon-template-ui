@@ -17,6 +17,7 @@ import SearchButton from "./search/SearchButton";
 import FilterTermsExtra from "./search/FilterTemsExtra";
 import SearchFiltersInput from "../components/search/SearchFiltersInput";
 import SearchGenomicInput from "../components/search/SearchGenomicInput";
+import useAuthHeaders from "../hooks/useAuthHeaders";
 import {
   formatEntryLabel,
   singleEntryCustomLabels,
@@ -71,6 +72,9 @@ export default function Search({
   const searchRef = useRef(null);
   const inputRef = useRef(null);
 
+  // Get authentication headers (includes Bearer token if user is logged in)
+  const authHeaders = useAuthHeaders();
+
   useEffect(() => {
     if (activeInput === "genomic" && inputRef.current) {
       inputRef.current.focus();
@@ -93,8 +97,9 @@ export default function Search({
     const fetchEntryTypes = async () => {
       try {
         await handleBeaconsInfo();
-
-        const res = await fetch(`${config.apiUrl}/map`);
+        const res = await fetch(`${config.apiUrl}/map`, {
+          headers: authHeaders,
+        });
         const data = await res.json();
         // const data = mockMapResonse;
 
@@ -150,7 +155,9 @@ export default function Search({
 
   const fetchConfiguration = async () => {
     try {
-      const res = await fetch(`${config.apiUrl}/configuration`);
+      const res = await fetch(`${config.apiUrl}/configuration`, {
+        headers: authHeaders,
+      });
       const data = await res.json();
       setEntryTypesConfig({
         entryTypes: data.response?.entryTypes || data.entryTypes || {},
@@ -173,7 +180,7 @@ export default function Search({
   const handleBeaconsInfo = async () => {
     try {
       let url = `${config.apiUrl}/info`;
-      let response = await fetch(url);
+      let response = await fetch(url, { headers: authHeaders });
       const data = await response.json();
       let normalizedData = [];
       if (Array.isArray(data.responses)) {
