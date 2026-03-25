@@ -250,7 +250,7 @@ export const COHORTS_TABLE = [
   },
   {
     id: "cohort_age_range",
-    label: "Age Range Distribution",
+    label: "Disease Distribution",
     width: "20%",
     align: "left",
   },

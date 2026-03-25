@@ -23,7 +23,9 @@ export default function CohortsTable() {
   };
   const getGenderDistribution = (cohort) => {
     try {
-      const genders = cohort?.collectionEvents?.[0]?.eventGenders?.distribution;
+      const genders =
+        cohort?.collectionEvents?.[0]?.eventGenders?.distribution.genders ||
+        cohort?.collectionEvents?.[0]?.eventGenders?.distribution;
       if (!genders) return "-";
 
       const entries = Object.entries(genders);
@@ -46,6 +48,7 @@ export default function CohortsTable() {
   const getDiseasesDistribution = (cohort) => {
     try {
       const diseases =
+        cohort?.collectionEvents?.[0]?.eventDiseases?.distribution.diseases ||
         cohort?.collectionEvents?.[0]?.eventDiseases?.distribution;
       if (!diseases) return "-";
 
