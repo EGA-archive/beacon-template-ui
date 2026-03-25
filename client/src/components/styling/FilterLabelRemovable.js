@@ -1,4 +1,4 @@
-import { Typography, Button, Box, Divider } from "@mui/material";
+import { Typography, Button, Box, Divider, Tooltip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import ClearIcon from "@mui/icons-material/Clear";
 import config from "../../config/config.json";
@@ -9,7 +9,10 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 
 // This component shows a label for the filter that can be removable and expandable
 export default function FilterLabelRemovable({
+  type,
   label,
+  queryType,
+  queryParams,
   scope,
   scopes = [],
   onDelete,
@@ -34,7 +37,14 @@ export default function FilterLabelRemovable({
   // Can expand only if it’s removable and has multiple scopes
   const isExpandable = isRemovable && scopes.length > 1;
 
-  const { hasSearchResults, setQueryDirty } = useSelectedEntry();
+  const {
+    hasSearchResults,
+    setQueryDirty,
+    openGenomicQueryBuilder,
+    setGenomicPrefill,
+    editingGenomicFilter,
+    setEditingGenomicFilter,
+  } = useSelectedEntry();
 
   // Base background colors depending on the type (common or other)
   const baseBgColor =
@@ -101,122 +111,151 @@ export default function FilterLabelRemovable({
   }, [isExpanded, setExpandedKey, isExpandable]);
 
   return (
-    <Box
-      ref={containerRef}
-      sx={{
-        display: isSimple ? "inline-flex" : "flex",
-        flexDirection: isSimple ? "row" : "column",
-        flexWrap: "wrap", // allow text to wrap
-        alignItems: isSimple ? "center" : "flex-start",
-        justifyContent: isSimple ? "center" : "flex-start",
-        padding: isSimple ? "4px 12px" : isExpanded ? "9px 12px" : "4px 12px",
-        borderRadius: "8px",
-        border: "1px solid black",
-
-        // If expanded & multi-scope, use darkPrimary background
-        backgroundColor: expandedMultiScopeBg
-          ? `${expandedMultiScopeBg} !important`
-          : `${finalBgColor} !important`,
-
-        fontSize: "14px",
-        fontWeight: 400,
-        cursor: isSimple || isRemovable ? "pointer" : "default",
-        transition: "background-color 0.2s ease",
-
-        "&:hover": {
-          // Darker hover when multi-scope, otherwise default hover
-          backgroundColor: isMultiScopeChip
-            ? `${multiScopeHoverBg} !important`
-            : `${hoverColor} !important`,
-        },
-
-        maxWidth: isExpanded ? "400px" : "auto",
-        height: isExpanded ? "auto" : "fit-content", // auto height only if expanded
-      }}
-      onClick={() => {
-        if (isSimple && typeof onClick === "function") {
-          onClick(); // for simple variant, trigger onClick
-        } else if (isExpandable && typeof setExpandedKey === "function") {
-          // toggle expansion only when multiple scopes exist
-          setExpandedKey(isExpanded ? null : keyValue);
-        }
-      }}
+    <Tooltip
+      title={
+        scope === "genomicQueryBuilder" || scope === "genomicVariant"
+          ? "Click the genomic query to edit it in the Genomic Query Builder."
+          : ""
+      }
+      arrow
+      placement="top"
     >
-      {/* Top part of the label: shows text and delete icon if removable */}
-      <Box display="flex" alignItems="center" gap={1}>
-        <Typography sx={{ fontSize: "14px" }} data-cy="filter-chip">
-          {scope === "genomicQueryBuilder" && typeof label === "string"
-            ? label.split(" | ").map((part, i, arr) => {
-                const [key, ...valueParts] = part.split(":");
-                const value = valueParts.join(":");
+      <Box
+        ref={containerRef}
+        sx={{
+          display: isSimple ? "inline-flex" : "flex",
+          flexDirection: isSimple ? "row" : "column",
+          flexWrap: "wrap", // allow text to wrap
+          alignItems: isSimple ? "center" : "flex-start",
+          justifyContent: isSimple ? "center" : "flex-start",
+          padding: isSimple ? "4px 12px" : isExpanded ? "9px 12px" : "4px 12px",
+          borderRadius: "8px",
+          border: "1px solid black",
+
+          // If expanded & multi-scope, use darkPrimary background
+          backgroundColor: expandedMultiScopeBg
+            ? `${expandedMultiScopeBg} !important`
+            : `${finalBgColor} !important`,
+
+          fontSize: "14px",
+          fontWeight: 400,
+          cursor: isSimple || isRemovable ? "pointer" : "default",
+          transition: "background-color 0.2s ease",
+
+          "&:hover": {
+            // Darker hover when multi-scope, otherwise default hover
+            backgroundColor: isMultiScopeChip
+              ? `${multiScopeHoverBg} !important`
+              : `${hoverColor} !important`,
+          },
+
+          maxWidth: isExpanded ? "400px" : "auto",
+          height: isExpanded ? "auto" : "fit-content", // auto height only if expanded
+        }}
+        onClick={() => {
+          if (scope === "genomicQueryBuilder" || scope === "genomicVariant") {
+            // tell the system we are editing THIS genomic filter
+            setEditingGenomicFilter({
+              id: keyValue,
+              queryType,
+              queryParams,
+            });
+
+            // prefill the builder
+            setGenomicPrefill({
+              queryType,
+              queryParams,
+            });
+
+            openGenomicQueryBuilder();
+            return;
+          }
+
+          if (isSimple && typeof onClick === "function") {
+            onClick(); // for simple variant, trigger onClick
+          } else if (isExpandable && typeof setExpandedKey === "function") {
+            // toggle expansion only when multiple scopes exist
+            setExpandedKey(isExpanded ? null : keyValue);
+          }
+        }}
+      >
+        {/* Top part of the label: shows text and delete icon if removable */}
+        <Box display="flex" alignItems="center" gap={1}>
+          <Typography sx={{ fontSize: "14px" }} data-cy="filter-chip">
+            {type === "genomic" && typeof label === "string"
+              ? label.split(" | ").map((part, i, arr) => {
+                  const [key, ...valueParts] = part.split(":");
+                  const value = valueParts.join(":");
+
+                  return (
+                    <span key={i}>
+                      <strong>{key}:</strong> {value}
+                      {i < arr.length - 1 && " | "}
+                    </span>
+                  );
+                })
+              : labelToShow}
+          </Typography>
+          {isRemovable && (
+            <ClearIcon
+              onClick={(e) => {
+                e.stopPropagation();
+
+                onDelete?.();
+
+                if (hasSearchResults) {
+                  setQueryDirty(true);
+                }
+              }}
+              sx={{
+                fontSize: 18,
+                cursor: "pointer",
+                opacity: 0.6,
+                "&:hover": { opacity: 1 },
+              }}
+            />
+          )}
+        </Box>
+
+        {/* Expanded content: scope selector.  
+          Shown only when chip has multiple scopes */}
+        {isExpandable && isExpanded && (
+          <Box mt={1} sx={{ width: "100%" }}>
+            <Divider
+              orientation="horizontal"
+              flexItem
+              sx={{ borderColor: "black" }}
+            />
+            <Typography
+              fontWeight={400}
+              fontSize={13}
+              mb={1}
+              mt={1}
+              data-cy="scope-selector-title"
+            >
+              Select the scope:
+            </Typography>
+
+            {/* Buttons for each available scope */}
+            {/* Clicking a button changes the scope for this filter */}
+            <Box display="flex" gap={1} flexWrap="wrap">
+              {scopes.map((s) => {
+                const isSelected = s === scope;
                 return (
-                  <span key={i}>
-                    <strong>{key}:</strong> {value}
-                    {i < arr.length - 1 && " | "}
-                  </span>
+                  <Button
+                    key={s}
+                    variant={isSelected ? "contained" : "outlined"}
+                    onClick={() => onScopeChange?.(keyValue, s)}
+                    sx={getSelectableScopeStyles(isSelected)}
+                  >
+                    {capitalize(s)}
+                  </Button>
                 );
-              })
-            : labelToShow}
-        </Typography>
-        {isRemovable && (
-          <ClearIcon
-            onClick={(e) => {
-              e.stopPropagation();
-
-              onDelete?.();
-
-              if (hasSearchResults) {
-                setQueryDirty(true);
-              }
-            }}
-            sx={{
-              fontSize: 18,
-              cursor: "pointer",
-              opacity: 0.6,
-              "&:hover": { opacity: 1 },
-            }}
-          />
+              })}
+            </Box>
+          </Box>
         )}
       </Box>
-
-      {/* Expanded content: scope selector.  
-          Shown only when chip has multiple scopes */}
-      {isExpandable && isExpanded && (
-        <Box mt={1} sx={{ width: "100%" }}>
-          <Divider
-            orientation="horizontal"
-            flexItem
-            sx={{ borderColor: "black" }}
-          />
-          <Typography
-            fontWeight={400}
-            fontSize={13}
-            mb={1}
-            mt={1}
-            data-cy="scope-selector-title"
-          >
-            Select the scope:
-          </Typography>
-
-          {/* Buttons for each available scope */}
-          {/* Clicking a button changes the scope for this filter */}
-          <Box display="flex" gap={1} flexWrap="wrap">
-            {scopes.map((s) => {
-              const isSelected = s === scope;
-              return (
-                <Button
-                  key={s}
-                  variant={isSelected ? "contained" : "outlined"}
-                  onClick={() => onScopeChange?.(keyValue, s)}
-                  sx={getSelectableScopeStyles(isSelected)}
-                >
-                  {capitalize(s)}
-                </Button>
-              );
-            })}
-          </Box>
-        </Box>
-      )}
-    </Box>
+    </Tooltip>
   );
 }

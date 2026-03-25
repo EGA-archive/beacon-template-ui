@@ -131,26 +131,22 @@ export const GenomicQueryLabel = (
   </Tooltip>
 );
 
-export const FilteringTermsLabel = (
+export const FilteringTermsInfoTooltip = (
   <Tooltip
-    component="ul"
     title={
       <Box
+        component="ul"
         sx={{
-          pl: { xs: "5px", lg: "20px" },
+          pl: 2,
+          listStyleType: "disc",
           fontFamily: '"Open Sans", sans-serif',
         }}
       >
-        <div>
-          <li> Use filtering terms to refine Beacon responses.</li>
-        </div>
-        <div>
-          <li>
-            {" "}
-            Review all filtering terms available across datasets in{" "}
-            <b>“All Filtering Terms”</b>.
-          </li>
-        </div>
+        <li>Use filtering terms to refine Beacon responses.</li>
+        <li>
+          Review all filtering terms available across datasets in{" "}
+          <b>“All Filtering Terms”</b>.
+        </li>
       </Box>
     }
     placement="top-start"
@@ -158,12 +154,13 @@ export const FilteringTermsLabel = (
     componentsProps={{
       tooltip: {
         sx: {
+          py: 1,
           backgroundColor: "#fff",
           color: "#000",
           border: "1px solid black",
           minWidth: {
             xs: "361px",
-            sm: "400px",
+            sm: "420px",
           },
         },
       },
@@ -178,11 +175,95 @@ export const FilteringTermsLabel = (
     <Box
       component="span"
       sx={{
-        textDecoration: "underline",
-        fontWeight: 600,
+        cursor: "pointer",
+        ml: 3,
+        mb: "4px",
+        width: "20px",
+        height: "20px",
+        borderRadius: "30px",
+        backgroundColor: config.ui.colors.primary,
+        color: "white",
+        textAlign: "center",
+        fontSize: "14px",
       }}
     >
-      Filtering Terms
+      i
+    </Box>
+  </Tooltip>
+);
+
+export const SearchBarsInfoTooltip = (
+  <Tooltip
+    title={
+      <Box
+        component="ul"
+        sx={{
+          pl: 2,
+          listStyleType: "disc",
+          fontFamily: '"Open Sans", sans-serif',
+        }}
+      >
+        <b>Genomic Query</b>
+        <Box component="ul" sx={{ pl: 3, listStyleType: "disc" }}>
+          <li>
+            Query for variants at a specific genomic location or within a
+            defined region.
+          </li>
+          <li>
+            Compile complex genomic queries using the{" "}
+            <b>“Genomic Query Builder”</b>.
+          </li>
+        </Box>
+        <br />
+        <b>Filtering Terms</b>
+        <Box component="ul" sx={{ pl: 3, listStyleType: "disc" }}>
+          <li>Use filtering terms to refine Beacon responses.</li>
+          <li>
+            Review all filtering terms available across datasets in{" "}
+            <b>“All Filtering Terms”</b>.
+          </li>
+        </Box>
+      </Box>
+    }
+    placement="top-start"
+    arrow
+    componentsProps={{
+      tooltip: {
+        sx: {
+          py: 1,
+          backgroundColor: "#fff",
+          color: "#000",
+          border: "1px solid black",
+          minWidth: {
+            xs: "361px",
+            sm: "420px",
+          },
+        },
+      },
+      arrow: {
+        sx: {
+          color: "#fff",
+          "&::before": { border: "1px solid black" },
+        },
+      },
+    }}
+  >
+    <Box
+      component="span"
+      sx={{
+        cursor: "pointer",
+        ml: 3,
+        mb: "4px",
+        width: "20px",
+        height: "20px",
+        borderRadius: "30px",
+        backgroundColor: config.ui.colors.primary,
+        color: "white",
+        textAlign: "center",
+        fontSize: "14px",
+      }}
+    >
+      i
     </Box>
   </Tooltip>
 );

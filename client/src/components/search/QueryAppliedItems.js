@@ -133,8 +133,11 @@ export default function QueryAppliedItems({
               key={isGenomic ? filter.id : `${filter.key}__${filter.scope}`}
               keyValue={keyValue}
               label={filter.label}
+              type={filter.type}
               scope={filter.scope}
               scopes={filter.scopes}
+              queryType={filter.queryType}
+              queryParams={filter.queryParams}
               onDelete={() => {
                 if (hasSearchResults) {
                   setQueryDirty(true);

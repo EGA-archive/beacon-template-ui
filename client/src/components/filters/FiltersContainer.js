@@ -68,6 +68,9 @@ export default function FiltersContainer({
   // Grab the currently selected entry type and the list of all entry types from context
   const { selectedPathSegment, entryTypes } = useSelectedEntry();
 
+  // Checks if g_var is the first entry type in the configuration file
+  const isFirstEntryGenomic = entryTypes[0]?.pathSegment === "g_variants";
+
   // Track which tab is active
   const [tabValue, setTabValue] = useState(0);
 
@@ -85,31 +88,36 @@ export default function FiltersContainer({
   const hasGenomic = entryTypes.some(
     (entry) => entry.pathSegment === "g_variants"
   );
-  const isGenomicSelected = selectedPathSegment === "g_variants";
 
   // Build tab list dynamically based on configuration and entry type
   let tabs = [];
 
-  // Case 1: user is currently viewing "Genomic Variants"
-  if (hasGenomic && isGenomicSelected) {
-    // If config allows Genomic Annotations → add this tab first
-    if (hasGenomicAnnotationsConfig) {
+  if (isFirstEntryGenomic) {
+    // Case 1: The first entry type is genomic (g_variants)
+
+    // If genomic annotations are enabled in the config
+    // and the beacon supports genomic entry types,
+    // add the "Genomic Annotations" tab first.
+    if (hasGenomicAnnotationsConfig && hasGenomic) {
       tabs.push(buildGenomicAnnotationsTab(setActiveInput));
     }
 
-    // If config allows Common Filters → add this tab after Genomic Annotations
+    // If Common Filters are enabled in the config,
+    // add the "Common Filters" tab second.
     if (hasCommonFiltersConfig) {
       tabs.push(buildCommonFiltersTab());
     }
-
-    // Case 2: user is on a different entry type (not "Genomic Variants")
   } else {
-    // Add Common Filters first (if enabled in config)
+    // Case 2: The first entry type is NOT genomic
+    // (for example: runs, individuals, biosamples, etc.)
+
+    // Add the "Common Filters" tab first.
     if (hasCommonFiltersConfig) {
       tabs.push(buildCommonFiltersTab());
     }
 
-    // Add Genomic Annotations second (but only if the beacon supports genomics)
+    // If the beacon supports genomic data and the config allows it,
+    // add the "Genomic Annotations" tab second.
     if (hasGenomic && hasGenomicAnnotationsConfig) {
       tabs.push(buildGenomicAnnotationsTab(setActiveInput));
     }
@@ -214,19 +222,6 @@ export default function FiltersContainer({
         {tabs.map((tab, i) => (
           <TabPanel value={tabValue} index={i} key={tab.label}>
             <Box sx={{ padding: "20px" }}>
-              {/* <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: "bold",
-                  fontSize: "14px",
-                  lineHeight: "19px",
-                  mb: 0.5,
-                  color: "black",
-                }}
-              >
-                {tab.title}
-              </Typography> */}
-
               <Typography
                 variant="body1"
                 sx={{

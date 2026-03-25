@@ -151,7 +151,12 @@ export default function GenomicQueryBuilderDialog({
   );
   const [selectedInput, setSelectedInput] = useState("variationType");
   const [duplicateMessage, setDuplicateMessage] = useState("");
-  const { genomicPrefill, clearGenomicPrefill } = useSelectedEntry();
+  const {
+    genomicPrefill,
+    clearGenomicPrefill,
+    editingGenomicFilter,
+    setEditingGenomicFilter,
+  } = useSelectedEntry();
 
   // This map links each query type label to the corresponding form component
   // It tells the app which form to display based on the user's selection
@@ -255,8 +260,8 @@ export default function GenomicQueryBuilderDialog({
       PaperProps={{
         sx: {
           borderRadius: "10px",
-          padding: "20px",
-          height: "75%",
+          padding: "9px",
+          height: "79%",
         },
       }}
     >
@@ -274,6 +279,7 @@ export default function GenomicQueryBuilderDialog({
             fontSize: "16px",
             fontWeight: 700,
             fontFamily: '"Open Sans", sans-serif',
+            py: 1.5,
           }}
         >
           Genomic Query Builder
@@ -298,7 +304,7 @@ export default function GenomicQueryBuilderDialog({
       {/*The dyamic content of the dialog starts here */}
       <DialogContent
         sx={{
-          pt: 1,
+          pt: 0,
         }}
       >
         {/* This is the form wrapper that controls validation and submission, 
@@ -389,11 +395,11 @@ export default function GenomicQueryBuilderDialog({
               setTimeout(() => setDuplicateMessage(""), 5000);
               return;
             }
-
             const alreadyHasGenomic = selectedFilter.some(
               (f) => f.type === "genomic"
             );
-            if (alreadyHasGenomic) {
+
+            if (alreadyHasGenomic && !editingGenomicFilter) {
               console.warn(
                 "[GQB] Attempted to add a second genomic query — blocked"
               );
@@ -405,9 +411,16 @@ export default function GenomicQueryBuilderDialog({
 
             // STEP 2C: update applied filters
             setSelectedFilter((prev) => {
-              const next = [...prev, newFilter];
-              return next;
+              // If editing a genomic filter → replace the existing genomic filter
+              if (editingGenomicFilter) {
+                return [...prev.filter((f) => f.type !== "genomic"), newFilter];
+              }
+
+              // Otherwise just add the new genomic filter
+              return [...prev, newFilter];
             });
+
+            setEditingGenomicFilter(null);
 
             setDuplicateMessage("");
             resetBuilderState();
@@ -416,14 +429,6 @@ export default function GenomicQueryBuilderDialog({
           }}
         >
           {({ resetForm, isValid, dirty, values, errors }) => {
-            console.log("[GQB DEBUG]", {
-              selectedQueryType,
-              isValid,
-              dirty,
-              values,
-              initialValues,
-            });
-
             return (
               <Form>
                 {/* Render the selectable query type buttons */}
@@ -450,7 +455,7 @@ export default function GenomicQueryBuilderDialog({
                 {/* Render the selected form based on the current query type based on user's selection */}
                 <Box
                   sx={{
-                    mt: 4,
+                    mt: 2,
                   }}
                 >
                   {SelectedFormComponent && (
@@ -467,7 +472,7 @@ export default function GenomicQueryBuilderDialog({
                 </Box>
                 {/* Submit button is shown at the bottom right of all the query types and is disabled if the form is invalid or untouched */}
                 <Box
-                  sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}
+                  sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}
                 >
                   <GenomicSubmitButton disabled={!isValid} />
                 </Box>

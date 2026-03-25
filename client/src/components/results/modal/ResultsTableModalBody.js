@@ -16,7 +16,6 @@ import {
   TableHead,
   TableRow,
   tableCellClasses,
-  Tooltip,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import config from "../../../config/config.json";
@@ -35,6 +34,7 @@ import InfoCell from "../modal/cellRenderers/InfoCell";
 import MolecularAttributesCell from "../modal/cellRenderers/MolecularAttributesCell";
 import VariationCell from "../modal/cellRenderers/VariationCell";
 import CaseLevelDataCell from "../modal/cellRenderers/CaseLevelDataCell";
+import useAuthHeaders from "../../../hooks/useAuthHeaders";
 
 /**
  * Displays paginated results inside the modal.
@@ -59,6 +59,9 @@ const ResultsTableModalBody = ({
   const [expandedRow, setExpandedRow] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
   const initialized = useRef(false);
+
+  // Get authentication headers (includes Bearer token if user is logged in)
+  const authHeaders = useAuthHeaders();
 
   const start = page * rowsPerPage;
   const end = start + rowsPerPage;
@@ -186,6 +189,7 @@ const ResultsTableModalBody = ({
       selectedPathSegment,
       queryBuilder,
       datasetId,
+      authHeaders,
     });
   }, [
     dataTable,
@@ -195,6 +199,7 @@ const ResultsTableModalBody = ({
     entryTypeId,
     selectedPathSegment,
     datasetId,
+    authHeaders,
   ]);
 
   const CELL_RENDERERS = {

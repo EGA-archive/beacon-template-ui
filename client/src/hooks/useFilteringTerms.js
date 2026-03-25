@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import config from "../config/config.json";
 import { useSelectedEntry } from "../components/context/SelectedEntryContext";
+import useAuthHeaders from "./useAuthHeaders";
 
 // Custom hook to fetch filtering terms from the Beacon API
 export default function useFilteringTerms() {
@@ -16,6 +17,9 @@ export default function useFilteringTerms() {
   // Context function to update molecular effects globally
   const { setMolecularEffects } = useSelectedEntry();
 
+  // Get authentication headers (includes Bearer token if user is logged in)
+  const authHeaders = useAuthHeaders();
+
   useEffect(() => {
     // Function to fetch the filtering terms
     const fetchTerms = async () => {
@@ -24,7 +28,8 @@ export default function useFilteringTerms() {
       try {
         // Make the GET request to the filtering_terms endpoint limit=0 returns the full list
         const response = await fetch(
-          `${config.apiUrl}/filtering_terms?limit=0`
+          `${config.apiUrl}/filtering_terms?limit=0`,
+          { headers: authHeaders }
         );
         // Convert the response to JSON
         const data = await response.json();

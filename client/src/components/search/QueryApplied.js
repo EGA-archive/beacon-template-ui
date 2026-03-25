@@ -8,13 +8,7 @@ import deleteIcon from "../../assets/logos/delete.svg";
 // It allows them to remove individual filters or clear all at once.
 export default function QueryApplied({ variant }) {
   // Get context functions to update filters and result states
-  const {
-    setSelectedFilter,
-    setLoadingData,
-    setResultData,
-    setHasSearchResult,
-    setQueryDirty,
-  } = useSelectedEntry();
+  const { setSelectedFilter, setQueryDirty } = useSelectedEntry();
 
   // Get the primary color from config file
   const primaryDarkColor = config.ui.colors.darkPrimary;

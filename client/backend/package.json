@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "main": "contact.js",
   "license": "MIT",
+  "scripts": {
+    "start": "node contact.js"
+  },
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.1.0",
-    "nodemailer": "^7.0.7"
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "nodemailer": "^8.0.2"
   }
 }

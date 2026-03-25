@@ -183,21 +183,6 @@ export default function NetworkMembers() {
                           No Logo
                         </Typography>
                       )}
-
-                      {/* Shared network logo (from API, not hardcoded) */}
-                      {networkLogoUrl && (
-                        <Box
-                          component="img"
-                          src={networkLogoUrl}
-                          alt="Network Logo"
-                          sx={{
-                            width: 100,
-                            height: "auto",
-                            objectFit: "contain",
-                          }}
-                          onError={(e) => (e.target.style.display = "none")}
-                        />
-                      )}
                     </Box>
 
                     {/* Right side: Beacon details */}

@@ -35,6 +35,7 @@ import {
   getBeaconAggregationInfo,
   getDatasetResponse,
 } from "./utils/beaconType";
+import useAuthHeaders from "../../hooks/useAuthHeaders";
 
 const ResultsTableModal = lazy(() => import("./modal/ResultsTableModal"));
 
@@ -52,6 +53,9 @@ export default function ResultsTable() {
   const [selectedSubRow, setSelectedSubRow] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [networkMembers, setNetworkMembers] = useState([]);
+
+  // Get authentication headers (includes Bearer token if user is logged in)
+  const authHeaders = useAuthHeaders();
 
   const headerCellStyle = {
     backgroundColor: config.ui.colors.primary,
@@ -135,13 +139,16 @@ export default function ResultsTable() {
 
   useEffect(() => {
     async function loadMembers() {
-      const membersWithMaturity = await loadNetworkMembersWithMaturity();
+      const membersWithMaturity = await loadNetworkMembersWithMaturity(
+        authHeaders
+      );
+
       setNetworkMembers(membersWithMaturity);
     }
     if (config.beaconType === "networkBeacon") {
       loadMembers();
     }
-  }, []);
+  }, [authHeaders]);
 
   const getBeaconStatusLabel = (status) => {
     if (!status) return "Undefined";

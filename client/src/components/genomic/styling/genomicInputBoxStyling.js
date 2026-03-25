@@ -31,7 +31,7 @@ export const selectStyle = {
 // Typography style
 export const mainBoxTypography = {
   mt: 3,
-  mb: 2,
+  mb: 1,
   fontFamily: '"Open Sans", sans-serif',
   fontWeight: 400,
   fontSize: "12px",

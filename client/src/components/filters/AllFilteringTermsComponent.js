@@ -1,13 +1,18 @@
-import { useEffect, useState } from "react";
-import { Box, Typography, TextField } from "@mui/material";
+import { useEffect, useState, useMemo } from "react";
+import {
+  Box,
+  Typography,
+  TextField,
+  InputAdornment,
+  IconButton,
+} from "@mui/material";
 import config from "../../config/config.json";
 import SearchIcon from "@mui/icons-material/Search";
 import { alpha } from "@mui/material/styles";
 import FilteringTermsTable from "./FilteringTermsTable";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
-import { InputAdornment, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-
+import useAuthHeaders from "../../hooks/useAuthHeaders";
 import { searchFilteringTerms } from "../common/filteringTermsHelpers";
 
 // Component: Displays a searchable and paginated list of filtering terms
@@ -48,6 +53,9 @@ export default function AllFilteringTermsComponent({
 
   const unselectedBorderColor = alpha(primaryColor, 0.15);
 
+  // Get authentication headers (includes Bearer token if user is logged in)
+  const authHeaders = useAuthHeaders();
+
   // Handle table pagination: page change
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -64,7 +72,9 @@ export default function AllFilteringTermsComponent({
   useEffect(() => {
     const fetchFilteringTerms = async () => {
       try {
-        const res = await fetch(`${config.apiUrl}/filtering_terms?limit=0`);
+        const res = await fetch(`${config.apiUrl}/filtering_terms?limit=0`, {
+          headers: authHeaders,
+        });
         const data = await res.json();
         setFilteringTerms(data);
       } catch (err) {
@@ -75,7 +85,7 @@ export default function AllFilteringTermsComponent({
     };
 
     fetchFilteringTerms();
-  }, []);
+  }, [authHeaders]);
 
   // This hook filters the terms based on what the user typed. If no search is entered, it shows all terms. If something is typed, it updates the list to only show matches.
   // This useEffect runs every time either:

@@ -27,9 +27,6 @@ export default function GenomicAnnotations() {
     setQueryDirty,
     hasSearchResults,
     molecularEffects,
-    setExtraFilter,
-    openGenomicQueryBuilder,
-    setGenomicPrefill,
   } = useSelectedEntry();
 
   // Only molecular effects with these IDs are allowed to appear in the UI
@@ -140,11 +137,10 @@ export default function GenomicAnnotations() {
 
   const handleGenomicFilter = useGenomicAnnotationClick({
     selectedFilter,
+    setSelectedFilter,
     setMessage,
     setQueryDirty,
     hasSearchResults,
-    setGenomicPrefill,
-    openGenomicQueryBuilder,
   });
 
   // Render collapsible categories and their labels as clickable filter chips

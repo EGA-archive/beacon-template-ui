@@ -4,12 +4,12 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
-import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
 import { useRef, useEffect, useState } from "react";
 import config from "../../config/config.json";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { GENOMIC_LABELS_MAP } from "../genomic/genomicLabelHelper";
 
 // This component renders an input bar for adding free-text genomic queries.
 // It includes a dropdown for selecting the genome assembly coming from the config,
@@ -174,6 +174,35 @@ export default function SearchGenomicInput({
     }
   }, [detectedAssembly, assembly, setAssembly]);
 
+  const buildSequenceQueryLabel = (queryParams = {}) => {
+    const orderedKeys = [
+      "assemblyId",
+      "referenceName",
+      "start",
+      "alternateBases",
+      "referenceBases",
+    ];
+
+    return orderedKeys
+      .filter(
+        (key) => queryParams[key] !== undefined && queryParams[key] !== null
+      )
+      .map((key) => {
+        const normalizedKey = key === "referenceName" ? "chromosome" : key;
+        const displayKey = GENOMIC_LABELS_MAP[normalizedKey] || normalizedKey;
+
+        const rawValue = queryParams[key];
+        const displayValue = Array.isArray(rawValue) ? rawValue[0] : rawValue;
+
+        return `${displayKey}: ${displayValue}`;
+      })
+      .join(" | ")
+      .replace(/\|{2,}/g, "|")
+      .replace(/\|\s*\|/g, "|")
+      .replace(/\|\s+$/, "")
+      .replace(/^\s+\|/, "");
+  };
+
   // Commit the draft query to filters
   const commitGenomicDraft = () => {
     const chromosomeLibrary =
@@ -194,7 +223,9 @@ export default function SearchGenomicInput({
     const finalAssembly = detectedAssembly || assembly;
 
     // Restrict to single genomic query
-    const alreadyHasGenomic = selectedFilter.some((f) => f.type === "genomic");
+    const alreadyHasGenomic = selectedFilter.some(
+      (f) => f.type === "genomic" && f.scope !== "editing"
+    );
     if (alreadyHasGenomic) {
       setMessage(COMMON_MESSAGES.singleGenomicQuery);
       setTimeout(() => setMessage(null), 3000);
@@ -275,17 +306,38 @@ export default function SearchGenomicInput({
     };
 
     // Create unique ID
-    const uniqueId = `genomic-free-${Date.now().toString(36)}-${Math.random()
-      .toString(36)
-      .slice(2, 7)}`;
+    // const uniqueId = `genomic-free-${Date.now().toString(36)}-${Math.random()
+    //   .toString(36)
+    //   .slice(2, 7)}`;
+
+    // const newGenomicFilter = {
+    //   id: uniqueId,
+    //   key: uniqueId,
+
+    // Build deterministic ID from query parameters
+    const validEntries = Object.entries(queryParams).filter(
+      ([_, value]) =>
+        value !== undefined &&
+        value !== null &&
+        !(typeof value === "string" && value.trim() === "")
+    );
+
+    const idLabel = validEntries
+      .map(([key, value]) => `${key}:${value}`)
+      .join("-");
+
+    const id = `genomic-Sequence Query-${idLabel}`;
+
+    const combinedLabel = buildSequenceQueryLabel(queryParams);
 
     const newGenomicFilter = {
-      id: uniqueId,
-      key: uniqueId,
-      label: labelForCheck,
+      id,
+      key: "Sequence Query",
+      label: combinedLabel,
       scope: "genomicVariant",
       bgColor: "genomic",
       type: "genomic",
+      queryType: "Sequence Query",
       queryParams,
     };
 

@@ -38,7 +38,7 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
     <Box>
       <Box
         sx={{
-          mt: 2,
+          mt: 0,
           display: "flex",
           "@media (max-width:1108px)": {
             flexDirection: "column",
@@ -171,7 +171,13 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
             )}
           </Box>
 
-          <Typography sx={mainBoxTypography}>
+          <Typography
+            sx={{
+              ...mainBoxTypography,
+              mt: 2,
+              mb: 1,
+            }}
+          >
             You can add the Genomic Location:
           </Typography>
 
