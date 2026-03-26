@@ -69,7 +69,7 @@ export default function FiltersContainer({
   const { selectedPathSegment, entryTypes } = useSelectedEntry();
 
   // Checks if g_var is the first entry type in the configuration file
-  const isFirstEntryGenomic = entryTypes[0]?.pathSegment === "g_variants";
+  const isSelectedGenomic = selectedPathSegment === "g_variants";
 
   // Track which tab is active
   const [tabValue, setTabValue] = useState(0);
@@ -92,7 +92,7 @@ export default function FiltersContainer({
   // Build tab list dynamically based on configuration and entry type
   let tabs = [];
 
-  if (isFirstEntryGenomic) {
+  if (isSelectedGenomic) {
     // Case 1: The first entry type is genomic (g_variants)
 
     // If genomic annotations are enabled in the config

@@ -139,16 +139,13 @@ export default function ResultsTable() {
 
   useEffect(() => {
     async function loadMembers() {
-      const membersWithMaturity = await loadNetworkMembersWithMaturity(
-        authHeaders
-      );
-
+      const membersWithMaturity = await loadNetworkMembersWithMaturity();
       setNetworkMembers(membersWithMaturity);
     }
     if (config.beaconType === "networkBeacon") {
       loadMembers();
     }
-  }, [authHeaders]);
+  }, []);
 
   const getBeaconStatusLabel = (status) => {
     if (!status) return "Undefined";
