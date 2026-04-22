@@ -5,7 +5,10 @@ import config from "../../../config/config.json";
  * Returns true if showLogin is true, false otherwise.
  */
 export const isLoginEnabled = () => {
-  return config?.ui?.showLogin === true;
+  const showLogin = config?.ui?.showLogin === true;
+  const disableLogin = config?.ui?.disableLogin === true;
+
+  return showLogin && !disableLogin;
 };
 
 export const safeSignIn = (auth, onDisabledLogin) => {

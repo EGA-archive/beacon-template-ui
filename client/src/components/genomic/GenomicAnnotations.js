@@ -90,7 +90,7 @@ export default function GenomicAnnotations() {
   // All possible genomic annotation categories available in the UI
   const allCategories = [
     "SNP Examples",
-    "Genomic Variant Examples",
+    "HGVS Examples",
     "Protein Examples",
     "Molecular Effect",
   ];

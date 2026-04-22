@@ -28,8 +28,7 @@ export default function useFilteringTerms() {
       try {
         // Make the GET request to the filtering_terms endpoint limit=0 returns the full list
         const response = await fetch(
-          `${config.apiUrl}/filtering_terms?limit=0`,
-          { headers: authHeaders }
+          `${config.apiUrl}/filtering_terms?limit=0`
         );
         // Convert the response to JSON
         const data = await response.json();

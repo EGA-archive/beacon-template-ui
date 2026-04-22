@@ -36,7 +36,10 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
   // Retrieves the authentication context provided by the oidc-react context
   const auth = useAuth();
 
+  const isLoginDisabled = config?.ui?.disableLogin === true;
+
   // Checks if a user is authenticated by verifying if user data exists
+  const isDemoMode = config?.ui?.demoMode === true;
   const isLoggedIn = !!auth?.userData;
 
   // Extracts the user's name from the authentication profile
@@ -219,8 +222,25 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
                   ) : (
                     <Button
                       {...buttonProps}
-                      component={Link}
-                      to={item.url}
+                      component={isDemoMode && isLogin ? "button" : Link}
+                      to={isDemoMode && isLogin ? undefined : item.url}
+                      onClick={(e) => {
+                        if (isDemoMode && isLogin) {
+                          e.preventDefault();
+                        }
+                      }}
+                      sx={{
+                        ...buttonProps.sx,
+                        ...(isDemoMode &&
+                          isLogin && {
+                            cursor: "not-allowed",
+                          }),
+                      }}
+                      title={
+                        isDemoMode && isLogin
+                          ? "Login disabled for demo purposes"
+                          : undefined
+                      }
                       data-cy={`nav-link-internal-${item.label
                         .toLowerCase()
                         .replace(/\s+/g, "-")}`}
@@ -306,10 +326,14 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
                   ) : (
                     <Button
                       fullWidth
-                      component={Link}
-                      to={item.url}
+                      component={isLoginDisabled && isLogin ? "button" : Link}
+                      to={isLoginDisabled && isLogin ? undefined : item.url}
+                      onClick={(e) => {
+                        if (isLoginDisabled && isLogin) {
+                          e.preventDefault();
+                        }
+                      }}
                       className={isLogin ? "login-button" : undefined}
-                      // Here
                       sx={{
                         px: 3,
                         py: 1,
@@ -326,7 +350,16 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
                         width: isActive ? "80%" : "none",
                         marginLeft: isActive ? "17px" : "none",
                         borderRadius: isActive ? "6px" : "none",
+                        ...(isLoginDisabled &&
+                          isLogin && {
+                            cursor: "not-allowed",
+                          }),
                       }}
+                      title={
+                        isLoginDisabled && isLogin
+                          ? "Login disabled for demo purposes"
+                          : undefined
+                      }
                     >
                       {item.label}
                     </Button>

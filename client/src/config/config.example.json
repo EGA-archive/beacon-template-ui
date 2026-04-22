@@ -200,7 +200,7 @@
     "genomicAnnotations": {
       "visibleGenomicCategories": [
         "SNP Examples",
-        "Genomic Variant Examples",
+        "HGVS Examples",
         "Protein Examples",
         "Molecular Effect"
       ]

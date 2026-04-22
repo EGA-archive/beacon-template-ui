@@ -262,7 +262,7 @@ const schema = Joi.object({
         .items(
           Joi.string().valid(
             "SNP Examples",
-            "Genomic Variant Examples",
+            "HGVS Examples",
             "Protein Examples",
             "Molecular Effect"
           )
