@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useAuthSafe as useAuth } from "../components/pages/login/useAuthSafe";
 
 /**
@@ -16,14 +17,18 @@ export default function useAuthHeaders() {
   const token = auth?.userData?.access_token;
 
   // Build headers object
-  const headers = {
-    "Content-Type": "application/json",
-  };
+  const headers = useMemo(() => {
+    const baseHeaders = {
+      "Content-Type": "application/json",
+    };
 
-  // If user is authenticated, add the Authorization header with Bearer token
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
+    // If user is authenticated, add the Authorization header with Bearer token
+    if (token) {
+      baseHeaders["Authorization"] = `Bearer ${token}`;
+    }
+
+    return baseHeaders;
+  }, [token]);
 
   return headers;
 }
