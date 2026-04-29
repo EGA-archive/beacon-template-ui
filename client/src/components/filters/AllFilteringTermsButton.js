@@ -23,6 +23,7 @@ export default function AllFilteringTermsButton({ onClick }) {
       }
     }, 100);
   };
+
   return (
     <StyledButton
       icon={

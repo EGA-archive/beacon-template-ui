@@ -327,7 +327,7 @@ export default function FilteringTermsTable({
 
                               const isSelected = selectedFilter.some(
                                 (filter) =>
-                                  filter.label === item.label &&
+                                  filter.id === item.id &&
                                   filter.scope === item.scope
                               );
 
@@ -336,7 +336,7 @@ export default function FilteringTermsTable({
                                   prev.filter(
                                     (filter) =>
                                       !(
-                                        filter.label === item.label &&
+                                        filter.id === item.id &&
                                         filter.scope === item.scope
                                       )
                                   )
@@ -355,7 +355,7 @@ export default function FilteringTermsTable({
                             {/* Check whether this filter is currently applied */}
                             {selectedFilter.some(
                               (filter) =>
-                                filter.label === item.label &&
+                                filter.id === item.id &&
                                 filter.scope === item.scope
                             ) ? (
                               <CheckCircleIcon

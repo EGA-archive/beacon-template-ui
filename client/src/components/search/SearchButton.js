@@ -38,6 +38,7 @@ export default function SearchButton({ setSelectedTool }) {
     setRawItems,
     setResponseMeta,
     isExtraFilterValid,
+    setIsFilteringTermsOpen,
   } = useSelectedEntry();
 
   // Get authentication headers (includes Bearer token if user is logged in)
@@ -45,6 +46,7 @@ export default function SearchButton({ setSelectedTool }) {
 
   // Main logic executed when the user clicks "Search"
   const handleSearch = async () => {
+    setIsFilteringTermsOpen(false);
     const entryTypeId = PATH_SEGMENT_TO_ENTRY_ID[selectedPathSegment];
     const configForEntry = entryTypesConfig?.[entryTypeId];
     const nonFilteredAllowed =
