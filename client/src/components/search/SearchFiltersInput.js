@@ -14,7 +14,11 @@ export default function SearchFiltersInput({ activeInput, setActiveInput }) {
   const primaryDarkColor = config.ui.colors.darkPrimary;
   return (
     <Box
-      onClick={() => setActiveInput("filter")} // When user clicks this area, it becomes the active input
+      // onClick={() => setActiveInput("filter")} // When user clicks this area, it becomes the active input
+      onClick={() => {
+        console.log("clicked filtering input → setting activeInput to filter");
+        setActiveInput("filter");
+      }}
       sx={{
         flex: activeInput === "filter" ? 1 : 0.3,
         display: "flex",

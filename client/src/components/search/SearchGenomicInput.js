@@ -354,6 +354,11 @@ export default function SearchGenomicInput({
       <KeyboardArrowRightRoundedIcon {...props} />
     );
 
+  useEffect(() => {
+    console.log("SearchGenomicInput render → activeInput:", activeInput);
+    console.log("SearchGenomicInput render → genomicDraft:", genomicDraft);
+  }, [activeInput, genomicDraft]);
+
   return (
     <Box
       sx={{
@@ -365,7 +370,7 @@ export default function SearchGenomicInput({
     >
       {/* Input container */}
       <Box
-        onClick={() => setActiveInput("genomic")}
+        // onClick={() => setActiveInput("genomic")}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -417,6 +422,12 @@ export default function SearchGenomicInput({
         {/* Main input */}
         <Box sx={{ position: "relative", flex: 1 }}>
           <InputBase
+            onClick={() => {
+              console.log(
+                "clicked genomic input → setting activeInput to genomic"
+              );
+              setActiveInput("genomic");
+            }}
             inputRef={inputRef}
             placeholder={
               activeInput === "genomic"
@@ -437,7 +448,7 @@ export default function SearchGenomicInput({
           />
 
           {/* Clear icon */}
-          {genomicDraft?.trim() && (
+          {activeInput === "genomic" && genomicDraft?.trim() && (
             <Box
               role="button"
               onClick={() => setGenomicDraft("")}
@@ -467,7 +478,7 @@ export default function SearchGenomicInput({
       </Box>
 
       {/* Add button and message */}
-      {genomicDraft?.trim() && (
+      {activeInput === "genomic" && genomicDraft?.trim() && (
         <Box>
           <Box
             role="button"

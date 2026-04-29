@@ -203,13 +203,8 @@ export default function FiltersContainer({
           boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.05)",
           borderRadius: "8px",
           backgroundColor: "white",
-          // backgroundColor: {
-          //   lg: "salmon",
-          //   md: "pink",
-          //   sm: "lightgreen",
-          //   xs: "lightblue",
-          // },
-          mt: "-4px",
+
+          mt: "-4.7px",
           overflow: "hidden",
           height: {
             lg: `${searchHeight}px`,
@@ -220,7 +215,12 @@ export default function FiltersContainer({
         }}
       >
         {tabs.map((tab, i) => (
-          <TabPanel value={tabValue} index={i} key={tab.label}>
+          <TabPanel
+            value={tabValue}
+            index={i}
+            key={tab.label}
+            sx={{ backgroundColor: "pink !important" }}
+          >
             <Box sx={{ padding: "20px" }}>
               <Typography
                 variant="body1"

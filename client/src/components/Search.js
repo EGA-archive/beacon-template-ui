@@ -377,22 +377,22 @@ export default function Search({
                   fontSize: "14px",
                   backgroundColor:
                     selectedPathSegment === entry.pathSegment
-                      ? selectedBgColor
+                      ? "#000000"
                       : "#FFFFFF",
                   color:
                     selectedPathSegment === entry.pathSegment
-                      ? "black"
+                      ? "#FFFFFF"
                       : primaryColor,
                   border: `1px solid ${
                     selectedPathSegment === entry.pathSegment
-                      ? "black"
+                      ? "#000000"
                       : primaryColor
                   }`,
                   boxShadow: "none",
                   "&:hover": {
                     backgroundColor:
                       selectedPathSegment === entry.pathSegment
-                        ? selectedBgColor
+                        ? "#000000"
                         : darken("#FFFFFF", 0.05),
                   },
                 }}
