@@ -6,8 +6,8 @@ import {
   Typography,
   Button,
   Chip,
+  Grid,
 } from "@mui/material";
-import { Grid } from "@mui/material";
 import { darken } from "@mui/system";
 import { useEffect, useState } from "react";
 import config from "../../config/config.json";
@@ -22,7 +22,6 @@ import Founders from "../Founders";
 
 export default function NetworkMembers() {
   const [beacons, setBeacons] = useState([]);
-  const [networkLogoUrl, setNetworkLogoUrl] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Utility: remove unwanted HTML tags from descriptions
@@ -34,10 +33,6 @@ export default function NetworkMembers() {
       try {
         const response = await fetch(`${config.apiUrl}/`);
         const data = await response.json();
-
-        // Save top-level network logo
-        setNetworkLogoUrl(data?.response?.organization?.logoUrl || null);
-
         // Use "responses" array from the API if present
         if (data.responses && Array.isArray(data.responses)) {
           setBeacons(data.responses);
@@ -108,8 +103,6 @@ export default function NetworkMembers() {
                 beacon.response.organization?.name || "Undefined";
 
               // Define external links (fallbacks where missing)
-              const informationLink =
-                beacon.response.welcomeUrl || beacon.response.alternativeUrl;
               const websiteLink =
                 beacon.response.organization?.welcomeUrl ||
                 beacon.response.alternativeUrl;
@@ -138,23 +131,50 @@ export default function NetworkMembers() {
                     sx={{
                       height: "100%",
                       display: "flex",
-                      flexDirection: "row",
+                      flexDirection: {
+                        xs: "column",
+                        sm: "row",
+                      },
                       justifyContent: "flex-start",
                       boxShadow: 3,
                       borderRadius: 2,
                       p: 2,
                     }}
                   >
+                    {" "}
                     {/* Left side: Beacon + network logos */}
                     <Box
                       sx={{
-                        width: 100,
-                        minWidth: 100,
+                        width: {
+                          xs: "100%",
+                          sm: 100,
+                        },
+                        minWidth: {
+                          xs: "100%",
+                          sm: 100,
+                        },
                         display: "flex",
-                        justifyContent: "flex-start",
-                        flexDirection: "column",
+                        justifyContent: {
+                          xs: "center",
+                          sm: "flex-start",
+                        },
+                        alignItems: {
+                          xs: "center",
+                          sm: "flex-start",
+                        },
+                        flexDirection: {
+                          xs: "row",
+                          sm: "column",
+                        },
                         borderRadius: 1,
-                        mr: 2,
+                        mr: {
+                          xs: 0,
+                          sm: 2,
+                        },
+                        mb: {
+                          xs: 2,
+                          sm: 0,
+                        },
                         gap: 2,
                         p: 2,
                       }}
@@ -184,7 +204,6 @@ export default function NetworkMembers() {
                         </Typography>
                       )}
                     </Box>
-
                     {/* Right side: Beacon details */}
                     <Box
                       sx={{
@@ -206,7 +225,13 @@ export default function NetworkMembers() {
                             mb: 1,
                           }}
                         >
-                          <Box sx={{ display: "flex", gap: 2 }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 1,
+                              flexWrap: "wrap",
+                            }}
+                          >
                             <Chip
                               label={` API version: ${
                                 beacon?.meta?.apiVersion || "Undefined"
@@ -266,6 +291,10 @@ export default function NetworkMembers() {
                           gap: 1,
                           px: 2,
                           pb: 2,
+                          justifyContent: {
+                            xs: "center",
+                            sm: "flex-start",
+                          },
                         }}
                       >
                         {actionLinks.map(({ label, link }) => (
