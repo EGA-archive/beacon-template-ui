@@ -16,7 +16,6 @@ export default function SearchFiltersInput({ activeInput, setActiveInput }) {
     <Box
       // onClick={() => setActiveInput("filter")} // When user clicks this area, it becomes the active input
       onClick={() => {
-        console.log("clicked filtering input → setting activeInput to filter");
         setActiveInput("filter");
       }}
       sx={{

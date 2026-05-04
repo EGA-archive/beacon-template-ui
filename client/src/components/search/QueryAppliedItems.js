@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import CommonMessage, {
   COMMON_MESSAGES,
 } from "../../components/common/CommonMessage";
+import { formatEntryLabel } from "../common/textFormatting";
 
 export default function QueryAppliedItems({
   handleFilterRemove,
@@ -21,8 +22,6 @@ export default function QueryAppliedItems({
     lastSearchedPathSegment,
     hasSearchResults,
   } = useSelectedEntry();
-
-  const filtersToRender = customFilters || selectedFilter;
 
   // Track which label is expanded (if any)
   const [expandedKey, setExpandedKey] = useState(false);
@@ -102,6 +101,19 @@ export default function QueryAppliedItems({
     lastSearchedPathSegment,
     setQueryDirty,
   ]);
+
+  const entryTypeChip = {
+    id: `entry-type-${selectedPathSegment}`,
+    key: `entry-type-${selectedPathSegment}`,
+    label: formatEntryLabel(selectedPathSegment),
+    type: "entryType",
+    scope: "entryType",
+    scopes: [],
+    bgColor: "common",
+  };
+
+  // const filtersToRender = customFilters || selectedFilter;
+  const filtersToRender = customFilters || [entryTypeChip, ...selectedFilter];
 
   return (
     <Box>

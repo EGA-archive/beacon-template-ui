@@ -354,11 +354,6 @@ export default function SearchGenomicInput({
       <KeyboardArrowRightRoundedIcon {...props} />
     );
 
-  useEffect(() => {
-    console.log("SearchGenomicInput render → activeInput:", activeInput);
-    console.log("SearchGenomicInput render → genomicDraft:", genomicDraft);
-  }, [activeInput, genomicDraft]);
-
   return (
     <Box
       sx={{
@@ -423,9 +418,6 @@ export default function SearchGenomicInput({
         <Box sx={{ position: "relative", flex: 1 }}>
           <InputBase
             onClick={() => {
-              console.log(
-                "clicked genomic input → setting activeInput to genomic"
-              );
               setActiveInput("genomic");
             }}
             inputRef={inputRef}

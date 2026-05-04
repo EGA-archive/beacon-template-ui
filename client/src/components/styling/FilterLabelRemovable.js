@@ -2,12 +2,13 @@ import { Typography, Button, Box, Divider, Tooltip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import ClearIcon from "@mui/icons-material/Clear";
 import config from "../../config/config.json";
-import { capitalize } from "../common/textFormatting";
+import { capitalize, formatEntryLabel } from "../common/textFormatting";
 import { useEffect, useRef } from "react";
 import { getSelectableScopeStyles } from "../styling/selectableScopeStyles";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
+import { getEntryTypeSelectableStyles } from "../styling/getEntryTypeSelectableStyles";
 
-// This component shows a label for the filter that can be removable and expandable
+// // This component shows a label for the filter that can be removable and expandable
 export default function FilterLabelRemovable({
   type,
   label,
@@ -27,26 +28,33 @@ export default function FilterLabelRemovable({
 }) {
   const containerRef = useRef(null);
 
-  // State to check if this label is the one currently expanded
-  const isExpanded = expandedKey === keyValue;
-
-  // Different types of labels: simple = clickable, removable = has delete icon
-  const isSimple = variant === "simple";
-  const isRemovable = variant === "removable";
-
-  // Can expand only if it’s removable and has multiple scopes
-  const isExpandable = isRemovable && scopes.length > 1;
-
   const {
     hasSearchResults,
     setQueryDirty,
     openGenomicQueryBuilder,
     setGenomicPrefill,
-    editingGenomicFilter,
     setEditingGenomicFilter,
+    entryTypes,
+    selectedPathSegment,
+    setSelectedPathSegment,
   } = useSelectedEntry();
 
-  // Base background colors depending on the type (common or other)
+  const isExpanded = expandedKey === keyValue;
+
+  const isSimple = variant === "simple";
+  const isEntryTypeChip = scope === "entryType";
+  const isRemovable = variant === "removable" && !isEntryTypeChip;
+
+  const isGenomicChip =
+    scope === "genomicQueryBuilder" || scope === "genomicVariant";
+
+  const isEntryTypeExpandable =
+    isEntryTypeChip && entryTypes.length > 1 && variant === "removable";
+
+  const isMultiScopeChip = isRemovable && scopes.length > 1;
+
+  const isExpandable = isEntryTypeExpandable || isMultiScopeChip;
+
   const baseBgColor =
     bgColor === "common"
       ? alpha(config.ui.colors.primary, 0.05)
@@ -57,39 +65,101 @@ export default function FilterLabelRemovable({
       ? alpha(config.ui.colors.primary, 0.05)
       : alpha(config.ui.colors.secondary, 0.6);
 
-  // Multi-scope chip flag (used for coloring rules)
-  const isMultiScopeChip = isRemovable && scopes.length > 1;
-
-  // Background for applied multi-scope chip
   const activeBgColor = isMultiScopeChip
     ? alpha(config.ui.colors.primary, 0.2)
     : stateSelected
     ? alpha(config.ui.colors.primary, 0.25)
     : baseBgColor;
 
-  // Background when chip is expanded and is multi-scope
   const expandedMultiScopeBg =
-    isExpanded && scopes.length > 1
+    isExpanded && isMultiScopeChip
       ? alpha(config.ui.colors.primary, 0.2)
       : null;
 
-  // Final chip background depending on simple/expanded/selected state
   const finalBgColor = isSimple
     ? baseBgColor
     : isExpanded
     ? hoverColor
     : activeBgColor;
 
-  // Hover color specifically for multi-scope chips
   const multiScopeHoverBg = isMultiScopeChip
     ? alpha(config.ui.colors.primary, 0.3)
     : null;
 
-  // Show scope inside label only if there are multiple
   const labelToShow =
     scopes.length > 1 && scope ? `${label} | ${capitalize(scope)}` : label;
 
-  // Handle clicking outside to close expanded label
+  const chipBackgroundColor = isEntryTypeChip
+    ? isExpanded
+      ? "#E6E7E8 !important"
+      : "#F4F5F6 !important"
+    : expandedMultiScopeBg
+    ? `${expandedMultiScopeBg} !important`
+    : `${finalBgColor} !important`;
+
+  const chipHoverColor = isEntryTypeChip
+    ? variant === "removable"
+      ? "#E6E7E8 !important"
+      : chipBackgroundColor
+    : isMultiScopeChip
+    ? `${multiScopeHoverBg} !important`
+    : `${hoverColor} !important`;
+
+  const handleChipClick = () => {
+    if (isGenomicChip) {
+      setEditingGenomicFilter({
+        id: keyValue,
+        queryType,
+        queryParams,
+      });
+
+      setGenomicPrefill({
+        queryType,
+        queryParams,
+      });
+
+      openGenomicQueryBuilder();
+      return;
+    }
+
+    if (isSimple && typeof onClick === "function") {
+      onClick();
+      return;
+    }
+
+    if (isExpandable && typeof setExpandedKey === "function") {
+      setExpandedKey(isExpanded ? null : keyValue);
+    }
+  };
+
+  const handleDelete = (event) => {
+    event.stopPropagation();
+
+    onDelete?.();
+
+    if (hasSearchResults) {
+      setQueryDirty(true);
+    }
+  };
+
+  const renderLabel = () => {
+    if (type !== "genomic" || typeof label !== "string") {
+      return labelToShow;
+    }
+
+    return label.split(" | ").map((part, i, arr) => {
+      const [key, ...valueParts] = part.split(":");
+      const value = valueParts.join(":");
+
+      return (
+        <span key={i}>
+          <strong>{key}:</strong> {value}
+          {i < arr.length - 1 && " | "}
+        </span>
+      );
+    });
+  };
+
   useEffect(() => {
     if (!isExpandable) return;
 
@@ -105,15 +175,16 @@ export default function FilterLabelRemovable({
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isExpanded, setExpandedKey, isExpandable]);
+  }, [isExpanded, isExpandable, setExpandedKey]);
 
   return (
     <Tooltip
       title={
-        scope === "genomicQueryBuilder" || scope === "genomicVariant"
+        isGenomicChip
           ? "Click the genomic query to edit it in the Genomic Query Builder."
           : ""
       }
@@ -122,110 +193,93 @@ export default function FilterLabelRemovable({
     >
       <Box
         ref={containerRef}
+        onClick={handleChipClick}
         sx={{
           display: isSimple ? "inline-flex" : "flex",
           flexDirection: isSimple ? "row" : "column",
-          flexWrap: "wrap", // allow text to wrap
+          flexWrap: "wrap",
           alignItems: isSimple ? "center" : "flex-start",
           justifyContent: isSimple ? "center" : "flex-start",
           padding: isSimple ? "4px 12px" : isExpanded ? "9px 12px" : "4px 12px",
           borderRadius: "8px",
           border: "1px solid black",
-
-          // If expanded & multi-scope, use darkPrimary background
-          backgroundColor: expandedMultiScopeBg
-            ? `${expandedMultiScopeBg} !important`
-            : `${finalBgColor} !important`,
-
+          backgroundColor: chipBackgroundColor,
           fontSize: "14px",
           fontWeight: 400,
-          cursor: isSimple || isRemovable ? "pointer" : "default",
+          cursor:
+            isSimple || isRemovable || isEntryTypeExpandable
+              ? "pointer"
+              : "default",
           transition: "background-color 0.2s ease",
 
           "&:hover": {
-            // Darker hover when multi-scope, otherwise default hover
-            backgroundColor: isMultiScopeChip
-              ? `${multiScopeHoverBg} !important`
-              : `${hoverColor} !important`,
+            backgroundColor: chipHoverColor,
           },
 
           maxWidth: isExpanded ? "400px" : "auto",
-          height: isExpanded ? "auto" : "fit-content", // auto height only if expanded
-        }}
-        onClick={() => {
-          if (scope === "genomicQueryBuilder" || scope === "genomicVariant") {
-            // tell the system we are editing THIS genomic filter
-            setEditingGenomicFilter({
-              id: keyValue,
-              queryType,
-              queryParams,
-            });
-
-            // prefill the builder
-            setGenomicPrefill({
-              queryType,
-              queryParams,
-            });
-
-            openGenomicQueryBuilder();
-            return;
-          }
-
-          if (isSimple && typeof onClick === "function") {
-            onClick(); // for simple variant, trigger onClick
-          } else if (isExpandable && typeof setExpandedKey === "function") {
-            // toggle expansion only when multiple scopes exist
-            setExpandedKey(isExpanded ? null : keyValue);
-          }
+          height: isExpanded ? "auto" : "fit-content",
         }}
       >
-        {/* Top part of the label: shows text and delete icon if removable */}
         <Box display="flex" alignItems="center" gap={1}>
           <Typography sx={{ fontSize: "14px" }} data-cy="filter-chip">
-            {type === "genomic" && typeof label === "string"
-              ? label.split(" | ").map((part, i, arr) => {
-                  const [key, ...valueParts] = part.split(":");
-                  const value = valueParts.join(":");
-
-                  return (
-                    <span key={i}>
-                      <strong>{key}:</strong> {value}
-                      {i < arr.length - 1 && " | "}
-                    </span>
-                  );
-                })
-              : labelToShow}
+            {renderLabel()}
           </Typography>
+
           {isRemovable && (
             <ClearIcon
-              onClick={(e) => {
-                e.stopPropagation();
-
-                onDelete?.();
-
-                if (hasSearchResults) {
-                  setQueryDirty(true);
-                }
-              }}
+              onClick={handleDelete}
               sx={{
                 fontSize: 18,
                 cursor: "pointer",
                 opacity: 0.6,
-                "&:hover": { opacity: 1 },
+                "&:hover": {
+                  opacity: 1,
+                },
               }}
             />
           )}
         </Box>
 
-        {/* Expanded content: scope selector.  
-          Shown only when chip has multiple scopes */}
-        {isExpandable && isExpanded && (
+        {isExpanded && isEntryTypeExpandable ? (
           <Box mt={1} sx={{ width: "100%" }}>
             <Divider
               orientation="horizontal"
               flexItem
               sx={{ borderColor: "black" }}
             />
+
+            <Typography fontWeight={400} fontSize={12} mb={1} mt={1}>
+              Change the results type:
+            </Typography>
+
+            <Box display="flex" gap={1} flexWrap="wrap">
+              {entryTypes.map((entry) => {
+                const isSelected = entry.pathSegment === selectedPathSegment;
+
+                return (
+                  <Button
+                    key={entry.pathSegment}
+                    variant={isSelected ? "contained" : "outlined"}
+                    onClick={() => {
+                      setSelectedPathSegment(entry.pathSegment);
+                      setExpandedKey(null);
+                    }}
+                    sx={getEntryTypeSelectableStyles(isSelected)}
+                  >
+                    {formatEntryLabel(entry.pathSegment)}
+                  </Button>
+                );
+              })}
+            </Box>
+          </Box>
+        ) : isExpanded && isMultiScopeChip ? (
+          <Box mt={1} sx={{ width: "100%" }}>
+            <Divider
+              orientation="horizontal"
+              flexItem
+              sx={{ borderColor: "black" }}
+            />
+
             <Typography
               fontWeight={400}
               fontSize={13}
@@ -236,11 +290,10 @@ export default function FilterLabelRemovable({
               Select the scope:
             </Typography>
 
-            {/* Buttons for each available scope */}
-            {/* Clicking a button changes the scope for this filter */}
             <Box display="flex" gap={1} flexWrap="wrap">
               {scopes.map((s) => {
                 const isSelected = s === scope;
+
                 return (
                   <Button
                     key={s}
@@ -254,7 +307,7 @@ export default function FilterLabelRemovable({
               })}
             </Box>
           </Box>
-        )}
+        ) : null}
       </Box>
     </Tooltip>
   );
