@@ -294,7 +294,7 @@ export default function Search({
                   data-testid="entrytypes-tooltip-content"
                   sx={{
                     listStyleType: "disc",
-                    pl: { xs: "5px", lg: "20px" },
+                    pl: "20px",
                     fontFamily: '"Open Sans", sans-serif',
                   }}
                 >

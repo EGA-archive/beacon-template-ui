@@ -12,6 +12,7 @@ import { darken } from "@mui/system";
 import { useEffect, useState } from "react";
 import config from "../../config/config.json";
 import Founders from "../Founders";
+import useBeaconMetadata from "../../hooks/useBeaconMetaData";
 
 /**
  * Generic UI page to display a list of Beacon network members.
@@ -21,33 +22,11 @@ import Founders from "../Founders";
  */
 
 export default function NetworkMembers() {
-  const [beacons, setBeacons] = useState([]);
-  const [loading, setLoading] = useState(true);
-
   // Utility: remove unwanted HTML tags from descriptions
   const stripHTML = (html) => html?.replace(/<[^>]*>/g, "") || "";
 
-  // On mount: fetch Beacon network members
-  useEffect(() => {
-    const fetchBeacons = async () => {
-      try {
-        const response = await fetch(`${config.apiUrl}/`);
-        const data = await response.json();
-        // Use "responses" array from the API if present
-        if (data.responses && Array.isArray(data.responses)) {
-          setBeacons(data.responses);
-        } else {
-          setBeacons([]);
-        }
-      } catch (error) {
-        console.error("Error fetching beacon networks:", error);
-        setBeacons([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBeacons();
-  }, []);
+  const { beacons } = useBeaconMetadata();
+  const loading = !beacons.length;
 
   return (
     <>

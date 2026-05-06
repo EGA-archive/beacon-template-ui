@@ -26,16 +26,15 @@ import LocalPostOfficeRoundedIcon from "@mui/icons-material/LocalPostOfficeRound
 import LocalPostOfficeOutlinedIcon from "@mui/icons-material/LocalPostOfficeOutlined";
 import config from "../../config/config.json";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import ResultsTableRow from "./ResultsTableRow";
-import { loadNetworkMembersWithMaturity } from "./utils/networkMembers";
 import CohortsTable from "./CohortsTable";
 import DatasetsTable from "./DatasetsTable";
 import {
   getBeaconAggregationInfo,
   getDatasetResponse,
 } from "./utils/beaconType";
-import useAuthHeaders from "../../hooks/useAuthHeaders";
+import useBeaconMetadata from "../../hooks/useBeaconMetaData";
 
 const ResultsTableModal = lazy(() => import("./modal/ResultsTableModal"));
 
@@ -52,10 +51,9 @@ export default function ResultsTable() {
   const [expandedRow, setExpandedRow] = useState(null);
   const [selectedSubRow, setSelectedSubRow] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [networkMembers, setNetworkMembers] = useState([]);
+  const { envMap } = useBeaconMetadata();
 
-  // Get authentication headers (includes Bearer token if user is logged in)
-  const authHeaders = useAuthHeaders();
+  console.log("envMap", envMap);
 
   const headerCellStyle = {
     backgroundColor: config.ui.colors.primary,
@@ -137,22 +135,15 @@ export default function ResultsTable() {
     window.location.href = `mailto:${email}`;
   };
 
-  useEffect(() => {
-    async function loadMembers() {
-      const membersWithMaturity = await loadNetworkMembersWithMaturity();
-      setNetworkMembers(membersWithMaturity);
-    }
-    if (config.beaconType === "networkBeacon") {
-      loadMembers();
-    }
-  }, []);
-
   const getBeaconStatusLabel = (status) => {
     if (!status) return "Undefined";
-    const normalized = status.toUpperCase();
-    if (normalized === "PROD") return "Production";
-    if (normalized === "TEST") return "Test";
-    if (normalized === "DEV") return "Development";
+
+    const normalized = status.toString().toUpperCase();
+
+    if (normalized.includes("PROD")) return "Production";
+    if (normalized.includes("TEST")) return "Test";
+    if (normalized.includes("DEV")) return "Development";
+
     return status;
   };
 
@@ -293,8 +284,10 @@ export default function ResultsTable() {
                             }}
                           >
                             {(() => {
+                              console.log("ITEM:", item);
+
                               const status =
-                                item.maturity || (item.exists ? "PROD" : "DEV");
+                                envMap[item.beaconId] || item.maturity;
                               return getBeaconStatusLabel(status);
                             })()}
                           </TableCell>

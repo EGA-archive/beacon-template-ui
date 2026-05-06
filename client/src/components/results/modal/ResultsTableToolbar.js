@@ -134,6 +134,22 @@ export default function ResultsTableToolbar({
             }}
             IconComponent={KeyboardArrowDownRoundedIcon}
           >
+            <MenuItem>
+              <Checkbox
+                size="small"
+                sx={{
+                  color: colors.darkPrimary,
+                  "&.Mui-checked": { color: colors.primary },
+                }}
+              />
+              here we can put the toggle
+              <ListItemText
+                primaryTypographyProps={{
+                  sx: { fontSize: "13px", color: colors.darkPrimary },
+                }}
+              />
+            </MenuItem>
+
             {sortedHeaders.map((col) => (
               <MenuItem key={col.id} value={col.id}>
                 <Checkbox
