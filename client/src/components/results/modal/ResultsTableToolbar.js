@@ -134,7 +134,7 @@ export default function ResultsTableToolbar({
             }}
             IconComponent={KeyboardArrowDownRoundedIcon}
           >
-            <MenuItem>
+            {/* <MenuItem>
               <Checkbox
                 size="small"
                 sx={{
@@ -148,7 +148,7 @@ export default function ResultsTableToolbar({
                   sx: { fontSize: "13px", color: colors.darkPrimary },
                 }}
               />
-            </MenuItem>
+            </MenuItem> */}
 
             {sortedHeaders.map((col) => (
               <MenuItem key={col.id} value={col.id}>

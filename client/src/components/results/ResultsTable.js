@@ -53,8 +53,6 @@ export default function ResultsTable() {
   const [modalOpen, setModalOpen] = useState(false);
   const { envMap } = useBeaconMetadata();
 
-  console.log("envMap", envMap);
-
   const headerCellStyle = {
     backgroundColor: config.ui.colors.primary,
     fontWeight: 700,
@@ -284,8 +282,6 @@ export default function ResultsTable() {
                             }}
                           >
                             {(() => {
-                              console.log("ITEM:", item);
-
                               const status =
                                 envMap[item.beaconId] || item.maturity;
                               return getBeaconStatusLabel(status);
