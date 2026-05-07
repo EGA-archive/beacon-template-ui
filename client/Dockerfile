@@ -1,6 +1,6 @@
 # client/Dockerfile
 
-FROM node:latest
+FROM node:22.19.0
 
 # set working directory
 WORKDIR ./client
