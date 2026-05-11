@@ -9,6 +9,7 @@ import { IconButton } from "@mui/material";
 import { useSelectedEntry } from "../../context/SelectedEntryContext";
 import Loader from "../../common/Loader";
 import { PATH_SEGMENT_TO_ENTRY_ID } from "../../common/textFormatting";
+import ResultsEmpty from "../ResultsEmpty";
 
 /**
  * Displays a modal containing a paginated results table for the selected dataset.
@@ -43,7 +44,7 @@ const ResultsTableModal = ({
     if (headers && headers.length > 0 && visibleColumns.length === 0) {
       setVisibleColumns(headers);
     }
-  }, [headers, visibleColumns.length]);
+  }, [headers]);
 
   const style = {
     position: "absolute",
@@ -271,6 +272,10 @@ const ResultsTableModal = ({
                 setSearchTerm={setSearchTerm}
                 setSearchCount={setSearchCount}
               />
+            )}
+
+            {!loading && visibleColumns.length === 0 && (
+              <ResultsEmpty message="To view the details table, please select at least one column" />
             )}
           </Box>
 

@@ -9,6 +9,9 @@ import {
   TextField,
   InputAdornment,
 } from "@mui/material";
+
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useState, useEffect } from "react";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
@@ -35,6 +38,90 @@ export default function ResultsTableToolbar({
   const colors = config.ui.colors;
 
   const limit = responseMeta?.receivedRequestSummary?.pagination?.limit;
+
+  const DEFAULT_VISIBLE_COLUMNS = {
+    lg: 8,
+    md: 5,
+    sm: 4,
+    xs: 3,
+  };
+
+  const isLargeScreen = useMediaQuery("(min-width:1200px)");
+  const isMediumScreen = useMediaQuery("(min-width:900px)");
+  const isSmallScreen = useMediaQuery("(min-width:600px)");
+
+  const defaultColumnLimit = isLargeScreen
+    ? DEFAULT_VISIBLE_COLUMNS.lg
+    : isMediumScreen
+    ? DEFAULT_VISIBLE_COLUMNS.md
+    : isSmallScreen
+    ? DEFAULT_VISIBLE_COLUMNS.sm
+    : DEFAULT_VISIBLE_COLUMNS.xs;
+
+  const getColumnButtonStyle = (isActive) => ({
+    borderRadius: "27px",
+    height: "30px",
+    fontSize: "12px",
+    fontWeight: 700,
+    textTransform: "none",
+    background: isActive ? "none" : "white",
+    border: isActive ? `1px solid grey` : `1px solid ${colors.darkPrimary}`,
+    cursor: isActive ? "not-allowed" : "pointer",
+    color: isActive ? "grey" : colors.darkPrimary,
+
+    "&:hover": {
+      background: isActive ? "none" : "#1976D214",
+    },
+  });
+
+  const allColumnsSelected = visibleColumns.length === sortedHeaders.length;
+
+  const noColumnsSelected = visibleColumns.length === 0;
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  useEffect(() => {
+    if (isInitialLoad && sortedHeaders.length > 0) {
+      const defaultColumns = sortedHeaders
+        .slice(0, defaultColumnLimit)
+        .map((col) => col.id);
+
+      setVisibleColumns(defaultColumns);
+    }
+  }, [isInitialLoad, sortedHeaders, defaultColumnLimit, setVisibleColumns]);
+
+  const handleSelectAllColumns = (event) => {
+    event.stopPropagation();
+    setIsInitialLoad(false);
+    setVisibleColumns(sortedHeaders.map((col) => col.id));
+  };
+
+  const handleUnselectAllColumns = (event) => {
+    event.stopPropagation();
+    setIsInitialLoad(false);
+    setVisibleColumns([]);
+  };
+
+  const handleColumnSelectionChange = (event) => {
+    const clickedColumns = event.target.value;
+    setIsInitialLoad(false);
+    setVisibleColumns((prevVisibleColumns) => {
+      const addedColumn = clickedColumns.find(
+        (col) => !prevVisibleColumns.includes(col)
+      );
+
+      const removedColumns = prevVisibleColumns.filter((col) =>
+        clickedColumns.includes(col)
+      );
+
+      const newVisibleColumns = addedColumn
+        ? [...removedColumns, addedColumn]
+        : removedColumns;
+
+      return newVisibleColumns;
+    });
+  };
+
+  const shouldPulse = visibleColumns.length < sortedHeaders.length;
 
   return (
     <Box
@@ -88,7 +175,7 @@ export default function ResultsTableToolbar({
             multiple
             displayEmpty
             value={visibleColumns}
-            onChange={(e) => setVisibleColumns(e.target.value)}
+            onChange={handleColumnSelectionChange}
             renderValue={() => (
               <Box
                 sx={{
@@ -112,12 +199,27 @@ export default function ResultsTableToolbar({
             sx={{
               borderRadius: "24px",
               height: "40px",
+              animation: shouldPulse ? "pulseBorder 2s ease-in-out 3" : "none",
+
+              "@keyframes pulseBorder": {
+                "0%": {
+                  boxShadow: "0 0 0 0 rgba(25, 118, 210, 0.18)",
+                },
+                "50%": {
+                  boxShadow: "0 0 0 8px rgba(25, 118, 210, 0.08)",
+                },
+                "100%": {
+                  boxShadow: "0 0 0 0 rgba(25, 118, 210, 0)",
+                },
+              },
               "& .MuiOutlinedInput-notchedOutline": {
                 borderColor: colors.darkPrimary,
               },
+
               "&:hover .MuiOutlinedInput-notchedOutline": {
                 borderColor: colors.primary,
               },
+
               "& .MuiSelect-select": {
                 display: "flex",
                 alignItems: "center",
@@ -134,21 +236,57 @@ export default function ResultsTableToolbar({
             }}
             IconComponent={KeyboardArrowDownRoundedIcon}
           >
-            {/* <MenuItem>
-              <Checkbox
-                size="small"
-                sx={{
-                  color: colors.darkPrimary,
-                  "&.Mui-checked": { color: colors.primary },
-                }}
-              />
-              here we can put the toggle
-              <ListItemText
-                primaryTypographyProps={{
-                  sx: { fontSize: "13px", color: colors.darkPrimary },
-                }}
-              />
+            {/* <MenuItem
+              sx={{
+                backgroundColor: "lightgrey",
+                "&:hover": {
+                  backgroundColor: "lightgrey",
+                },
+              }}
+            >
+              Here we need to add the buttons: Select All and Unselect All
             </MenuItem> */}
+
+            <MenuItem
+              disableRipple
+              sx={{
+                backgroundColor: "#ECECEC",
+                "&:hover": {
+                  backgroundColor: "#ECECEC",
+                },
+                cursor: "default",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 1,
+                  width: "100%",
+                  justifyContent: "center",
+                  py: 0.5,
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  onClick={handleSelectAllColumns}
+                  sx={getColumnButtonStyle(
+                    isInitialLoad ? false : allColumnsSelected
+                  )}
+                >
+                  Select All
+                </Button>
+
+                <Button
+                  variant="outlined"
+                  onClick={handleUnselectAllColumns}
+                  sx={getColumnButtonStyle(
+                    isInitialLoad ? false : noColumnsSelected
+                  )}
+                >
+                  Unselect All
+                </Button>
+              </Box>
+            </MenuItem>
 
             {sortedHeaders.map((col) => (
               <MenuItem key={col.id} value={col.id}>

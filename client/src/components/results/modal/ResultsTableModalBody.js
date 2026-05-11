@@ -140,6 +140,12 @@ const ResultsTableModalBody = ({
     ];
   }, [headersArray]);
 
+  const orderedVisibleHeaders = useMemo(() => {
+    return visibleColumns
+      .map((columnId) => sortedHeaders.find((header) => header.id === columnId))
+      .filter(Boolean);
+  }, [visibleColumns, sortedHeaders]);
+
   /** Initialize visible columns once (no eslint disable, no re-runs) */
   useEffect(() => {
     if (
@@ -330,7 +336,7 @@ const ResultsTableModalBody = ({
           <Table stickyHeader aria-label="Results table">
             <TableHead>
               <StyledTableRow>
-                {sortedHeaders
+                {orderedVisibleHeaders
                   .filter((col) => visibleColumns.includes(col.id))
                   .map((column) => (
                     <TableCell key={column.id} sx={headerCellStyle}>
@@ -373,7 +379,7 @@ const ResultsTableModalBody = ({
                         fontWeight: "bold",
                       }}
                     >
-                      {sortedHeaders
+                      {orderedVisibleHeaders
                         .filter((col) => visibleColumns.includes(col.id))
                         .map((col) => (
                           <StyledTableCell

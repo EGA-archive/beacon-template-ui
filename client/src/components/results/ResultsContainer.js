@@ -80,7 +80,7 @@ export default function ResultsContainer() {
             {!loadingData &&
               hasSearchResults &&
               positiveResults.length === 0 && (
-                <ResultsEmpty message={message || "No results"} />
+                <ResultsEmpty message={message || ""} />
               )}
 
             {!loadingData && hasSearchResults && positiveResults.length > 0 && (
