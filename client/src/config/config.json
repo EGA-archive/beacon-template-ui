@@ -67,7 +67,9 @@
         }
       ]
     },
-
+    "download": {
+      "enabled": true
+    },
     "showLogin": false,
     "auth": {
       "providerType": "private",

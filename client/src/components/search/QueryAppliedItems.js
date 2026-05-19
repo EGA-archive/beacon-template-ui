@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import CommonMessage, {
   COMMON_MESSAGES,
 } from "../../components/common/CommonMessage";
-import { formatEntryLabel } from "../common/textFormatting";
 
 export default function QueryAppliedItems({
   handleFilterRemove,
@@ -102,18 +101,7 @@ export default function QueryAppliedItems({
     setQueryDirty,
   ]);
 
-  const entryTypeChip = {
-    id: `entry-type-${selectedPathSegment}`,
-    key: `entry-type-${selectedPathSegment}`,
-    label: formatEntryLabel(selectedPathSegment),
-    type: "entryType",
-    scope: "entryType",
-    scopes: [],
-    bgColor: "common",
-  };
-
-  // const filtersToRender = customFilters || selectedFilter;
-  const filtersToRender = customFilters || [entryTypeChip, ...selectedFilter];
+  const filtersToRender = customFilters || selectedFilter;
 
   return (
     <Box>

@@ -6,9 +6,8 @@ import { capitalize, formatEntryLabel } from "../common/textFormatting";
 import { useEffect, useRef } from "react";
 import { getSelectableScopeStyles } from "../styling/selectableScopeStyles";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
-import { getEntryTypeSelectableStyles } from "../styling/getEntryTypeSelectableStyles";
 
-// // This component shows a label for the filter that can be removable and expandable
+// This component shows a label for the filter that can be removable and expandable
 export default function FilterLabelRemovable({
   type,
   label,
@@ -48,8 +47,7 @@ export default function FilterLabelRemovable({
   const isGenomicChip =
     scope === "genomicQueryBuilder" || scope === "genomicVariant";
 
-  const isEntryTypeExpandable =
-    isEntryTypeChip && entryTypes.length > 1 && variant === "removable";
+  const isEntryTypeExpandable = false;
 
   const isMultiScopeChip = isRemovable && scopes.length > 1;
 
@@ -91,16 +89,16 @@ export default function FilterLabelRemovable({
 
   const chipBackgroundColor = isEntryTypeChip
     ? isExpanded
-      ? "#E6E7E8 !important"
-      : "#F4F5F6 !important"
+      ? "#000000 !important"
+      : // changed
+        // : "#F4F5F6 !important"
+        "#000000 !important"
     : expandedMultiScopeBg
     ? `${expandedMultiScopeBg} !important`
     : `${finalBgColor} !important`;
 
   const chipHoverColor = isEntryTypeChip
-    ? variant === "removable"
-      ? "#E6E7E8 !important"
-      : chipBackgroundColor
+    ? chipBackgroundColor
     : isMultiScopeChip
     ? `${multiScopeHoverBg} !important`
     : `${hoverColor} !important`;
@@ -201,15 +199,13 @@ export default function FilterLabelRemovable({
           alignItems: isSimple ? "center" : "flex-start",
           justifyContent: isSimple ? "center" : "flex-start",
           padding: isSimple ? "4px 12px" : isExpanded ? "9px 12px" : "4px 12px",
-          borderRadius: "8px",
+          borderRadius: isEntryTypeChip ? "30px" : "8px",
           border: "1px solid black",
+          color: isEntryTypeChip ? "white" : "black",
           backgroundColor: chipBackgroundColor,
           fontSize: "14px",
-          fontWeight: 400,
           cursor:
-            isSimple || isRemovable || isEntryTypeExpandable
-              ? "pointer"
-              : "default",
+            isGenomicChip || isSimple || isRemovable ? "pointer" : "default",
           transition: "background-color 0.2s ease",
 
           "&:hover": {
@@ -245,7 +241,9 @@ export default function FilterLabelRemovable({
             <Divider
               orientation="horizontal"
               flexItem
-              sx={{ borderColor: "black" }}
+              sx={{
+                borderColor: isEntryTypeChip ? "white" : "black",
+              }}
             />
 
             <Typography fontWeight={400} fontSize={12} mb={1} mt={1}>
@@ -264,7 +262,6 @@ export default function FilterLabelRemovable({
                       setSelectedPathSegment(entry.pathSegment);
                       setExpandedKey(null);
                     }}
-                    sx={getEntryTypeSelectableStyles(isSelected)}
                   >
                     {formatEntryLabel(entry.pathSegment)}
                   </Button>

@@ -505,6 +505,7 @@ export default function Search({
         </Box>
         {extraFilter && <FilterTermsExtra />}
         {selectedFilter.length > 0 && <QueryApplied />}
+        {/* {selectedPathSegment && <QueryApplied />} */}
 
         <Box
           sx={{

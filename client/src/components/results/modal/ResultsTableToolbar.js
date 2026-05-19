@@ -58,6 +58,8 @@ export default function ResultsTableToolbar({
     ? DEFAULT_VISIBLE_COLUMNS.sm
     : DEFAULT_VISIBLE_COLUMNS.xs;
 
+  const isDownloadEnabled = config.ui?.download?.enabled ?? true;
+
   const getColumnButtonStyle = (isActive) => ({
     borderRadius: "27px",
     height: "30px",
@@ -203,10 +205,10 @@ export default function ResultsTableToolbar({
 
               "@keyframes pulseBorder": {
                 "0%": {
-                  boxShadow: "0 0 0 0 rgba(25, 118, 210, 0.18)",
+                  boxShadow: "0 0 0 0 rgba(25, 118, 210, 0.28)",
                 },
                 "50%": {
-                  boxShadow: "0 0 0 8px rgba(25, 118, 210, 0.08)",
+                  boxShadow: "0 0 0 8px rgba(25, 118, 210, 0.18)",
                 },
                 "100%": {
                   boxShadow: "0 0 0 0 rgba(25, 118, 210, 0)",
@@ -341,22 +343,25 @@ export default function ResultsTableToolbar({
           }}
         />
 
-        <Button
-          variant="outlined"
-          size="large"
-          sx={{
-            px: 2,
-            borderColor: colors.darkPrimary,
-            borderRadius: "24px",
-            "& .MuiButton-startIcon": {
-              marginLeft: 0,
-              marginRight: 0,
-            },
-          }}
-          // onClick={() => console.log("Download clicked")}
-          onClick={handleExport}
-          startIcon={<DownloadRoundedIcon sx={{ color: colors.darkPrimary }} />}
-        />
+        {isDownloadEnabled && (
+          <Button
+            variant="outlined"
+            size="large"
+            sx={{
+              px: 2,
+              borderColor: colors.darkPrimary,
+              borderRadius: "24px",
+              "& .MuiButton-startIcon": {
+                marginLeft: 0,
+                marginRight: 0,
+              },
+            }}
+            onClick={handleExport}
+            startIcon={
+              <DownloadRoundedIcon sx={{ color: colors.darkPrimary }} />
+            }
+          />
+        )}
       </Box>
     </Box>
   );
