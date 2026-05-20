@@ -201,7 +201,7 @@ export default function ResultsTableToolbar({
             sx={{
               borderRadius: "24px",
               height: "40px",
-              animation: shouldPulse ? "pulseBorder 2s ease-in-out 3" : "none",
+              animation: shouldPulse ? "pulseBorder 3s ease-in-out 8" : "none",
 
               "@keyframes pulseBorder": {
                 "0%": {

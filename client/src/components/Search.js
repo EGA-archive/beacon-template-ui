@@ -251,6 +251,12 @@ export default function Search({
     setOpenGenomicQueryBuilder(() => openGenomicQueryBuilder);
   }, [setOpenGenomicQueryBuilder]);
 
+  const is0Based = config.queryCoordinatesAre0Based ?? true;
+
+  const genomicCoordinateLabel = is0Based
+    ? "Genomic Query (0-based)"
+    : "Genomic Query (1-based)";
+
   return (
     <>
       <Box
@@ -427,11 +433,15 @@ export default function Search({
                 {isSingleEntryType ? "" : "2. "}
                 Use the following search bars to narrow down your search using{" "}
                 <b>
-                  {isFirstEntryGenomic ? "Genomic Query" : "Filtering Terms"}
+                  {isFirstEntryGenomic
+                    ? genomicCoordinateLabel
+                    : "Filtering Terms"}
                 </b>{" "}
                 and/or{" "}
                 <b>
-                  {isFirstEntryGenomic ? "Filtering Terms" : "Genomic Query"}
+                  {isFirstEntryGenomic
+                    ? "Filtering Terms"
+                    : genomicCoordinateLabel}
                 </b>
                 .
               </Typography>

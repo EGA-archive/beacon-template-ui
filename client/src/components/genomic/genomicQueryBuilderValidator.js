@@ -1,6 +1,8 @@
 import * as Yup from "yup";
 import config from "../../config/config.json";
 
+const minimumCoordinate = config.queryCoordinatesAre0Based ?? true ? 0 : 1;
+
 // Yup base pattern for Ref/Alt bases — allows IUPAC codes (excluding U), '.' and '-'
 export const basePattern = /^[ACGTRYSWKMBDHVN.\-]+$/;
 
@@ -90,6 +92,12 @@ export const createStartValidator = (label = "Start") =>
   Yup.number()
     .typeError(`${label} must be a number`)
     .integer(`${label} must be an integer`)
+    .min(
+      minimumCoordinate,
+      minimumCoordinate === 1
+        ? `${label} must be greater than 0`
+        : `${label} must be 0 or greater`
+    )
     .required(`${label} is required`);
 
 // End position: required, must be ≥ start
@@ -97,6 +105,12 @@ export const createEndValidator = (label = "End", startLabel = "Start") =>
   Yup.number()
     .typeError(`${label} must be a number`)
     .integer(`${label} must be an integer`)
+    .min(
+      minimumCoordinate,
+      minimumCoordinate === 1
+        ? `${label} must be greater than 0`
+        : `${label} must be 0 or greater`
+    )
     .when("start", (start, schema) =>
       start
         ? schema.min(
@@ -152,6 +166,12 @@ const numberField = (label) =>
   Yup.number()
     .typeError(`${label} must be a number`)
     .integer(`${label} must be an integer`)
+    .min(
+      minimumCoordinate,
+      minimumCoordinate === 1
+        ? `${label} must be greater than 0`
+        : `${label} must be 0 or greater`
+    )
     .required(`${label} is required`);
 
 export const bracketRangeValidator = Yup.object({

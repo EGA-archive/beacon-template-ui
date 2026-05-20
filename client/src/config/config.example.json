@@ -11,6 +11,7 @@
     { "jsonName": "CNV", "displayName": "CNV" },
     { "jsonName": "BND", "displayName": "BND" }
   ],
+  "queryCoordinatesAre0Based": true,
   "ui": {
     "title": "EGA Beacon Browser",
     "favicon": "/assets/logos/favicon.ico",
@@ -67,7 +68,9 @@
         }
       ]
     },
-
+    "download": {
+      "enabled": true
+    },
     "showLogin": false,
     "auth": {
       "providerType": "private",

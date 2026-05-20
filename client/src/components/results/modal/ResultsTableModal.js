@@ -10,6 +10,7 @@ import { useSelectedEntry } from "../../context/SelectedEntryContext";
 import Loader from "../../common/Loader";
 import { PATH_SEGMENT_TO_ENTRY_ID } from "../../common/textFormatting";
 import ResultsEmpty from "../ResultsEmpty";
+import { normalizeGenomicRequestParameters } from "../../genomic/utils/normalizeGenomicRequestParameters";
 
 /**
  * Displays a modal containing a paginated results table for the selected dataset.
@@ -105,7 +106,7 @@ const ResultsTableModal = ({
         if (item.queryParams) {
           filter.query.requestParameters = {
             ...filter.query.requestParameters,
-            ...item.queryParams,
+            ...normalizeGenomicRequestParameters(item.queryParams),
           };
         } else if (item.operator) {
           filter.query.filters.push({
