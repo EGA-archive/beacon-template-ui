@@ -1403,6 +1403,10 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
+"@ega/beacon-cookie-consent@https://github.com/EGA-archive/beacon-cookie-consent.git":
+  version "0.1.0"
+  resolved "https://github.com/EGA-archive/beacon-cookie-consent.git#1154d280d1d79c1d9a9c4ce073fb17ef282e47fa"
+
 "@emotion/babel-plugin@^11.13.5":
   version "11.13.5"
   resolved "https://registry.yarnpkg.com/@emotion/babel-plugin/-/babel-plugin-11.13.5.tgz#eab8d65dbded74e0ecfd28dc218e75607c4e7bc0"

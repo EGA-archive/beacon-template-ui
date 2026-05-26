@@ -1,52 +1,122 @@
 import { Box, Typography, Link as MuiLink } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Link } from "react-router-dom";
+import config from "../config/config.json";
 import { isLoginEnabled } from "../components/pages/login/authHelpers";
 import { useAuthSafe as useAuth } from "../components/pages/login/useAuthSafe";
-
-// Logos shown in the footer
 import maingrey from "../assets/logos/maingrey.svg";
 import crg from "../assets/logos/crg.svg";
 import bsc from "../assets/logos/bsc.svg";
 
-/**
- * Footer component
- * Displays:
- *  - Credits and institutional logos (EGA, CRG, BSC)
- *  - Documentation + UI walkthrough links
- *  - Log in / Log out control depending on authentication state
- */
+// Footer component with dynamic legal links, institutional logos,
+// documentation links and login/logout controls
 export default function Footer() {
   const auth = useAuth();
 
   const isLoggedIn = !!auth?.userData;
   const loginEnabled = isLoginEnabled();
 
-  // Function to log the user out
+  // Legal links come from the same config used by the cookie banner
+  const legalLinks = config.ui?.cookies?.links || [];
+  const hasLegalLinks = legalLinks.length > 0;
+
   const handleLogout = () => {
     localStorage.setItem("isLoggingOut", "true");
     auth.signOut();
     auth.signOutRedirect();
   };
 
-  // Function to redirect to login
   const handleLogin = () => {
     auth.signIn();
   };
+
+  // Shared style used for all footer links
+  const sharedLinkStyles = {
+    color: "#111",
+    fontSize: "12px",
+    textDecorationColor: "#111",
+    fontFamily: '"Open Sans", sans-serif',
+  };
+
+  // Reusable institutions logos block for ega, crg and bsc
+  const renderInstitutionLogos = () => (
+    <>
+      <MuiLink
+        href="https://ega-archive.org/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img src={maingrey} alt="EGA Logo" style={{ height: 34 }} />
+      </MuiLink>
+
+      <MuiLink
+        href="https://www.crg.eu/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img src={crg} alt="CRG Logo" style={{ height: 34 }} />
+      </MuiLink>
+
+      <MuiLink
+        href="https://www.bsc.es/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img src={bsc} alt="BSC Logo" style={{ height: 34 }} />
+      </MuiLink>
+    </>
+  );
+
+  // Login/Logout is shown only if enabled in config
+  const renderLoginSection = () => (
+    <>
+      {loginEnabled && !isLoggedIn && (
+        <MuiLink
+          component={Link}
+          to="/login"
+          underline="none"
+          onClick={handleLogin}
+          sx={{
+            ...sharedLinkStyles,
+            cursor: "pointer",
+            "&:hover": {
+              textDecoration: "underline",
+            },
+          }}
+        >
+          Log in
+        </MuiLink>
+      )}
+
+      {loginEnabled && isLoggedIn && (
+        <LogoutIcon
+          onClick={handleLogout}
+          sx={{
+            color: "#444",
+            cursor: "pointer",
+            fontSize: "20px",
+            "&:hover": {
+              color: "#000",
+            },
+          }}
+          titleAccess="Log out"
+        />
+      )}
+    </>
+  );
 
   return (
     <Box
       component="footer"
       data-testid="footer"
       sx={{
-        backgroundColor: "#eee",
+        backgroundColor: "#EAEAEA",
         py: 2,
         px: 4,
         minHeight: "68px",
         mt: "auto",
       }}
     >
-      {/* Main responsive container */}
       <Box
         sx={{
           display: "flex",
@@ -60,113 +130,140 @@ export default function Footer() {
           mr: 1,
         }}
       >
-        {/* Left Side — Text and institution logos */}
-        <Box
-          data-testid="footer-left"
-          sx={{
-            display: "flex",
-            gap: { xs: 2, md: 3 },
-            "@media (max-width: 1044px) and (min-width: 721px)": {
-              gap: 6,
-            },
-            "@media (max-width: 648px) and (min-width:633px)": {
-              gap: 4,
-            },
-            alignItems: "center",
-          }}
-        >
-          <Typography
-            data-testid="footer-credit-text"
-            variant="body2"
-            color="black"
+        {/* Left section: if legal links exist, show them here. Otherwise skipt the section */}
+        {hasLegalLinks ? (
+          <Box
+            data-testid="footer-left"
             sx={{
-              fontSize: { xs: "12px", sm: "14px" },
-              "@media (max-width: 648px) and (min-width:600px)": {
-                fontSize: "12px",
-              },
+              display: "flex",
+              gap: 4,
+              flexWrap: "wrap",
+              alignItems: "center",
             }}
           >
-            Beacon User Interface template provided by:
-          </Typography>
-
-          <MuiLink
-            data-testid="footer-logo-ega"
-            href="https://ega-archive.org/"
-            target="_blank"
-            rel="noopener noreferrer"
+            {legalLinks.map((link, index) => (
+              <MuiLink
+                key={index}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                underline="always"
+                sx={sharedLinkStyles}
+              >
+                {link.label}
+              </MuiLink>
+            ))}
+          </Box>
+        ) : (
+          <Box
+            data-testid="footer-left"
+            sx={{
+              display: "flex",
+              gap: { xs: 2, md: 3 },
+              "@media (max-width: 1044px) and (min-width: 721px)": {
+                gap: 6,
+              },
+              "@media (max-width: 648px) and (min-width:633px)": {
+                gap: 4,
+              },
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
           >
-            <img src={maingrey} alt="EGA Logo" style={{ height: 34 }} />
-          </MuiLink>
+            <Typography
+              sx={{
+                fontSize: "12px",
+                color: "#111",
+                fontFamily: '"Open Sans", sans-serif',
+              }}
+            >
+              Beacon User Interface template provided by:
+            </Typography>
 
-          <MuiLink
-            data-testid="footer-logo-crg"
-            href="https://www.crg.eu/"
-            target="_blank"
-            rel="noopener noreferrer"
+            {renderInstitutionLogos()}
+          </Box>
+        )}
+
+        {/* Center section only exists when legal links are present */}
+        {hasLegalLinks && (
+          <Box
+            data-testid="footer-center"
+            sx={{
+              display: "flex",
+              gap: { xs: 2, md: 3 },
+              "@media (max-width: 1044px) and (min-width: 784px)": {
+                gap: 6,
+              },
+              "@media (max-width: 783px) and (min-width: 633px)": {
+                gap: 3,
+              },
+
+              alignItems: "center",
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}
           >
-            <img src={crg} alt="CRG Logo" style={{ height: 34 }} />
-          </MuiLink>
+            <Typography
+              sx={{
+                fontSize: "12px",
+                color: "#111",
+                fontFamily: '"Open Sans", sans-serif',
+              }}
+            >
+              Beacon Template User Interface provided by:
+            </Typography>
 
-          <MuiLink
-            data-testid="footer-logo-bsc"
-            href="https://www.bsc.es/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img src={bsc} alt="BSC Logo" style={{ height: 34 }} />
-          </MuiLink>
-        </Box>
+            {renderInstitutionLogos()}
+          </Box>
+        )}
 
-        {/* Right Side — Documentation + login/logout */}
+        {/* Right section with docs and login/logout */}
         <Box
           data-testid="footer-right"
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: 4,
+            gap: { xs: 1.5, md: 2 },
             flexWrap: "wrap",
             justifyContent: { xs: "center", md: "flex-end" },
             fontFamily: '"Open Sans", sans-serif',
-            marginRight: 0,
           }}
         >
-          {/* Documentation links */}
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
-              alignItems: "center",
-              fontSize: "13px",
+              alignItems: { xs: "center", md: "flex-start" },
+              fontSize: "12px",
             }}
           >
             <Typography
               sx={{
-                fontSize: "13px",
+                fontSize: "12px",
                 fontWeight: 600,
                 lineHeight: "16px",
+                color: "#111",
               }}
             >
-              Beacon Template User Interface
+              Beacon Template User Interface:
             </Typography>
 
             <Box
               sx={{
                 display: "flex",
-                gap: 8,
+                gap: 3,
+                alignItems: "center",
+                flexWrap: "wrap",
               }}
             >
               <MuiLink
-                href="https://github.com/EGA-archive/beacon-template-ui"
+                href="https://beacon-documentation-demo.ega-archive.org/ui-introduction"
                 target="_blank"
                 rel="noopener noreferrer"
                 underline="always"
-                sx={{
-                  color: "#333",
-                  fontSize: "13px",
-                  textDecorationColor: "black",
-                }}
+                sx={sharedLinkStyles}
               >
-                Git Hub
+                Documentation
               </MuiLink>
 
               <MuiLink
@@ -174,55 +271,14 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 underline="always"
-                sx={{
-                  color: "#333",
-                  fontSize: "13px",
-                  textDecorationColor: "black",
-                }}
+                sx={sharedLinkStyles}
               >
                 UI Walkthrough
               </MuiLink>
+
+              {renderLoginSection()}
             </Box>
           </Box>
-
-          {/* Login / Logout controls */}
-          {loginEnabled && (
-            <>
-              {!isLoggedIn && (
-                <MuiLink
-                  data-testid="footer-login-button"
-                  component={Link}
-                  to="/login"
-                  underline="none"
-                  className="login-button"
-                  sx={{
-                    fontSize: "14px",
-                    "@media (max-width: 452px)": { fontSize: "12px" },
-                    color: "#333",
-                    "&:hover": { textDecoration: "underline" },
-                    cursor: "pointer",
-                  }}
-                  onClick={handleLogin}
-                >
-                  Log in
-                </MuiLink>
-              )}
-
-              {isLoggedIn && (
-                <LogoutIcon
-                  data-testid="footer-logout-icon"
-                  onClick={handleLogout}
-                  sx={{
-                    color: "#444",
-                    cursor: "pointer",
-                    fontSize: "20px",
-                    "&:hover": { color: "#000" },
-                  }}
-                  titleAccess="Log out"
-                />
-              )}
-            </>
-          )}
         </Box>
       </Box>
     </Box>

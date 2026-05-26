@@ -26,7 +26,8 @@
     "react-router-dom": "^7.5.0",
     "react-scripts": "5.0.1",
     "resend": "^6.0.1",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "@ega/beacon-cookie-consent": "https://github.com/EGA-archive/beacon-cookie-consent.git"
   },
   "browserslist": {
     "production": [

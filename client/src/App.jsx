@@ -11,6 +11,7 @@ import config from "./config/config.json";
 import { useState, useEffect } from "react";
 import LoginModal from "./components/common/LoginModal";
 import { logosHelper } from "./lib/logosHelper";
+import { CookieBanner } from "@ega/beacon-cookie-consent";
 
 import {
   BrowserRouter as Router,
@@ -87,6 +88,7 @@ export default function App() {
           }}
         >
           <CssBaseline />
+          <CookieBanner config={config.ui?.cookies} />
           <Navbar
             title={config.ui.title}
             main={logosHelper(config.ui.logos.main)}

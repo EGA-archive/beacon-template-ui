@@ -71,6 +71,21 @@
     "download": {
       "enabled": true
     },
+    "cookies": {
+      "enabled": true,
+      "message": "This website requires cookies, and the limited processing of your personal data in order to function. By using the site you agree to this as outlined in our Privacy Notice and Terms of Use.",
+      "buttonText": "I understand",
+      "links": [
+        {
+          "label": "Privacy Notice",
+          "url": "https://ega-archive.org/data-protection/privacy-notice/ega-website/"
+        },
+        {
+          "label": "Terms of Use",
+          "url": "https://ega-archive.org/legal-notice/"
+        }
+      ]
+    },
     "showLogin": false,
     "auth": {
       "providerType": "private",
