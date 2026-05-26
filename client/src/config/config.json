@@ -19,7 +19,7 @@
       "founders": [
         {
           "src": "/assets/logos/founder1.svg",
-          "url": "https://impact.isciii.es/"
+          "url": "https://www.isciii.es/en/"
         },
         {
           "src": "/assets/logos/founder2.svg",
@@ -27,15 +27,11 @@
         },
         {
           "src": "/assets/logos/founder3.svg",
-          "url": "https://www.ciencia.gob.es/en/"
+          "url": "https://planderecuperacion.gob.es/"
         },
         {
           "src": "/assets/logos/founder4.svg",
-          "url": "https://www.isciii.es/en/"
-        },
-        {
-          "src": "/assets/logos/founder5.svg",
-          "url": "https://fundacionlacaixa.org/es/"
+          "url": "https://next-generation-eu.europa.eu/index_en"
         }
       ]
     },
@@ -48,13 +44,7 @@
     ],
     "showAboutPage": true,
     "about": {
-      "logos": [
-        "/assets/logos/about1.svg",
-        "/assets/logos/about2.svg",
-        "/assets/logos/about3.svg",
-        "/assets/logos/about4.svg",
-        "/assets/logos/about5.svg"
-      ],
+      "logos": ["/assets/logos/about1.svg", "/assets/logos/about2.svg"],
       "descriptions": [
         "<b>IMPaCT</b> (Infrastructure for Precision Medicine associated with Science and Technology) is a national initiative designed to support the implementation of precision medicine in Spain’s healthcare system. Its goal is to ensure high scientific and technical standards, promote equitable access, and make better use of available resources to improve healthcare outcomes.The programme is structured around three strategic axes: predictive medicine (Cohorts), genomic medicine (Genomics), and data science (Data).",
         "<b> IMPaCT-Data</b>, the data science pillar, focuses on building an infrastructure that allows clinical, genomic, and imaging data to be integrated and analysed together. It aims to create a shared, interoperable environment where data from different institutions can be accessed and used in a coordinated and secure way, supporting both research and healthcare.",
@@ -66,8 +56,7 @@
           "logos": [
             "/assets/logos/organization1.svg",
             "/assets/logos/organization2.svg",
-            "/assets/logos/organization3.svg",
-            "/assets/logos/organization4.svg"
+            "/assets/logos/organization3.svg"
           ]
         }
       ]
