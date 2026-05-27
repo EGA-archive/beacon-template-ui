@@ -205,7 +205,9 @@ export default function FiltersContainer({
           backgroundColor: "white",
 
           mt: "-4.7px",
-          overflow: "hidden",
+          // overflow: "hidden",
+          overflowY: "auto",
+          overflowX: "hidden",
           height: {
             lg: `${searchHeight}px`,
             md: `${searchHeight}px`,
