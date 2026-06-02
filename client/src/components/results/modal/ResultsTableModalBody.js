@@ -271,7 +271,8 @@ const ResultsTableModalBody = ({
   return (
     <Box
       sx={{
-        maxHeight: "70vh",
+        // Sara for height/ scroll
+        // maxHeight: "70vh",
         // overflow: "hidden",
         display: "flex",
         flexDirection: "column",
@@ -319,7 +320,7 @@ const ResultsTableModalBody = ({
         sx={{
           width: "100%",
           flexGrow: 1,
-          // overflow: "hidden",
+          overflow: "hidden",
           boxShadow: "none",
           borderRadius: 0,
           display: "flex",
@@ -328,9 +329,7 @@ const ResultsTableModalBody = ({
       >
         <TableContainer
           sx={{
-            maxHeight: "60vh",
-            overflow: "visible",
-            // overflowY: "auto"
+            overflowX: "auto",
           }}
         >
           <Table stickyHeader aria-label="Results table">

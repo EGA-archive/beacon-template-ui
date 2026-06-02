@@ -24,6 +24,7 @@ export default function FilterLabelRemovable({
   bgColor,
   stateSelected,
   variant = "",
+  disableTooltip = false,
 }) {
   const containerRef = useRef(null);
 
@@ -182,7 +183,9 @@ export default function FilterLabelRemovable({
   return (
     <Tooltip
       title={
-        isGenomicChip
+        disableTooltip
+          ? ""
+          : isGenomicChip
           ? "Click the genomic query to edit it in the Genomic Query Builder."
           : ""
       }

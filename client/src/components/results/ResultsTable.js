@@ -39,10 +39,18 @@ import useBeaconMetadata from "../../hooks/useBeaconMetaData";
 const ResultsTableModal = lazy(() => import("./modal/ResultsTableModal"));
 
 export default function ResultsTable() {
+  // const {
+  //   resultData,
+  //   beaconsInfo,
+  //   selectedPathSegment: selectedEntryType,
+  //   selectedFilter,
+  // } = useSelectedEntry();
   const {
     resultData,
     beaconsInfo,
     selectedPathSegment: selectedEntryType,
+    lastSearchedFilters,
+    lastSearchedPathSegment,
   } = useSelectedEntry();
 
   // expandedRow and selectedSubRow have very similar logs.
@@ -79,9 +87,44 @@ export default function ResultsTable() {
     setSelectedSubRow(item);
   };
 
+  // const handleOpenModal = (subRow) => {
+  //   const storageKey = `datasetDetailedTable_${subRow.beaconId}_${subRow.datasetId}`;
+  //   localStorage.setItem(storageKey, JSON.stringify(subRow));
+  //   window.open(
+  //     `/dataset-detailed-table?beaconId=${encodeURIComponent(
+  //       subRow.beaconId
+  //     )}&datasetId=${encodeURIComponent(subRow.datasetId)}`,
+  //     "_blank"
+  //   );
+  // };
+
   const handleOpenModal = (subRow) => {
-    setSelectedSubRow(subRow);
-    setModalOpen(true);
+    const storageKey = `datasetDetailedTable_${subRow.beaconId}_${subRow.datasetId}`;
+
+    console.log("[AppliedQuery] lastSearchedFilters:", lastSearchedFilters);
+
+    console.log(
+      "[AppliedQuery] lastSearchedPathSegment:",
+      lastSearchedPathSegment
+    );
+
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify({
+        ...subRow,
+        appliedQuery: {
+          entryType: lastSearchedPathSegment,
+          filters: lastSearchedFilters,
+        },
+      })
+    );
+
+    window.open(
+      `/dataset-detailed-table?beaconId=${encodeURIComponent(
+        subRow.beaconId
+      )}&datasetId=${encodeURIComponent(subRow.datasetId)}`,
+      "_blank"
+    );
   };
 
   const handleCloseModal = () => {

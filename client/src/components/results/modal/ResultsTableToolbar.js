@@ -158,6 +158,9 @@ export default function ResultsTableToolbar({
         {count > limit && (
           <Box>Details returned for the first {limit} records</Box>
         )}
+        <Box>
+          <b>Dispaly Options:</b>{" "}
+        </Box>
       </Box>
 
       <Box

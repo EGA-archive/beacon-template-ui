@@ -12,7 +12,7 @@ import { useState, useEffect } from "react";
 import LoginModal from "./components/common/LoginModal";
 import { logosHelper } from "./lib/logosHelper";
 import { CookieBanner } from "@ega/beacon-cookie-consent";
-
+import DatasetDetailedTablePage from "./components/pages/DatasetDetailedTablePage";
 import {
   BrowserRouter as Router,
   Routes,
@@ -132,6 +132,11 @@ export default function App() {
                   <Route path="/login" element={<Login />} />
                 </>
               )}
+
+              <Route
+                path="/dataset-detailed-table"
+                element={<DatasetDetailedTablePage />}
+              />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </Box>
