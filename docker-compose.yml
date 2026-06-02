@@ -7,7 +7,7 @@ services:
     build:
       context: ./client
     command: node /opt/yarn-v1.22.22/bin/yarn.js start
-    container_name: template-ui
+    container_name: template-impact-ui
     ports:
       - 3006:3000
     volumes:
