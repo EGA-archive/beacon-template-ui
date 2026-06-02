@@ -9,7 +9,7 @@ services:
     command: node /opt/yarn-v1.22.22/bin/yarn.js start
     container_name: template-ui
     ports:
-      - 3006:3000
+      - 3000:3000
     volumes:
       - ./client/src/config/config.json:/client/src/config/config.json
       - ./client/.env:/client/.env
