@@ -2,8 +2,8 @@ import config from "../../../config/config.json";
 
 /**
  * Exports either:
- * - All backend rows (if no search term)
- * - Or only visible filtered rows (if user searched)
+ * - Current visible table rows (Download View)
+ * - Or all backend rows (Download All)
  */
 export const exportCSV = async ({
   dataTable,
@@ -16,27 +16,50 @@ export const exportCSV = async ({
   queryBuilder,
   datasetId,
   authHeaders,
+  selectedFilters = [],
+  downloadMode = "view",
 }) => {
   try {
+    console.log("========== EXPORT START ==========");
+    console.log("downloadMode:", downloadMode);
+
     let results = [];
 
-    // Case 1: user typed a search term: export only filtered rows
-    if (searchTerm.trim()) {
-      results = dataTable.filter((item) => {
-        const rowString = sortedHeaders
-          .map((h) => summarizeValue(item[h.id], h.id))
-          .join(" ")
-          .toLowerCase();
-        return rowString.includes(searchTerm.toLowerCase());
-      });
+    // Case 1: Download View
+    if (downloadMode === "view") {
+      console.log("DOWNLOAD VIEW");
+
+      results = searchTerm.trim()
+        ? dataTable.filter((item) => {
+            const rowString = sortedHeaders
+              .map((h) => summarizeValue(item[h.id], h.id))
+              .join(" ")
+              .toLowerCase();
+
+            return rowString.includes(searchTerm.toLowerCase());
+          })
+        : dataTable;
+
+      console.log("View results length:", results.length);
     }
 
-    // Case 2: no search: fetch everything from backend
+    // Case 2: Download All
     else {
-      const fullQuery = queryBuilder([], entryTypeId);
-      fullQuery.query.pagination = { skip: 0, limit: 100 };
+      console.log("DOWNLOAD ALL");
+
+      const fullQuery = queryBuilder(selectedFilters, entryTypeId);
+
+      // limit=0 => ask backend for all results.
+      // Backend may still apply its own protection cap.
+      fullQuery.query.pagination = {
+        skip: 0,
+        limit: 0,
+      };
+
+      console.log("Query after override:", fullQuery);
 
       const fullUrl = `${config.apiUrl}/${selectedPathSegment}`;
+
       const response = await fetch(fullUrl, {
         method: "POST",
         headers: authHeaders,
@@ -50,7 +73,19 @@ export const exportCSV = async ({
       }
 
       const data = await response.json();
+
+      console.log("Response received:", data);
+
       const resultSets = data?.response?.resultSets ?? [];
+
+      console.log(
+        "Datasets returned:",
+        resultSets.map((r) => ({
+          id: r.id,
+          results: r.results?.length,
+        }))
+      );
+
       const selectedDataset = resultSets.find(
         (r) => r.id === datasetId || r.dataset === datasetId
       );
@@ -59,7 +94,87 @@ export const exportCSV = async ({
         alert(`No dataset found for ID: ${datasetId}`);
         return;
       }
-      results = selectedDataset.results || [];
+
+      console.log("Selected dataset:", selectedDataset);
+
+      const initialResults = selectedDataset.results || [];
+      const totalResults =
+        selectedDataset.resultsCount ?? initialResults.length;
+      const PAGE_SIZE = initialResults.length;
+
+      const MAX_DOWNLOAD_RECORDS = 5000;
+
+      const downloadLimit = Math.min(totalResults, MAX_DOWNLOAD_RECORDS);
+
+      if (totalResults > MAX_DOWNLOAD_RECORDS) {
+        alert(
+          `This query contains ${totalResults.toLocaleString()} records. Only the first ${MAX_DOWNLOAD_RECORDS.toLocaleString()} records will be downloaded.`
+        );
+      }
+
+      if (!PAGE_SIZE) {
+        alert("No data available to export.");
+        return;
+      }
+
+      const allResults = [...initialResults];
+
+      let page = 1;
+
+      while (allResults.length < downloadLimit) {
+        const nextQuery = JSON.parse(JSON.stringify(fullQuery));
+
+        nextQuery.query.pagination = {
+          skip: page,
+          limit: PAGE_SIZE,
+        };
+
+        console.log(
+          `Fetching next export page: skip=${page}, limit=${PAGE_SIZE}`
+        );
+
+        const nextResponse = await fetch(fullUrl, {
+          method: "POST",
+          headers: authHeaders,
+          body: JSON.stringify(nextQuery),
+        });
+
+        if (!nextResponse.ok) {
+          console.error("Fetch failed with status:", nextResponse.status);
+          alert("Failed to fetch all data for export.");
+          return;
+        }
+
+        const nextData = await nextResponse.json();
+        const nextResultSets = nextData?.response?.resultSets ?? [];
+
+        const nextDataset = nextResultSets.find(
+          (r) => r.id === datasetId || r.dataset === datasetId
+        );
+
+        console.log("Next dataset:", nextDataset);
+
+        const nextResults = nextDataset?.results || [];
+
+        console.log(
+          `pagination sent: skip=${page}, limit=${PAGE_SIZE}`,
+          "nextResults length:",
+          nextResults.length
+        );
+
+        if (!nextResults.length) {
+          console.warn("No more results returned. Stopping export pagination.");
+          break;
+        }
+
+        allResults.push(...nextResults);
+
+        console.log(`Fetched ${allResults.length}/${downloadLimit} rows`);
+
+        page += 1;
+      }
+
+      results = allResults.slice(0, downloadLimit);
     }
 
     if (!results.length) {
@@ -71,6 +186,7 @@ export const exportCSV = async ({
     const visibleHeaderObjects = sortedHeaders.filter((h) =>
       visibleColumns.includes(h.id)
     );
+
     const headers = visibleHeaderObjects.map((h) => h.id);
     const headerLabels = visibleHeaderObjects.map((h) => h.name);
 
@@ -94,22 +210,32 @@ export const exportCSV = async ({
           .join(",")
       ),
     ];
+
     const csvContent = csvRows.join("\n");
 
     // Create file
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+
     const url = URL.createObjectURL(blob);
+
     const fileName = `beacon-${selectedPathSegment || "results"}-${
       new Date().toISOString().split("T")[0]
     }.csv`;
 
     const link = document.createElement("a");
+
     link.href = url;
     link.setAttribute("download", fileName);
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
     URL.revokeObjectURL(url);
+
+    console.log("========== EXPORT END ==========");
   } catch (err) {
     console.error("CSV export failed:", err);
     alert("CSV export failed. Check the console for details.");

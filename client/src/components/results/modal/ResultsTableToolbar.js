@@ -18,6 +18,7 @@ import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownR
 import config from "../../../config/config.json";
 import { useSelectedEntry } from "../../../components/context/SelectedEntryContext";
 import { ReactComponent as SelectColumn } from "../../../assets/logos/SelectColumn.svg";
+import DownloadTablePopover from "../modal/DownloadTablePopover";
 
 /**
  * Toolbar for the Results Table, it contains:
@@ -32,6 +33,7 @@ export default function ResultsTableToolbar({
   setSearchTerm,
   sortedHeaders,
   count,
+  loadedCount,
   handleExport,
 }) {
   const { responseMeta } = useSelectedEntry();
@@ -155,11 +157,11 @@ export default function ResultsTableToolbar({
             : "—"}
         </Box>
 
-        {count > limit && (
-          <Box>Details returned for the first {limit} records</Box>
+        {loadedCount && count > loadedCount && (
+          <Box>Details returned for the first {loadedCount} records</Box>
         )}
         <Box>
-          <b>Dispaly Options:</b>{" "}
+          <b>Display Options:</b>{" "}
         </Box>
       </Box>
 
@@ -345,25 +347,36 @@ export default function ResultsTableToolbar({
             ),
           }}
         />
-
-        {isDownloadEnabled && (
+        {/* {isDownloadEnabled && (
           <Button
             variant="outlined"
             size="large"
-            sx={{
-              px: 2,
-              borderColor: colors.darkPrimary,
-              borderRadius: "24px",
-              "& .MuiButton-startIcon": {
-                marginLeft: 0,
-                marginRight: 0,
-              },
-            }}
             onClick={handleExport}
             startIcon={
               <DownloadRoundedIcon sx={{ color: colors.darkPrimary }} />
             }
-          />
+            sx={{
+              px: 2,
+              borderColor: colors.darkPrimary,
+              borderRadius: "24px",
+              color: colors.darkPrimary,
+              textTransform: "none",
+              fontSize: "12px",
+
+              "& .MuiButton-startIcon": {
+                marginLeft: 0,
+              },
+
+              "&:hover": {
+                borderColor: colors.primary,
+              },
+            }}
+          >
+            Download Table
+          </Button>
+        )} */}
+        {isDownloadEnabled && (
+          <DownloadTablePopover handleExport={handleExport} />
         )}
       </Box>
     </Box>

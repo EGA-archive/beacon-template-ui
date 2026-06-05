@@ -12,6 +12,7 @@ export default function DatasetDetailedTablePage() {
   const datasetId = searchParams.get("datasetId");
   const storageKey = `datasetDetailedTable_${beaconId}_${datasetId}`;
   const data = JSON.parse(localStorage.getItem(storageKey) || "{}");
+
   const { selectedFilter, selectedPathSegment } = useSelectedEntry();
 
   const [visibleColumns, setVisibleColumns] = useState([]);
@@ -117,9 +118,15 @@ export default function DatasetDetailedTablePage() {
         </Box>
 
         <ResultsTableModalBody
+          //   dataTable={data.dataTable || []}
+          //   entryTypeId={data.entryTypeId}
+          //   selectedPathSegment={data.selectedPathSegment}
           dataTable={data.dataTable || []}
-          entryTypeId=""
-          selectedPathSegment=""
+          entryTypeId={data.entryTypeId || data.appliedQuery?.entryType || ""}
+          selectedPathSegment={
+            data.selectedPathSegment || data.appliedQuery?.entryType || ""
+          }
+          selectedFilters={data.selectedFilters || []}
           beaconId={data.beaconId}
           datasetId={data.datasetId}
           displayedCount={data.displayedCount}

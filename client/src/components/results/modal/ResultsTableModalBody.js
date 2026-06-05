@@ -55,6 +55,7 @@ const ResultsTableModalBody = ({
   setSearchTerm,
   searchTerm,
   setSearchCount,
+  selectedFilters,
 }) => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
@@ -163,7 +164,7 @@ const ResultsTableModalBody = ({
     const filtered = dataTable.filter((item) => {
       if (!searchTerm) return true;
       const rowString = sortedHeaders
-        .map((h) => summarizeValue(item[h.id]))
+        .map((h) => summarizeValue(item[h.id], h.id))
         .join(" ")
         .toLowerCase();
       return rowString.includes(searchTerm.toLowerCase());
@@ -184,29 +185,35 @@ const ResultsTableModalBody = ({
   );
 
   /** Export CSV */
-  const handleExport = useCallback(() => {
-    exportCSV({
+  const handleExport = useCallback(
+    (downloadMode = "view") => {
+      exportCSV({
+        dataTable,
+        sortedHeaders,
+        visibleColumns,
+        summarizeValue,
+        searchTerm,
+        entryTypeId,
+        selectedPathSegment,
+        queryBuilder,
+        datasetId,
+        authHeaders,
+        selectedFilters,
+        downloadMode,
+      });
+    },
+    [
       dataTable,
       sortedHeaders,
       visibleColumns,
-      summarizeValue,
       searchTerm,
       entryTypeId,
       selectedPathSegment,
-      queryBuilder,
       datasetId,
       authHeaders,
-    });
-  }, [
-    dataTable,
-    sortedHeaders,
-    visibleColumns,
-    searchTerm,
-    entryTypeId,
-    selectedPathSegment,
-    datasetId,
-    authHeaders,
-  ]);
+      selectedFilters,
+    ]
+  );
 
   const CELL_RENDERERS = {
     interventionsOrProcedures: InterventionsOrProceduresCell,
@@ -267,7 +274,6 @@ const ResultsTableModalBody = ({
     return summarizeValue(value);
   }, []);
 
-  /** Render */
   return (
     <Box
       sx={{
@@ -314,6 +320,7 @@ const ResultsTableModalBody = ({
         handleExport={handleExport}
         sortedHeaders={sortedHeaders}
         count={displayedCount}
+        loadedCount={dataTable.length}
       />
 
       <Paper

@@ -101,17 +101,26 @@ export default function ResultsTable() {
   const handleOpenModal = (subRow) => {
     const storageKey = `datasetDetailedTable_${subRow.beaconId}_${subRow.datasetId}`;
 
-    console.log("[AppliedQuery] lastSearchedFilters:", lastSearchedFilters);
-
-    console.log(
-      "[AppliedQuery] lastSearchedPathSegment:",
-      lastSearchedPathSegment
-    );
+    // localStorage.setItem(
+    //   storageKey,
+    //   JSON.stringify({
+    //     ...subRow,
+    //     appliedQuery: {
+    //       entryType: lastSearchedPathSegment,
+    //       filters: lastSearchedFilters,
+    //     },
+    //   })
+    // );
 
     localStorage.setItem(
       storageKey,
       JSON.stringify({
         ...subRow,
+
+        entryTypeId: lastSearchedPathSegment,
+        selectedPathSegment: lastSearchedPathSegment,
+        selectedFilters: lastSearchedFilters,
+
         appliedQuery: {
           entryType: lastSearchedPathSegment,
           filters: lastSearchedFilters,
