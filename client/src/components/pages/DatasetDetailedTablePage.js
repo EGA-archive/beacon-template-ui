@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Box, TablePagination, Typography } from "@mui/material";
-import { useSelectedEntry } from "../context/SelectedEntryContext";
 import ResultsTableModalBody from "../results/modal/ResultsTableModalBody";
 import ChevronRight from "../../assets/logos/chevron-right.svg";
 import FilterLabelRemovable from "../../components/styling/FilterLabelRemovable";
 import { formatEntryLabel } from "../../components/common/textFormatting";
+import config from "../../config/config.json";
 
 export default function DatasetDetailedTablePage() {
   const searchParams = new URLSearchParams(window.location.search);
@@ -12,8 +12,6 @@ export default function DatasetDetailedTablePage() {
   const datasetId = searchParams.get("datasetId");
   const storageKey = `datasetDetailedTable_${beaconId}_${datasetId}`;
   const data = JSON.parse(localStorage.getItem(storageKey) || "{}");
-
-  const { selectedFilter, selectedPathSegment } = useSelectedEntry();
 
   const [visibleColumns, setVisibleColumns] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,14 +50,18 @@ export default function DatasetDetailedTablePage() {
           sx={{
             display: "flex",
             alignItems: "center",
+            flexWrap: "wrap",
             gap: 1,
+            rowGap: 0.5,
             mb: 3,
-            fontSize: "14px",
+            fontSize: { xs: "12px", sm: "13px", md: "14px", lg: "16px" },
           }}
         >
           <Typography
             sx={{
+              fontSize: { xs: "12px", sm: "13px", md: "14px", lg: "16px" },
               fontWeight: 700,
+              whiteSpace: "nowrap",
             }}
           >
             Results
@@ -68,17 +70,59 @@ export default function DatasetDetailedTablePage() {
           <img
             src={ChevronRight}
             alt="breadcrumb separator"
-            style={{
-              width: "7px",
-              height: "12px",
-            }}
+            style={{ width: "7px", height: "12px" }}
           />
 
-          <Typography sx={{ fontWeight: 700 }}>
+          <Typography
+            sx={{
+              fontSize: { xs: "12px", sm: "13px", md: "14px", lg: "16px" },
+              fontWeight: 700,
+              whiteSpace: "nowrap",
+            }}
+          >
             Dataset Detailed Table
           </Typography>
-        </Box>
 
+          {config.beaconType === "networkBeacon" && (
+            <>
+              <Typography
+                sx={{
+                  fontSize: { xs: "12px", sm: "13px", md: "14px", lg: "16px" },
+                  fontWeight: 700,
+                }}
+              >
+                |
+              </Typography>
+
+              <Typography
+                sx={{
+                  fontSize: { xs: "12px", sm: "13px", md: "14px", lg: "16px" },
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Beacon: <b>{data.beaconId || "—"}</b>
+              </Typography>
+            </>
+          )}
+
+          <Typography
+            sx={{
+              fontSize: { xs: "12px", sm: "13px", md: "14px", lg: "16px" },
+              fontWeight: 700,
+            }}
+          >
+            |
+          </Typography>
+
+          <Typography
+            sx={{
+              fontSize: { xs: "12px", sm: "13px", md: "14px", lg: "16px" },
+              whiteSpace: "nowrap",
+            }}
+          >
+            Dataset: <b>{data.datasetId || "—"}</b>
+          </Typography>
+        </Box>
         <Box
           sx={{
             display: "flex",
@@ -118,9 +162,6 @@ export default function DatasetDetailedTablePage() {
         </Box>
 
         <ResultsTableModalBody
-          //   dataTable={data.dataTable || []}
-          //   entryTypeId={data.entryTypeId}
-          //   selectedPathSegment={data.selectedPathSegment}
           dataTable={data.dataTable || []}
           entryTypeId={data.entryTypeId || data.appliedQuery?.entryType || ""}
           selectedPathSegment={

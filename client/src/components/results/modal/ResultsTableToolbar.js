@@ -128,256 +128,265 @@ export default function ResultsTableToolbar({
   const shouldPulse = visibleColumns.length < sortedHeaders.length;
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        my: 2,
-        flexDirection: { xs: "column", md: "row" },
-        alignItems: { xs: "flex-start", md: "center" },
-        gap: { xs: 2, md: 0 },
-      }}
-    >
+    <Box sx={{ mb: 3 }}>
+      {/* Total Results */}
       <Box
         sx={{
-          color: colors.darkPrimary,
+          color: "000",
           fontSize: "14px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          mt: "auto",
-          gap: "2px",
+          mb: 2,
         }}
       >
-        <Box>
-          <b>Total Results:</b>{" "}
+        <Box
+          sx={{
+            fontWeight: 700,
+            fontSize: "14px",
+          }}
+        >
+          Total Results:{" "}
           {count
             ? new Intl.NumberFormat(navigator.language).format(count)
             : "—"}
-        </Box>
-
-        {loadedCount && count > loadedCount && (
-          <Box>Details returned for the first {loadedCount} records</Box>
-        )}
-        <Box>
-          <b>Display Options:</b>{" "}
+          <Box
+            component="span"
+            sx={{
+              ml: 1,
+              fontStyle: "italic",
+              fontWeight: 400,
+              fontSize: "12px",
+            }}
+          >
+            {loadedCount &&
+              count > loadedCount &&
+              `(Details returned for the first ${loadedCount} records)`}
+          </Box>
         </Box>
       </Box>
 
+      {/* Display Options + Toolbar */}
       <Box
         sx={{
           display: "flex",
+          justifyContent: "space-between",
           alignItems: "center",
-          gap: {
-            xs: 1,
-            sm: 1,
-            md: 2,
-            lg: 3,
-          },
+          flexWrap: "wrap",
+          gap: 2,
         }}
       >
-        <FormControl size="small">
-          <Select
-            multiple
-            displayEmpty
-            value={visibleColumns}
-            onChange={handleColumnSelectionChange}
-            renderValue={() => (
-              <Box
-                sx={{
+        {/* Left Side */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            flexWrap: "wrap",
+          }}
+        >
+          {/* This will be  conditional to the presece of Frequencies in Populations */}
+          {/* <Box
+            sx={{
+              fontSize: "14px",
+            }}
+          >
+            <b>Display Options:</b>
+          </Box> */}
+        </Box>
+
+        {/* Right Side */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: {
+              xs: 1,
+              sm: 1,
+              md: 2,
+              lg: 3,
+            },
+            flexWrap: "wrap",
+          }}
+        >
+          <FormControl size="small">
+            <Select
+              multiple
+              displayEmpty
+              value={visibleColumns}
+              onChange={handleColumnSelectionChange}
+              renderValue={() => (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                  }}
+                >
+                  <SelectColumn sx={{ color: colors.darkPrimary }} />
+                  <span
+                    style={{
+                      color: colors.darkPrimary,
+                      opacity: 1,
+                      fontSize: "12px",
+                    }}
+                  >
+                    Select column
+                  </span>
+                </Box>
+              )}
+              sx={{
+                borderRadius: "24px",
+                height: "40px",
+                animation: shouldPulse
+                  ? "pulseBorder 3s ease-in-out 8"
+                  : "none",
+
+                "@keyframes pulseBorder": {
+                  "0%": {
+                    boxShadow: "0 0 0 0 rgba(25, 118, 210, 0.28)",
+                  },
+                  "50%": {
+                    boxShadow: "0 0 0 8px rgba(25, 118, 210, 0.18)",
+                  },
+                  "100%": {
+                    boxShadow: "0 0 0 0 rgba(25, 118, 210, 0)",
+                  },
+                },
+
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: colors.darkPrimary,
+                },
+
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: colors.primary,
+                },
+
+                "& .MuiSelect-select": {
                   display: "flex",
                   alignItems: "center",
-                  gap: 1,
-                }}
-              >
-                <SelectColumn sx={{ color: colors.darkPrimary }} />
-                <span
-                  style={{
-                    color: colors.darkPrimary,
-                    opacity: 1,
-                    fontSize: "12px",
-                  }}
-                >
-                  Select column
-                </span>
-              </Box>
-            )}
-            sx={{
-              borderRadius: "24px",
-              height: "40px",
-              animation: shouldPulse ? "pulseBorder 3s ease-in-out 8" : "none",
-
-              "@keyframes pulseBorder": {
-                "0%": {
-                  boxShadow: "0 0 0 0 rgba(25, 118, 210, 0.28)",
-                },
-                "50%": {
-                  boxShadow: "0 0 0 8px rgba(25, 118, 210, 0.18)",
-                },
-                "100%": {
-                  boxShadow: "0 0 0 0 rgba(25, 118, 210, 0)",
-                },
-              },
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: colors.darkPrimary,
-              },
-
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: colors.primary,
-              },
-
-              "& .MuiSelect-select": {
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                py: 0.5,
-                width: {
-                  xs: "120px",
-                  sm: "150px",
-                  md: "150px",
-                  lg: "200px",
-                },
-                height: "40px",
-              },
-            }}
-            IconComponent={KeyboardArrowDownRoundedIcon}
-          >
-            {/* <MenuItem
-              sx={{
-                backgroundColor: "lightgrey",
-                "&:hover": {
-                  backgroundColor: "lightgrey",
-                },
-              }}
-            >
-              Here we need to add the buttons: Select All and Unselect All
-            </MenuItem> */}
-
-            <MenuItem
-              disableRipple
-              sx={{
-                backgroundColor: "#ECECEC",
-                "&:hover": {
-                  backgroundColor: "#ECECEC",
-                },
-                cursor: "default",
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: 1,
-                  width: "100%",
-                  justifyContent: "center",
+                  gap: "8px",
                   py: 0.5,
+                  width: {
+                    xs: "120px",
+                    sm: "150px",
+                    md: "150px",
+                    lg: "200px",
+                  },
+                  height: "40px",
+                },
+              }}
+              IconComponent={KeyboardArrowDownRoundedIcon}
+            >
+              <MenuItem
+                disableRipple
+                sx={{
+                  backgroundColor: "#ECECEC",
+                  "&:hover": {
+                    backgroundColor: "#ECECEC",
+                  },
+                  cursor: "default",
                 }}
               >
-                <Button
-                  variant="outlined"
-                  onClick={handleSelectAllColumns}
-                  sx={getColumnButtonStyle(
-                    isInitialLoad ? false : allColumnsSelected
-                  )}
-                >
-                  Select All
-                </Button>
-
-                <Button
-                  variant="outlined"
-                  onClick={handleUnselectAllColumns}
-                  sx={getColumnButtonStyle(
-                    isInitialLoad ? false : noColumnsSelected
-                  )}
-                >
-                  Unselect All
-                </Button>
-              </Box>
-            </MenuItem>
-
-            {sortedHeaders.map((col) => (
-              <MenuItem key={col.id} value={col.id}>
-                <Checkbox
-                  size="small"
-                  checked={visibleColumns.indexOf(col.id) > -1}
+                <Box
                   sx={{
-                    color: colors.darkPrimary,
-                    "&.Mui-checked": { color: colors.primary },
+                    display: "flex",
+                    gap: 1,
+                    width: "100%",
+                    justifyContent: "center",
+                    py: 0.5,
                   }}
-                />
-                <ListItemText
-                  primary={col.name}
-                  primaryTypographyProps={{
-                    sx: { fontSize: "13px", color: colors.darkPrimary },
-                  }}
-                />
+                >
+                  <Button
+                    variant="outlined"
+                    onClick={handleSelectAllColumns}
+                    sx={getColumnButtonStyle(
+                      isInitialLoad ? false : allColumnsSelected
+                    )}
+                  >
+                    Select All
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    onClick={handleUnselectAllColumns}
+                    sx={getColumnButtonStyle(
+                      isInitialLoad ? false : noColumnsSelected
+                    )}
+                  >
+                    Unselect All
+                  </Button>
+                </Box>
               </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <TextField
-          size="small"
-          placeholder="Search keywords"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{
-            width: {
-              xs: "160px",
-              sm: "170px",
-              md: "170px",
-              lg: "237px",
-            },
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "24px",
-              height: "40px",
-              "& fieldset": { borderColor: colors.darkPrimary },
-              "&:hover fieldset": { borderColor: colors.primary },
-              "& input::placeholder": {
-                color: colors.darkPrimary,
-                opacity: 1,
-                fontSize: "12px",
-              },
-            },
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start" size="small">
-                <SearchRoundedIcon sx={{ color: colors.darkPrimary }} />
-              </InputAdornment>
-            ),
-          }}
-        />
-        {/* {isDownloadEnabled && (
-          <Button
-            variant="outlined"
-            size="large"
-            onClick={handleExport}
-            startIcon={
-              <DownloadRoundedIcon sx={{ color: colors.darkPrimary }} />
-            }
+
+              {sortedHeaders.map((col) => (
+                <MenuItem key={col.id} value={col.id}>
+                  <Checkbox
+                    size="small"
+                    checked={visibleColumns.indexOf(col.id) > -1}
+                    sx={{
+                      color: colors.darkPrimary,
+                      "&.Mui-checked": {
+                        color: colors.primary,
+                      },
+                    }}
+                  />
+                  <ListItemText
+                    primary={col.name}
+                    primaryTypographyProps={{
+                      sx: {
+                        fontSize: "13px",
+                        color: colors.darkPrimary,
+                      },
+                    }}
+                  />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <TextField
+            size="small"
+            placeholder="Search keywords"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             sx={{
-              px: 2,
-              borderColor: colors.darkPrimary,
-              borderRadius: "24px",
-              color: colors.darkPrimary,
-              textTransform: "none",
-              fontSize: "12px",
-
-              "& .MuiButton-startIcon": {
-                marginLeft: 0,
+              width: {
+                xs: "160px",
+                sm: "170px",
+                md: "170px",
+                lg: "237px",
               },
-
-              "&:hover": {
-                borderColor: colors.primary,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "24px",
+                height: "40px",
+                "& fieldset": {
+                  borderColor: colors.darkPrimary,
+                },
+                "&:hover fieldset": {
+                  borderColor: colors.primary,
+                },
+                "& input::placeholder": {
+                  color: colors.darkPrimary,
+                  opacity: 1,
+                  fontSize: "12px",
+                },
               },
             }}
-          >
-            Download Table
-          </Button>
-        )} */}
-        {isDownloadEnabled && (
-          <DownloadTablePopover handleExport={handleExport} />
-        )}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start" size="small">
+                  <SearchRoundedIcon
+                    sx={{
+                      color: colors.darkPrimary,
+                    }}
+                  />
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          {isDownloadEnabled && (
+            <DownloadTablePopover handleExport={handleExport} />
+          )}
+        </Box>
       </Box>
     </Box>
   );

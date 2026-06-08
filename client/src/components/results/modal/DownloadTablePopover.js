@@ -6,6 +6,7 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  CircularProgress,
 } from "@mui/material";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import config from "../../../config/config.json";
@@ -16,8 +17,9 @@ export default function DownloadTablePopover({ handleExport }) {
   const primaryColor = colors.primary;
   const hoverBg = alpha(primaryColor, 0.15);
 
-  const [downloadMode, setDownloadMode] = useState("view");
+  const [downloadMode, setDownloadMode] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const radioStyle = {
     color: "white",
@@ -43,12 +45,16 @@ export default function DownloadTablePopover({ handleExport }) {
   };
 
   const handleButtonClick = () => {
+    if (!isOpen) {
+      setDownloadMode("");
+    }
     setIsOpen((prev) => !prev);
   };
 
   return (
     <Box
       sx={{
+        zIndex: "999",
         width: "240px",
         position: "relative",
       }}
@@ -75,25 +81,21 @@ export default function DownloadTablePopover({ handleExport }) {
         >
           <RadioGroup
             value={downloadMode}
-            // onChange={(e) => {
-            //   const selectedMode = e.target.value;
-
-            //   setDownloadMode(selectedMode);
-
-            //   console.log("Selected download mode:", selectedMode);
-
-            //   handleExport(selectedMode);
-
-            //   handleClose();
-            // }}
-            onChange={(e) => {
+            disabled={isDownloading}
+            onChange={async (e) => {
               const selectedMode = e.target.value;
-
               setDownloadMode(selectedMode);
-
-              handleExport(selectedMode);
-
+              setIsDownloading(true);
+              // Close popup immediately so only the button remains visible
               handleClose();
+              try {
+                await handleExport(selectedMode);
+              } catch (error) {
+                console.error("Download failed:", error);
+              } finally {
+                setIsDownloading(false);
+                setDownloadMode("");
+              }
             }}
           >
             <FormControlLabel
@@ -131,36 +133,40 @@ export default function DownloadTablePopover({ handleExport }) {
         variant="outlined"
         fullWidth
         onClick={handleButtonClick}
+        disabled={isDownloading}
         startIcon={
-          <DownloadRoundedIcon
-            sx={{
-              color: isOpen ? "white" : colors.darkPrimary,
-            }}
-          />
+          isDownloading ? (
+            <CircularProgress
+              size={16}
+              sx={{
+                color: "white",
+              }}
+            />
+          ) : (
+            <DownloadRoundedIcon />
+          )
         }
         sx={{
           borderRadius: isOpen ? "0 0 24px 24px" : "24px",
-
           backgroundColor: isOpen ? colors.darkPrimary : "white",
-
           borderColor: colors.darkPrimary,
-
           color: isOpen ? "white" : colors.darkPrimary,
-
           textTransform: "none",
-
           fontSize: "12px",
           fontWeight: 400,
-
           height: "40px",
-
           "&:hover": {
             backgroundColor: isOpen ? colors.darkPrimary : hoverBg,
             borderColor: colors.darkPrimary,
           },
+          "&.Mui-disabled": {
+            backgroundColor: colors.darkPrimary,
+            borderColor: colors.darkPrimary,
+            color: "white",
+          },
         }}
       >
-        Download Table
+        {isDownloading ? "Downloading Table..." : "Download Table"}
       </Button>
     </Box>
   );

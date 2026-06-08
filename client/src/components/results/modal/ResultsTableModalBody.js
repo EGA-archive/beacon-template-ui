@@ -187,7 +187,7 @@ const ResultsTableModalBody = ({
   /** Export CSV */
   const handleExport = useCallback(
     (downloadMode = "view") => {
-      exportCSV({
+      return exportCSV({
         dataTable,
         sortedHeaders,
         visibleColumns,
@@ -277,41 +277,12 @@ const ResultsTableModalBody = ({
   return (
     <Box
       sx={{
-        // Sara for height/ scroll
-        // maxHeight: "70vh",
+        maxHeight: "70vh",
         // overflow: "hidden",
         display: "flex",
         flexDirection: "column",
       }}
     >
-      {config.beaconType === "networkBeacon" && (
-        <Box
-          sx={{
-            color: config.ui.colors.darkPrimary,
-            fontSize: "14px",
-            display: "flex",
-            alignItems: "flex-end",
-            mt: "auto",
-            gap: "6px",
-          }}
-        >
-          Beacon: <b>{beaconId || "—"}</b>
-        </Box>
-      )}
-
-      <Box
-        sx={{
-          color: config.ui.colors.darkPrimary,
-          fontSize: "14px",
-          display: "flex",
-          alignItems: "flex-end",
-          mt: "auto",
-          gap: "6px",
-        }}
-      >
-        Dataset: <b>{datasetId || "—"}</b>
-      </Box>
-
       <ResultsTableToolbar
         visibleColumns={visibleColumns}
         setVisibleColumns={setVisibleColumns}
