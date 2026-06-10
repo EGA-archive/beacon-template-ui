@@ -9,6 +9,8 @@ import {
   CircularProgress,
 } from "@mui/material";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
 import config from "../../../config/config.json";
 import { alpha } from "@mui/material/styles";
 
@@ -60,73 +62,86 @@ export default function DownloadTablePopover({ handleExport }) {
       }}
     >
       {isOpen && (
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: "40px",
-            left: 0,
-            right: 0,
-
-            backgroundColor: colors.darkPrimary,
-            color: "white",
-
-            borderTopLeftRadius: "24px",
-            borderTopRightRadius: "24px",
-
-            px: 2,
-            py: 2,
-
-            zIndex: 10,
+        <ClickAwayListener
+          onClickAway={() => {
+            if (!isDownloading) {
+              handleClose();
+            }
           }}
         >
-          <RadioGroup
-            value={downloadMode}
-            disabled={isDownloading}
-            onChange={async (e) => {
-              const selectedMode = e.target.value;
-              setDownloadMode(selectedMode);
-              setIsDownloading(true);
-              // Close popup immediately so only the button remains visible
-              handleClose();
-              try {
-                await handleExport(selectedMode);
-              } catch (error) {
-                console.error("Download failed:", error);
-              } finally {
-                setIsDownloading(false);
-                setDownloadMode("");
-              }
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: "40px",
+              left: 0,
+              right: 0,
+
+              backgroundColor: colors.darkPrimary,
+              color: "white",
+
+              borderTopLeftRadius: "24px",
+              borderTopRightRadius: "24px",
+
+              px: 2,
+              py: 2,
+
+              zIndex: 10,
             }}
           >
-            <FormControlLabel
-              value="view"
-              control={<Radio sx={radioStyle} />}
-              label={
-                <Box>
-                  {" "}
-                  <Typography sx={optionTitleStyle}>Download View </Typography>
-                  <Typography sx={optionSubtitleStyle}>
-                    Selected columns
-                  </Typography>
-                </Box>
-              }
-            />
+            <RadioGroup
+              value={downloadMode}
+              disabled={isDownloading}
+              onChange={async (e) => {
+                const selectedMode = e.target.value;
 
-            <FormControlLabel
-              value="all"
-              control={<Radio sx={radioStyle} />}
-              label={
-                <Box>
-                  <Typography sx={optionTitleStyle}>Download All</Typography>
+                setDownloadMode(selectedMode);
+                setIsDownloading(true);
 
-                  <Typography sx={optionSubtitleStyle}>
-                    It can take a few minutes
-                  </Typography>
-                </Box>
-              }
-            />
-          </RadioGroup>
-        </Box>
+                // Close popup immediately so only the button remains visible
+                handleClose();
+
+                try {
+                  await handleExport(selectedMode);
+                } catch (error) {
+                  console.error("Download failed:", error);
+                } finally {
+                  setIsDownloading(false);
+                  setDownloadMode("");
+                }
+              }}
+            >
+              <FormControlLabel
+                value="view"
+                control={<Radio sx={radioStyle} />}
+                label={
+                  <Box>
+                    {" "}
+                    <Typography sx={optionTitleStyle}>
+                      Download View{" "}
+                    </Typography>
+                    <Typography sx={optionSubtitleStyle}>
+                      Selected columns
+                    </Typography>
+                  </Box>
+                }
+              />
+
+              <FormControlLabel
+                value="all"
+                control={<Radio sx={radioStyle} />}
+                label={
+                  <Box>
+                    <Typography sx={optionTitleStyle}>Download All</Typography>
+
+                    <Typography sx={optionSubtitleStyle}>
+                      It can take a few minutes
+                    </Typography>
+                  </Box>
+                }
+              />
+            </RadioGroup>
+          </Box>
+        </ClickAwayListener>
       )}
 
       <Button
@@ -163,6 +178,8 @@ export default function DownloadTablePopover({ handleExport }) {
             backgroundColor: colors.darkPrimary,
             borderColor: colors.darkPrimary,
             color: "white",
+            cursor: "not-allowed",
+            pointerEvents: "all",
           },
         }}
       >

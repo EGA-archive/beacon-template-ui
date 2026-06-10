@@ -182,7 +182,9 @@ export default function ResultsTable() {
   };
 
   const handleEmail = (email) => {
-    window.location.href = `mailto:${email}`;
+    window.open(`mailto:${email}`, "_blank");
+
+    console.log(email);
   };
 
   const getBeaconStatusLabel = (status) => {

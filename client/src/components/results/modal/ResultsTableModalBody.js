@@ -35,6 +35,12 @@ import MolecularAttributesCell from "../modal/cellRenderers/MolecularAttributesC
 import VariationCell from "../modal/cellRenderers/VariationCell";
 import CaseLevelDataCell from "../modal/cellRenderers/CaseLevelDataCell";
 import useAuthHeaders from "../../../hooks/useAuthHeaders";
+import DownloadLimitDialog from "../modal/DownloadLimitDialog";
+import { highlightText } from "../utils/highlightText";
+import defaultsortingicon from "../../../assets/logos/default-sorting-icon.svg";
+import sortascIcon from "../../../assets/logos/sort-asc.svg";
+import sortdescIcon from "../../../assets/logos/sort-desc.svg";
+import { getSortableValue } from "../utils/sortValue";
 
 /**
  * Displays paginated results inside the modal.
@@ -59,6 +65,9 @@ const ResultsTableModalBody = ({
 }) => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
+  const [downloadLimitInfo, setDownloadLimitInfo] = useState(null);
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState(null);
   const initialized = useRef(false);
 
   // Get authentication headers (includes Bearer token if user is logged in)
@@ -163,10 +172,12 @@ const ResultsTableModalBody = ({
   useEffect(() => {
     const filtered = dataTable.filter((item) => {
       if (!searchTerm) return true;
+
       const rowString = sortedHeaders
         .map((h) => summarizeValue(item[h.id], h.id))
         .join(" ")
         .toLowerCase();
+
       return rowString.includes(searchTerm.toLowerCase());
     });
 
@@ -175,13 +186,69 @@ const ResultsTableModalBody = ({
     if (setSearchCount) {
       setSearchCount(filtered.length);
     }
-  }, [searchTerm, dataTable, sortedHeaders]);
+  }, [searchTerm, dataTable, sortedHeaders, setSearchCount]);
 
-  /** Slice visible rows for current page */
+  const handleSort = (columnId) => {
+    if (sortColumn !== columnId) {
+      setSortColumn(columnId);
+      setSortDirection("asc");
+      return;
+    }
+
+    if (sortDirection === "asc") {
+      setSortDirection("desc");
+      return;
+    }
+
+    setSortColumn(null);
+    setSortDirection(null);
+  };
+
+  const getSortIcon = (columnId) => {
+    if (sortColumn !== columnId) return defaultsortingicon;
+    return sortDirection === "asc" ? sortascIcon : sortdescIcon;
+  };
+
+  const sortedFilteredData = useMemo(() => {
+    if (!sortColumn || !sortDirection) return filteredData;
+
+    return [...filteredData].sort((a, b) => {
+      const aValue = summarizeValue(a[sortColumn], sortColumn);
+      const bValue = summarizeValue(b[sortColumn], sortColumn);
+
+      const aSortable = getSortableValue(aValue);
+      const bSortable = getSortableValue(bValue);
+
+      // Genomic position sorting
+      if (aSortable.type === "genomic" && bSortable.type === "genomic") {
+        return sortDirection === "asc"
+          ? aSortable.value - bSortable.value
+          : bSortable.value - aSortable.value;
+      }
+
+      // Numeric sorting
+      if (aSortable.type === "number" && bSortable.type === "number") {
+        return sortDirection === "asc"
+          ? aSortable.value - bSortable.value
+          : bSortable.value - aSortable.value;
+      }
+
+      // Fallback text sorting
+      return sortDirection === "asc"
+        ? String(aValue).localeCompare(String(bValue), undefined, {
+            numeric: true,
+            sensitivity: "base",
+          })
+        : String(bValue).localeCompare(String(aValue), undefined, {
+            numeric: true,
+            sensitivity: "base",
+          });
+    });
+  }, [filteredData, sortColumn, sortDirection]);
 
   const visibleRows = useMemo(
-    () => filteredData.slice(start, end),
-    [filteredData, start, end]
+    () => sortedFilteredData.slice(start, end),
+    [sortedFilteredData, start, end]
   );
 
   /** Export CSV */
@@ -200,6 +267,9 @@ const ResultsTableModalBody = ({
         authHeaders,
         selectedFilters,
         downloadMode,
+        onDownloadLimitReached: (info) => {
+          setDownloadLimitInfo(info);
+        },
       });
     },
     [
@@ -289,6 +359,7 @@ const ResultsTableModalBody = ({
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         handleExport={handleExport}
+        setDownloadLimitInfo={setDownloadLimitInfo}
         sortedHeaders={sortedHeaders}
         count={displayedCount}
         loadedCount={dataTable.length}
@@ -321,10 +392,24 @@ const ResultsTableModalBody = ({
                         sx={{
                           display: "flex",
                           alignItems: "center",
-                          gap: "6px",
+                          gap: "15px",
                         }}
                       >
                         {column.name}
+                        {/* <img
+                          src={defaultsortingicon}
+                          alt="sorting icon"
+                          style={{ opacity: 0.5 }}
+                        /> */}
+                        <img
+                          src={getSortIcon(column.id)}
+                          alt="sorting icon"
+                          onClick={() => handleSort(column.id)}
+                          style={{
+                            opacity: sortColumn === column.id ? 1 : 0.5,
+                            cursor: "pointer",
+                          }}
+                        />
                       </Box>
                     </TableCell>
                   ))}
@@ -383,9 +468,15 @@ const ResultsTableModalBody = ({
                             {(() => {
                               const Renderer = CELL_RENDERERS[col.id];
                               return Renderer ? (
-                                <Renderer value={item[col.id]} />
+                                <Renderer
+                                  value={item[col.id]}
+                                  searchTerm={searchTerm}
+                                />
                               ) : (
-                                renderCellContent(item, col.id)
+                                highlightText(
+                                  renderCellContent(item, col.id),
+                                  searchTerm
+                                )
                               );
                             })()}
                           </StyledTableCell>
@@ -405,6 +496,12 @@ const ResultsTableModalBody = ({
           </Table>
         </TableContainer>
       </Paper>
+      <DownloadLimitDialog
+        open={Boolean(downloadLimitInfo)}
+        totalResults={downloadLimitInfo?.totalResults}
+        downloadLimit={downloadLimitInfo?.downloadLimit}
+        onClose={() => setDownloadLimitInfo(null)}
+      />
     </Box>
   );
 };

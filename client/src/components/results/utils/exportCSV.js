@@ -1,6 +1,12 @@
 import config from "../../../config/config.json";
 
 /**
+ * Maximum number of records allowed in a CSV download.
+ * This protects the browser from downloading extremely large datasets.
+ */
+const MAX_DOWNLOAD_RECORDS = 5000;
+
+/**
  * Exports either:
  * - Current visible table rows (Download View)
  * - Or all backend rows (Download All)
@@ -18,17 +24,19 @@ export const exportCSV = async ({
   authHeaders,
   selectedFilters = [],
   downloadMode = "view",
+  onDownloadLimitReached,
 }) => {
   try {
-    console.log("========== EXPORT START ==========");
-    console.log("downloadMode:", downloadMode);
-
     let results = [];
+    let totalResults = 0;
+    let downloadLimit = 0;
+    let wasTruncated = false;
 
-    // Case 1: Download View
+    /**
+     * DOWNLOAD VIEW
+     * Export only the rows currently visible in the table.
+     */
     if (downloadMode === "view") {
-      console.log("DOWNLOAD VIEW");
-
       results = searchTerm.trim()
         ? dataTable.filter((item) => {
             const rowString = sortedHeaders
@@ -40,23 +48,25 @@ export const exportCSV = async ({
           })
         : dataTable;
 
-      console.log("View results length:", results.length);
-    }
+      totalResults = results.length;
+      downloadLimit = results.length;
+      wasTruncated = false;
+    } else {
 
-    // Case 2: Download All
-    else {
-      console.log("DOWNLOAD ALL");
-
+    /**
+     * DOWNLOAD ALL
+     * Request all available records from the backend.
+     */
       const fullQuery = queryBuilder(selectedFilters, entryTypeId);
 
-      // limit=0 => ask backend for all results.
-      // Backend may still apply its own protection cap.
+      /**
+       * Ask the backend for all records.
+       * The backend may still apply its own limits.
+       */
       fullQuery.query.pagination = {
         skip: 0,
         limit: 0,
       };
-
-      console.log("Query after override:", fullQuery);
 
       const fullUrl = `${config.apiUrl}/${selectedPathSegment}`;
 
@@ -74,17 +84,7 @@ export const exportCSV = async ({
 
       const data = await response.json();
 
-      console.log("Response received:", data);
-
       const resultSets = data?.response?.resultSets ?? [];
-
-      console.log(
-        "Datasets returned:",
-        resultSets.map((r) => ({
-          id: r.id,
-          results: r.results?.length,
-        }))
-      );
 
       const selectedDataset = resultSets.find(
         (r) => r.id === datasetId || r.dataset === datasetId
@@ -95,43 +95,62 @@ export const exportCSV = async ({
         return;
       }
 
-      console.log("Selected dataset:", selectedDataset);
-
       const initialResults = selectedDataset.results || [];
-      const totalResults =
-        selectedDataset.resultsCount ?? initialResults.length;
-      const PAGE_SIZE = initialResults.length;
 
-      const MAX_DOWNLOAD_RECORDS = 5000;
+      totalResults = selectedDataset.resultsCount ?? initialResults.length;
 
-      const downloadLimit = Math.min(totalResults, MAX_DOWNLOAD_RECORDS);
+      /**
+       * Number of records returned by the backend in one page.
+       * We reuse this size when requesting the following pages.
+       */
+      const pageSize = initialResults.length;
 
-      if (totalResults > MAX_DOWNLOAD_RECORDS) {
-        alert(
-          `This query contains ${totalResults.toLocaleString()} records. Only the first ${MAX_DOWNLOAD_RECORDS.toLocaleString()} records will be downloaded.`
-        );
+      downloadLimit = Math.min(totalResults, MAX_DOWNLOAD_RECORDS);
+
+      wasTruncated = totalResults > MAX_DOWNLOAD_RECORDS;
+
+      /**
+       * Notify the UI if the download was limited.
+       */
+      if (wasTruncated && onDownloadLimitReached) {
+        onDownloadLimitReached({
+          totalResults,
+          downloadLimit,
+        });
       }
 
-      if (!PAGE_SIZE) {
+      if (!pageSize) {
         alert("No data available to export.");
         return;
       }
 
       const allResults = [...initialResults];
 
+      /**
+       * Beacon pagination works slightly differently:
+       *
+       * skip = page number
+       * limit = page size
+       *
+       * Example:
+       * skip: 0, limit: 100 → first page
+       * skip: 1, limit: 100 → second page
+       * skip: 2, limit: 100 → third page
+       */
       let page = 1;
 
+      /**
+       * Keep requesting pages until:
+       * - we reach the download limit
+       * - or the backend has no more results
+       */
       while (allResults.length < downloadLimit) {
         const nextQuery = JSON.parse(JSON.stringify(fullQuery));
 
         nextQuery.query.pagination = {
           skip: page,
-          limit: PAGE_SIZE,
+          limit: pageSize,
         };
-
-        console.log(
-          `Fetching next export page: skip=${page}, limit=${PAGE_SIZE}`
-        );
 
         const nextResponse = await fetch(fullUrl, {
           method: "POST",
@@ -146,43 +165,43 @@ export const exportCSV = async ({
         }
 
         const nextData = await nextResponse.json();
+
         const nextResultSets = nextData?.response?.resultSets ?? [];
 
         const nextDataset = nextResultSets.find(
           (r) => r.id === datasetId || r.dataset === datasetId
         );
 
-        console.log("Next dataset:", nextDataset);
-
         const nextResults = nextDataset?.results || [];
 
-        console.log(
-          `pagination sent: skip=${page}, limit=${PAGE_SIZE}`,
-          "nextResults length:",
-          nextResults.length
-        );
-
+        /**
+         * Stop if there are no more records.
+         */
         if (!nextResults.length) {
-          console.warn("No more results returned. Stopping export pagination.");
           break;
         }
 
         allResults.push(...nextResults);
-
-        console.log(`Fetched ${allResults.length}/${downloadLimit} rows`);
-
         page += 1;
       }
 
+      /**
+       * Keep only the allowed number of records.
+       */
       results = allResults.slice(0, downloadLimit);
     }
 
+    /**
+     * Nothing to export.
+     */
     if (!results.length) {
       alert("No data available to export.");
       return;
     }
 
-    // Use only visible columns
+    /**
+     * Export only the columns currently visible in the table.
+     */
     const visibleHeaderObjects = sortedHeaders.filter((h) =>
       visibleColumns.includes(h.id)
     );
@@ -190,7 +209,9 @@ export const exportCSV = async ({
     const headers = visibleHeaderObjects.map((h) => h.id);
     const headerLabels = visibleHeaderObjects.map((h) => h.name);
 
-    // Build CSV
+    /**
+     * Build CSV rows.
+     */
     const csvRows = [
       headerLabels.join(","),
       ...results.map((row) =>
@@ -213,7 +234,9 @@ export const exportCSV = async ({
 
     const csvContent = csvRows.join("\n");
 
-    // Create file
+    /**
+     * Create the CSV file.
+     */
     const blob = new Blob([csvContent], {
       type: "text/csv;charset=utf-8;",
     });
@@ -235,7 +258,11 @@ export const exportCSV = async ({
 
     URL.revokeObjectURL(url);
 
-    console.log("========== EXPORT END ==========");
+    return {
+      totalResults,
+      downloadLimit,
+      wasTruncated,
+    };
   } catch (err) {
     console.error("CSV export failed:", err);
     alert("CSV export failed. Check the console for details.");

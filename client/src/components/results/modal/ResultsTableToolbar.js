@@ -35,6 +35,7 @@ export default function ResultsTableToolbar({
   count,
   loadedCount,
   handleExport,
+  setDownloadLimitInfo,
 }) {
   const { responseMeta } = useSelectedEntry();
   const colors = config.ui.colors;
@@ -384,7 +385,10 @@ export default function ResultsTableToolbar({
           />
 
           {isDownloadEnabled && (
-            <DownloadTablePopover handleExport={handleExport} />
+            <DownloadTablePopover
+              handleExport={handleExport}
+              setDownloadLimitInfo={setDownloadLimitInfo}
+            />
           )}
         </Box>
       </Box>

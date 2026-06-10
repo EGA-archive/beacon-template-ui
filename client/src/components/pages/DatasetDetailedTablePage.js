@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, TablePagination, Typography } from "@mui/material";
 import ResultsTableModalBody from "../results/modal/ResultsTableModalBody";
 import ChevronRight from "../../assets/logos/chevron-right.svg";
@@ -27,6 +27,10 @@ export default function DatasetDetailedTablePage() {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  useEffect(() => {
+    setPage(0);
+  }, [searchTerm]);
 
   return (
     <Box
