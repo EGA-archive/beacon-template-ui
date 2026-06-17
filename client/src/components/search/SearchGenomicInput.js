@@ -10,6 +10,7 @@ import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { GENOMIC_LABELS_MAP } from "../genomic/genomicLabelHelper";
+import { useSelectedEntry } from "../../components/context/SelectedEntryContext";
 
 // This component renders an input bar for adding free-text genomic queries.
 // It includes a dropdown for selecting the genome assembly coming from the config,
@@ -30,6 +31,8 @@ export default function SearchGenomicInput({
   message,
   setMessage,
 }) {
+  const { openGenomicQueryBuilder, setOpenGenomicQueryBuilder } =
+    useSelectedEntry();
   const inputRef = useRef(null); // For managing focus on the input field
 
   const IUPAC_BASE_PATTERN = /^[ACGTUNRYSWKMBDHV\-.]+$/i;
@@ -127,27 +130,16 @@ export default function SearchGenomicInput({
   // Validate genomic variant: checks chromosome and base validity
   const validateGenomicVariant = (cleanedValue, chromosomeLibrary) => {
     const [chrom, pos, ref, alt] = cleanedValue.split("-");
-    const errors = [];
 
     const validChromosomes = chromosomeLibrary.map((c) => c.toUpperCase());
     const basePattern = IUPAC_BASE_PATTERN;
 
-    // Invalid chromosome
-    if (!validChromosomes.includes(chrom.toUpperCase())) {
-      errors.push(
-        `${
-          COMMON_MESSAGES.invalidChromosome
-        } ("${chrom}"). Allowed: ${validChromosomes.join(", ")}.`
-      );
-    }
+    const invalidChromosome = !validChromosomes.includes(chrom.toUpperCase());
 
-    // Invalid bases
-    if (!basePattern.test(ref) || !basePattern.test(alt)) {
-      errors.push(`${COMMON_MESSAGES.invalidBases} (Found ${ref}/${alt}).`);
-    }
+    const invalidBases = !basePattern.test(ref) || !basePattern.test(alt);
 
-    if (errors.length > 0) {
-      return errors.join(" ");
+    if (invalidChromosome || invalidBases) {
+      return COMMON_MESSAGES.invalidGenomicQuery;
     }
 
     return null;
@@ -255,43 +247,16 @@ export default function SearchGenomicInput({
         cleanedValue,
         chromosomeLibrary
       );
+
       if (validationError) {
         setMessage(validationError);
-        setTimeout(() => setMessage(null), 4000);
+        setTimeout(() => setMessage(null), 9000);
         return;
       }
     } else {
-      // Case 2: No proper variant structure. It detects if user tried but failed
-      const draft = genomicDraft.trim().toUpperCase();
-
-      // Check chromosome portion
-      const chrom = draft.replace(/^CHR/i, "").split(/[-:]/)[0];
-      const validChromosomes = chromosomeLibrary.map((c) => c.toUpperCase());
-
-      let errors = [];
-
-      if (!validChromosomes.includes(chrom)) {
-        errors.push(COMMON_MESSAGES.invalidChromosome);
-      }
-
-      // Try to extract bases from something like 17:7674945C>G
-      const match = draft.match(
-        new RegExp(
-          `([${IUPAC_BASE_CLASS}\\-.])[\\->]([${IUPAC_BASE_CLASS}\\-.])`,
-          "i"
-        )
-      );
-
-      if (!match) {
-        errors.push(COMMON_MESSAGES.invalidBases);
-      }
-      // If nothing matches any known pattern, fallback to format error
-      if (errors.length === 0) {
-        errors.push(COMMON_MESSAGES.invalidFormat);
-      }
-
-      setMessage(errors.join(" "));
-      setTimeout(() => setMessage(null), 4000);
+      // Case 2: Query is not a valid SNV/SNP format
+      setMessage(COMMON_MESSAGES.invalidGenomicQuery);
+      setTimeout(() => setMessage(null), 9000);
       return;
     }
 
@@ -585,9 +550,109 @@ export default function SearchGenomicInput({
                 </>
               )}
             </Box>
+            <Box
+              sx={{
+                width: "100%",
+                px: 3,
+                py: 1,
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+              <Box
+                onClick={() => {
+                  openGenomicQueryBuilder?.();
+                  setMessage(null);
+                  setGenomicDraft("");
+                }}
+                sx={{
+                  position: "relative",
+                  width: 16,
+                  height: 16,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+
+                  "& .unchecked": {
+                    display: "block",
+                  },
+
+                  "& .checked": {
+                    display: "none",
+                  },
+
+                  "&:hover .unchecked": {
+                    display: "none",
+                  },
+
+                  "&:hover .checked": {
+                    display: "block",
+                  },
+                }}
+              >
+                <RadioButtonUncheckedIcon
+                  className="unchecked"
+                  sx={{
+                    color: isVariant ? config.ui.colors.primary : "grey",
+                    fontSize: 16,
+                  }}
+                />
+                <CheckCircleIcon
+                  className="checked"
+                  sx={{
+                    color: alpha(config.ui.colors.primary, 0.6),
+                    fontSize: 16,
+                  }}
+                />
+              </Box>
+              <Box
+                onClick={() => {
+                  openGenomicQueryBuilder?.();
+                  setMessage(null);
+                  setGenomicDraft("");
+                }}
+                sx={{
+                  cursor: "pointer",
+                }}
+              >
+                Open <b>Genomic Query Builder</b> for the following query:{" "}
+                <b>Gene ID, Range, Bracket or HGVS.</b>
+              </Box>
+            </Box>
           </Box>
           <Box sx={{ mt: message ? 2 : 0 }}>
-            {message && <CommonMessage text={message} type="error" />}
+            {message === COMMON_MESSAGES.invalidGenomicQuery ? (
+              <CommonMessage
+                type="warning"
+                text={
+                  <>
+                    This search bar only supports{" "}
+                    <b>single nucleotide variants (SNVs/SNPs)</b>.
+                    <br />
+                    To search by gene, range, bracket or HGVS queries, use the{" "}
+                    <span
+                      onClick={() => {
+                        setMessage(null);
+                        setGenomicDraft("");
+                        openGenomicQueryBuilder?.();
+                      }}
+                      style={{
+                        fontWeight: 700,
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Genomic Query Builder
+                    </span>
+                    .
+                  </>
+                }
+              />
+            ) : (
+              message && <CommonMessage text={message} type="error" />
+            )}
           </Box>
         </Box>
       )}

@@ -255,7 +255,8 @@ const ResultsTableModalBody = ({
   const handleExport = useCallback(
     (downloadMode = "view") => {
       return exportCSV({
-        dataTable,
+        // dataTable,
+        dataTable: sortedFilteredData,
         sortedHeaders,
         visibleColumns,
         summarizeValue,
@@ -396,11 +397,6 @@ const ResultsTableModalBody = ({
                         }}
                       >
                         {column.name}
-                        {/* <img
-                          src={defaultsortingicon}
-                          alt="sorting icon"
-                          style={{ opacity: 0.5 }}
-                        /> */}
                         <img
                           src={getSortIcon(column.id)}
                           alt="sorting icon"
@@ -408,6 +404,14 @@ const ResultsTableModalBody = ({
                           style={{
                             opacity: sortColumn === column.id ? 1 : 0.5,
                             cursor: "pointer",
+                            transition: "opacity 0.2s ease",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.opacity = 1;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.opacity =
+                              sortColumn === column.id ? 1 : 0.5;
                           }}
                         />
                       </Box>
@@ -417,10 +421,8 @@ const ResultsTableModalBody = ({
             </TableHead>
             <TableBody>
               {visibleRows.map((item, index) => {
-                // const isExpanded = expandedRow?.id === item.id;
                 const isExpanded =
                   expandedRow !== null && expandedRow.id === item.id;
-
                 const parsedInfo = cleanAndParseInfo(item.info);
                 const id = `${item.id || `row_${index}`}${
                   parsedInfo?.sampleID ? `_${parsedInfo.sampleID}` : ""

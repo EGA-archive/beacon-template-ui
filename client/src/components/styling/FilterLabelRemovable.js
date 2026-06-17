@@ -2,7 +2,7 @@ import { Typography, Button, Box, Divider, Tooltip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import ClearIcon from "@mui/icons-material/Clear";
 import config from "../../config/config.json";
-import { capitalize, formatEntryLabel } from "../common/textFormatting";
+import { capitalize } from "../common/textFormatting";
 import { useEffect, useRef } from "react";
 import { getSelectableScopeStyles } from "../styling/selectableScopeStyles";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
@@ -22,9 +22,9 @@ export default function FilterLabelRemovable({
   expandedKey,
   setExpandedKey,
   bgColor,
-  stateSelected,
   variant = "",
   disableTooltip = false,
+  disableClick = false,
 }) {
   const containerRef = useRef(null);
 
@@ -34,9 +34,6 @@ export default function FilterLabelRemovable({
     openGenomicQueryBuilder,
     setGenomicPrefill,
     setEditingGenomicFilter,
-    entryTypes,
-    selectedPathSegment,
-    setSelectedPathSegment,
   } = useSelectedEntry();
 
   const isExpanded = expandedKey === keyValue;
@@ -48,63 +45,46 @@ export default function FilterLabelRemovable({
   const isGenomicChip =
     scope === "genomicQueryBuilder" || scope === "genomicVariant";
 
-  const isEntryTypeExpandable = false;
-
   const isMultiScopeChip = isRemovable && scopes.length > 1;
 
-  const isExpandable = isEntryTypeExpandable || isMultiScopeChip;
+  const isExpandable = isMultiScopeChip;
 
-  const baseBgColor =
-    bgColor === "common"
-      ? alpha(config.ui.colors.primary, 0.05)
-      : alpha(config.ui.colors.secondary, 0.4);
+  // Common filter chips use a very light primary color.
+  const commonFilterBg = alpha(config.ui.colors.primary, 0.05);
 
-  const hoverColor =
-    bgColor === "common"
-      ? alpha(config.ui.colors.primary, 0.05)
-      : alpha(config.ui.colors.secondary, 0.6);
+  // Genomic query chips use the secondary color, slightly stronger.
+  const genomicFilterBg = alpha(config.ui.colors.secondary, 0.4);
 
-  const activeBgColor = isMultiScopeChip
-    ? alpha(config.ui.colors.primary, 0.2)
-    : stateSelected
-    ? alpha(config.ui.colors.primary, 0.25)
-    : baseBgColor;
+  // Genomic query chips can have a stronger hover color.
+  const genomicFilterHoverBg = alpha(config.ui.colors.secondary, 0.6);
 
-  const expandedMultiScopeBg =
-    isExpanded && isMultiScopeChip
-      ? alpha(config.ui.colors.primary, 0.2)
-      : null;
+  // Multi-scope filters are expandable, so they keep a visible hover state.
+  const multiScopeHoverBg = alpha(config.ui.colors.primary, 0.3);
 
-  const finalBgColor = isSimple
-    ? baseBgColor
-    : isExpanded
-    ? hoverColor
-    : activeBgColor;
+  // Entry type chips are black.
+  const entryTypeBg = "#000000";
 
-  const multiScopeHoverBg = isMultiScopeChip
-    ? alpha(config.ui.colors.primary, 0.3)
-    : null;
+  const isCommonFilter = bgColor === "common";
+
+  const baseBgColor = isCommonFilter ? commonFilterBg : genomicFilterBg;
+
+  const regularHoverBg = isCommonFilter ? commonFilterBg : genomicFilterHoverBg;
 
   const labelToShow =
     scopes.length > 1 && scope ? `${label} | ${capitalize(scope)}` : label;
 
   const chipBackgroundColor = isEntryTypeChip
-    ? isExpanded
-      ? "#000000 !important"
-      : // changed
-        // : "#F4F5F6 !important"
-        "#000000 !important"
-    : expandedMultiScopeBg
-    ? `${expandedMultiScopeBg} !important`
-    : `${finalBgColor} !important`;
+    ? `${entryTypeBg} !important`
+    : `${baseBgColor} !important`;
 
   const chipHoverColor = isEntryTypeChip
-    ? chipBackgroundColor
+    ? `${entryTypeBg} !important`
     : isMultiScopeChip
     ? `${multiScopeHoverBg} !important`
-    : `${hoverColor} !important`;
+    : `${regularHoverBg} !important`;
 
   const handleChipClick = () => {
+    if (disableClick) return;
     if (isGenomicChip) {
       setEditingGenomicFilter({
         id: keyValue,
@@ -121,13 +101,13 @@ export default function FilterLabelRemovable({
       return;
     }
 
-    if (isSimple && typeof onClick === "function") {
-      onClick();
+    if (isSimple) {
+      onClick?.();
       return;
     }
 
-    if (isExpandable && typeof setExpandedKey === "function") {
-      setExpandedKey(isExpanded ? null : keyValue);
+    if (isExpandable) {
+      setExpandedKey?.(isExpanded ? null : keyValue);
     }
   };
 
@@ -152,7 +132,7 @@ export default function FilterLabelRemovable({
 
       return (
         <span key={i}>
-          <strong>{key}:</strong> {value}
+          {key}:<strong>{value}</strong>
           {i < arr.length - 1 && " | "}
         </span>
       );
@@ -208,11 +188,16 @@ export default function FilterLabelRemovable({
           backgroundColor: chipBackgroundColor,
           fontSize: "14px",
           cursor:
-            isGenomicChip || isSimple || isRemovable ? "pointer" : "default",
+            !disableClick && (isGenomicChip || isSimple || isRemovable)
+              ? "pointer"
+              : "default",
           transition: "background-color 0.2s ease",
 
           "&:hover": {
-            backgroundColor: chipHoverColor,
+            // Disabled chips should not visually react on hover.
+            backgroundColor: disableClick
+              ? chipBackgroundColor
+              : chipHoverColor,
           },
 
           maxWidth: isExpanded ? "400px" : "auto",
@@ -239,40 +224,7 @@ export default function FilterLabelRemovable({
           )}
         </Box>
 
-        {isExpanded && isEntryTypeExpandable ? (
-          <Box mt={1} sx={{ width: "100%" }}>
-            <Divider
-              orientation="horizontal"
-              flexItem
-              sx={{
-                borderColor: isEntryTypeChip ? "white" : "black",
-              }}
-            />
-
-            <Typography fontWeight={400} fontSize={12} mb={1} mt={1}>
-              Change the results type:
-            </Typography>
-
-            <Box display="flex" gap={1} flexWrap="wrap">
-              {entryTypes.map((entry) => {
-                const isSelected = entry.pathSegment === selectedPathSegment;
-
-                return (
-                  <Button
-                    key={entry.pathSegment}
-                    variant={isSelected ? "contained" : "outlined"}
-                    onClick={() => {
-                      setSelectedPathSegment(entry.pathSegment);
-                      setExpandedKey(null);
-                    }}
-                  >
-                    {formatEntryLabel(entry.pathSegment)}
-                  </Button>
-                );
-              })}
-            </Box>
-          </Box>
-        ) : isExpanded && isMultiScopeChip ? (
+        {isExpanded && isMultiScopeChip ? (
           <Box mt={1} sx={{ width: "100%" }}>
             <Divider
               orientation="horizontal"

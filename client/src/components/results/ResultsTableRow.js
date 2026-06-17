@@ -56,8 +56,6 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
     return dataset.results?.length || "-";
   };
 
-  const datasetBgColor = lighten(config.ui.colors.primary, 0.9);
-
   // Prepare items to ensure structure is consistent
   const safeItems = (item.items || []).map((ds) => {
     const datasetType = getDatasetType(ds);
@@ -83,7 +81,8 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
             >
               <TableBody
                 sx={{
-                  backgroundColor: datasetBgColor,
+                  // backgroundColor: datasetBgColor,
+                  backgroundColor: "#f5f5f5",
                 }}
               >
                 {safeItems.map((dataset, i) => {
@@ -230,11 +229,7 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
                                           : config.ui.colors.darkPrimary,
                                     },
                                     "&:hover": {
-                                      backgroundColor:
-                                        !dataset.results ||
-                                        dataset.results.length === 0
-                                          ? "transparent"
-                                          : `${config.ui.colors.darkPrimary}10`,
+                                      backgroundColor: "transparent",
                                     },
                                   }}
                                 >

@@ -13,7 +13,6 @@ import {
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useState, useEffect } from "react";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
-import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import config from "../../../config/config.json";
 import { useSelectedEntry } from "../../../components/context/SelectedEntryContext";

@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -14,6 +14,7 @@ import GenomicLocationRage from "./querybuilder/GenomicLocationRange";
 import GenomicAlleleQuery from "./querybuilder/GenomicAlleleQuery";
 import GenomicLocationBracket from "./querybuilder/GenomicLocationBracket";
 import DefinedVariationSequence from "./querybuilder/DefinedVariationSequence";
+import GenomicQueryBuilderHelp from "./querybuilder/GenomicQueryBuilderHelp";
 import GenomicSubmitButton from "../genomic/GenomicSubmitButton";
 import { Formik, Form } from "formik";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
@@ -43,6 +44,7 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 // Used to display the selection buttons and control which form is shown
 // This list comes from the configuration file
 const QUERY_TYPE_LABELS = {
+  help: "Need Help?",
   sequenceQuery: "Sequence Query",
   geneId: "Gene ID",
   rangeQuery: "Range Query",
@@ -139,18 +141,31 @@ const mapQueryParamsToFormik = (queryType, queryParams = {}) => {
   }
 };
 
+function DraftSaver({ values, selectedQueryType, setTabDrafts }) {
+  useEffect(() => {
+    if (selectedQueryType !== "Need Help?") {
+      setTabDrafts((prev) => ({
+        ...prev,
+        [selectedQueryType]: values,
+      }));
+    }
+  }, [values, selectedQueryType, setTabDrafts]);
+
+  return null;
+}
+
 export default function GenomicQueryBuilderDialog({
   open,
   handleClose,
   selectedFilter,
   setSelectedFilter,
+  setActiveInput,
 }) {
   // This selectes on load the first query type, without user's interaction
-  const [selectedQueryType, setSelectedQueryType] = useState(
-    enabledQueryTypes[0]?.label
-  );
+  const [selectedQueryType, setSelectedQueryType] = useState("Need Help?");
   const [selectedInput, setSelectedInput] = useState("variationType");
   const [duplicateMessage, setDuplicateMessage] = useState("");
+  const [tabDrafts, setTabDrafts] = useState({});
   const {
     genomicPrefill,
     clearGenomicPrefill,
@@ -222,14 +237,17 @@ export default function GenomicQueryBuilderDialog({
   // This is used to render the correct form in the UI based on user's selection
   const SelectedFormComponent = formComponentsMap[selectedQueryType];
 
+  const isHelpPage = selectedQueryType === "Need Help?";
+
   // Compute initial values: ONLY the tab matching genomicPrefill.queryType gets values
   const initialValues =
-    open &&
+    tabDrafts[selectedQueryType] ||
+    (open &&
     genomicPrefill?.queryType &&
     genomicPrefill?.queryParams &&
     selectedQueryType === genomicPrefill.queryType
       ? mapQueryParamsToFormik(selectedQueryType, genomicPrefill.queryParams)
-      : EMPTY_INITIAL_VALUES;
+      : EMPTY_INITIAL_VALUES);
 
   useEffect(() => {
     if (open && genomicPrefill?.queryType) {
@@ -238,20 +256,24 @@ export default function GenomicQueryBuilderDialog({
   }, [open, genomicPrefill]);
 
   const resetBuilderState = () => {
-    setSelectedQueryType(enabledQueryTypes[0]?.label);
+    setSelectedQueryType("Need Help?");
     setSelectedInput("variationType");
     setDuplicateMessage("");
+  };
+
+  const handleDialogClose = () => {
+    resetBuilderState();
+    clearGenomicPrefill();
+    setEditingGenomicFilter(null);
+    setTabDrafts({});
+    handleClose();
   };
 
   return (
     // This is the empty dialog
     <Dialog
       open={open}
-      onClose={() => {
-        resetBuilderState();
-        clearGenomicPrefill();
-        handleClose();
-      }}
+      onClose={handleDialogClose}
       disablePortal={false}
       disableAutoFocus={false}
       disableEnforceFocus={false}
@@ -261,7 +283,7 @@ export default function GenomicQueryBuilderDialog({
         sx: {
           borderRadius: "10px",
           padding: "9px",
-          height: "79%",
+          height: "100%",
         },
       }}
     >
@@ -288,12 +310,7 @@ export default function GenomicQueryBuilderDialog({
         <IconButton
           edge="start"
           color="inherit"
-          // onClick={handleClose}
-          onClick={() => {
-            resetBuilderState();
-            clearGenomicPrefill();
-            handleClose();
-          }}
+          onClick={handleDialogClose}
           aria-label="close"
           sx={{ mr: 1 }}
         >
@@ -312,7 +329,6 @@ export default function GenomicQueryBuilderDialog({
         selected query type */}
         <Formik
           key={selectedQueryType}
-          enableReinitialize
           validateOnMount
           initialValues={initialValues}
           validationSchema={validationSchemaMap[selectedQueryType]}
@@ -423,60 +439,90 @@ export default function GenomicQueryBuilderDialog({
             setEditingGenomicFilter(null);
 
             setDuplicateMessage("");
-            resetBuilderState();
-            clearGenomicPrefill();
-            handleClose();
+            handleDialogClose();
           }}
         >
           {({ resetForm, isValid, dirty, values, errors }) => {
             return (
-              <Form>
-                {/* Render the selectable query type buttons */}
-                {/* When a user clicks a button, the form type changes and the form is reset */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    gap: 2,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  {enabledQueryTypes.map(({ key, label }) => (
+              <>
+                <DraftSaver
+                  values={values}
+                  selectedQueryType={selectedQueryType}
+                  setTabDrafts={setTabDrafts}
+                />
+                <Form>
+                  {/* Render the selectable query type buttons */}
+                  {/* When a user clicks a button, the form type changes and the form is reset */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 2,
+                      flexWrap: "wrap",
+                    }}
+                  >
                     <StyledGenomicLabels
-                      key={key}
-                      label={label}
-                      selected={selectedQueryType === label}
+                      label="Need Help?"
+                      isHelpButton
+                      selected={selectedQueryType === "Need Help?"}
                       onClick={() => {
-                        setSelectedQueryType(label);
+                        setSelectedQueryType("Need Help?");
                         resetForm({ values: EMPTY_INITIAL_VALUES });
                       }}
                     />
-                  ))}
-                </Box>
-                {/* Render the selected form based on the current query type based on user's selection */}
-                <Box
-                  sx={{
-                    mt: 2,
-                  }}
-                >
-                  {SelectedFormComponent && (
-                    <SelectedFormComponent
-                      selectedInput={selectedInput}
-                      setSelectedInput={setSelectedInput}
-                    />
+
+                    {enabledQueryTypes.map(({ key, label }) => (
+                      <StyledGenomicLabels
+                        key={key}
+                        label={label}
+                        selected={selectedQueryType === label}
+                        onClick={() => {
+                          setSelectedQueryType(label);
+                          resetForm({ values: EMPTY_INITIAL_VALUES });
+                        }}
+                      />
+                    ))}
+                  </Box>
+                  {/* Render the selected form based on the current query type based on user's selection */}
+                  <Box
+                    sx={{
+                      mt: 2,
+                    }}
+                  >
+                    {isHelpPage ? (
+                      <GenomicQueryBuilderHelp
+                        setSelectedQueryType={setSelectedQueryType}
+                        handleClose={handleClose}
+                        setActiveInput={setActiveInput}
+                        setTabDrafts={setTabDrafts}
+                      />
+                    ) : (
+                      SelectedFormComponent && (
+                        <SelectedFormComponent
+                          selectedInput={selectedInput}
+                          setSelectedInput={setSelectedInput}
+                        />
+                      )
+                    )}
+                  </Box>
+                  <Box sx={{ mt: 2, mb: 0 }}>
+                    {duplicateMessage && (
+                      <CommonMessage text={duplicateMessage} type="error" />
+                    )}
+                  </Box>
+                  {/* Submit button is shown at the bottom right of all the query types and is disabled if the form is invalid or untouched */}
+                  {!isHelpPage && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        mt: 2,
+                      }}
+                    >
+                      <GenomicSubmitButton disabled={!isValid} />
+                    </Box>
                   )}
-                </Box>
-                <Box sx={{ mt: 2, mb: 0 }}>
-                  {duplicateMessage && (
-                    <CommonMessage text={duplicateMessage} type="error" />
-                  )}
-                </Box>
-                {/* Submit button is shown at the bottom right of all the query types and is disabled if the form is invalid or untouched */}
-                <Box
-                  sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}
-                >
-                  <GenomicSubmitButton disabled={!isValid} />
-                </Box>
-              </Form>
+                </Form>
+              </>
             );
           }}
         </Formik>

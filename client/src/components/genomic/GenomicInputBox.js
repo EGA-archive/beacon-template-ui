@@ -41,7 +41,6 @@ export default function GenomicInputBox({
 }) {
   // Connect this field to Formik (value, error, helpers)
   const [field, meta, helpers] = useField(name);
-
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
 
   // Show error only if user touched the field
@@ -175,12 +174,12 @@ export default function GenomicInputBox({
     <Box
       sx={{
         height: "auto",
-        border: `1px solid ${
+        border: `${required ? 2 : 1}px solid ${
           isUnavailable
-            ? "#E0E0E0" // pale border for unavailable
+            ? "#E0E0E0"
             : isInactiveSelectable
-            ? "#BDBDBD" // medium gray for inactive (clickable)
-            : primaryDarkColor // normal active border
+            ? "#BDBDBD"
+            : primaryDarkColor
         }`,
 
         borderRadius: "10px",

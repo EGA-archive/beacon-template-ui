@@ -16,9 +16,8 @@ export const COMMON_MESSAGES = {
   singleGenomicQuery: "Only one genomic query can be added at a time.",
   incompleteFilter:
     "Please fill in the current filter value before adding a new one.",
-  invalidChromosome: "Invalid chromosome name in the query.",
-  invalidBases:
-    "Invalid query. The following symbols are allowed: A, C, G, T, U, N, R, Y, S, W, K, M, B, D, H, V.",
+  invalidGenomicQuery:
+    "This search bar only supports single nucleotide variants (SNVs/SNPs). To search by gene, range, bracket or HGVS queries, use the Genomic Query Builder (link).",
   invalidFormat:
     "Unrecognized genomic query format. Please use 22-16050527-C-A or 22:16050527C>A",
 };
@@ -26,7 +25,10 @@ export const COMMON_MESSAGES = {
 // Reusable component to display messages (error or success)
 export default function CommonMessage({ text, type }) {
   // Determine alert style based on message type
-  const severity = type === "error" ? "error" : "success";
+  const severity =
+    type === "error" ? "error" : type === "warning" ? "error" : "success";
+
+  const isWarning = type === "warning";
 
   return (
     <Stack
@@ -40,7 +42,15 @@ export default function CommonMessage({ text, type }) {
     >
       <Alert
         severity={severity}
-        sx={{ width: "80%", justifyContent: "center", alignItems: "center" }}
+        sx={{
+          width: "80%",
+          justifyContent: "center",
+          alignItems: "center",
+          ...(isWarning && {
+            backgroundColor: "#fdead5",
+            color: "#2B2B2B",
+          }),
+        }}
       >
         {text}
       </Alert>

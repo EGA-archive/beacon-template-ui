@@ -86,10 +86,9 @@ export const BEACON_NETWORK_COLUMNS = [
     numeric: true,
     width: "20%",
   },
-
   {
     id: "response",
-    label: "Response",
+    label: "Search Results",
     width: "15%",
     align: "left",
   },
@@ -141,7 +140,7 @@ export const BEACON_SINGLE_COLUMNS = [
     id: "response",
     label: (
       <Box display="flex" alignItems="center" gap={1}>
-        Response
+        Search Results
         <Tooltip
           title={
             <Box

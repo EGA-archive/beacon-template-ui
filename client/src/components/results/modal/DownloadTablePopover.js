@@ -9,7 +9,6 @@ import {
   CircularProgress,
 } from "@mui/material";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import config from "../../../config/config.json";
 import { alpha } from "@mui/material/styles";
@@ -57,7 +56,6 @@ export default function DownloadTablePopover({ handleExport }) {
     <Box
       sx={{
         zIndex: "999",
-        width: "240px",
         position: "relative",
       }}
     >
@@ -170,6 +168,12 @@ export default function DownloadTablePopover({ handleExport }) {
           fontSize: "12px",
           fontWeight: 400,
           height: "40px",
+          width: {
+            xs: "160px",
+            sm: "170px",
+            md: "170px",
+            lg: "237px",
+          },
           "&:hover": {
             backgroundColor: isOpen ? colors.darkPrimary : hoverBg,
             borderColor: colors.darkPrimary,
@@ -183,7 +187,11 @@ export default function DownloadTablePopover({ handleExport }) {
           },
         }}
       >
-        {isDownloading ? "Downloading Table..." : "Download Table"}
+        {isDownloading
+          ? `Downloading Table (${downloadMode === "all" ? "All" : "View"})`
+          : downloadMode
+          ? `Download Table (${downloadMode === "all" ? "All" : "View"})`
+          : "Download Table"}
       </Button>
     </Box>
   );

@@ -16,7 +16,7 @@ import {
   Tooltip,
   IconButton,
 } from "@mui/material";
-
+import { alpha } from "@mui/material/styles";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 import InfoIcon from "@mui/icons-material/Info";
@@ -26,7 +26,7 @@ import LocalPostOfficeRoundedIcon from "@mui/icons-material/LocalPostOfficeRound
 import LocalPostOfficeOutlinedIcon from "@mui/icons-material/LocalPostOfficeOutlined";
 import config from "../../config/config.json";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ResultsTableRow from "./ResultsTableRow";
 import CohortsTable from "./CohortsTable";
 import DatasetsTable from "./DatasetsTable";
@@ -39,12 +39,6 @@ import useBeaconMetadata from "../../hooks/useBeaconMetaData";
 const ResultsTableModal = lazy(() => import("./modal/ResultsTableModal"));
 
 export default function ResultsTable() {
-  // const {
-  //   resultData,
-  //   beaconsInfo,
-  //   selectedPathSegment: selectedEntryType,
-  //   selectedFilter,
-  // } = useSelectedEntry();
   const {
     resultData,
     beaconsInfo,
@@ -56,7 +50,8 @@ export default function ResultsTable() {
   // expandedRow and selectedSubRow have very similar logs.
   // expandedRow populates when the row is open (when the user clicks)
   // selectedSubRow populates when the user clicks to open the deatils
-  const [expandedRow, setExpandedRow] = useState(null);
+  // const [expandedRow, setExpandedRow] = useState(null);
+  const [expandedRows, setExpandedRows] = useState({});
   const [selectedSubRow, setSelectedSubRow] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const { envMap } = useBeaconMetadata();
@@ -69,11 +64,10 @@ export default function ResultsTable() {
   };
 
   const handleRowClick = (item) => {
-    if (expandedRow && expandedRow.beaconId === item.beaconId) {
-      setExpandedRow(null);
-    } else {
-      setExpandedRow(item);
-    }
+    setExpandedRows((prev) => ({
+      ...prev,
+      [item.beaconId]: !prev[item.beaconId],
+    }));
   };
 
   let tableColumns =
@@ -81,37 +75,61 @@ export default function ResultsTable() {
       ? BEACON_SINGLE_COLUMNS
       : BEACON_NETWORK_COLUMNS;
 
-  const selectedBgColor = (theme) => theme.palette.grey[100];
+  const formatEntryTypeLabel = (entryType) => {
+    const labels = {
+      g_variants: "Genomic Variations",
+      individuals: "Individuals",
+      biosamples: "Biosamples",
+      analyses: "Analyses",
+      cohorts: "Cohorts",
+      datasets: "Datasets",
+      runs: "Runs",
+    };
+
+    return labels[entryType] || entryType;
+  };
+
+  tableColumns = tableColumns.map((column) =>
+    column.id === "response"
+      ? {
+          ...column,
+          label: (
+            <Box>
+              <Box>Search Results</Box>
+
+              <Box
+                sx={{
+                  fontStyle: "italic",
+                  fontWeight: 400,
+                  fontSize: "12px",
+                }}
+              >
+                ({formatEntryTypeLabel(lastSearchedPathSegment)})
+              </Box>
+            </Box>
+          ),
+        }
+      : column
+  );
+
+  useEffect(() => {
+    const initialExpandedRows = {};
+
+    resultData.forEach((item) => {
+      if (item.items?.length > 0 && item.beaconId) {
+        initialExpandedRows[item.beaconId] = true;
+      }
+    });
+
+    setExpandedRows(initialExpandedRows);
+  }, [resultData]);
 
   const handleRowClicked = (item) => {
     setSelectedSubRow(item);
   };
 
-  // const handleOpenModal = (subRow) => {
-  //   const storageKey = `datasetDetailedTable_${subRow.beaconId}_${subRow.datasetId}`;
-  //   localStorage.setItem(storageKey, JSON.stringify(subRow));
-  //   window.open(
-  //     `/dataset-detailed-table?beaconId=${encodeURIComponent(
-  //       subRow.beaconId
-  //     )}&datasetId=${encodeURIComponent(subRow.datasetId)}`,
-  //     "_blank"
-  //   );
-  // };
-
   const handleOpenModal = (subRow) => {
     const storageKey = `datasetDetailedTable_${subRow.beaconId}_${subRow.datasetId}`;
-
-    // localStorage.setItem(
-    //   storageKey,
-    //   JSON.stringify({
-    //     ...subRow,
-    //     appliedQuery: {
-    //       entryType: lastSearchedPathSegment,
-    //       filters: lastSearchedFilters,
-    //     },
-    //   })
-    // );
-
     localStorage.setItem(
       storageKey,
       JSON.stringify({
@@ -183,8 +201,6 @@ export default function ResultsTable() {
 
   const handleEmail = (email) => {
     window.open(`mailto:${email}`, "_blank");
-
-    console.log(email);
   };
 
   const getBeaconStatusLabel = (status) => {
@@ -244,7 +260,6 @@ export default function ResultsTable() {
                 // This lines of code filters out erroring out beacons
                 .filter((item) => item.exists === true && !item.info?.error)
                 .map((item, index) => {
-                  const iconUrl = findBeaconIcon(item.beaconId);
                   const itemEmail = findBeaconEmail(item.beaconId);
 
                   const { type: beaconType, datasetCount } =
@@ -272,7 +287,12 @@ export default function ResultsTable() {
                           fontWeight: "bold",
                           cursor:
                             item.items?.length > 0 ? "pointer" : "default",
-                          "&:hover": { backgroundColor: selectedBgColor },
+                          "&:hover": {
+                            backgroundColor: alpha(
+                              config.ui.colors.secondary,
+                              0.4
+                            ),
+                          },
                           "&.MuiTableRow-root": {
                             transition: "background-color 0.2s ease",
                           },
@@ -298,29 +318,11 @@ export default function ResultsTable() {
                           >
                             {item.items.length > 0 &&
                               item.beaconId &&
-                              (expandedRow &&
-                              expandedRow.beaconId === item.beaconId ? (
+                              (expandedRows[item.beaconId] ? (
                                 <KeyboardArrowDownIcon data-cy="results-row-collapse-icon" />
                               ) : (
                                 <KeyboardArrowRightRoundedIcon data-cy="results-row-expand-icon" />
                               ))}
-
-                            {iconUrl && (
-                              <img
-                                className="table-icon"
-                                src={iconUrl}
-                                alt="Beacon logo"
-                                onError={(e) => {
-                                  const fallbackId =
-                                    item.beaconId || item.id || "unknown";
-                                  console.warn(
-                                    `[ResultsTable] Broken logo for beacon: ${fallbackId}`
-                                  );
-                                  e.target.style.display = "none";
-                                }}
-                              />
-                            )}
-
                             <span data-cy="results-table-id-value">
                               {item.beaconId || item.id || "Unavailable"}
                             </span>
@@ -580,15 +582,13 @@ export default function ResultsTable() {
                           )}
                         </TableCell>
                       </TableRow>
-                      {expandedRow &&
-                        expandedRow.beaconId &&
-                        expandedRow.beaconId === item.beaconId && (
-                          <ResultsTableRow
-                            item={expandedRow}
-                            handleRowClicked={handleRowClicked}
-                            handleOpenModal={handleOpenModal}
-                          />
-                        )}
+                      {expandedRows[item.beaconId] && (
+                        <ResultsTableRow
+                          item={item}
+                          handleRowClicked={handleRowClicked}
+                          handleOpenModal={handleOpenModal}
+                        />
+                      )}
                     </React.Fragment>
                   );
                 })}

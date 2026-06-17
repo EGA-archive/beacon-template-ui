@@ -153,6 +153,7 @@ export default function DatasetDetailedTablePage() {
             <FilterLabelRemovable
               key={index}
               disableTooltip
+              disableClick
               variant="simple"
               label={filter.label}
               type={filter.type}

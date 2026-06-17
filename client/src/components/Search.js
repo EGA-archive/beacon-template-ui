@@ -1,13 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  Box,
-  Typography,
-  Tooltip,
-  Button,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Typography, Tooltip, CircularProgress } from "@mui/material";
 import config from "../config/config.json";
-import { darken, lighten } from "@mui/system";
+import { lighten } from "@mui/system";
 import { useSelectedEntry } from "./context/SelectedEntryContext";
 import GenomicQueryBuilderButton from "./genomic/GenomicQueryBuilderButton";
 import GenomicQueryBuilderDialog from "./genomic/GenomicQueryBuilderDialog";
@@ -17,6 +11,7 @@ import SearchButton from "./search/SearchButton";
 import FilterTermsExtra from "./search/FilterTemsExtra";
 import SearchFiltersInput from "../components/search/SearchFiltersInput";
 import SearchGenomicInput from "../components/search/SearchGenomicInput";
+import EntryTypeSelector from "./search/EntryTypeSelector";
 import useAuthHeaders from "../hooks/useAuthHeaders";
 import {
   formatEntryLabel,
@@ -274,7 +269,7 @@ export default function Search({
             mb: 2,
             fontWeight: 700,
             fontFamily: '"Open Sans", sans-serif',
-            fontSize: entryTypes.length === 1 ? "16px" : "14px",
+            fontSize: entryTypes.length === 1 ? "18px" : "16px",
           }}
         >
           {isSingleEntryType
@@ -284,13 +279,23 @@ export default function Search({
               }`
             : "Search"}
         </Typography>
+        <Typography
+          sx={{
+            mb: 2,
+            fontWeight: 700,
+            fontFamily: '"Open Sans", sans-serif',
+            fontSize: entryTypes.length === 1 ? "16px" : "14px",
+          }}
+        >
+          Result Type
+        </Typography>
         {!isSingleEntryType && (
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
             <Typography
               variant="body1"
               sx={{ fontFamily: '"Open Sans", sans-serif', fontSize: "14px" }}
             >
-              1. Choose the <b>result type</b> for your search.
+              Which information do you want to get?
             </Typography>
 
             <Tooltip
@@ -361,52 +366,11 @@ export default function Search({
         {loading || !isLoaded ? (
           <CircularProgress />
         ) : !isSingleEntryType ? (
-          <Box
-            data-testid="entrytype-buttons"
-            sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}
-          >
-            {entryTypes.map((entry) => (
-              <Button
-                key={entry.id}
-                data-testid={`entrytype-${entry.pathSegment}`}
-                onClick={() => {
-                  if (entry.pathSegment !== selectedPathSegment) {
-                    setSelectedPathSegment(entry.pathSegment);
-                  }
-                }}
-                variant="outlined"
-                sx={{
-                  borderRadius: "999px",
-                  fontWeight: 700,
-                  textTransform: "none",
-                  fontFamily: '"Open Sans", sans-serif',
-                  fontSize: "14px",
-                  backgroundColor:
-                    selectedPathSegment === entry.pathSegment
-                      ? "#000000"
-                      : "#FFFFFF",
-                  color:
-                    selectedPathSegment === entry.pathSegment
-                      ? "#FFFFFF"
-                      : primaryColor,
-                  border: `1px solid ${
-                    selectedPathSegment === entry.pathSegment
-                      ? "#000000"
-                      : primaryColor
-                  }`,
-                  boxShadow: "none",
-                  "&:hover": {
-                    backgroundColor:
-                      selectedPathSegment === entry.pathSegment
-                        ? "#000000"
-                        : darken("#FFFFFF", 0.05),
-                  },
-                }}
-              >
-                {formatEntryLabel(entry.pathSegment)}
-              </Button>
-            ))}
-          </Box>
+          <EntryTypeSelector
+            entryTypes={entryTypes}
+            selectedPathSegment={selectedPathSegment}
+            setSelectedPathSegment={setSelectedPathSegment}
+          />
         ) : null}
         {/* Here */}
         <Box sx={{ display: "flex", alignItems: "center", mb: 2, mt: 4 }}>
@@ -583,13 +547,10 @@ export default function Search({
                   handleClose={handleClose}
                   selectedFilter={selectedFilter}
                   setSelectedFilter={setSelectedFilter}
+                  setActiveInput={setActiveInput}
                 />
               </>
             )}
-            {/* <AllFilteringTermsButton
-              onClick={handleAllFilteringClick}
-              selected={selectedTool === "allFilteringTerms"}
-            /> */}
             <Box ref={filteringButtonRef}>
               <AllFilteringTermsButton
                 onClick={handleAllFilteringClick}

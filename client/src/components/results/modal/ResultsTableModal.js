@@ -61,8 +61,6 @@ const ResultsTableModal = ({
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
-    // overflow: "hidden",
-    // overflowY: "auto",
     p: 4,
   };
 

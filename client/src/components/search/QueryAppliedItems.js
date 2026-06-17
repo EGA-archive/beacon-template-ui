@@ -149,6 +149,8 @@ export default function QueryAppliedItems({
               expandedKey={expandedKey}
               setExpandedKey={setExpandedKey}
               variant={variant}
+              disableTooltip={variant === "readonly"}
+              disableClick={variant === "readonly"}
             />
           );
         })}
