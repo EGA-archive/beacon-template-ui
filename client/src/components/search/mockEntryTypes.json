@@ -1,0 +1,48 @@
+{
+  "meta": {
+    "apiVersion": "v2.2.0",
+    "beaconId": "org.ega-archive.ega-af-beacon",
+    "returnedSchemas": [
+      {
+        "schema": "map-v2.2.0"
+      }
+    ]
+  },
+  "response": {
+    "$schema": "https://raw.githubusercontent.com/ga4gh-beacon/beacon-framework-v2/main/configuration/beaconMapSchema.json",
+    "endpointSets": {
+      "genomicVariant": {
+        "endpoints": {
+          "dataset": {
+            "returnedEntryType": "dataset",
+            "url": "https://af-ega-beacon-demo.ega-archive.org/api/g_variants/{id}/datasets"
+          },
+          "individual": {
+            "returnedEntryType": "individual",
+            "url": "https://af-ega-beacon-demo.ega-archive.org/api/g_variants/{id}/individuals"
+          },
+          "analysis": {
+            "returnedEntryType": "analysis",
+            "url": "https://af-ega-beacon-demo.ega-archive.org/api/g_variants/{id}/analyses"
+          },
+          "cohort": {
+            "returnedEntryType": "cohort",
+            "url": "https://af-ega-beacon-demo.ega-archive.org/api/g_variants/{id}/cohorts"
+          },
+          "run": {
+            "returnedEntryType": "run",
+            "url": "https://af-ega-beacon-demo.ega-archive.org/api/g_variants/{id}/runs"
+          },
+          "biosample": {
+            "returnedEntryType": "biosample",
+            "url": "https://af-ega-beacon-demo.ega-archive.org/api/g_variants/{id}/biosamples"
+          }
+        },
+        "openAPIEndpointsDefinition": "https://raw.githubusercontent.com/ga4gh-beacon/beacon-v2/main/models/json/beacon-v2-default-model/genomicVariations/endpoints.json",
+        "entryType": "genomicVariant",
+        "rootUrl": "https://af-ega-beacon-demo.ega-archive.org/api/g_variants",
+        "singleEntryUrl": "https://af-ega-beacon-demo.ega-archive.org/api/g_variants/{id}"
+      }
+    }
+  }
+}

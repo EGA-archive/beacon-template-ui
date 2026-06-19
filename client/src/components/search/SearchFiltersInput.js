@@ -9,7 +9,11 @@ import config from "../../config/config.json";
 // This component displays a filtering term input bar where users can type in text-based filters.
 // It includes a search icon, an input field, a "clear" icon, and a button to commit the filter.
 // When the user presses Enter or clicks the "Add" button, the filter is added to the list of selected filters.
-export default function SearchFiltersInput({ activeInput, setActiveInput }) {
+export default function SearchFiltersInput({
+  activeInput,
+  setActiveInput,
+  placeholder,
+}) {
   const [searchInput, setSearchInput] = useState(""); // Local state to track the text typed by the user
   const primaryDarkColor = config.ui.colors.darkPrimary;
   return (
@@ -39,11 +43,7 @@ export default function SearchFiltersInput({ activeInput, setActiveInput }) {
           <SearchIcon sx={{ color: primaryDarkColor, mr: 1 }} />
           <InputBase
             data-testid="filtering-input"
-            placeholder={
-              activeInput === "filter"
-                ? "Search by Filtering Terms. Examples: sex, breast cancer"
-                : "Search by Filtering Terms."
-            }
+            placeholder={placeholder}
             fullWidth
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)} // Update local state as user types

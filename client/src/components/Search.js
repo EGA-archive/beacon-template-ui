@@ -13,6 +13,8 @@ import SearchFiltersInput from "../components/search/SearchFiltersInput";
 import SearchGenomicInput from "../components/search/SearchGenomicInput";
 import EntryTypeSelector from "./search/EntryTypeSelector";
 import useAuthHeaders from "../hooks/useAuthHeaders";
+import InfoTooltip from "./search/utils/InfoTooltip";
+import { getGenomicTooltipContent } from "./search/utils/genomicTooltipContent";
 import {
   formatEntryLabel,
   singleEntryCustomLabels,
@@ -21,6 +23,7 @@ import {
   FilteringTermsInfoTooltip,
   SearchBarsInfoTooltip,
 } from "../components/common/textFormatting";
+import mockEntryTypes from "./search/mockEntryTypes.json";
 
 export default function Search({
   activeInput,
@@ -70,6 +73,25 @@ export default function Search({
   // Get authentication headers (includes Bearer token if user is logged in)
   const authHeaders = useAuthHeaders();
 
+  const FILTERING_PLACEHOLDERS = {
+    individuals:
+      "Search by Filtering Terms. Examples: sex, diseases, treatment.",
+
+    biosamples:
+      "Search by sample origin, sample processing, diagnostic markers, etc.",
+
+    runs: "Search by library strategy, platform, run date, etc.",
+
+    analyses: "Search by variant caller, pipeline reference, aligner, etc.",
+
+    cohorts: "Search by Filtering Terms. Examples: sex, diseases, treatment.",
+
+    datasets: "Search by Filtering Terms. Examples: sex, diseases, treatment.",
+
+    g_variants:
+      "Search by Filtering Terms. Examples: sex, diseases, treatment.",
+  };
+
   useEffect(() => {
     if (activeInput === "genomic" && inputRef.current) {
       inputRef.current.focus();
@@ -95,8 +117,8 @@ export default function Search({
         const res = await fetch(`${config.apiUrl}/map`, {
           headers: authHeaders,
         });
-        const data = await res.json();
-        // const data = mockMapResonse;
+        // const data = await res.json();
+        const data = mockEntryTypes;
 
         const endpointSets = data.response.endpointSets || {};
         const seen = new Set();
@@ -206,10 +228,24 @@ export default function Search({
 
   const isSingleEntryType = entryTypes.length === 1;
   const onlyEntryPath = entryTypes[0]?.pathSegment;
-  const isSingleNonGenomic =
-    isSingleEntryType && onlyEntryPath !== "g_variants";
+  // const isSingleNonGenomic =
+  //   isSingleEntryType && onlyEntryPath !== "g_variants";
 
   const hasGenomic = entryTypes.some((e) => e.pathSegment === "g_variants");
+
+  // CASE A
+  const isSingleNonGenomic = isSingleEntryType && !hasGenomic;
+
+  // CASE C
+  const isSingleGenomic = isSingleEntryType && hasGenomic;
+
+  // CASE B
+  const isMultiNonGenomic = !isSingleEntryType && !hasGenomic;
+
+  // CASE D
+  const isMultiGenomic = !isSingleEntryType && hasGenomic;
+
+  const showGenomicSearch = hasGenomic;
 
   const isGenomicFirstOrOnly =
     entryTypes.length === 1 ||
@@ -252,6 +288,243 @@ export default function Search({
     ? "Genomic Query (0-based)"
     : "Genomic Query (1-based)";
 
+  const getFilteringPlaceholder = (pathSegment) =>
+    FILTERING_PLACEHOLDERS[pathSegment] || "Search by Filtering Terms.";
+
+  const getGenomicQueryDescription = () => {
+    // Available genomic query types configured by the deployer
+    const queryTypes = config.ui.genomicQueries?.genomicQueryTypes || {};
+    const description = [];
+    // Sequence Query enables direct SNV/INDEL searches
+    if (queryTypes.sequenceQuery) {
+      description.push("Search by SNV or INDEL.");
+    }
+    // Query types available through the Genomic Query Builder
+    const rangeBracket = [];
+    if (queryTypes.rangeQuery) rangeBracket.push("Range");
+    if (queryTypes.bracketQuery) rangeBracket.push("Bracket");
+    const annotations = [];
+    if (queryTypes.geneId) annotations.push("Gene");
+    if (queryTypes.hgvsQuery) annotations.push("HGVS annotation");
+    if (rangeBracket.length || annotations.length) {
+      let text = "Use Genomic Query Builder to ";
+      if (rangeBracket.length) {
+        text += `do ${rangeBracket.join("/")} quer${
+          rangeBracket.length > 1 ? "ies" : "y"
+        }`;
+      }
+      if (annotations.length) {
+        if (rangeBracket.length) {
+          text += ` or search by ${annotations.join(" or ")}`;
+        } else {
+          text += `search by ${annotations.join(" or ")}`;
+        }
+      }
+      text += ".";
+      description.push(text);
+    }
+    return description.join(" ");
+  };
+
+  const genomicQueryDescription = getGenomicQueryDescription();
+  const genomicTooltipContent = getGenomicTooltipContent();
+
+  const filteringTermsSection = (
+    <>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          mt: 3,
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 700,
+            fontSize: "14px",
+            fontFamily: '"Open Sans", sans-serif',
+          }}
+        >
+          Filtering Terms
+        </Typography>
+        <InfoTooltip testId="filtering-terms-tooltip">
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: "12px",
+              fontFamily: '"Open Sans", sans-serif',
+            }}
+          >
+            Filtering Terms
+          </Typography>
+
+          <Box
+            component="ul"
+            data-testid="filtering-terms-tooltip-content"
+            sx={{
+              listStyleType: "disc",
+              pl: "20px",
+              fontFamily: '"Open Sans", sans-serif',
+            }}
+          >
+            <li>
+              Use filtering terms to narrow down your search results (e.g.
+              diseases, sex, age, or clinical characteristics).
+            </li>
+
+            <li>
+              Filtering terms are provided by data owners and reflect the
+              information available in their datasets.
+            </li>
+
+            <li>
+              Filtering terms are{" "}
+              <strong>independent of the Result Type</strong> (e.g. Individuals,
+              Biosamples, etc.) selected.
+            </li>
+          </Box>
+        </InfoTooltip>
+      </Box>
+      <Typography
+        sx={{
+          fontSize: "12px",
+          mt: 0.5,
+          mb: 2,
+        }}
+      >
+        Filtering options available for this dataset.
+      </Typography>
+      <Box sx={{ mt: 2 }}>
+        <SearchFiltersInput
+          activeInput={activeInput}
+          setActiveInput={setActiveInput}
+          placeholder={getFilteringPlaceholder(selectedPathSegment)}
+        />
+      </Box>
+    </>
+  );
+
+  const genomicSearchSection = (
+    <>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 700,
+            fontSize: "14px",
+            fontFamily: '"Open Sans", sans-serif',
+          }}
+        >
+          {genomicCoordinateLabel}
+        </Typography>
+
+        <InfoTooltip testId="genomic-query-tooltip">
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: "12px",
+              fontFamily: '"Open Sans", sans-serif',
+            }}
+          >
+            Genomic Query
+          </Typography>
+
+          <Box
+            component="ul"
+            data-testid="genomic-query-tooltip-content"
+            sx={{
+              listStyleType: "disc",
+              pl: "20px",
+              fontFamily: '"Open Sans", sans-serif',
+            }}
+          >
+            {genomicTooltipContent.sequenceQuery && (
+              <li>
+                Search for a specific single nucleotide variant or INDEL.{" "}
+                <strong>(Chr - Position - Ref. bases - Alt. bases)</strong>{" "}
+                using the Search Bar.
+              </li>
+            )}
+
+            {(genomicTooltipContent.rangeQuery ||
+              genomicTooltipContent.bracketQuery ||
+              genomicTooltipContent.geneId ||
+              genomicTooltipContent.hgvsQuery) && (
+              <li>
+                Use the Genomic Query Builder to search by:{" "}
+                {[
+                  genomicTooltipContent.geneId && (
+                    <strong key="gene">Gene ID</strong>
+                  ),
+                  genomicTooltipContent.rangeQuery && (
+                    <strong key="range">Genomic region (Range Query)</strong>
+                  ),
+                  genomicTooltipContent.bracketQuery && (
+                    <strong key="bracket">Bracket Query</strong>
+                  ),
+                  genomicTooltipContent.hgvsQuery && (
+                    <strong key="hgvs">HGVS expression</strong>
+                  ),
+                ]
+                  .filter(Boolean)
+                  .reduce((acc, item, index, array) => {
+                    if (index === 0) return [item];
+
+                    if (index === array.length - 1) {
+                      return [...acc, " or ", item];
+                    }
+
+                    return [...acc, ", ", item];
+                  }, [])}
+                .
+              </li>
+            )}
+
+            <li>Only one genomic query is accepted per search.</li>
+          </Box>
+        </InfoTooltip>
+      </Box>
+
+      <Typography
+        sx={{
+          fontSize: "12px",
+          mt: 0.5,
+        }}
+      >
+        {genomicQueryDescription}
+      </Typography>
+
+      <Box sx={{ mt: 2 }}>
+        <SearchGenomicInput
+          activeInput={activeInput}
+          setActiveInput={setActiveInput}
+          genomicDraft={genomicDraft}
+          setGenomicDraft={setGenomicDraft}
+          selectedFilter={selectedFilter}
+          setSelectedFilter={setSelectedFilter}
+          assembly={assembly}
+          setAssembly={setAssembly}
+          primaryDarkColor={primaryDarkColor}
+          message={message}
+          setMessage={setMessage}
+        />
+      </Box>
+    </>
+  );
+
+  console.log({
+    isSingleNonGenomic,
+    isSingleGenomic,
+    isMultiNonGenomic,
+    isMultiGenomic,
+  });
+
   return (
     <>
       <Box
@@ -279,210 +552,119 @@ export default function Search({
               }`
             : "Search"}
         </Typography>
-        <Typography
-          sx={{
-            mb: 2,
-            fontWeight: 700,
-            fontFamily: '"Open Sans", sans-serif',
-            fontSize: entryTypes.length === 1 ? "16px" : "14px",
-          }}
-        >
-          Result Type
-        </Typography>
+        {isSingleNonGenomic && (
+          <Box sx={{ mt: 2 }}>{filteringTermsSection}</Box>
+        )}
         {!isSingleEntryType && (
-          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-            <Typography
-              variant="body1"
-              sx={{ fontFamily: '"Open Sans", sans-serif', fontSize: "14px" }}
-            >
-              Which information do you want to get?
-            </Typography>
-
-            <Tooltip
-              title={
-                <Box
-                  component="ul"
-                  data-testid="entrytypes-tooltip-content"
-                  sx={{
-                    listStyleType: "disc",
-                    pl: "20px",
-                    fontFamily: '"Open Sans", sans-serif',
-                  }}
-                >
-                  {entryTypes.map((entry) => (
-                    <li key={entry.pathSegment}>
-                      <b>{formatEntryLabel(entry.pathSegment)}</b>:{" "}
-                      {entryTypeDescriptions[entry.pathSegment] ||
-                        `No description for ${entry.pathSegment}`}
-                    </li>
-                  ))}
-                </Box>
-              }
-              placement="top-start"
-              arrow
-              componentsProps={{
-                tooltip: {
-                  sx: {
-                    py: 1,
-                    backgroundColor: "#fff",
-                    color: "#000",
-                    border: "1px solid black",
-                    minWidth: {
-                      xs: "361px",
-                      sm: "400px",
-                    },
-                  },
-                },
-                arrow: {
-                  sx: {
-                    color: "#fff",
-                    "&::before": { border: "1px solid black" },
-                  },
-                },
+          <Box
+            sx={{
+              display: "flex",
+              gap: 3,
+              alignItems: "flex-start",
+              mb: 2,
+              backgroundColor: "blueviolet",
+            }}
+          >
+            <Box
+              sx={{
+                width: "260px",
+                flexShrink: 0,
+                backgroundColor: "pink",
               }}
             >
               <Box
-                component="span"
-                data-testid="entrytypes-tooltip-trigger"
                 sx={{
-                  cursor: "pointer",
-                  ml: 3,
-                  mb: "4px",
-                  width: "20px",
-                  height: "20px",
-                  borderRadius: "30px",
-                  backgroundColor: primaryColor,
-                  color: "white",
-                  textAlign: "center",
-                  fontSize: "14px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  mb: 1,
                 }}
               >
-                i
+                {/* Accounts for a title change when there is only one entry type */}
+                <Typography
+                  sx={{
+                    fontWeight: 700,
+                    fontFamily: '"Open Sans", sans-serif',
+                    fontSize: entryTypes.length === 1 ? "16px" : "14px",
+                  }}
+                >
+                  {isSingleEntryType
+                    ? `Result Type: ${
+                        singleEntryCustomLabels[onlyEntryPath] ||
+                        formatEntryLabel(onlyEntryPath)
+                      }`
+                    : "Result Type"}
+                </Typography>
+                <InfoTooltip testId="entrytypes-tooltip-trigger">
+                  <Box
+                    component="ul"
+                    data-testid="entrytypes-tooltip-content"
+                    sx={{
+                      listStyleType: "disc",
+                      pl: "20px",
+                      fontFamily: '"Open Sans", sans-serif',
+                    }}
+                  >
+                    {entryTypes.map((entry) => (
+                      <li key={entry.pathSegment}>
+                        <b>{formatEntryLabel(entry.pathSegment)}</b>:{" "}
+                        {entryTypeDescriptions[entry.pathSegment] ||
+                          `No description for ${entry.pathSegment}`}
+                      </li>
+                    ))}
+                  </Box>
+                </InfoTooltip>
               </Box>
-            </Tooltip>
+              {!isSingleEntryType && (
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontFamily: '"Open Sans", sans-serif',
+                      fontSize: "14px",
+                    }}
+                  >
+                    Which information do you want to get?
+                  </Typography>
+                </Box>
+              )}
+              {!isSingleEntryType && (
+                <Box
+                  sx={{
+                    width: "260px",
+                    flexShrink: 0,
+                  }}
+                >
+                  <EntryTypeSelector
+                    entryTypes={entryTypes}
+                    selectedPathSegment={selectedPathSegment}
+                    setSelectedPathSegment={setSelectedPathSegment}
+                  />
+                </Box>
+              )}
+            </Box>
+            <Box
+              sx={{
+                flex: 1,
+                backgroundColor: "lightblue",
+              }}
+            >
+              {showGenomicSearch && genomicSearchSection}
+              {filteringTermsSection}
+            </Box>
           </Box>
         )}
-
-        {loading || !isLoaded ? (
-          <CircularProgress />
-        ) : !isSingleEntryType ? (
-          <EntryTypeSelector
-            entryTypes={entryTypes}
-            selectedPathSegment={selectedPathSegment}
-            setSelectedPathSegment={setSelectedPathSegment}
-          />
-        ) : null}
-        {/* Here */}
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2, mt: 4 }}>
-          {isSingleNonGenomic ? (
-            <>
-              <Typography
-                variant="body1"
-                sx={{ fontFamily: '"Open Sans", sans-serif', fontSize: "14px" }}
-              >
-                Add the <b>Filtering Terms</b> you need for your search.
-              </Typography>
-
-              {FilteringTermsInfoTooltip}
-            </>
-          ) : (
-            <>
-              <Typography
-                variant="body1"
-                sx={{
-                  fontFamily: '"Open Sans", sans-serif',
-                  fontSize: "14px",
-                }}
-              >
-                {isSingleEntryType ? "" : "2. "}
-                Use the following search bars to narrow down your search using{" "}
-                <b>
-                  {isFirstEntryGenomic
-                    ? genomicCoordinateLabel
-                    : "Filtering Terms"}
-                </b>{" "}
-                and/or{" "}
-                <b>
-                  {isFirstEntryGenomic
-                    ? "Filtering Terms"
-                    : genomicCoordinateLabel}
-                </b>
-                .
-              </Typography>
-              {SearchBarsInfoTooltip}
-            </>
-          )}
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
-            gap: 2,
-          }}
-        >
-          {isSingleNonGenomic ? (
-            <SearchFiltersInput
-              activeInput={activeInput}
-              setActiveInput={setActiveInput}
-            />
-          ) : hasGenomic ? (
-            isFirstEntryGenomic ? (
-              <>
-                <SearchGenomicInput
-                  activeInput={activeInput}
-                  setActiveInput={setActiveInput}
-                  genomicDraft={genomicDraft}
-                  setGenomicDraft={setGenomicDraft}
-                  selectedFilter={selectedFilter}
-                  setSelectedFilter={setSelectedFilter}
-                  assembly={assembly}
-                  setAssembly={setAssembly}
-                  primaryDarkColor={primaryDarkColor}
-                  message={message}
-                  setMessage={setMessage}
-                />
-
-                <SearchFiltersInput
-                  activeInput={activeInput}
-                  setActiveInput={setActiveInput}
-                />
-              </>
-            ) : (
-              <>
-                <SearchFiltersInput
-                  activeInput={activeInput}
-                  setActiveInput={setActiveInput}
-                />
-
-                <SearchGenomicInput
-                  activeInput={activeInput}
-                  setActiveInput={setActiveInput}
-                  genomicDraft={genomicDraft}
-                  setGenomicDraft={setGenomicDraft}
-                  selectedFilter={selectedFilter}
-                  setSelectedFilter={setSelectedFilter}
-                  assembly={assembly}
-                  setAssembly={setAssembly}
-                  primaryDarkColor={primaryDarkColor}
-                  message={message}
-                  setMessage={setMessage}
-                />
-              </>
-            )
-          ) : (
-            <SearchFiltersInput
-              activeInput={activeInput}
-              setActiveInput={setActiveInput}
-            />
-          )}
-        </Box>
+        {isSingleGenomic && (
+          <Box sx={{ mt: 2 }}>
+            {genomicSearchSection}
+            {filteringTermsSection}
+          </Box>
+        )}
         {extraFilter && <FilterTermsExtra />}
         {selectedFilter.length > 0 && <QueryApplied />}
-        {/* {selectedPathSegment && <QueryApplied />} */}
-
         <Box
           sx={{
+            backgroundColor: "green",
             mt: 5,
             mb: 2,
             gap: 2,
