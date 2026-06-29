@@ -17,6 +17,7 @@ export default function GenomicSearchSection({
   primaryDarkColor,
   message,
   setMessage,
+  genomicAction,
 }) {
   return (
     <>
@@ -126,6 +127,7 @@ export default function GenomicSearchSection({
           primaryDarkColor={primaryDarkColor}
           message={message}
           setMessage={setMessage}
+          action={genomicAction}
         />
       </Box>
     </>

@@ -14,6 +14,7 @@ export default function ResultTypeSection({
   isSingleEntryType,
   onlyEntryPath,
   hasTwoColumns,
+  loading,
 }) {
   return (
     <>
@@ -90,6 +91,7 @@ export default function ResultTypeSection({
             selectedPathSegment={selectedPathSegment}
             setSelectedPathSegment={setSelectedPathSegment}
             hasTwoColumns={hasTwoColumns}
+            loading={loading}
           />
         </Box>
       </Box>

@@ -30,6 +30,7 @@ export default function SearchGenomicInput({
   setSelectedFilter,
   message,
   setMessage,
+  action,
 }) {
   const { openGenomicQueryBuilder, setOpenGenomicQueryBuilder } =
     useSelectedEntry();
@@ -324,13 +325,11 @@ export default function SearchGenomicInput({
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 0.5,
         flex: activeInput === "genomic" ? 1 : 0.3,
       }}
     >
       {/* Input container */}
       <Box
-        // onClick={() => setActiveInput("genomic")}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -338,6 +337,9 @@ export default function SearchGenomicInput({
           borderRadius: "999px",
           backgroundColor: "#fff",
           transition: "flex 0.3s ease",
+          pr: 2,
+          py: 1,
+          height: "47px",
         }}
       >
         {/* Genome assembly dropdown */}
@@ -375,7 +377,7 @@ export default function SearchGenomicInput({
         )}
 
         {/* Search icon */}
-        <Box sx={{ px: 1, color: primaryDarkColor }}>
+        <Box sx={{ pl: 2, pr: 1, color: primaryDarkColor }}>
           <SearchIcon />
         </Box>
 
@@ -432,6 +434,18 @@ export default function SearchGenomicInput({
             </Box>
           )}
         </Box>
+        {/* Optional action displayed inside the genomic search bar */}
+        {action && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              flexShrink: 0,
+            }}
+          >
+            {action}
+          </Box>
+        )}
       </Box>
 
       {/* Add button and message */}

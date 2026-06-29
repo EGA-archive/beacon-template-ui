@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import config from "../config/config.json";
 import { useSelectedEntry } from "./context/SelectedEntryContext";
 import GenomicQueryBuilderButton from "./genomic/GenomicQueryBuilderButton";
 import GenomicQueryBuilderDialog from "./genomic/GenomicQueryBuilderDialog";
-import AllFilteringTermsButton from "./filters/AllFilteringTermsButton";
 import QueryApplied from "./search/QueryApplied";
 import SearchButton from "./search/SearchButton";
 import FilterTermsExtra from "./search/FilterTemsExtra";
@@ -90,12 +89,14 @@ export default function Search({
 
   useEffect(() => {
     const fetchEntryTypes = async () => {
+      setLoading(true);
       try {
         await handleBeaconsInfo();
         const res = await fetch(`${config.apiUrl}/map`, {
           headers: authHeaders,
         });
         const data = await res.json();
+
         // const data = mockEntryTypes;
 
         const endpointSets = data.response.endpointSets || {};
@@ -136,10 +137,8 @@ export default function Search({
         }
 
         await handleBeaconsInfo();
-
         setIsLoaded(true);
       } catch (err) {
-        console.error("Error fetching entry types:", err);
       } finally {
         setLoading(false);
       }
@@ -168,7 +167,6 @@ export default function Search({
       await fetchConfiguration();
       setLoading(false);
     };
-
     fetchAll();
   }, []);
 
@@ -258,6 +256,8 @@ export default function Search({
   const getFilteringPlaceholder = (pathSegment) =>
     FILTERING_PLACEHOLDERS[pathSegment] || "Search by Filtering Terms.";
 
+  console.log("getFilteringPlaceholder from Search", getFilteringPlaceholder);
+
   const genomicQueryDescription = getGenomicQueryDescription();
   const genomicTooltipContent = getGenomicTooltipContent();
 
@@ -281,6 +281,19 @@ export default function Search({
           primaryDarkColor={primaryDarkColor}
           message={message}
           setMessage={setMessage}
+          genomicAction={
+            <GenomicQueryBuilderButton
+              onClick={() => {
+                setSelectedTool((prev) =>
+                  prev === "genomicQueryBuilder" ? null : "genomicQueryBuilder"
+                );
+
+                handleClickOpen();
+              }}
+              selected={selectedTool === "genomicQueryBuilder"}
+              selectedFilter={selectedFilter}
+            />
+          }
         />
       )}
 
@@ -289,9 +302,13 @@ export default function Search({
         setActiveInput={setActiveInput}
         selectedPathSegment={selectedPathSegment}
         getFilteringPlaceholder={getFilteringPlaceholder}
+        onAllFilteringClick={handleAllFilteringClick}
+        filteringButtonRef={filteringButtonRef}
       />
     </>
   );
+
+  const isEntryTypesLoading = loading || !isLoaded;
 
   return (
     <>
@@ -327,6 +344,8 @@ export default function Search({
               setActiveInput={setActiveInput}
               selectedPathSegment={selectedPathSegment}
               getFilteringPlaceholder={getFilteringPlaceholder}
+              onAllFilteringClick={handleAllFilteringClick}
+              filteringButtonRef={filteringButtonRef}
             />
           </Box>
         )}
@@ -346,12 +365,12 @@ export default function Search({
               isSingleEntryType={isSingleEntryType}
               onlyEntryPath={onlyEntryPath}
               hasTwoColumns={hasTwoColumns}
+              loading={isEntryTypesLoading}
             />
             <Box
               sx={{
                 flex: 1,
                 height: "100%",
-                // backgroundColor: "palevioletred",
               }}
             >
               {searchInputsSection}
@@ -410,18 +429,6 @@ export default function Search({
           >
             {hasGenomic && (
               <>
-                <GenomicQueryBuilderButton
-                  onClick={() => {
-                    setSelectedTool((prev) =>
-                      prev === "genomicQueryBuilder"
-                        ? null
-                        : "genomicQueryBuilder"
-                    );
-                    handleClickOpen();
-                  }}
-                  selected={selectedTool === "genomicQueryBuilder"}
-                  selectedFilter={selectedFilter}
-                />
                 <GenomicQueryBuilderDialog
                   open={open}
                   handleClose={handleClose}
@@ -431,12 +438,6 @@ export default function Search({
                 />
               </>
             )}
-            <Box ref={filteringButtonRef}>
-              <AllFilteringTermsButton
-                onClick={handleAllFilteringClick}
-                selected={selectedTool === "allFilteringTerms"}
-              />
-            </Box>
           </Box>
           <Box>
             <SearchButton

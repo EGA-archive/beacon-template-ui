@@ -1,13 +1,17 @@
 import { Box, Typography } from "@mui/material";
 import InfoTooltip from "../utils/InfoTooltip";
 import SearchFiltersInput from "../../../components/search/SearchFiltersInput";
+import AllFilteringTermsButton from "../../filters/AllFilteringTermsButton";
 
 export default function FilteringTermsSection({
   activeInput,
   setActiveInput,
   selectedPathSegment,
   getFilteringPlaceholder,
+  onAllFilteringClick,
+  filteringButtonRef,
 }) {
+  console.log("getFilteringPlaceholder", getFilteringPlaceholder);
   return (
     <>
       <Box
@@ -15,7 +19,7 @@ export default function FilteringTermsSection({
           display: "flex",
           alignItems: "center",
           gap: 1,
-          mt: 3,
+          mt: 3.5,
         }}
       >
         <Typography
@@ -79,6 +83,11 @@ export default function FilteringTermsSection({
           activeInput={activeInput}
           setActiveInput={setActiveInput}
           placeholder={getFilteringPlaceholder(selectedPathSegment)}
+          action={
+            <Box ref={filteringButtonRef}>
+              <AllFilteringTermsButton onClick={onAllFilteringClick} />
+            </Box>
+          }
         />
       </Box>
     </>

@@ -13,9 +13,12 @@ export default function SearchFiltersInput({
   activeInput,
   setActiveInput,
   placeholder,
+  action,
 }) {
   const [searchInput, setSearchInput] = useState(""); // Local state to track the text typed by the user
   const primaryDarkColor = config.ui.colors.darkPrimary;
+
+  console.log("placeholder", placeholder);
   return (
     <Box
       // onClick={() => setActiveInput("filter")} // When user clicks this area, it becomes the active input
@@ -37,38 +40,54 @@ export default function SearchFiltersInput({
         height: "47px",
       }}
     >
-      <Box sx={{ position: "relative", flex: 1 }}>
-        {/* Search icon and text input */}
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <SearchIcon sx={{ color: primaryDarkColor, mr: 1 }} />
-          <InputBase
-            data-testid="filtering-input"
-            placeholder={placeholder}
-            fullWidth
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)} // Update local state as user types
-            sx={{
-              fontFamily: '"Open Sans", sans-serif',
-              fontSize: "14px",
-            }}
-          />
-        </Box>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          width: "100%",
+          minWidth: 0,
+        }}
+      >
+        {/* Search icon */}
+        <SearchIcon
+          sx={{
+            color: primaryDarkColor,
+            mr: 1,
+            flexShrink: 0,
+          }}
+        />
 
-        {/* Clear button shown only if there's input */}
-        {searchInput?.trim() && (
+        {/* Text input */}
+        <InputBase
+          data-testid="filtering-input"
+          placeholder={placeholder}
+          value={searchInput}
+          onChange={(event) => setSearchInput(event.target.value)}
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            fontFamily: '"Open Sans", sans-serif',
+            fontSize: "14px",
+          }}
+        />
+
+        {/* Clear button appears only when text has been entered */}
+        {searchInput.trim() && (
           <Box
             role="button"
-            onClick={() => setSearchInput("")} // Clear the input when clicked
+            aria-label="Clear filtering terms search"
+            onClick={(event) => {
+              event.stopPropagation();
+              setSearchInput("");
+            }}
             sx={{
-              position: "absolute",
-              top: "50%",
-              right: 8,
-              transform: "translateY(-50%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              flexShrink: 0,
               width: "24px",
               height: "24px",
+              mr: 1,
               borderRadius: "50%",
               backgroundColor: alpha(primaryDarkColor, 0.1),
               color: primaryDarkColor,
@@ -81,8 +100,21 @@ export default function SearchFiltersInput({
             <ClearIcon sx={{ fontSize: "16px" }} />
           </Box>
         )}
-      </Box>
 
+        {/* Optional action displayed inside the search bar */}
+        {action && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              flexShrink: 0,
+              ml: 1,
+            }}
+          >
+            {action}
+          </Box>
+        )}
+      </Box>
       {/* Dropdown component that shows matching filtering terms */}
       <FilteringTermsDropdownResults
         searchInput={searchInput}

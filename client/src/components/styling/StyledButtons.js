@@ -22,13 +22,13 @@ export default function StyledButtons({
 }) {
   // Base styling common to all buttons
   const baseStyles = {
-    borderRadius: "999px", // Makes button pill-shaped
+    borderRadius: "7px", // Makes button pill-shaped
     textTransform: "none", // Keep label casing as-is
     fontSize: { xs: "13px", sm: "14px" },
     fontWeight: 400,
     fontFamily: '"Open Sans", sans-serif',
-    minWidth: { xs: "120px", sm: "180px" },
-    height: { xs: "45px", sm: "40px" },
+    width: { xs: "120px", sm: "210px" },
+    height: { xs: "29px", sm: "29px" },
     px: 2,
     py: 0.5,
   };
