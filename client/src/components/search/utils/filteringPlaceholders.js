@@ -1,5 +1,5 @@
 const FILTERING_PLACEHOLDERS = {
-  individuals: "Search by Filtering Terms. Examples: sex, diseases, treatment.",
+  individuals: "Search by Filtering Terms. Examples: sex, diseases, etc.",
 
   biosamples:
     "Search by sample origin, sample processing, diagnostic markers, etc.",
@@ -8,9 +8,11 @@ const FILTERING_PLACEHOLDERS = {
 
   analyses: "Search by variant caller, pipeline reference, aligner, etc.",
 
-  cohorts: "Search by Filtering Terms. Examples: sex, diseases, treatment.",
+  cohorts: "Search by Filtering Terms. Examples: sex, diseases, etc.",
 
-  datasets: "Search by Filtering Terms. Examples: sex, diseases, treatment.",
+  datasets: "Search by Filtering Terms. Examples: sex, diseases, etc.",
 
-  g_variants: "Search by Filtering Terms. Examples: sex, diseases, treatment.",
+  g_variants: "Search by Filtering Terms. Examples: sex, diseases, etc.",
 };
+
+export default FILTERING_PLACEHOLDERS;

@@ -144,6 +144,8 @@ export default function FiltersContainer({
     }
   }, [activeInput]);
 
+  const stackSearchAndCommonFilters = "@media (max-width:1100px)";
+
   return (
     <Box>
       {/* This is the tabs container for: Common Filters and Genomic Annotations. The top part only */}
@@ -203,7 +205,6 @@ export default function FiltersContainer({
           boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.05)",
           borderRadius: "8px",
           backgroundColor: "white",
-
           mt: "-4.7px",
           // overflow: "hidden",
           overflowY: "auto",
@@ -214,15 +215,13 @@ export default function FiltersContainer({
             sm: "350px",
             xs: "350px",
           },
+          [stackSearchAndCommonFilters]: {
+            height: "auto",
+          },
         }}
       >
         {tabs.map((tab, i) => (
-          <TabPanel
-            value={tabValue}
-            index={i}
-            key={tab.label}
-            sx={{ backgroundColor: "pink !important" }}
-          >
+          <TabPanel value={tabValue} index={i} key={tab.label}>
             <Box sx={{ padding: "20px" }}>
               <Typography
                 variant="body1"

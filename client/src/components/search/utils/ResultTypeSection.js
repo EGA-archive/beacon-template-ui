@@ -68,7 +68,13 @@ export default function ResultTypeSection({
           </InfoTooltip>
         </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
           <Typography
             variant="body1"
             sx={{
@@ -82,7 +88,6 @@ export default function ResultTypeSection({
 
         <Box
           sx={{
-            width: "240px",
             flexShrink: 0,
           }}
         >

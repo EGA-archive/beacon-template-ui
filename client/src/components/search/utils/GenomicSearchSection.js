@@ -1,6 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import SearchGenomicInput from "../../search/SearchGenomicInput";
 import InfoTooltip from "./InfoTooltip";
+import { useEffect, useRef } from "react";
 
 export default function GenomicSearchSection({
   genomicCoordinateLabel,
@@ -18,7 +19,35 @@ export default function GenomicSearchSection({
   message,
   setMessage,
   genomicAction,
+  setIsGenomicDescriptionMultiline,
+  isGenomicDescriptionMultiline,
 }) {
+  const descriptionRef = useRef(null);
+
+  useEffect(() => {
+    const checkDescriptionLines = () => {
+      const element = descriptionRef.current;
+
+      if (!element || !setIsGenomicDescriptionMultiline) return;
+
+      const lineHeight = parseFloat(
+        window.getComputedStyle(element).lineHeight
+      );
+
+      const lineCount = Math.round(element.scrollHeight / lineHeight);
+
+      setIsGenomicDescriptionMultiline(lineCount > 1);
+    };
+
+    checkDescriptionLines();
+
+    window.addEventListener("resize", checkDescriptionLines);
+
+    return () => {
+      window.removeEventListener("resize", checkDescriptionLines);
+    };
+  }, [genomicQueryDescription, setIsGenomicDescriptionMultiline]);
+
   return (
     <>
       <Box
@@ -105,17 +134,44 @@ export default function GenomicSearchSection({
         </InfoTooltip>
       </Box>
 
-      <Typography
+      {/* <Box
         sx={{
-          fontSize: "12px",
-          mt: 0.5,
+          height: "35px",
         }}
       >
-        {genomicQueryDescription}
-      </Typography>
+        <Typography
+          sx={{
+            fontSize: "12px",
+            mt: 1,
+            backgroundColor: "lavenderblush",
+          }}
+        >
+          {genomicQueryDescription}
+        </Typography>
+      </Box> */}
+      <Box
+      // sx={{
+      //   minHeight: {
+      //     xs: "auto",
+      //     md: "35px",
+      //   },
+      // }}
+      >
+        <Typography
+          ref={descriptionRef}
+          sx={{
+            fontSize: "12px",
+            mt: 1,
+            lineHeight: "17px",
+          }}
+        >
+          {genomicQueryDescription}
+        </Typography>
+      </Box>
 
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 1 }}>
         <SearchGenomicInput
+          isGenomicDescriptionMultiline={isGenomicDescriptionMultiline}
           activeInput={activeInput}
           setActiveInput={setActiveInput}
           genomicDraft={genomicDraft}

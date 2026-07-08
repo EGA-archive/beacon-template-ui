@@ -31,10 +31,57 @@ export default function SearchGenomicInput({
   message,
   setMessage,
   action,
+  isGenomicDescriptionMultiline,
 }) {
-  const { openGenomicQueryBuilder, setOpenGenomicQueryBuilder } =
-    useSelectedEntry();
+  const { openGenomicQueryBuilder } = useSelectedEntry();
   const inputRef = useRef(null); // For managing focus on the input field
+
+  const genomicQueryTypes = config?.ui?.genomicQueries?.genomicQueryTypes ?? {};
+
+  const GENOMIC_QUERY_BUILDER_OPTIONS = [
+    {
+      configKey: "geneId",
+      ctaLabel: "Gene ID",
+      warningLabel: "gene",
+    },
+    {
+      configKey: "rangeQuery",
+      ctaLabel: "Range",
+      warningLabel: "range",
+    },
+    {
+      configKey: "bracketQuery",
+      ctaLabel: "Bracket",
+      warningLabel: "bracket",
+    },
+    {
+      configKey: "hgvsQuery",
+      ctaLabel: "HGVS",
+      warningLabel: "HGVS",
+    },
+  ];
+
+  const formatQueryList = (labels = []) => {
+    if (labels.length === 0) return "";
+    if (labels.length === 1) return labels[0];
+    if (labels.length === 2) return `${labels[0]} or ${labels[1]}`;
+
+    return `${labels.slice(0, -1).join(", ")} or ${labels.at(-1)}`;
+  };
+
+  const enabledBuilderQueries = GENOMIC_QUERY_BUILDER_OPTIONS.filter(
+    ({ configKey }) => genomicQueryTypes?.[configKey]
+  );
+
+  const genomicBuilderCtaList = formatQueryList(
+    enabledBuilderQueries.map(({ ctaLabel }) => ctaLabel)
+  );
+
+  const genomicBuilderWarningList = formatQueryList(
+    enabledBuilderQueries.map(({ warningLabel }) => warningLabel)
+  );
+
+  const hasGenomicBuilderQueries = enabledBuilderQueries.length > 0;
 
   const IUPAC_BASE_PATTERN = /^[ACGTUNRYSWKMBDHV\-.]+$/i;
   const IUPAC_BASE_CLASS = "ACGTUNRYSWKMBDHV";
@@ -326,6 +373,7 @@ export default function SearchGenomicInput({
         display: "flex",
         flexDirection: "column",
         flex: activeInput === "genomic" ? 1 : 0.3,
+        mt: isGenomicDescriptionMultiline ? 0 : "15px",
       }}
     >
       {/* Input container */}
@@ -401,7 +449,7 @@ export default function SearchGenomicInput({
             }}
             sx={{
               fontFamily: '"Open Sans", sans-serif',
-              fontSize: "14px",
+              fontSize: "12px",
               height: "47px",
             }}
           />
@@ -505,65 +553,67 @@ export default function SearchGenomicInput({
               </span>
             </Box>
 
-            <Box
-              sx={{
-                width: "100%",
-                px: 3,
-                py: 1,
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-              }}
-            >
+            {hasGenomicBuilderQueries && (
               <Box
                 sx={{
-                  position: "relative",
-                  width: 16,
-                  height: 16,
+                  width: "100%",
+                  px: 3,
+                  py: 1,
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  cursor: isVariant ? "pointer" : "default",
-                  "& .unchecked": {
-                    display: "block",
-                  },
-                  "& .checked": {
-                    display: "none",
-                  },
-                  "&:hover .unchecked": {
-                    display: isVariant ? "none" : "block",
-                  },
-                  "&:hover .checked": {
-                    display: isVariant ? "block" : "none",
-                  },
+                  gap: 1,
                 }}
               >
-                <RadioButtonUncheckedIcon
-                  className="unchecked"
+                <Box
                   sx={{
-                    color: isVariant ? config.ui.colors.primary : "grey",
-                    fontSize: 16,
+                    position: "relative",
+                    width: 16,
+                    height: 16,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: isVariant ? "pointer" : "default",
+                    "& .unchecked": {
+                      display: "block",
+                    },
+                    "& .checked": {
+                      display: "none",
+                    },
+                    "&:hover .unchecked": {
+                      display: isVariant ? "none" : "block",
+                    },
+                    "&:hover .checked": {
+                      display: isVariant ? "block" : "none",
+                    },
                   }}
-                />
-                <CheckCircleIcon
-                  className="checked"
-                  sx={{
-                    color: alpha(config.ui.colors.primary, 0.6),
-                    fontSize: 16,
-                  }}
-                />
-              </Box>
+                >
+                  <RadioButtonUncheckedIcon
+                    className="unchecked"
+                    sx={{
+                      color: isVariant ? config.ui.colors.primary : "grey",
+                      fontSize: 16,
+                    }}
+                  />
+                  <CheckCircleIcon
+                    className="checked"
+                    sx={{
+                      color: alpha(config.ui.colors.primary, 0.6),
+                      fontSize: 16,
+                    }}
+                  />
+                </Box>
 
-              {isVariant ? (
-                <>
-                  Add <b>genomic variant:</b> <code>{cleanedValue}</code>
-                </>
-              ) : (
-                <>
-                  Add <b>genomic query:</b> <code>{genomicDraft}</code>
-                </>
-              )}
-            </Box>
+                {isVariant ? (
+                  <>
+                    Add <b>genomic variant:</b> <code>{cleanedValue}</code>
+                  </>
+                ) : (
+                  <>
+                    Add <b>genomic query:</b> <code>{genomicDraft}</code>
+                  </>
+                )}
+              </Box>
+            )}
             <Box
               sx={{
                 width: "100%",
@@ -632,7 +682,7 @@ export default function SearchGenomicInput({
                 }}
               >
                 Open <b>Genomic Query Builder</b> for the following query:{" "}
-                <b>Gene ID, Range, Bracket or HGVS.</b>
+                <b>{genomicBuilderCtaList}.</b>
               </Box>
             </Box>
           </Box>
@@ -645,22 +695,27 @@ export default function SearchGenomicInput({
                     This search bar only supports{" "}
                     <b>single nucleotide variants (SNVs/SNPs)</b>.
                     <br />
-                    To search by gene, range, bracket or HGVS queries, use the{" "}
-                    <span
-                      onClick={() => {
-                        setMessage(null);
-                        setGenomicDraft("");
-                        openGenomicQueryBuilder?.();
-                      }}
-                      style={{
-                        fontWeight: 700,
-                        textDecoration: "underline",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Genomic Query Builder
-                    </span>
-                    .
+                    {hasGenomicBuilderQueries && (
+                      <>
+                        To search by {genomicBuilderWarningList} queries, use
+                        the{" "}
+                        <span
+                          onClick={() => {
+                            setMessage(null);
+                            setGenomicDraft("");
+                            openGenomicQueryBuilder?.();
+                          }}
+                          style={{
+                            fontWeight: 700,
+                            textDecoration: "underline",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Genomic Query Builder
+                        </span>
+                        .
+                      </>
+                    )}
                   </>
                 }
               />

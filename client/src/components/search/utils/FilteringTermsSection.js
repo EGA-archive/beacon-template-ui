@@ -10,8 +10,8 @@ export default function FilteringTermsSection({
   getFilteringPlaceholder,
   onAllFilteringClick,
   filteringButtonRef,
+  isGenomicDescriptionMultiline,
 }) {
-  console.log("getFilteringPlaceholder", getFilteringPlaceholder);
   return (
     <>
       <Box
@@ -19,7 +19,7 @@ export default function FilteringTermsSection({
           display: "flex",
           alignItems: "center",
           gap: 1,
-          mt: 3.5,
+          mt: isGenomicDescriptionMultiline ? 5 : 5.5,
         }}
       >
         <Typography
@@ -72,13 +72,17 @@ export default function FilteringTermsSection({
       <Typography
         sx={{
           fontSize: "12px",
-          mt: 0.5,
-          mb: 2,
+          mt: 1,
         }}
       >
         Filtering options available for this dataset.
       </Typography>
-      <Box sx={{ mt: 2 }}>
+      <Box
+        sx={{
+          mt: isGenomicDescriptionMultiline ? 1 : "15px",
+          fontSize: "12px",
+        }}
+      >
         <SearchFiltersInput
           activeInput={activeInput}
           setActiveInput={setActiveInput}

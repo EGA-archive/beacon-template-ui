@@ -2,7 +2,6 @@
  */
 
 import { Tooltip, Box } from "@mui/material";
-import config from "../../config/config.json";
 
 // Capitalizes the first letter of a word and makes the rest lowercase
 export function capitalize(word) {

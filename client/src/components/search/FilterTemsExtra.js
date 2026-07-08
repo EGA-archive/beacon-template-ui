@@ -207,6 +207,10 @@ export default function FilterTermsExtra() {
         justifyContent: "center",
         alignItems: "center",
         flexWrap: "wrap",
+        // Sara, to be discussed
+        borderRadius: "10px",
+        border: "1px solid #E0E0E0",
+        padding: "15px 15px",
       }}
     >
       {/* Label showing which filter the user is filling in */}

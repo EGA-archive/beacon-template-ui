@@ -25,12 +25,11 @@ export default function EntryTypeSelector({
         border: "1px solid black",
         borderRadius: "28px",
         // Internal space between the border and the radio options.
-        px: "13px",
-        py: "13px",
+        p: "10px",
         // Use a wider container when the options are displayed in two columns.
-        maxWidth: hasTwoColumns ? "262px" : "207px",
+        maxWidth: hasTwoColumns ? "260px" : "207px",
         // Fixed height keeps the selector aligned with the search input section.
-        height: "195px",
+        height: "197px",
         // Includes padding and border inside the declared width and height.
         boxSizing: "border-box",
       }}

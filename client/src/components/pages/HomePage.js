@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Box, Button } from "@mui/material";
+import { Box } from "@mui/material";
 import Founders from "../Founders";
 import FiltersContainer from "../filters/FiltersContainer";
 import Search from "../Search";
@@ -79,8 +79,6 @@ export default function HomePage({
   const showBeaconBanner =
     !hasSearchBeenTriggered && selectedTool !== "allFilteringTerms";
 
-  const showAllFilteringTerms = selectedTool === "allFilteringTerms";
-
   // Check if Genomic Annotations filters should be shown based on the config file
   const hasGenomicAnnotationsConfig =
     !!config.ui?.genomicAnnotations?.visibleGenomicCategories;
@@ -103,37 +101,42 @@ export default function HomePage({
     return () => window.removeEventListener("setActiveInput", handler);
   }, []);
 
+  const stackSearchandCommonFilters = "@media (max-width:1100px)";
+
+  const twoValuesStackSearchandCommonFilters =
+    "@media (min-width:900px) and (max-width:1100px)";
+
   return (
     <>
       {/* Main container */}
       <Box
         sx={{
           display: "flex",
-          flexDirection: { xs: "column", md: "row" },
+          flexDirection: "row",
+          [stackSearchandCommonFilters]: {
+            flexDirection: "column",
+          },
           gap: { lg: 4, md: 4, sm: 0 },
           flexWrap: "wrap",
           flexGrow: 1,
         }}
       >
-        {/* Left section: Founders and Search bar */}
+        {/* Left section: Founders and Result Type radio selector, search bars, search button */}
         <Box
           sx={{
             flexGrow: { xs: 0, md: 1 },
             display: "flex",
             flexDirection: "column",
-            width: { lg: "60%", md: "60%" },
-            // backgroundColor: {
-            //   lg: "lightsalmon",
-            //   md: "pink",
-            //   sm: "lightgreen",
-            //   xs: "lightblue",
-            // },
+            // width: { lg: "60%", md: "60%" },
+            width: "60%",
+            [stackSearchandCommonFilters]: {
+              width: "100%",
+            },
           }}
         >
           {/* Show founders section on top left */}
           <Founders />
-
-          {/* Main Search input component */}
+          {/* Main Search input component, this contains Result Type Radio selector, Genomic Query and Filtering Terms searchers */}
           <Search
             onHeightChange={setSearchHeight} // Updates the height of the search box
             selectedTool={selectedTool}
@@ -143,18 +146,18 @@ export default function HomePage({
           />
         </Box>
 
-        {/* Right section: Filters sidebar, only shown if needed */}
+        {/* Right section: Common Filters and Genomic Annotations sidebar, only shown if needed */}
         {shouldShowFilters && (
           <Box
             sx={{
-              width: { xs: "100%", sm: "100%", md: "290px", lg: "338px" },
+              width: { md: "290px", lg: "338px" },
               flexShrink: 0,
               mt: { xs: "0px", md: "42px" },
-              mb: { xs: "25px", lg: "0px" },
+              mb: { xs: "20px", lg: "0px" },
               alignSelf: "flex-start",
               height: {
-                lg: `${searchHeight}px`, // Match height with search bar
-                md: `${searchHeight}px`, // Match height with search bar
+                lg: `${searchHeight}px`,
+                md: `${searchHeight}px`,
                 sm: "auto",
                 xs: "auto",
               },
@@ -163,6 +166,15 @@ export default function HomePage({
               display: "flex",
               flexDirection: "column",
               gap: 2,
+              [stackSearchandCommonFilters]: {
+                width: "100%",
+                height: "auto !important",
+              },
+              [twoValuesStackSearchandCommonFilters]: {
+                mt: "-18px",
+                backgroundColor: "mistyrose",
+                mb: "45px",
+              },
             }}
           >
             {/* Filters section with optional groups (common and/or genomic) */}
@@ -177,14 +189,10 @@ export default function HomePage({
         )}
 
         {/* Banner only shown before a search is triggered and if the user isn't on "allFilteringTerms" tool */}
-        {/* {!hasSearchBeenTriggered && selectedTool !== "allFilteringTerms" && (
-          <BeaconTypeBanner />
-        )} */}
         {showBeaconBanner && <BeaconTypeBanner />}
       </Box>
 
-      {/* Show All Filtering Terms view if selected */}
-
+      {/* Show All Filtering Terms table if selected */}
       <Box>
         {selectedTool === "allFilteringTerms" && (
           <Box

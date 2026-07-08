@@ -9,7 +9,7 @@ import CommonMessage, {
 export default function QueryAppliedItems({
   handleFilterRemove,
   variant = "removable",
-  customFilters,
+  intialEntryTypeFiltertoRender,
 }) {
   // Get the current filters and setter from context
   const {
@@ -101,7 +101,7 @@ export default function QueryAppliedItems({
     setQueryDirty,
   ]);
 
-  const filtersToRender = customFilters || selectedFilter;
+  const filtersToRender = intialEntryTypeFiltertoRender || selectedFilter;
 
   return (
     <Box>

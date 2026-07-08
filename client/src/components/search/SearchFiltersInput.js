@@ -18,7 +18,6 @@ export default function SearchFiltersInput({
   const [searchInput, setSearchInput] = useState(""); // Local state to track the text typed by the user
   const primaryDarkColor = config.ui.colors.darkPrimary;
 
-  console.log("placeholder", placeholder);
   return (
     <Box
       // onClick={() => setActiveInput("filter")} // When user clicks this area, it becomes the active input
@@ -67,7 +66,7 @@ export default function SearchFiltersInput({
             flex: 1,
             minWidth: 0,
             fontFamily: '"Open Sans", sans-serif',
-            fontSize: "14px",
+            fontSize: "12px",
           }}
         />
 

@@ -85,6 +85,9 @@ export default function App() {
             minHeight: "100vh",
             display: "flex",
             flexDirection: "column",
+            width: "100%",
+            minWidth: 0,
+            overflowX: "hidden",
           }}
         >
           <CssBaseline />

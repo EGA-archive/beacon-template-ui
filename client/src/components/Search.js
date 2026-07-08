@@ -21,6 +21,9 @@ import {
 import mockEntryTypes from "./search/mockEntryTypes.json";
 import FilteringTermsSection from "./search/utils/FilteringTermsSection";
 
+const getFilteringPlaceholder = (pathSegment) =>
+  FILTERING_PLACEHOLDERS[pathSegment] || "Search by Filtering Terms.";
+
 export default function Search({
   activeInput,
   setActiveInput,
@@ -65,6 +68,8 @@ export default function Search({
   const [message, setMessage] = useState(null);
   const searchRef = useRef(null);
   const inputRef = useRef(null);
+  const [isGenomicDescriptionMultiline, setIsGenomicDescriptionMultiline] =
+    useState(false);
 
   // Get authentication headers (includes Bearer token if user is logged in)
   const authHeaders = useAuthHeaders();
@@ -253,11 +258,6 @@ export default function Search({
     ? "Genomic Query (0-based)"
     : "Genomic Query (1-based)";
 
-  const getFilteringPlaceholder = (pathSegment) =>
-    FILTERING_PLACEHOLDERS[pathSegment] || "Search by Filtering Terms.";
-
-  console.log("getFilteringPlaceholder from Search", getFilteringPlaceholder);
-
   const genomicQueryDescription = getGenomicQueryDescription();
   const genomicTooltipContent = getGenomicTooltipContent();
 
@@ -267,6 +267,8 @@ export default function Search({
     <>
       {showGenomicSearch && (
         <GenomicSearchSection
+          setIsGenomicDescriptionMultiline={setIsGenomicDescriptionMultiline}
+          isGenomicDescriptionMultiline={isGenomicDescriptionMultiline}
           genomicCoordinateLabel={genomicCoordinateLabel}
           genomicTooltipContent={genomicTooltipContent}
           genomicQueryDescription={genomicQueryDescription}
@@ -298,6 +300,7 @@ export default function Search({
       )}
 
       <FilteringTermsSection
+        isGenomicDescriptionMultiline={isGenomicDescriptionMultiline}
         activeInput={activeInput}
         setActiveInput={setActiveInput}
         selectedPathSegment={selectedPathSegment}
@@ -310,18 +313,30 @@ export default function Search({
 
   const isEntryTypesLoading = loading || !isLoaded;
 
+  const between900And1100 = "@media (min-width:900px) and (max-width:1100px)";
+
   return (
     <>
       <Box
         ref={searchRef}
         sx={{
-          mb: { lg: 6, md: 6, sm: 2, xs: 3 },
+          mb: { lg: 6, md: 6, sm: 2, xs: 2 },
           borderRadius: "10px",
           backgroundColor: "#FFFFFF",
           boxShadow: "0px 8px 11px 0px #9BA0AB24",
-          p: "24px 32px",
+          p: "24px 30px",
+          backgroundColor: {
+            lg: "lightsalmon",
+            md: "pink",
+            sm: "lightgreen",
+            xs: "lightblue",
+          },
+          [between900And1100]: {
+            mb: 0,
+          },
         }}
       >
+        {/* Main component title: Search */}
         <Typography
           sx={{
             mb: 2,
@@ -353,7 +368,7 @@ export default function Search({
           <Box
             sx={{
               display: "flex",
-              gap: hasTwoColumns ? 5 : 2,
+              gap: hasTwoColumns ? 3 : 2,
               alignItems: "flex-start",
               mb: 2,
             }}
@@ -379,12 +394,10 @@ export default function Search({
         )}
         {isSingleGenomic && <Box sx={{ mt: 2 }}>{searchInputsSection}</Box>}
         {extraFilter && <FilterTermsExtra />}
-        {selectedFilter.length > 0 && <QueryApplied />}
+        {selectedPathSegment && <QueryApplied />}
         <Box
           sx={{
-            mt: 5,
-            mb: 2,
-            gap: 2,
+            mt: 4,
             flexWrap: "wrap",
             display: "flex",
             flexDirection: {
@@ -411,10 +424,10 @@ export default function Search({
             sx={{
               display: "flex",
               gap: 4,
+
               "@media (max-width: 1008px) and (min-width: 900px)": {
                 width: "100%",
                 justifyContent: "center",
-
                 gap: 8,
               },
               "@media (max-width: 653px)": {

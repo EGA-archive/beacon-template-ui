@@ -112,6 +112,18 @@ export default function ResultsTable() {
       : column
   );
 
+  const getColumnWidth = (columnId) =>
+    tableColumns.find((column) => column.id === columnId)?.width;
+
+  console.log(
+    "tableColumns order:",
+    tableColumns.map((column) => ({
+      id: column.id,
+      label: typeof column.label === "string" ? column.label : "custom label",
+      width: column.width,
+    }))
+  );
+
   useEffect(() => {
     const initialExpandedRows = {};
 
@@ -223,6 +235,8 @@ export default function ResultsTable() {
     return <DatasetsTable />;
   }
 
+  // console.log("item", item);
+
   return (
     <Box>
       <Paper
@@ -238,6 +252,10 @@ export default function ResultsTable() {
             stickyHeader
             aria-label="Results table"
             data-cy="results-table"
+            sx={{
+              tableLayout: "fixed",
+              width: "100%",
+            }}
           >
             <TableHead>
               <TableRow>
@@ -265,15 +283,21 @@ export default function ResultsTable() {
                   const { type: beaconType, datasetCount } =
                     getBeaconAggregationInfo(item);
 
-                  let displayValue;
+                  const DATA_VISIBILITY_LABELS = {
+                    boolean: "Presence only (boolean)",
+                    count: "Count",
+                    record: "Detailed records",
+                  };
 
-                  if (beaconType === "record") {
-                    displayValue = datasetCount;
-                  } else if (beaconType === "count") {
-                    displayValue = <i>Count Beacon</i>;
-                  } else {
-                    displayValue = <i>Boolean Beacon</i>;
-                  }
+                  const dataVisibilityValue =
+                    DATA_VISIBILITY_LABELS[beaconType] || "-";
+
+                  const datasetCountValue =
+                    beaconType === "record" &&
+                    datasetCount !== undefined &&
+                    datasetCount !== null
+                      ? datasetCount
+                      : "-";
 
                   return (
                     <React.Fragment key={index}>
@@ -307,7 +331,7 @@ export default function ResultsTable() {
                           data-cy="results-table-cell-id"
                           sx={{ fontWeight: "bold" }}
                           style={{
-                            width: BEACON_NETWORK_COLUMNS[0].width,
+                            width: getColumnWidth("beacon_dataset"),
                           }}
                         >
                           <Box
@@ -316,13 +340,24 @@ export default function ResultsTable() {
                             alignItems="center"
                             gap={1}
                           >
-                            {item.items.length > 0 &&
-                              item.beaconId &&
-                              (expandedRows[item.beaconId] ? (
-                                <KeyboardArrowDownIcon data-cy="results-row-collapse-icon" />
-                              ) : (
-                                <KeyboardArrowRightRoundedIcon data-cy="results-row-expand-icon" />
-                              ))}
+                            <Box
+                              sx={{
+                                width: "24px",
+                                minWidth: "24px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              {item.items?.length > 0 &&
+                                item.beaconId &&
+                                (expandedRows[item.beaconId] ? (
+                                  <KeyboardArrowDownIcon data-cy="results-row-collapse-icon" />
+                                ) : (
+                                  <KeyboardArrowRightRoundedIcon data-cy="results-row-expand-icon" />
+                                ))}
+                            </Box>
+
                             <span data-cy="results-table-id-value">
                               {item.beaconId || item.id || "Unavailable"}
                             </span>
@@ -334,7 +369,7 @@ export default function ResultsTable() {
                           <TableCell
                             sx={{ fontWeight: "bold" }}
                             style={{
-                              width: BEACON_NETWORK_COLUMNS[1].width,
+                              width: getColumnWidth("maturity"),
                             }}
                           >
                             {(() => {
@@ -345,17 +380,27 @@ export default function ResultsTable() {
                           </TableCell>
                         )}
 
+                        {/* Data Visibility Column in the Network */}
+                        {config.beaconType !== "singleBeacon" && (
+                          <TableCell
+                            sx={{ fontWeight: "bold" }}
+                            style={{
+                              width: getColumnWidth("data_visibility"),
+                            }}
+                          >
+                            <Box component="strong">{dataVisibilityValue}</Box>
+                          </TableCell>
+                        )}
+
                         {/* N of Datasets Column in the Network */}
                         {config.beaconType !== "singleBeacon" && (
                           <TableCell
                             sx={{ fontWeight: "bold" }}
                             style={{
-                              width: BEACON_NETWORK_COLUMNS.find(
-                                (c) => c.id === "datasets_count"
-                              )?.width,
+                              width: getColumnWidth("datasets_count"),
                             }}
                           >
-                            {displayValue}
+                            {datasetCountValue}
                           </TableCell>
                         )}
 
@@ -363,9 +408,7 @@ export default function ResultsTable() {
                         <TableCell
                           sx={{ fontWeight: "bold" }}
                           style={{
-                            width: BEACON_NETWORK_COLUMNS.find(
-                              (c) => c.id === "response"
-                            )?.width,
+                            width: getColumnWidth("response"),
                           }}
                         >
                           {/* Network Beacon logic to render correct values in the response */}
@@ -539,47 +582,60 @@ export default function ResultsTable() {
                           </TableCell>
                         )}
 
-                        {/* Contact */}
+                        {/* Contact Column
+                        Present in both Single and Network Beacons */}
                         <TableCell
                           style={{
-                            width: BEACON_NETWORK_COLUMNS.find(
-                              (c) => c.id === "contact"
-                            )?.width,
+                            width: getColumnWidth("contact"),
                           }}
                         >
-                          {itemEmail && (
-                            <Button
-                              variant="text"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEmail(itemEmail);
-                              }}
-                              sx={{
-                                textTransform: "none",
-                                fontSize: "14px",
-                                fontWeight: 400,
-                                fontFamily: '"Open Sans", sans-serif',
-                                backgroundColor: "transparent",
-                                color: config.ui.colors.primary,
-                                width: "50px",
-                                height: "30px",
-                                minWidth: "30px",
-                                minHeight: "30px",
-                                padding: 0,
-                                transition: "all 0.3s ease",
-                                backgroundColor: "transparent",
-                                "&:hover": { backgroundColor: "transparent" },
-                                "& .hoverIcon": { display: "none" },
-                                "&:hover .hoverIcon": {
-                                  display: "inline-flex",
-                                },
-                                "&:hover .defaultIcon": { display: "none" },
-                              }}
-                            >
-                              <LocalPostOfficeRoundedIcon className="hoverIcon" />
-                              <LocalPostOfficeOutlinedIcon className="defaultIcon" />
-                            </Button>
-                          )}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              width: "100%",
+                            }}
+                          >
+                            {itemEmail && (
+                              <Button
+                                variant="text"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEmail(itemEmail);
+                                }}
+                                sx={{
+                                  textTransform: "none",
+                                  fontSize: "14px",
+                                  fontWeight: 400,
+                                  fontFamily: '"Open Sans", sans-serif',
+                                  color: config.ui.colors.primary,
+                                  width: "50px",
+                                  height: "30px",
+                                  minWidth: "30px",
+                                  minHeight: "30px",
+                                  padding: 0,
+                                  transition: "all 0.3s ease",
+                                  backgroundColor: "transparent",
+                                  "&:hover": {
+                                    backgroundColor: "transparent",
+                                  },
+                                  "& .hoverIcon": {
+                                    display: "none",
+                                  },
+                                  "&:hover .hoverIcon": {
+                                    display: "inline-flex",
+                                  },
+                                  "&:hover .defaultIcon": {
+                                    display: "none",
+                                  },
+                                }}
+                              >
+                                <LocalPostOfficeRoundedIcon className="hoverIcon" />
+                                <LocalPostOfficeOutlinedIcon className="defaultIcon" />
+                              </Button>
+                            )}
+                          </Box>
                         </TableCell>
                       </TableRow>
                       {expandedRows[item.beaconId] && (

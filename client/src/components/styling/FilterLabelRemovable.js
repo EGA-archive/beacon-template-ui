@@ -199,13 +199,18 @@ export default function FilterLabelRemovable({
               ? chipBackgroundColor
               : chipHoverColor,
           },
-
           maxWidth: isExpanded ? "400px" : "auto",
           height: isExpanded ? "auto" : "fit-content",
         }}
       >
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography sx={{ fontSize: "14px" }} data-cy="filter-chip">
+          <Typography
+            sx={{
+              fontSize: "14px",
+              fontWeight: isEntryTypeChip ? 600 : 400,
+            }}
+            data-cy="filter-chip"
+          >
             {renderLabel()}
           </Typography>
 

@@ -1,19 +1,29 @@
 import { Box, Typography } from "@mui/material";
-import { useSelectedEntry } from "../../context/SelectedEntryContext";
+import { alpha } from "@mui/material/styles";
 import { GENOMIC_LABELS_MAP } from "../../genomic/genomicLabelHelper";
 import config from "../../../config/config.json";
-import { alpha } from "@mui/material/styles";
+
+import needHelpFirstImage from "../../../assets/logos/need-help.svg";
+import needHelpSequence from "../../../assets/logos/need-help-sequence.svg";
+import needHelpGene from "../../../assets/logos/need-help-gene.svg";
+import needHelpRange from "../../../assets/logos/need-help-range.svg";
+import needHelpBracket from "../../../assets/logos/need-help-bracket.svg";
 
 export default function GenomicQueryBuilderHelp({
   setSelectedQueryType,
-  handleClose,
-  setActiveInput,
   setTabDrafts,
 }) {
+  const primaryDarkColor = config.ui.colors.darkPrimary;
+  const HELP_LABEL_COLUMN_WIDTH = {
+    xs: "23%",
+    sm: "23%",
+  };
+
   const cards = [
     {
-      title: "Specific Variant",
+      title: "Retrieve by single variation",
       queryType: "Sequence Query",
+      image: needHelpSequence,
       examples: [
         {
           assemblyId: "GRCh38",
@@ -25,8 +35,9 @@ export default function GenomicQueryBuilderHelp({
       ],
     },
     {
-      title: "Gene / Protein Changes",
+      title: "Retrieve by Gene HGNC symbol",
       queryType: "Gene ID",
+      image: needHelpGene,
       examples: [
         {
           geneId: "BRCA1",
@@ -40,17 +51,9 @@ export default function GenomicQueryBuilderHelp({
       ],
     },
     {
-      title: "HGVS Expression",
-      queryType: "Genomic Allele Query (HGVS)",
-      examples: [
-        {
-          genomicAlleleShortForm: "NC_000022.11:g.16050527C>A",
-        },
-      ],
-    },
-    {
-      title: "Genomic Region",
+      title: "Retrieve all variants within or overlapping the genomic range",
       queryType: "Range Query",
+      image: needHelpRange,
       examples: [
         {
           assemblyId: "GRCh38",
@@ -61,8 +64,10 @@ export default function GenomicQueryBuilderHelp({
       ],
     },
     {
-      title: "Approximate Genomic Region",
+      title:
+        "Retrieve all variants with start and end positions within defined ranges",
       queryType: "Bracket Query",
+      image: needHelpBracket,
       examples: [
         {
           assemblyId: "GRCh38",
@@ -75,6 +80,49 @@ export default function GenomicQueryBuilderHelp({
       ],
     },
   ];
+
+  const helpRowGridStyles = {
+    display: "grid",
+    gridTemplateColumns: {
+      xs: "1fr",
+      md: "minmax(0, 1.35fr) minmax(280px, 0.85fr)",
+    },
+    gap: {
+      xs: 0,
+      sm: 0,
+      md: 4,
+    },
+    alignItems: "center",
+  };
+
+  const getQueryRowStyles = (queryType) => {
+    const needsMoreInnerGap =
+      queryType === "Range Query" || queryType === "Bracket Query";
+
+    const needsMoreTopGap = queryType === "Bracket Query";
+
+    return {
+      ...helpRowGridStyles,
+
+      // Gap between the image block and its example block
+      gap: needsMoreInnerGap
+        ? {
+            xs: 0,
+            sm: 0,
+            md: 4,
+          }
+        : helpRowGridStyles.gap,
+
+      // Extra space between Range Query row and Bracket Query row
+      mt: needsMoreTopGap
+        ? {
+            xs: 2,
+            sm: 2,
+            md: 2,
+          }
+        : 0,
+    };
+  };
 
   const handleExampleClick = (card, example) => {
     const queryType = card.queryType;
@@ -93,10 +141,6 @@ export default function GenomicQueryBuilderHelp({
         refAa: example.refAa,
         altAa: example.altAa,
         aaPosition: example.aaPosition,
-      },
-
-      "Genomic Allele Query (HGVS)": {
-        genomicHGVSshortForm: example.genomicAlleleShortForm,
       },
 
       "Range Query": {
@@ -127,244 +171,211 @@ export default function GenomicQueryBuilderHelp({
     setSelectedQueryType(queryType);
   };
 
+  const renderExampleLabel = (example) =>
+    Object.entries(example).map(([key, value], index, array) => (
+      <span key={key}>
+        {GENOMIC_LABELS_MAP[key] || key}: <strong>{value}</strong>
+        {index < array.length - 1 && " | "}
+      </span>
+    ));
+
+  const renderExamples = (card) => (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.5,
+      }}
+    >
+      {card.examples.map((example, index) => (
+        <Box
+          key={`${card.queryType}-${index}`}
+          onClick={() => handleExampleClick(card, example)}
+          sx={{
+            p: "8px 10px",
+            borderRadius: "6px",
+            border: `1px solid ${primaryDarkColor}`,
+            backgroundColor: alpha(config.ui.colors.secondary, 0.18),
+            fontSize: {
+              lg: "12px",
+              md: "12px",
+              sm: "11px",
+              xs: "10px",
+            },
+            lineHeight: "16px",
+            cursor: "pointer",
+            transition: "background-color 0.2s ease",
+
+            "&:hover": {
+              backgroundColor: alpha(config.ui.colors.secondary, 0.35),
+            },
+          }}
+        >
+          {renderExampleLabel(example)}
+        </Box>
+      ))}
+    </Box>
+  );
+
   return (
     <Box
       sx={{
-        mt: 2,
-        display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          lg: "repeat(6, 1fr)",
-        },
-        gap: 2,
-        gridAutoRows: "1fr",
-        alignItems: "stretch",
+        fontFamily: '"Open Sans", sans-serif',
+        // backgroundColor: {
+        //   lg: "lightsalmon",
+        //   md: "pink",
+        //   sm: "lightgreen",
+        //   xs: "lightblue",
+        // },
       }}
     >
-      {cards.map((card, index) => (
-        <Box
-          key={card.title}
-          onClick={() => setSelectedQueryType(card.queryType)}
+      {/* Intro */}
+      <Box sx={{ mb: 3 }}>
+        <Typography
           sx={{
-            gridColumn: {
-              xs: "span 1",
-              lg: index < 3 ? "span 2" : "span 3",
-            },
-            p: 2,
-            height: "210px",
-            border: "1px solid #3176B1",
-            borderRadius: "8px",
-            cursor: "pointer",
-            transition: "0.2s ease",
+            fontWeight: 700,
+            fontSize: "14px",
+            mb: 1,
           }}
         >
-          <Typography
+          What do you want to search?
+        </Typography>
+
+        <Typography
+          sx={{
+            fontSize: "12px",
+            lineHeight: "18px",
+          }}
+        >
+          If you want to know more about the genomic query types, you can visit
+          the{" "}
+          <Box
+            component="a"
+            href="https://beacon-documentation-demo.ega-archive.org/pi-querying-the-api#pi-get-method"
+            target="_blank"
+            rel="noreferrer"
             sx={{
               fontWeight: 700,
-              fontSize: "14px",
+              color: "inherit",
+              textDecoration: "underline",
+              cursor: "pointer",
             }}
           >
-            {card.title}
-          </Typography>
+            documentation
+          </Box>
+          .
+        </Typography>
+      </Box>
 
-          <Typography
+      {/* Main content */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+        }}
+      >
+        {/* Top row: chromosome overview + examples heading */}
+        <Box
+          sx={{
+            ...helpRowGridStyles,
+            alignItems: "start",
+          }}
+        >
+          <Box
+            component="img"
+            src={needHelpFirstImage}
+            alt="Genomic query overview"
             sx={{
-              mt: 1,
-              fontSize: "13px",
+              display: "block",
+              width: {
+                xs: `calc(100% - ${HELP_LABEL_COLUMN_WIDTH.xs})`,
+                sm: `calc(100% - ${HELP_LABEL_COLUMN_WIDTH.sm})`,
+              },
+              ml: {
+                xs: HELP_LABEL_COLUMN_WIDTH.xs,
+                sm: HELP_LABEL_COLUMN_WIDTH.sm,
+              },
+            }}
+          />
+
+          <Box
+            sx={{
+              display: {
+                xs: "none",
+                sm: "none",
+                md: "block",
+              },
             }}
           >
-            {card.title === "Specific Variant" && (
-              <>
-                Search by{" "}
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedQueryType("Sequence Query");
-                  }}
-                  style={{
-                    fontWeight: 700,
-                    textDecoration: "underline",
-                    cursor: "pointer",
-                  }}
-                >
-                  Sequence Query
-                </span>{" "}
-                or directly in the{" "}
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleClose();
-                    setActiveInput("genomic");
-                  }}
-                  style={{
-                    fontWeight: 700,
-                    textDecoration: "underline",
-                    cursor: "pointer",
-                  }}
-                >
-                  search bar
-                </span>
-                .
-              </>
-            )}
-
-            {card.title === "Gene / Protein Changes" && (
-              <>
-                Search by{" "}
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedQueryType("Gene ID");
-                  }}
-                  style={{
-                    fontWeight: 700,
-                    textDecoration: "underline",
-                    cursor: "pointer",
-                  }}
-                >
-                  Gene ID
-                </span>
-                .
-              </>
-            )}
-
-            {card.title === "HGVS Expression" && (
-              <>
-                Search using{" "}
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedQueryType("Genomic Allele Query (HGVS)");
-                  }}
-                  style={{
-                    fontWeight: 700,
-                    textDecoration: "underline",
-                    cursor: "pointer",
-                  }}
-                >
-                  HGVS
-                </span>{" "}
-                notation.
-              </>
-            )}
-
-            {card.title === "Genomic Region" && (
-              <>
-                Search variants within a genomic range in{" "}
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedQueryType("Range Query");
-                  }}
-                  style={{
-                    fontWeight: 700,
-                    textDecoration: "underline",
-                    cursor: "pointer",
-                  }}
-                >
-                  Range Query
-                </span>
-                .
-              </>
-            )}
-
-            {card.title === "Approximate Genomic Region" && (
-              <>
-                Search around a genomic position using a distance offset with{" "}
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedQueryType("Bracket Query");
-                  }}
-                  style={{
-                    fontWeight: 700,
-                    textDecoration: "underline",
-                    cursor: "pointer",
-                  }}
-                >
-                  Bracket Query
-                </span>
-                .
-              </>
-            )}
-          </Typography>
-
-          {card.examples && (
-            <Box
+            <Typography
               sx={{
-                mt: 1.5,
+                fontWeight: 700,
+                fontSize: "14px",
+                mb: 1,
               }}
             >
-              <Typography
-                sx={{
-                  fontSize: "12px",
-                  mb: 0.5,
-                }}
-              >
-                Example:
-              </Typography>
+              Examples
+            </Typography>
 
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 1,
-                }}
-              >
-                {card.examples.map((example, index) => (
-                  <Box
-                    key={index}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleExampleClick(card, example);
-                    }}
-                    sx={{
-                      display: "inline-flex",
-                      width: "fit-content",
-                      alignItems: "center",
-                      flexWrap: "wrap",
-
-                      px: "12px",
-                      py: "4px",
-
-                      borderRadius: "8px",
-                      border: "1px solid black",
-
-                      color: "black",
-                      backgroundColor: alpha(config.ui.colors.secondary, 0.4),
-
-                      fontSize: "12px",
-                      cursor: "pointer",
-
-                      transition: "background-color 0.2s ease",
-
-                      "&:hover": {
-                        backgroundColor: alpha(config.ui.colors.secondary, 0.6),
-                      },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: 0.5,
-                      }}
-                    >
-                      {Object.entries(example).map(([key, value], idx, arr) => (
-                        <span key={key}>
-                          {GENOMIC_LABELS_MAP[key] || key}:{" "}
-                          <strong>{value}</strong>
-                          {idx < arr.length - 1 && " | "}
-                        </span>
-                      ))}
-                    </Box>
-                  </Box>
-                ))}
-              </Box>
-            </Box>
-          )}
+            <Typography
+              sx={{
+                fontSize: "12px",
+                lineHeight: "16px",
+              }}
+            >
+              Select an example to automatically populate the query fields.
+            </Typography>
+          </Box>
         </Box>
-      ))}
+
+        {/* Query rows */}
+        {cards.map((card) => (
+          <Box key={card.queryType} sx={getQueryRowStyles(card.queryType)}>
+            <Box
+              onClick={() => setSelectedQueryType(card.queryType)}
+              sx={{
+                cursor: "pointer",
+                borderRadius: "8px",
+                transition: "opacity 0.2s ease, transform 0.2s ease",
+
+                "&:hover": {
+                  opacity: 0.85,
+                  transform: "translateY(-1px)",
+                },
+              }}
+            >
+              <Box
+                component="img"
+                src={card.image}
+                alt={`${card.queryType}: ${card.title}`}
+                sx={{
+                  width: "100%",
+                  display: "block",
+                }}
+              />
+            </Box>
+
+            <Box
+              //  Check with Sara
+              // This is the alignment of the Bracket Query label
+              sx={{
+                alignSelf:
+                  card.queryType === "Bracket Query"
+                    ? {
+                        xs: "center",
+                        sm: "center",
+                        md: "center",
+                        lg: "start",
+                      }
+                    : "center",
+              }}
+            >
+              {renderExamples(card)}
+            </Box>
+          </Box>
+        ))}
+      </Box>
     </Box>
   );
 }

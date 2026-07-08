@@ -14,7 +14,6 @@ import { BEACON_NETWORK_COLUMNS_EXPANDED } from "../../lib/tableConstants";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import config from "../../config/config.json";
-import { lighten } from "@mui/system";
 import { getDatasetType } from "./utils/beaconType";
 
 // This component renders only for Beacon Networks
@@ -96,36 +95,43 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
                   const isBoolean = dataset.type === "boolean";
 
                   return (
-                    <TableRow key={i}>
+                    <TableRow
+                      key={i}
+                      sx={{
+                        height: "55px",
+                        "& > td": {
+                          height: "55px",
+                          py: 0,
+                        },
+                      }}
+                    >
                       {/* Dataset ID */}
                       <TableCell
-                        style={{
+                        sx={{
                           width:
                             BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset_name
                               .width,
                         }}
                       >
-                        <Box sx={{ display: "flex", pl: 9 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            pl: 9,
+                            minWidth: 0,
+                          }}
+                        >
                           <Typography
+                            variant="body2"
                             sx={{
                               pl: 6.5,
+                              minWidth: 0,
+                              width: "100%",
                               whiteSpace: "normal",
-                              wordWrap: "break-word",
-                              maxWidth: {
-                                xs: "250px",
-                                sm: "350px",
-                                md: "450px",
-                                lg: "550px",
-                                xl: "650px",
-                              },
+                              overflowWrap: "anywhere",
+                              wordBreak: "break-word",
                             }}
-                            variant="body2"
                           >
-                            {dataset.dataset ? (
-                              dataset.dataset
-                            ) : (
-                              <i>Undefined</i>
-                            )}
+                            {dataset.dataset || <i>Undefined</i>}
                           </Typography>
                         </Box>
                       </TableCell>
@@ -139,12 +145,20 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
                         }}
                       />
 
-                      {/* Empty column 2 */}
+                      {/* Empty column 3 */}
                       <TableCell
                         style={{
                           width:
                             BEACON_NETWORK_COLUMNS_EXPANDED
                               .beacon_dataset_empty_two.width,
+                        }}
+                      />
+                      {/* Empty column 2 */}
+                      <TableCell
+                        style={{
+                          width:
+                            BEACON_NETWORK_COLUMNS_EXPANDED
+                              .beacon_dataset_empty_three.width,
                         }}
                       />
 
