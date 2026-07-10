@@ -325,12 +325,12 @@ export default function Search({
           backgroundColor: "#FFFFFF",
           boxShadow: "0px 8px 11px 0px #9BA0AB24",
           p: "24px 30px",
-          backgroundColor: {
-            lg: "lightsalmon",
-            md: "pink",
-            sm: "lightgreen",
-            xs: "lightblue",
-          },
+          // backgroundColor: {
+          //   lg: "lightsalmon",
+          //   md: "pink",
+          //   sm: "lightgreen",
+          //   xs: "lightblue",
+          // },
           [between900And1100]: {
             mb: 0,
           },

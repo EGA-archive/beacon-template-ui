@@ -47,6 +47,8 @@ export default function ResultsTable() {
     lastSearchedPathSegment,
   } = useSelectedEntry();
 
+  console.log("resultData", resultData);
+
   // expandedRow and selectedSubRow have very similar logs.
   // expandedRow populates when the row is open (when the user clicks)
   // selectedSubRow populates when the user clicks to open the deatils
@@ -114,15 +116,6 @@ export default function ResultsTable() {
 
   const getColumnWidth = (columnId) =>
     tableColumns.find((column) => column.id === columnId)?.width;
-
-  console.log(
-    "tableColumns order:",
-    tableColumns.map((column) => ({
-      id: column.id,
-      label: typeof column.label === "string" ? column.label : "custom label",
-      width: column.width,
-    }))
-  );
 
   useEffect(() => {
     const initialExpandedRows = {};
@@ -275,9 +268,12 @@ export default function ResultsTable() {
             </TableHead>
             <TableBody>
               {resultData
+
                 // This lines of code filters out erroring out beacons
                 .filter((item) => item.exists === true && !item.info?.error)
+
                 .map((item, index) => {
+                  console.log(item);
                   const itemEmail = findBeaconEmail(item.beaconId);
 
                   const { type: beaconType, datasetCount } =
