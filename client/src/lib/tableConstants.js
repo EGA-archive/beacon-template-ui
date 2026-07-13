@@ -229,6 +229,18 @@ export const BEACON_NETWORK_COLUMNS_EXPANDED = {
   },
 };
 
+const dataVisibilityColumn = BEACON_NETWORK_COLUMNS.find(
+  (column) => column.id === "data_visibility"
+);
+
+const responseColumn = BEACON_NETWORK_COLUMNS.find(
+  (column) => column.id === "response"
+);
+
+const contactColumn = BEACON_NETWORK_COLUMNS.find(
+  (column) => column.id === "contact"
+);
+
 export const BEACON_SINGLE_COLUMNS = [
   {
     id: "beacon_dataset",
@@ -238,79 +250,19 @@ export const BEACON_SINGLE_COLUMNS = [
       </Box>
     ),
     align: "left",
-    width: "20%",
+    width: "35%",
   },
   {
-    id: "response",
-    label: (
-      <Box display="flex" alignItems="center" gap={1}>
-        Search Results
-        <Tooltip
-          title={
-            <Box
-              sx={{
-                p: 1,
-                fontFamily: '"Open Sans", sans-serif',
-              }}
-            >
-              The response can be a Boolean (yes/no), a count or detailed
-              records.
-            </Box>
-          }
-          placement="top-start"
-          arrow
-          componentsProps={{
-            tooltip: {
-              sx: {
-                backgroundColor: "#fff",
-                color: "#000",
-                border: "1px solid black",
-                maxWidth: "300px",
-              },
-            },
-            arrow: {
-              sx: {
-                color: "#fff",
-                "&::before": { border: "1px solid black" },
-              },
-            },
-          }}
-        >
-          <Box
-            component="span"
-            sx={{
-              cursor: "pointer",
-              width: "18px",
-              height: "18px",
-              borderRadius: "50%",
-              backgroundColor: "white",
-              color: primaryColor,
-              textAlign: "center",
-              fontSize: "12px",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            i
-          </Box>
-        </Tooltip>
-      </Box>
-    ),
-    width: "20%",
-    align: "left",
+    ...dataVisibilityColumn,
+    width: "25%",
   },
   {
-    id: "details",
-    label: "Details",
-    width: "15%",
-    align: "left",
+    ...responseColumn,
+    width: "30%",
   },
   {
-    id: "contact",
-    label: "Contact",
+    ...contactColumn,
     width: "10%",
-    align: "left",
   },
 ];
 

@@ -128,7 +128,7 @@ export default function ResultsTableToolbar({
   const shouldPulse = visibleColumns.length < sortedHeaders.length;
 
   return (
-    <Box sx={{ mb: 3 }}>
+    <Box sx={{ mb: 2 }}>
       {/* Total Results */}
       <Box
         sx={{
@@ -170,7 +170,6 @@ export default function ResultsTableToolbar({
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: 2,
         }}
       >
         {/* Left Side */}
@@ -178,7 +177,6 @@ export default function ResultsTableToolbar({
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: 1,
             flexWrap: "wrap",
           }}
         >

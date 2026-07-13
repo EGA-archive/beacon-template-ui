@@ -8,10 +8,17 @@ import config from "../../config/config.json";
 
 export default function DatasetDetailedTablePage() {
   const searchParams = new URLSearchParams(window.location.search);
+
   const beaconId = searchParams.get("beaconId");
   const datasetId = searchParams.get("datasetId");
-  const storageKey = `datasetDetailedTable_${beaconId}_${datasetId}`;
-  const data = JSON.parse(localStorage.getItem(storageKey) || "{}");
+  const entryType = searchParams.get("entryType");
+  const filterIds = searchParams.get("filterIds");
+  const queryId = searchParams.get("queryId");
+
+  const storageKey = `datasetDetailedTable_${queryId}`;
+
+  const storedData = localStorage.getItem(storageKey);
+  const data = storedData ? JSON.parse(storedData) : {};
 
   const [visibleColumns, setVisibleColumns] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -57,7 +64,7 @@ export default function DatasetDetailedTablePage() {
             flexWrap: "wrap",
             gap: 1,
             rowGap: 0.5,
-            mb: 3,
+            mb: 2,
             fontSize: { xs: "12px", sm: "13px", md: "14px", lg: "16px" },
           }}
         >
@@ -104,7 +111,7 @@ export default function DatasetDetailedTablePage() {
                   whiteSpace: "nowrap",
                 }}
               >
-                Beacon: <b>{data.beaconId || "—"}</b>
+                Beacon: <b>{data.beaconName || data.beaconId || "—"}</b>
               </Typography>
             </>
           )}
@@ -132,7 +139,7 @@ export default function DatasetDetailedTablePage() {
             display: "flex",
             alignItems: "center",
             gap: 2,
-            mb: 3,
+            mb: 2,
           }}
         >
           <Typography

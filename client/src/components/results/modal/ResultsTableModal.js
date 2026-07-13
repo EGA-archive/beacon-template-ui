@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Box, Typography, TablePagination } from "@mui/material";
 import Modal from "@mui/material/Modal";
 import Fade from "@mui/material/Fade";
@@ -41,9 +41,12 @@ const ResultsTableModal = ({
 
   const limit = responseMeta?.receivedRequestSummary?.pagination?.limit;
 
+  const columnsInitialized = useRef(false);
+
   useEffect(() => {
-    if (headers && headers.length > 0 && visibleColumns.length === 0) {
+    if (!columnsInitialized.current && headers?.length > 0) {
       setVisibleColumns(headers);
+      columnsInitialized.current = true;
     }
   }, [headers]);
 
@@ -204,6 +207,15 @@ const ResultsTableModal = ({
     setPage(0);
   }, [searchTerm]);
 
+  useEffect(() => {
+    console.group("DETAILS TABLE COLUMN CHECK");
+    console.log("headers:", headers);
+    console.log("visibleColumns:", visibleColumns);
+    console.log("visibleColumns length:", visibleColumns.length);
+    console.log("Should show empty message:", visibleColumns.length === 0);
+    console.groupEnd();
+  }, [headers, visibleColumns]);
+
   return (
     <Modal open={open} onClose={handleClose}>
       <Fade in={open}>
@@ -273,6 +285,9 @@ const ResultsTableModal = ({
               />
             )}
 
+            {/* {!loading && visibleColumns.length === 0 && (
+              <ResultsEmpty message="To view the details table, please select at least one column" />
+            )} */}
             {!loading && visibleColumns.length === 0 && (
               <ResultsEmpty message="To view the details table, please select at least one column" />
             )}

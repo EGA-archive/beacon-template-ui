@@ -172,7 +172,6 @@ export default function HomePage({
               },
               [twoValuesStackSearchandCommonFilters]: {
                 mt: "-18px",
-                backgroundColor: "mistyrose",
                 mb: "45px",
               },
             }}

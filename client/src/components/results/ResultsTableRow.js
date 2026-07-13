@@ -17,7 +17,7 @@ import config from "../../config/config.json";
 import { getDatasetType } from "./utils/beaconType";
 
 // This component renders only for Beacon Networks
-export default function ResultsTableRow({ item, handleOpenModal }) {
+export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
   const { setActualLoadedCount } = useSelectedEntry();
 
   // This function decides what number to render in the response column at a dataset level
@@ -201,6 +201,7 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
                                   onClick={() =>
                                     handleOpenModal({
                                       beaconId: item.beaconId,
+                                      beaconName,
                                       datasetId: dataset.dataset,
                                       dataTable: dataset.results || [],
                                       displayedCount,

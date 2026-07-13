@@ -29,7 +29,6 @@ export default function ResultsContainer() {
     return !item.info?.error;
   });
 
-  console.log("positiveResults", positiveResults);
   return (
     <>
       {showBox && (
