@@ -1,11 +1,4 @@
-import {
-  useState,
-  Fragment,
-  useEffect,
-  useCallback,
-  useMemo,
-  useRef,
-} from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   Box,
   Paper,
@@ -19,7 +12,6 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import config from "../../../config/config.json";
-import ResultsTableModalRow from "./ResultsTableModalRow";
 import { queryBuilder } from "../../search/utils/queryBuilder";
 import ResultsTableToolbar from "./ResultsTableToolbar";
 import { exportCSV } from "../utils/exportCSV";
@@ -28,6 +20,7 @@ import {
   summarizeValue,
   formatHeaderName,
 } from "../utils/tableHelpers";
+import FrequencyInPopulationsCell from "../modal/cellRenderers/FrequencyInPopulationsCell";
 import InterventionsOrProceduresCell from "../modal/cellRenderers/InterventionsOrProceduresCell";
 import MeasuresCell from "../modal/cellRenderers/MeasuresCell";
 import InfoCell from "../modal/cellRenderers/InfoCell";
@@ -41,6 +34,7 @@ import defaultsortingicon from "../../../assets/logos/default-sorting-icon.svg";
 import sortascIcon from "../../../assets/logos/sort-asc.svg";
 import sortdescIcon from "../../../assets/logos/sort-desc.svg";
 import { getSortableValue } from "../utils/sortValue";
+import ResultsEmpty from "../ResultsEmpty";
 
 /**
  * Displays paginated results inside the modal.
@@ -50,7 +44,6 @@ const ResultsTableModalBody = ({
   dataTable,
   entryTypeId,
   selectedPathSegment,
-  beaconId,
   datasetId,
   displayedCount,
   headers: providedHeaders = [],
@@ -62,8 +55,8 @@ const ResultsTableModalBody = ({
   searchTerm,
   setSearchCount,
   selectedFilters,
+  onOpenAlleleFrequency,
 }) => {
-  const [expandedRow, setExpandedRow] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
   const [downloadLimitInfo, setDownloadLimitInfo] = useState(null);
   const [sortColumn, setSortColumn] = useState(null);
@@ -75,10 +68,6 @@ const ResultsTableModalBody = ({
 
   const start = page * rowsPerPage;
   const end = start + rowsPerPage;
-
-  useEffect(() => {
-    setFilteredData(dataTable);
-  }, [dataTable]);
 
   const StyledTableCell = useMemo(
     () =>
@@ -158,13 +147,12 @@ const ResultsTableModalBody = ({
 
   /** Initialize visible columns once (no eslint disable, no re-runs) */
   useEffect(() => {
-    if (
-      !initialized.current &&
-      sortedHeaders.length > 0 &&
-      visibleColumns.length === 0
-    ) {
-      setVisibleColumns(sortedHeaders.map((h) => h.id));
-      initialized.current = true;
+    if (initialized.current || sortedHeaders.length === 0) return;
+
+    initialized.current = true;
+
+    if (visibleColumns.length === 0) {
+      setVisibleColumns(sortedHeaders.map((header) => header.id));
     }
   }, [sortedHeaders, visibleColumns.length, setVisibleColumns]);
 
@@ -255,7 +243,6 @@ const ResultsTableModalBody = ({
   const handleExport = useCallback(
     (downloadMode = "view") => {
       return exportCSV({
-        // dataTable,
         dataTable: sortedFilteredData,
         sortedHeaders,
         visibleColumns,
@@ -274,7 +261,7 @@ const ResultsTableModalBody = ({
       });
     },
     [
-      dataTable,
+      sortedFilteredData,
       sortedHeaders,
       visibleColumns,
       searchTerm,
@@ -293,12 +280,15 @@ const ResultsTableModalBody = ({
     molecularAttributes: MolecularAttributesCell,
     variation: VariationCell,
     caseLevelData: CaseLevelDataCell,
+    frequencyInPopulations: FrequencyInPopulationsCell,
   };
 
   /** Render table cell content */
   const renderCellContent = useCallback((item, column) => {
     const value = item[column];
-    if (!value) return "-";
+    if (value === null || value === undefined || value === "") {
+      return "-";
+    }
 
     if (
       (column === "phenotypicFeatures" || column === "exposures") &&
@@ -310,7 +300,9 @@ const ResultsTableModalBody = ({
 
           const parts = Object.entries(entry)
             .map(([key, val]) => {
-              if (!val) return null;
+              if (val === null || val === undefined || val === "") {
+                return null;
+              }
               if (typeof val === "object" && !Array.isArray(val)) {
                 if (val.iso8601duration)
                   return `Age at exposure: ${val.iso8601duration}`;
@@ -349,7 +341,6 @@ const ResultsTableModalBody = ({
     <Box
       sx={{
         maxHeight: "70vh",
-        // overflow: "hidden",
         display: "flex",
         flexDirection: "column",
       }}
@@ -365,29 +356,38 @@ const ResultsTableModalBody = ({
         count={displayedCount}
         loadedCount={dataTable.length}
       />
-
-      <Paper
-        sx={{
-          width: "100%",
-          flexGrow: 1,
-          overflow: "hidden",
-          boxShadow: "none",
-          borderRadius: 0,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <TableContainer
+      {visibleColumns?.length === 0 ? (
+        <Box
           sx={{
-            overflowX: "auto",
+            minHeight: "250px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <Table stickyHeader aria-label="Results table">
-            <TableHead>
-              <StyledTableRow>
-                {orderedVisibleHeaders
-                  .filter((col) => visibleColumns.includes(col.id))
-                  .map((column) => (
+          <ResultsEmpty message="To view the details table, please select at least one column" />
+        </Box>
+      ) : (
+        <Paper
+          sx={{
+            width: "100%",
+            flexGrow: 1,
+            overflow: "hidden",
+            boxShadow: "none",
+            borderRadius: 0,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <TableContainer
+            sx={{
+              overflowX: "auto",
+            }}
+          >
+            <Table stickyHeader aria-label="Results table">
+              <TableHead>
+                <StyledTableRow>
+                  {orderedVisibleHeaders.map((column) => (
                     <TableCell key={column.id} sx={headerCellStyle}>
                       <Box
                         sx={{
@@ -417,20 +417,18 @@ const ResultsTableModalBody = ({
                       </Box>
                     </TableCell>
                   ))}
-              </StyledTableRow>
-            </TableHead>
-            <TableBody>
-              {visibleRows.map((item, index) => {
-                const isExpanded =
-                  expandedRow !== null && expandedRow.id === item.id;
-                const parsedInfo = cleanAndParseInfo(item.info);
-                const id = `${item.id || `row_${index}`}${
-                  parsedInfo?.sampleID ? `_${parsedInfo.sampleID}` : ""
-                }`;
+                </StyledTableRow>
+              </TableHead>
+              <TableBody>
+                {visibleRows.map((item, index) => {
+                  const parsedInfo = cleanAndParseInfo(item.info);
+                  const id = `${item.id || `row_${index}`}${
+                    parsedInfo?.sampleID ? `_${parsedInfo.sampleID}` : ""
+                  }`;
 
-                return (
-                  <Fragment key={id}>
+                  return (
                     <StyledTableRow
+                      key={id}
                       hover
                       sx={{
                         "&.MuiTableRow-root": {
@@ -443,61 +441,55 @@ const ResultsTableModalBody = ({
                         fontWeight: "bold",
                       }}
                     >
-                      {orderedVisibleHeaders
-                        .filter((col) => visibleColumns.includes(col.id))
-                        .map((col) => (
-                          <StyledTableCell
-                            key={`${id}-${col.id}`}
-                            sx={{
-                              fontSize: "11px",
-                              whiteSpace: "wrap",
-                              overflowWrap: "anywhere",
-                              verticalAlign: "top",
-                            }}
-                            data-cy={
-                              col.id === "identifiers"
-                                ? "variant-identifiers-cell"
-                                : undefined
-                            }
-                            style={{
-                              width: col.width || "auto",
-                              maxWidth:
-                                col.id === "variantInternalId"
-                                  ? "300px"
-                                  : "250px",
-                            }}
-                          >
-                            {(() => {
-                              const Renderer = CELL_RENDERERS[col.id];
-                              return Renderer ? (
-                                <Renderer
-                                  value={item[col.id]}
-                                  searchTerm={searchTerm}
-                                />
-                              ) : (
-                                highlightText(
-                                  renderCellContent(item, col.id),
-                                  searchTerm
-                                )
-                              );
-                            })()}
-                          </StyledTableCell>
-                        ))}
-                    </StyledTableRow>
+                      {orderedVisibleHeaders.map((col) => (
+                        <StyledTableCell
+                          key={`${id}-${col.id}`}
+                          sx={{
+                            fontSize: "11px",
+                            whiteSpace: "normal",
+                            overflowWrap: "anywhere",
+                            verticalAlign: "top",
+                          }}
+                          data-cy={
+                            col.id === "identifiers"
+                              ? "variant-identifiers-cell"
+                              : undefined
+                          }
+                          style={{
+                            width: col.width || "auto",
+                            maxWidth:
+                              col.id === "variantInternalId"
+                                ? "300px"
+                                : "250px",
+                          }}
+                        >
+                          {(() => {
+                            const Renderer = CELL_RENDERERS[col.id];
 
-                    {isExpanded && (
-                      <ResultsTableModalRow
-                        key={`expanded-${id}`}
-                        item={expandedRow}
-                      />
-                    )}
-                  </Fragment>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
+                            return Renderer ? (
+                              <Renderer
+                                value={item[col.id]}
+                                item={item}
+                                searchTerm={searchTerm}
+                                onOpenAlleleFrequency={onOpenAlleleFrequency}
+                              />
+                            ) : (
+                              highlightText(
+                                renderCellContent(item, col.id),
+                                searchTerm
+                              )
+                            );
+                          })()}
+                        </StyledTableCell>
+                      ))}
+                    </StyledTableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      )}
       <DownloadLimitDialog
         open={Boolean(downloadLimitInfo)}
         totalResults={downloadLimitInfo?.totalResults}

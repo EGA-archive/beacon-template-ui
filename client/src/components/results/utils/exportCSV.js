@@ -4,7 +4,7 @@ import config from "../../../config/config.json";
  * Maximum number of records allowed in a CSV download.
  * This protects the browser from downloading extremely large datasets.
  */
-const MAX_DOWNLOAD_RECORDS = 5000;
+const MAX_DOWNLOAD_RECORDS = 1000;
 
 /**
  * Exports either:

@@ -13,6 +13,7 @@ import LoginModal from "./components/common/LoginModal";
 import { logosHelper } from "./lib/logosHelper";
 import { CookieBanner } from "@ega/beacon-cookie-consent";
 import DatasetDetailedTablePage from "./components/pages/DatasetDetailedTablePage";
+import AlleleFrequencyPage from "./components/results/modal/AlleleFrequencyPage";
 import {
   BrowserRouter as Router,
   Routes,
@@ -139,6 +140,10 @@ export default function App() {
               <Route
                 path="/dataset-detailed-table"
                 element={<DatasetDetailedTablePage />}
+              />
+              <Route
+                path="/allele-frequency"
+                element={<AlleleFrequencyPage />}
               />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>

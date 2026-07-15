@@ -6,8 +6,6 @@ import {
   Typography,
 } from "@mui/material";
 
-import config from "../../../config/config.json";
-
 export default function DownloadLimitDialog({
   open,
   totalResults,
