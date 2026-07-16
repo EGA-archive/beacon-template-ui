@@ -13,7 +13,7 @@ import LoginModal from "./components/common/LoginModal";
 import { logosHelper } from "./lib/logosHelper";
 import { CookieBanner } from "@ega/beacon-cookie-consent";
 import DatasetDetailedTablePage from "./components/pages/DatasetDetailedTablePage";
-import AlleleFrequencyPage from "./components/results/modal/AlleleFrequencyPage";
+import AlleleFrequencyPage from "./components/results/modal/alleleFrequency/AlleleFrequencyPage";
 import {
   BrowserRouter as Router,
   Routes,

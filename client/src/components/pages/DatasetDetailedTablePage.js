@@ -4,11 +4,10 @@ import Loader from "../common/Loader";
 import ResultsEmpty from "../results/ResultsEmpty";
 import ResultsTableModalBody from "../results/modal/ResultsTableModalBody";
 import ResultsPageHeader from "../results/modal/ResultsPageHeader";
-import { useDatasetRecordsTransfer } from "../results/hooks/useDatasetRecordsTransfer";
-import { useDatasetFallbackFetch } from "../results/hooks/useDatasetFallbackFetch";
+import { useDatasetDetailedRecordsTransfer } from "../results/hooks/useDatasetDetailedRecordsTransfer";
+import { useDatasetDetailedRecordsFallback } from "../results/hooks/useDatasetDetailedRecordsFallback";
 import { openAlleleFrequencyPage } from "../results/utils/openAlleleFrequencyPage";
-import { useDatasetDetailedPageContext } from "../results/hooks/useDatasetDetailedPageContext";
-
+import { useDatasetDetailedTableContext } from "../results/hooks/useDatasetDetailedTableContext";
 /**
  It displays the detailed records for one selected dataset from the main results table.
  When the page first opens, it tries to receive the 100 records that were already loaded on the Results page. This makes the table appear quickly and avoids storing large amounts of data in localStorage.
@@ -29,14 +28,13 @@ export default function DatasetDetailedTablePage() {
    */
   const {
     queryId,
-    data,
+    storedContext,
     selectedFilters,
-    selectedPathSegment,
-    targetBeaconId,
-    targetDatasetId,
+    selectedEntryTypePath,
+    beaconId,
+    datasetId,
     entryTypeId,
-  } = useDatasetDetailedPageContext();
-
+  } = useDatasetDetailedTableContext();
   /**
    * Store the detailed records shown in the table.
    * loading is used when the page must request the records again.
@@ -47,39 +45,45 @@ export default function DatasetDetailedTablePage() {
   const [fetchError, setFetchError] = useState("");
 
   /**
-   Try to receive the records that are already loaded in the main results table.
+   * Try to receive the records that are already loaded in the main Results table.
    *
-   * waitingForTransfer: The page is waiting for the original Results table to send the records.
+   * isWaitingForTransferredRecords:
+   * The page is waiting for the original Results tab to send the records.
    *
-   * receivedPreloadedData: The records were successfully received from the original tab.
+   * hasTransferredRecords:
+   * The records were successfully received from the original tab.
    *
-   * shouldFetchFallback: The transfer was not possible, so the page must request the records from the Beacon API.
+   * shouldFetchRecords:
+   * The transfer was not possible, so the page must request the records
+   * from the Beacon API.
    */
-  const { waitingForTransfer, receivedPreloadedData, shouldFetchFallback } =
-    useDatasetRecordsTransfer({
-      queryId,
-      setDataTable,
-      setLoading,
-      setFetchError,
-    });
+  const {
+    isWaitingForTransferredRecords,
+    hasTransferredRecords,
+    shouldFetchRecords,
+  } = useDatasetDetailedRecordsTransfer({
+    queryId,
+    setRecords: setDataTable,
+    setLoading,
+    setError: setFetchError,
+  });
 
   /**
    * Request the records from the Beacon API only when the main result table cannot send them.
    *
    * This normally happens when the user refreshes the detailed-table page or opens it without the original Results tab.
    */
-  useDatasetFallbackFetch({
-    shouldFetchFallback,
-    receivedPreloadedData,
-    selectedPathSegment,
-    selectedFilters,
-    targetBeaconId,
-    targetDatasetId,
-    setDataTable,
+  useDatasetDetailedRecordsFallback({
+    shouldFetchRecords,
+    hasTransferredRecords,
+    entryTypePath: selectedEntryTypePath,
+    queryFilters: selectedFilters,
+    beaconId,
+    datasetId,
+    setRecords: setDataTable,
     setLoading,
-    setFetchError,
+    setError: setFetchError,
   });
-
   /**
    * State used by the dataset detailed table interface.
    * visibleColumns: The columns currently selected by the user.
@@ -137,11 +141,11 @@ export default function DatasetDetailedTablePage() {
   const handleOpenAlleleFrequency = (item) => {
     openAlleleFrequencyPage({
       item,
-      beaconId: targetBeaconId,
-      beaconName: data.beaconName,
-      datasetId: targetDatasetId,
+      beaconId,
+      beaconName: storedContext.beaconName,
+      datasetId,
       entryTypeId,
-      appliedQuery: data.appliedQuery,
+      appliedQuery: storedContext.appliedQuery,
     });
   };
 
@@ -155,7 +159,7 @@ export default function DatasetDetailedTablePage() {
    * Decide which content should currently be displayed.
    */
   const hasRecords = dataTable.length > 0;
-  const isReady = !waitingForTransfer && !loading && !fetchError;
+  const isReady = !isWaitingForTransferredRecords && !loading && !fetchError;
 
   const canRenderTable = isReady && hasRecords;
   const showEmptyState = isReady && !hasRecords;
@@ -182,9 +186,9 @@ export default function DatasetDetailedTablePage() {
         {/* Shared header with page title, Beacon, dataset and applied query, same as per the AF Page*/}
         <ResultsPageHeader
           pageTitle="Dataset Detailed Table"
-          beaconName={data.beaconName || targetBeaconId}
-          datasetName={targetDatasetId}
-          appliedQuery={data.appliedQuery}
+          beaconName={storedContext.beaconName || beaconId}
+          datasetName={datasetId}
+          appliedQuery={storedContext.appliedQuery}
         />
 
         {/* Shown only when the API fallback request is loading */}
@@ -199,11 +203,11 @@ export default function DatasetDetailedTablePage() {
             <ResultsTableModalBody
               dataTable={dataTable}
               entryTypeId={entryTypeId}
-              selectedPathSegment={selectedPathSegment}
+              selectedPathSegment={selectedEntryTypePath}
               selectedFilters={selectedFilters}
-              beaconId={targetBeaconId}
-              datasetId={targetDatasetId}
-              displayedCount={data.displayedCount}
+              beaconId={beaconId}
+              datasetId={datasetId}
+              displayedCount={storedContext.displayedCount}
               headers={[]}
               visibleColumns={visibleColumns}
               setVisibleColumns={setVisibleColumns}

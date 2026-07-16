@@ -1,4 +1,4 @@
-import AlleleFrequenciesButton from "../AlleleFrequenciesButton";
+import AlleleFrequenciesButton from "../alleleFrequency/AlleleFrequenciesButton";
 
 const hasAlleleFrequencies = (value) =>
   Array.isArray(value) &&

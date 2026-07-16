@@ -1,5 +1,5 @@
 import { ButtonBase } from "@mui/material";
-import alleleFrequenciesSvg from "../../../assets/logos/allele-frequencies.svg";
+import alleleFrequenciesSvg from "../../../../assets/logos/allele-frequencies.svg";
 
 export default function AlleleFrequenciesButton({ onClick }) {
   return (
