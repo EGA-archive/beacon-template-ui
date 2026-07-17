@@ -21,7 +21,11 @@ import config from "../../../../config/config.json";
 
 const primaryDarkColor = config.ui.colors.darkPrimary;
 
-export default function AlleleFrequencyTable({ rows = [] }) {
+export default function AlleleFrequencyTable({
+  rows = [],
+  highlightedRowId = null,
+  onHighlightRow,
+}) {
   return (
     <TableContainer
       sx={{
@@ -72,7 +76,24 @@ export default function AlleleFrequencyTable({ rows = [] }) {
           }}
         >
           {rows.map((row) => (
-            <TableRow key={row.id} hover>
+            <TableRow
+              key={row.id}
+              hover
+              onMouseEnter={() => onHighlightRow?.(row.id)}
+              onMouseLeave={() => onHighlightRow?.(null)}
+              sx={(theme) => ({
+                cursor: "pointer",
+                backgroundColor:
+                  highlightedRowId === row.id
+                    ? theme.palette.action.hover
+                    : "transparent",
+                transition: "background-color 120ms ease",
+
+                "&:hover": {
+                  backgroundColor: theme.palette.action.hover,
+                },
+              })}
+            >
               <TableCell>{row.population}</TableCell>
 
               <TableCell align="right">

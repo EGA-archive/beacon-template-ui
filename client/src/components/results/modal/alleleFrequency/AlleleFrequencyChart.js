@@ -1,8 +1,10 @@
 import { Box, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   Label,
   ResponsiveContainer,
   XAxis,
@@ -13,27 +15,68 @@ import config from "../../../../config/config.json";
 
 const primaryDarkColor = config.ui.colors.darkPrimary;
 
+const WIDTH_PER_POPULATION = 38;
+const MINIMUM_CHART_WIDTH = 420;
+
 /**
- * Temporary colors used to understand the chart layout.
+ * Calculates how much horizontal space the chart needs.
  *
- * Remove these colors once the chart positioning is clear.
+ * Small charts keep a minimum width.
+ * Larger charts grow based on the number of populations.
  */
-const debugColors = {
-  completeComponent: "#e3f2fd",
-  title: "#ffcdd2",
-  scrollContainer: "#f8bbd0",
-  chartWidthContainer: "#c8e6c9",
-  responsiveContainer: "#fff9c4",
-  chartArea: "#ffccbc",
-};
+export const getAlleleFrequencyChartWidth = (populationCount) =>
+  Math.max(populationCount * WIDTH_PER_POPULATION, MINIMUM_CHART_WIDTH);
 
 /**
  * Displays the allele frequency for each population as a bar chart.
  *
  * The component receives the same normalized rows used by the table.
- * Missing allele-frequency values are not displayed as bars.
+ *
+ * When the user hovers over a bar, the matching table row is highlighted.
+ * When the user hovers over a table row, the matching chart area is
+ * highlighted.
  */
-export default function AlleleFrequencyChart({ rows = [] }) {
+export default function AlleleFrequencyChart({
+  rows = [],
+  highlightedRowId = null,
+  onHighlightRow,
+}) {
+  const theme = useTheme();
+
+  const hoverBackgroundColor = theme.palette.action.hover;
+
+  /**
+   * Draws the normal MUI hover color behind the selected population.
+   *
+   * The bar itself keeps its normal color and border.
+   */
+  const renderHighlightedBackground = ({ x, y, width, height, index }) => {
+    const row = rows[index];
+
+    if (row?.id !== highlightedRowId) {
+      return null;
+    }
+
+    const horizontalPadding = 18;
+
+    return (
+      <rect
+        x={x - horizontalPadding}
+        y={y}
+        width={width + horizontalPadding * 2}
+        height={height}
+        fill={hoverBackgroundColor}
+        pointerEvents="none"
+      />
+    );
+  };
+
+  /**
+   * Find the highest valid allele-frequency value.
+   *
+   * Missing values are ignored.
+   * Zero remains a valid value.
+   */
   const validAlleleFrequencies = rows
     .map((row) => row.alleleFrequency)
     .filter((value) => Number.isFinite(value));
@@ -43,49 +86,25 @@ export default function AlleleFrequencyChart({ rows = [] }) {
     : 0;
 
   /**
-   * Add a little space above the tallest bar.
+   * Add a small amount of space above the tallest bar.
    *
-   * Allele frequency cannot be higher than 1.
+   * Allele frequency cannot be greater than 1.
    */
   const yAxisMaximum =
     highestAlleleFrequency === 0
       ? 1
       : Math.min(highestAlleleFrequency * 1.1, 1);
 
-  /**
-   * Controls how much horizontal space each population receives.
-   *
-   * Larger number:
-   * - more space between populations;
-   * - wider chart;
-   * - more horizontal scrolling.
-   *
-   * Smaller number:
-   * - populations are closer together;
-   * - less scrolling.
-   */
-  const widthPerPopulation = 35;
-  const minimumChartWidth = 420;
-
-  const chartWidth = Math.max(
-    rows.length * widthPerPopulation,
-    minimumChartWidth
-  );
+  const chartWidth = getAlleleFrequencyChartWidth(rows.length);
 
   return (
-    /**
-     * Blue:
-     * The complete AlleleFrequencyChart component.
-     */
     <Box
       sx={{
         width: "100%",
         minWidth: 0,
       }}
     >
-      {/*
-       * The chart title area.
-       */}
+      {/* Chart title */}
       <Typography
         sx={{
           mb: 2,
@@ -97,9 +116,8 @@ export default function AlleleFrequencyChart({ rows = [] }) {
       </Typography>
 
       {/*
-       * The visible chart area.
-       * This container controls horizontal scrolling when the complete
-       * chart is wider than the available page space.
+       * This container becomes horizontally scrollable when the chart
+       * is wider than the available page space.
        */}
       <Box
         sx={{
@@ -107,34 +125,13 @@ export default function AlleleFrequencyChart({ rows = [] }) {
           overflowX: "auto",
         }}
       >
-        {/*
-         * Green:
-         * The complete chart width.
-         *
-         * This may be wider than the pink container, which creates
-         * horizontal scrolling.
-         */}
         <Box
           sx={{
             width: `${chartWidth}px`,
             height: "360px",
           }}
         >
-          {/*
-           * It gives Recharts the width and height of its parent.
-           */}
-          <ResponsiveContainer
-            height="100%"
-            width="100%"
-            style={{
-              backgroundColor: debugColors.responsiveContainer,
-            }}
-          >
-            {/*
-             * The actual Recharts chart area containing the axes,
-             * grid and bars.
-             * barCategoryGap controls the gap between population groups.
-             */}
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={rows}
               margin={{
@@ -145,6 +142,7 @@ export default function AlleleFrequencyChart({ rows = [] }) {
               }}
             >
               <CartesianGrid strokeDasharray="2 2" vertical={false} />
+
               <XAxis
                 dataKey="population"
                 interval={0}
@@ -166,6 +164,7 @@ export default function AlleleFrequencyChart({ rows = [] }) {
                   value="Populations"
                   position="insideBottom"
                   offset={0}
+                  dx={-30}
                   style={{
                     fontSize: 10,
                     fontWeight: 700,
@@ -192,7 +191,7 @@ export default function AlleleFrequencyChart({ rows = [] }) {
                 <Label
                   value="Allele Frequency"
                   angle={-90}
-                  offset={15}
+                  offset={12}
                   position="left"
                   style={{
                     textAnchor: "middle",
@@ -202,24 +201,27 @@ export default function AlleleFrequencyChart({ rows = [] }) {
                 />
               </YAxis>
 
-              {/*
-               * barSize controls the width of each individual bar.
-               *
-               * Smaller value:
-               * - thinner bars.
-               *
-               * Larger value:
-               * - wider bars.
-               */}
               <Bar
                 dataKey="alleleFrequency"
-                fill={`${primaryDarkColor}33`}
-                stroke={primaryDarkColor}
-                strokeWidth={2}
                 radius={[4, 4, 0, 0]}
-                barSize={18}
+                barSize={20}
                 isAnimationActive={false}
-              />
+                background={renderHighlightedBackground}
+              >
+                {rows.map((row) => (
+                  <Cell
+                    key={row.id}
+                    fill={`${primaryDarkColor}33`}
+                    stroke={primaryDarkColor}
+                    strokeWidth={2}
+                    onMouseEnter={() => onHighlightRow?.(row.id)}
+                    onMouseLeave={() => onHighlightRow?.(null)}
+                    style={{
+                      cursor: "pointer",
+                    }}
+                  />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </Box>
