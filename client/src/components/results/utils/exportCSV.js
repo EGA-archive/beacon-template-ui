@@ -1,4 +1,5 @@
 import config from "../../../config/config.json";
+import { downloadCsvFile } from "./downloadCsvFile";
 
 /**
  * Maximum number of records allowed in a CSV download.
@@ -257,57 +258,22 @@ export const exportCSV = async ({
       visibleColumns.includes(h.id)
     );
 
-    const headers = visibleHeaderObjects.map((h) => h.id);
-    const headerLabels = visibleHeaderObjects.map((h) => h.name);
-
-    /**
-     * Build CSV rows.
-     */
-    const csvRows = [
-      headerLabels.join(","),
-      ...results.map((row) =>
-        headers
-          .map((field) => {
-            const value = summarizeValue(
-              row[field] !== undefined && row[field] !== null ? row[field] : "",
-              field
-            );
-
-            if (typeof value === "string") {
-              return `"${value.replace(/"/g, '""')}"`;
-            }
-
-            return value;
-          })
-          .join(",")
-      ),
-    ];
-
-    const csvContent = csvRows.join("\n");
-
-    /**
-     * Create the CSV file.
-     */
-    const blob = new Blob([csvContent], {
-      type: "text/csv;charset=utf-8;",
-    });
-
-    const url = URL.createObjectURL(blob);
-
     const fileName = `beacon-${selectedPathSegment || "results"}-${
       new Date().toISOString().split("T")[0]
     }.csv`;
 
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.setAttribute("download", fileName);
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
+    downloadCsvFile({
+      rows: results,
+      columns: visibleHeaderObjects,
+      fileName,
+      getCellValue: (row, column) =>
+        summarizeValue(
+          row[column.id] !== undefined && row[column.id] !== null
+            ? row[column.id]
+            : "",
+          column.id
+        ),
+    });
 
     return {
       totalResults,
