@@ -12,8 +12,50 @@ export default function ResultsPageHeader({
   appliedQuery,
   showContactOwner = true,
   onContactOwner,
+  contactEmail,
 }) {
   const darkPrimaryColor = config.ui.colors.darkPrimary;
+
+  /**
+   * Contact information comes from the Beacon metadata.
+   *
+   * It may be:
+   * - a plain email address;
+   * - an email already prefixed with "mailto:";
+   * - a web URL.
+   */
+  const getContactHref = (contact) => {
+    if (!contact) return null;
+
+    if (
+      contact.startsWith("mailto:") ||
+      contact.startsWith("http://") ||
+      contact.startsWith("https://")
+    ) {
+      return contact;
+    }
+
+    return `mailto:${contact}`;
+  };
+
+  const contactHref = getContactHref(contactEmail);
+
+  /**
+   * Open the Beacon owner's contact information in a new tab.
+   * - Web URLs open as a normal new browser tab.
+   * - Email addresses open through the user's configured email application.
+   */
+  const handleContactOwner = () => {
+    if (contactHref) {
+      window.open(contactHref, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    // Keep the existing callback as a fallback when no contact URL is available.
+    if (onContactOwner) {
+      onContactOwner();
+    }
+  };
 
   return (
     <>
@@ -24,12 +66,6 @@ export default function ResultsPageHeader({
           alignItems: "flex-start",
           flexWrap: { xs: "wrap", sm: "nowrap" },
           gap: 2,
-          //   backgroundColor: {
-          //     lg: "lightsalmon",
-          //     md: "pink",
-          //     sm: "lightgreen",
-          //     xs: "lightblue",
-          //   },
         }}
       >
         <Box
@@ -156,7 +192,8 @@ export default function ResultsPageHeader({
             variant="outlined"
             aria-label="Contact Owner"
             startIcon={<LocalPostOfficeOutlinedIcon />}
-            onClick={onContactOwner}
+            onClick={handleContactOwner}
+            disabled={!contactHref && !onContactOwner}
             sx={(theme) => ({
               width: "176px",
               height: "39px",

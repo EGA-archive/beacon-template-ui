@@ -45,6 +45,9 @@ function buildOidcConfig() {
   }
 
   // OIDC configuration passed to AuthProvider
+  // Need to change here
+  // remove clientsecret keep client id
+  // No REACT_APP_CLIENT_SECRET in the browser side
   return {
     onSignIn: async () => {
       window.history.replaceState(null, "", "/login");

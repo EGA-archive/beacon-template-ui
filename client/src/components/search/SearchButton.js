@@ -90,8 +90,6 @@ export default function SearchButton({ setSelectedTool }) {
 
       const data = await response.json();
 
-      console.log("Data", data);
-
       // const data = mockSingleBeaconResponse;
 
       setResponseMeta(data.meta);

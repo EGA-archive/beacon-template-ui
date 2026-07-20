@@ -35,6 +35,14 @@ export default function DatasetDetailedTablePage() {
     datasetId,
     entryTypeId,
   } = useDatasetDetailedTableContext();
+
+  /**
+   * Actual contact information for the selected Beacon.
+   * This was resolved from beaconsInfo in the main Results page
+   * and saved as part of the dataset detailed table context.
+   */
+  const contactEmail = storedContext?.contactEmail || null;
+
   /**
    * Store the detailed records shown in the table.
    * loading is used when the page must request the records again.
@@ -136,7 +144,7 @@ export default function DatasetDetailedTablePage() {
 
   /**
    * Open the Allele Frequency page for the row selected by the user.
-   * The selected variant, dataset and applied query are passed to the Allele Frequency page.
+   * The selected variant, dataset, applied query and Beacon contact information are passed to the Allele Frequency page.
    */
   const handleOpenAlleleFrequency = (item) => {
     openAlleleFrequencyPage({
@@ -146,6 +154,7 @@ export default function DatasetDetailedTablePage() {
       datasetId,
       entryTypeId,
       appliedQuery: storedContext.appliedQuery,
+      contactEmail: storedContext.contactEmail,
     });
   };
 
@@ -189,6 +198,7 @@ export default function DatasetDetailedTablePage() {
           beaconName={storedContext.beaconName || beaconId}
           datasetName={datasetId}
           appliedQuery={storedContext.appliedQuery}
+          contactEmail={storedContext.contactEmail}
         />
 
         {/* Shown only when the API fallback request is loading */}
@@ -207,6 +217,7 @@ export default function DatasetDetailedTablePage() {
               selectedFilters={selectedFilters}
               beaconId={beaconId}
               datasetId={datasetId}
+              contactEmail={contactEmail}
               displayedCount={storedContext.displayedCount}
               headers={[]}
               visibleColumns={visibleColumns}

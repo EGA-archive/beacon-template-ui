@@ -152,17 +152,17 @@ export default function ResultsTable() {
     const queryId = crypto.randomUUID();
     const storageKey = `${DATASET_STORAGE_PREFIX}${queryId}`;
     const selectedFilters = lastSearchedFilters || [];
+    const contactEmail = findBeaconEmail(subRow.beaconId);
 
     const storedContext = {
       beaconId: subRow.beaconId,
       beaconName: subRow.beaconName,
       datasetId: subRow.datasetId,
       displayedCount: subRow.displayedCount,
-
+      contactEmail,
       entryTypeId: lastSearchedPathSegment,
       selectedPathSegment: lastSearchedPathSegment,
       selectedFilters,
-
       appliedQuery: {
         entryType: lastSearchedPathSegment,
         filters: selectedFilters,

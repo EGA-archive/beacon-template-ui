@@ -13,7 +13,7 @@
   ],
   "queryCoordinatesAre0Based": true,
   "ui": {
-    "title": "EGA Beacon Browser",
+    "title": "EGA Beacon Template UI",
     "favicon": "/assets/logos/favicon.ico",
     "colors": {
       "primary": "#3176B1",

@@ -23,11 +23,6 @@ export const openAlleleFrequencyPage = ({
     frequencyInPopulations: item.frequencyInPopulations,
   };
 
-  console.log(
-    "[AlleleFrequency] frequencyInPopulations:",
-    item.frequencyInPopulations
-  );
-
   try {
     localStorage.setItem(storageKey, JSON.stringify(selectedVariant));
   } catch (error) {

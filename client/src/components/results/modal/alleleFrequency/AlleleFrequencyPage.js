@@ -36,6 +36,7 @@ export default function AlleleFrequencyPage() {
     data?.frequencyInPopulations
   );
 
+  // Check with Sara
   /**
    * When there are more than 14 populations, the chart and table
    * are always stacked to give the chart enough horizontal space.
@@ -78,6 +79,7 @@ export default function AlleleFrequencyPage() {
             beaconName={data.beaconName || data.beaconId}
             datasetName={data.datasetId}
             appliedQuery={data.appliedQuery}
+            contactEmail={data.contactEmail}
           />
 
           <Box
@@ -119,8 +121,8 @@ export default function AlleleFrequencyPage() {
               sx={{
                 display: "grid",
                 gridTemplateColumns: chartAndTableColumns,
-                columnGap: 3,
-                rowGap: 3,
+                columnGap: 2,
+                rowGap: 2,
                 alignItems: "start",
                 width: "100%",
                 minWidth: 0,
@@ -137,6 +139,7 @@ export default function AlleleFrequencyPage() {
                   rows={alleleFrequencyRows}
                   highlightedRowId={highlightedRowId}
                   onHighlightRow={setHighlightedRowId}
+                  hasManyPopulations={hasManyPopulations}
                 />
               </Box>
 
@@ -144,6 +147,12 @@ export default function AlleleFrequencyPage() {
                 sx={{
                   minWidth: 0,
                   width: "100%",
+                  mt: hasManyPopulations
+                    ? 0
+                    : {
+                        xs: 0,
+                        lg: -1.5,
+                      },
                 }}
               >
                 <AlleleFrequencyTable
