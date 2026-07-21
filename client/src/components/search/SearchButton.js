@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import SearchIcon from "@mui/icons-material/Search";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import { COMMON_MESSAGES } from "../common/CommonMessage";

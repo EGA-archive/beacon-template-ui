@@ -5,7 +5,7 @@ import FiltersContainer from "../filters/FiltersContainer";
 import Search from "../Search";
 import AllFilteringTermsComponent from "../filters/AllFilteringTermsComponent";
 import ResultsContainer from "../results/ResultsContainer";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import BeaconTypeBanner from "../homepageBanner/BeaconTypeBanner";
 import { useLocation } from "react-router-dom";
 import { useAuthSafe as useAuth } from "../pages/login/useAuthSafe";

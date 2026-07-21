@@ -11,7 +11,7 @@ import {
   Link,
 } from "@mui/material";
 import { lighten } from "@mui/system";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import { DATASETS_TABLE } from "../../lib/tableConstants";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 

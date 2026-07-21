@@ -24,7 +24,7 @@ import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
 import LocalPostOfficeRoundedIcon from "@mui/icons-material/LocalPostOfficeRounded";
 import LocalPostOfficeOutlinedIcon from "@mui/icons-material/LocalPostOfficeOutlined";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import { useState, useEffect } from "react";
 import ResultsTableRow from "./ResultsTableRow";

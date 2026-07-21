@@ -1,5 +1,5 @@
 import { Box, Tooltip } from "@mui/material";
-import config from "../../../config/config.json";
+import config from "../../../config/runtimeConfig";
 
 export default function InfoTooltip({ children, testId = "info-tooltip" }) {
   return (

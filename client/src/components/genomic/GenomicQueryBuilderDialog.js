@@ -37,7 +37,7 @@ import {
   genomicHGVSshortForm,
   aminoAcidChangeGroupValidator,
 } from "../genomic/genomicQueryBuilderValidator";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 
 // List of all query types shown as options in the UI

@@ -11,7 +11,7 @@ import {
   tableCellClasses,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import config from "../../../config/config.json";
+import config from "../../../config/runtimeConfig";
 import { queryBuilder } from "../../search/utils/queryBuilder";
 import ResultsTableToolbar from "./ResultsTableToolbar";
 import { exportCSV } from "../utils/exportCSV";

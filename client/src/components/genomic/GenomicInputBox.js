@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Box, TextField, Select, MenuItem, Typography } from "@mui/material";
 import { useField } from "formik";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
 import {

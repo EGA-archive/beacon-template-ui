@@ -4,8 +4,8 @@ describe("Beacon Network rendering", () => {
   let beaconType = null;
 
   before(() => {
-    cy.readFile("src/config/config.json").then((config) => {
-      beaconType = config.beaconType;
+    cy.request("/config/config.json").then((response) => {
+      beaconType = response.body.beaconType;
       cy.log(`Detected beaconType: ${beaconType}`);
     });
   });

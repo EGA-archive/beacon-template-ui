@@ -6,7 +6,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { formatEntryLabel } from "../common/textFormatting";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 
 // This component shows the available entry types (previously fetched from the API) as radio buttons.
 // The user can select only one entry type at a time and the first one will be always pre-selected.

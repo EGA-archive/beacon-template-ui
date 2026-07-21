@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Box, Select, MenuItem, TextField } from "@mui/material";
 import { useFormikContext, useField } from "formik";
-import config from "../../../config/config.json";
+import config from "../../../config/runtimeConfig";
 import {
   selectStyle,
   textFieldStyle,

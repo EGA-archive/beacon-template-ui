@@ -1,6 +1,6 @@
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 import { Box, Tooltip } from "@mui/material";
-import config from "../config/config.json";
+import config from "../config/runtimeConfig";
 
 // This is a helper component for the tables' structure
 

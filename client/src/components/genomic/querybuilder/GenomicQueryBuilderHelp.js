@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { GENOMIC_LABELS_MAP } from "../../genomic/genomicLabelHelper";
-import config from "../../../config/config.json";
+import config from "../../../config/runtimeConfig";
 
 import needHelpFirstImage from "../../../assets/logos/need-help.svg";
 import needHelpSequence from "../../../assets/logos/need-help-sequence.svg";

@@ -5,7 +5,7 @@ import GenomicAnnotations from "../genomic/GenomicAnnotations";
 import { ReactComponent as DnaIcon } from "../../assets/logos/dna.svg";
 import { ReactComponent as FilterIcon } from "../../assets/logos/filteringterms.svg";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 
 const buildGenomicAnnotationsTab = (setActiveInput) => ({
   label: "Genomic Annotations",

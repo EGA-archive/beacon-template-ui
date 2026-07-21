@@ -7,7 +7,7 @@ import AlleleFrequencyChart, {
   getAlleleFrequencyChartWidth,
 } from "./AlleleFrequencyChart";
 import { buildAlleleFrequencyRows } from "../../utils/buildAlleleFrequencyRows";
-import config from "../../../../config/config.json";
+import config from "../../../../config/runtimeConfig";
 
 const getAlleleFrequencyData = () => {
   const searchParams = new URLSearchParams(window.location.search);

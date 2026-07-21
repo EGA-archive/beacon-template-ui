@@ -1,7 +1,7 @@
 import { Box, Typography, Link as MuiLink } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Link } from "react-router-dom";
-import config from "../config/config.json";
+import config from "../config/runtimeConfig";
 import { isLoginEnabled } from "../components/pages/login/authHelpers";
 import { useAuthSafe as useAuth } from "../components/pages/login/useAuthSafe";
 import maingrey from "../assets/logos/maingrey.svg";

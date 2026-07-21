@@ -1,6 +1,6 @@
 import { Button } from "@mui/material";
 import PropTypes from "prop-types";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import { lighten } from "@mui/system";
 import { alpha } from "@mui/material/styles";
 

@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import config from "../../../config/config.json";
+import config from "../../../config/runtimeConfig";
 
 // Reusable button used to display genomic filter labels
 // It can be "selected" (highlighted) or unselected (default)

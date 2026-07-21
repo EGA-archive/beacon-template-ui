@@ -3,7 +3,7 @@ import LocalPostOfficeOutlinedIcon from "@mui/icons-material/LocalPostOfficeOutl
 import ChevronRight from "../../../assets/logos/chevron-right.svg";
 import FilterLabelRemovable from "../../styling/FilterLabelRemovable";
 import { formatEntryLabel } from "../../common/textFormatting";
-import config from "../../../config/config.json";
+import config from "../../../config/runtimeConfig";
 
 export default function ResultsPageHeader({
   pageTitle,

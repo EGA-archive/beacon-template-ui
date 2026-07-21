@@ -11,12 +11,13 @@ import {
   YAxis,
 } from "recharts";
 import { formatAlleleFrequency } from "../../utils/alleleFrequencyUtils";
-import config from "../../../../config/config.json";
+import config from "../../../../config/runtimeConfig";
 
 const primaryDarkColor = config.ui.colors.darkPrimary;
 
 const WIDTH_PER_POPULATION = 38;
 const MINIMUM_CHART_WIDTH = 420;
+const HOVER_PADDING_RATIO = 0.4;
 
 /**
  * Calculates how much horizontal space the chart needs.
@@ -45,22 +46,19 @@ export default function AlleleFrequencyChart({
 
   const hoverBackgroundColor = theme.palette.action.hover;
 
-  console.log("rows", rows);
-
   /**
-   * Draws the normal MUI hover color behind the selected population.
-   * The bar itself keeps its normal color and border.
+   * Creates a full-height hover area for each population.
+   *
+   * The area remains visually transparent until the population is highlighted.
+   * This makes hovering work even when the allele frequency is 0.
    */
   const renderHighlightedBackground = ({ x, y, width, height, index }) => {
     const row = rows[index];
-    console.log("row", row);
-    // console.log("rows[index]", rows[index]);
-    if (row?.id !== highlightedRowId) {
-      return null;
-    }
-    console.log("highlightedRowId", highlightedRowId);
 
-    const horizontalPadding = 18;
+    if (!row) return null;
+
+    const horizontalPadding = width * HOVER_PADDING_RATIO;
+    const isHighlighted = row.id === highlightedRowId;
 
     return (
       <rect
@@ -68,14 +66,12 @@ export default function AlleleFrequencyChart({
         y={y}
         width={width + horizontalPadding * 2}
         height={height}
-        // fill={hoverBackgroundColor}
-        fill="red"
-        pointerEvents="none"
+        fill={isHighlighted ? hoverBackgroundColor : "rgba(0, 0, 0, 0.001)"}
+        pointerEvents="all"
+        onMouseEnter={() => onHighlightRow?.(row.id)}
       />
     );
   };
-
-  console.log("renderHighlightedBackground", renderHighlightedBackground);
 
   /**
    * Find the highest valid allele-frequency value.
@@ -90,7 +86,6 @@ export default function AlleleFrequencyChart({
     ? Math.max(...validAlleleFrequencies)
     : 0;
 
-  console.log("validAlleleFrequencies", validAlleleFrequencies);
   /**
    * Add a small amount of space above the tallest bar.
    * Allele frequency cannot be greater than 1.
@@ -100,7 +95,39 @@ export default function AlleleFrequencyChart({
       ? 1
       : Math.min(highestAlleleFrequency * 1.1, 1);
 
-  const chartWidth = getAlleleFrequencyChartWidth(rows.length);
+  /**
+   * Renders each population label on the X-axis and connects
+   * its hover state to the same chart/table highlight.
+   */
+  const renderPopulationTick = ({ x, y, payload }) => {
+    const row = rows.find((item) => item.population === payload.value);
+
+    return (
+      <g
+        transform={`translate(${x}, ${y})`}
+        onMouseEnter={() => {
+          if (row) {
+            onHighlightRow?.(row.id);
+          }
+        }}
+        style={{
+          cursor: "pointer",
+        }}
+      >
+        <text
+          x={0}
+          y={0}
+          dy={8}
+          textAnchor="end"
+          transform="rotate(-45)"
+          fontSize={10}
+          fill="#000"
+        >
+          {payload.value}
+        </text>
+      </g>
+    );
+  };
 
   return (
     <Box
@@ -155,6 +182,7 @@ export default function AlleleFrequencyChart({
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={rows}
+              onMouseLeave={() => onHighlightRow?.(null)}
               margin={{
                 top: 10,
                 right: 20,
@@ -165,17 +193,11 @@ export default function AlleleFrequencyChart({
               }}
             >
               <CartesianGrid strokeDasharray="2 2" vertical={false} />
-
               <XAxis
                 dataKey="population"
                 interval={0}
-                angle={-45}
-                textAnchor="end"
                 height={100}
-                tick={{
-                  fontSize: 10,
-                  fill: "#000",
-                }}
+                tick={renderPopulationTick}
                 axisLine={{
                   stroke: "#000",
                 }}
@@ -224,11 +246,11 @@ export default function AlleleFrequencyChart({
                   }}
                 />
               </YAxis>
-
               <Bar
                 dataKey="alleleFrequency"
                 radius={[4, 4, 0, 0]}
                 barSize={20}
+                minPointSize={1}
                 isAnimationActive={false}
                 background={renderHighlightedBackground}
               >
@@ -238,10 +260,8 @@ export default function AlleleFrequencyChart({
                     fill={`${primaryDarkColor}33`}
                     stroke={primaryDarkColor}
                     strokeWidth={2}
-                    onMouseEnter={() => onHighlightRow?.(row.id)}
-                    onMouseLeave={() => onHighlightRow?.(null)}
                     style={{
-                      cursor: "pointer",
+                      pointerEvents: "none",
                     }}
                   />
                 ))}

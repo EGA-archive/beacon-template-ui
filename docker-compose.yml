@@ -11,7 +11,7 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ./client/src/config/config.json:/client/src/config/config.json
+      - ./client/public/config:/client/public/config
       - ./client/.env:/client/.env
     environment:
       - CHOKIDAR_USEPOLLING=true

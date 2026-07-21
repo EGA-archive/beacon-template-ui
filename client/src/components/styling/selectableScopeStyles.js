@@ -1,4 +1,4 @@
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import { alpha } from "@mui/material/styles";
 
 // Create a lighter version of the primary color for hover effect

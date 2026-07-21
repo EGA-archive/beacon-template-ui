@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
-import config from "../../../config/config.json";
+import config from "../../../config/runtimeConfig";
 import { alpha } from "@mui/material/styles";
 
 export default function DownloadTablePopover({ handleExport }) {

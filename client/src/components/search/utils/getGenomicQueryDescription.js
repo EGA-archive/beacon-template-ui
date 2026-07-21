@@ -1,4 +1,4 @@
-import config from "../../../config/config.json";
+import config from "../../../config/runtimeConfig";
 
 export default function getGenomicQueryDescription() {
   const queryTypes = config.ui.genomicQueries?.genomicQueryTypes || {};

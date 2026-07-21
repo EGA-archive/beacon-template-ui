@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-import config from "../../../config/config.json";
+import config from "../../../config/runtimeConfig";
 import { useSelectedEntry } from "../../context/SelectedEntryContext";
 import { PATH_SEGMENT_TO_ENTRY_ID } from "../../common/textFormatting";
 import Loader from "../../common/Loader";

@@ -7,7 +7,7 @@ import NetworkMembers from "./components/pages/NetworkMembers";
 import Login from "./components/pages/login/Login";
 import HomePage from "./components/pages/HomePage";
 import { CssBaseline, Box } from "@mui/material";
-import config from "./config/config.json";
+import config from "./config/runtimeConfig";
 import { useState, useEffect } from "react";
 import LoginModal from "./components/common/LoginModal";
 import { logosHelper } from "./lib/logosHelper";

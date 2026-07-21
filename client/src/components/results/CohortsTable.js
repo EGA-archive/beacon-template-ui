@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@mui/material";
 import { lighten } from "@mui/system";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import { COHORTS_TABLE } from "../../lib/tableConstants";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 

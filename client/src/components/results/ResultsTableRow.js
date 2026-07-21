@@ -13,7 +13,7 @@ import {
 import { BEACON_NETWORK_COLUMNS_EXPANDED } from "../../lib/tableConstants";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import { getDatasetType } from "./utils/beaconType";
 
 // This component renders only for Beacon Networks

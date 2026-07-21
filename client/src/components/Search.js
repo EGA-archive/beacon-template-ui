@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Box, Typography } from "@mui/material";
-import config from "../config/config.json";
+import config from "../config/runtimeConfig";
 import { useSelectedEntry } from "./context/SelectedEntryContext";
 import GenomicQueryBuilderButton from "./genomic/GenomicQueryBuilderButton";
 import GenomicQueryBuilderDialog from "./genomic/GenomicQueryBuilderDialog";

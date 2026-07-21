@@ -13,12 +13,12 @@
   ],
   "queryCoordinatesAre0Based": true,
   "ui": {
-    "title": "EGA Beacon Template UI Client",
+    "title": "EGA Beacon Template UI",
     "favicon": "/assets/logos/favicon.ico",
     "colors": {
-      "primary": "#3176B1",
-      "darkPrimary": "#173D5D",
-      "secondary": "#FFE4D4"
+      "primary": "#2E7D32",
+      "darkPrimary": "#967bb6",
+      "secondary": "#20b2aa"
     },
     "logos": {
       "main": "/assets/logos/main.svg",
@@ -227,7 +227,7 @@
     "genomicQueries": {
       "genomicQueryTypes": {
         "sequenceQuery": true,
-        "geneId": true,
+        "geneId": false,
         "rangeQuery": true,
         "bracketQuery": true,
         "hgvsQuery": true

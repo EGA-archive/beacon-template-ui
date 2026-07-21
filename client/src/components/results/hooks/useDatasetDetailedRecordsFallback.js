@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import config from "../../../config/config.json";
+import config from "../../../config/runtimeConfig";
 import { buildDetailedTableQuery } from "../modal/buildDetailedTableQuery";
 
 /**

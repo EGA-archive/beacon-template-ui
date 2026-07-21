@@ -13,7 +13,7 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PropTypes from "prop-types";
-import config from "../config/config.json";
+import config from "../config/runtimeConfig";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthSafe as useAuth } from "../components/pages/login/useAuthSafe";
 import { useSelectedEntry } from "../components/context/SelectedEntryContext";

@@ -6,7 +6,7 @@ import {
   InputAdornment,
   IconButton,
 } from "@mui/material";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import SearchIcon from "@mui/icons-material/Search";
 import { alpha } from "@mui/material/styles";
 import FilteringTermsTable from "./FilteringTermsTable";

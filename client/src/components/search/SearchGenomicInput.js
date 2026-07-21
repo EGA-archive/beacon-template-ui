@@ -5,7 +5,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 import { useRef, useEffect, useState } from "react";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";

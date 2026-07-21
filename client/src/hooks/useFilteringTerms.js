@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import config from "../config/config.json";
+import config from "../config/runtimeConfig";
 import { useSelectedEntry } from "../components/context/SelectedEntryContext";
 import useAuthHeaders from "./useAuthHeaders";
 

@@ -4,7 +4,7 @@ import { alpha } from "@mui/material/styles";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import FilteringTermsDropdownResults from "../filters/FilteringTermsDropdownResults";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 
 // This component displays a filtering term input bar where users can type in text-based filters.
 // It includes a search icon, an input field, a "clear" icon, and a button to commit the filter.

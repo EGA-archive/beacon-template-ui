@@ -18,7 +18,7 @@ import TableToolbarControls from "../../table/TableToolbarControls";
 import { downloadCsvFile } from "../../utils/downloadCsvFile";
 import ResultsEmpty from "../../ResultsEmpty";
 
-import config from "../../../../config/config.json";
+import config from "../../../../config/runtimeConfig";
 
 const primaryDarkColor = config.ui.colors.darkPrimary;
 
