@@ -1,18 +1,12 @@
 # docker-compose.yml
 
-# version: "3.8"
-
 services:
   client:
     build:
       context: ./client
-    command: node /opt/yarn-v1.22.22/bin/yarn.js start
     container_name: template-ui
     ports:
-      - 3000:3000
+      - 3000:80
     volumes:
-      - ./client/public/config:/client/public/config
+      - ./client/public/config:/usr/share/nginx/html/config:ro
       - ./client/.env:/client/.env
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-      - WATCHPACK_POLLING=true
