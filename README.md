@@ -28,7 +28,6 @@ Docker Compose version v2.29.7-desktop.1
 You will need a code editor (e.g. Visual Studio Code) to:
 
 - Edit the config.json
-- Create and edit your `.env` file (if login is enabled)
 
 2. Clone the repository
 
@@ -63,10 +62,6 @@ Before proceeding, make sure that the following files are configured:
 
 The UI loads `config.json` at runtime. After the application is deployed, changes to the runtime configuration can be applied without rebuilding the UI. Refresh or reopen the application to load the updated configuration.
 
-Only if login is enabled:
-
-- Add the `.env` file inside the `client` folder with the required credentials.
-
 ## 4. Start the application with Docker
 
 In your terminal, run:
@@ -88,7 +83,7 @@ docker ps
 Expected output:
 
 CONTAINER ID IMAGE COMMAND STATUS PORTS
-123abc456def beacon-template-ui-client:latest "node /opt/yarn..." Up 10 seconds 0.0.0.0:3000->3000/tcp
+123abc456def beacon-template-ui-client:latest "/docker-entrypoint…" Up 10 seconds 0.0.0.0:3000->80/tcp
 
 If it’s visible, the UI is running locally at: http://localhost:3000
 
@@ -100,7 +95,7 @@ To stop the container:
 docker compose down
 ```
 
-If you modify only client/public/config/config.json, you do not need to rebuild the UI. Refresh the browser to load the updated runtime configuration.
+If you modify only `client/public/config/config.json`, you do not need to rebuild the UI.Refresh the browser to load the updated runtime configuration.
 
 If the application source code changes, rebuild and restart the container:
 
@@ -117,11 +112,10 @@ To update to a newer version:
 1. Keep your existing configuration files
 
    - `client/public/config/config.json`
-   - `client/.env` (if login is enabled)
 
 2. Update the Template UI code
 
-   - Either pull the latest changes from the repository (for example with git fetch/git pull), or clone the new version and copy your existing `config.json` and `.env` files into it.
+   - Either pull the latest changes from the repository (for example with `git fetch` / `git pull`), or clone the new version and copy your existing `config.json` into it.
 
 3. Rebuild and restart the UI
 

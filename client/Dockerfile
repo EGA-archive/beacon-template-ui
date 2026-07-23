@@ -16,7 +16,6 @@
     COPY public ./public
     COPY src ./src
     # COPY backend ./backend
-    COPY auth/* .
     # COPY backend/.env ./backend
     
     RUN yarn install --frozen-lockfile

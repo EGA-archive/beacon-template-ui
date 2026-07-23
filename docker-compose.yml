@@ -9,4 +9,3 @@ services:
       - 3000:80
     volumes:
       - ./client/public/config:/usr/share/nginx/html/config:ro
-      - ./client/.env:/client/.env

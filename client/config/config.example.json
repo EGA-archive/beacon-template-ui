@@ -78,7 +78,7 @@
         "autoSignIn": false,
         "responseType": "code",
         "automaticSilentRenew": true,
-        "redirectUri": "http://localhost:3000/",
+        "redirectUri": "http://localhost:3000",
         "scope": "openid profile email ga4gh_passport_v1 offline_access",
         "revokeAccessTokenOnSignout": true
       }

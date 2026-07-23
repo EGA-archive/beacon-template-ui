@@ -1,2 +1,0 @@
-REACT_APP_CLIENT_ID="your-client-id"
-REACT_APP_CLIENT_SECRET="your-client-secret"
