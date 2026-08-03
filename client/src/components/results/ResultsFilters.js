@@ -30,6 +30,10 @@ export default function ResultsFilters() {
       }
     : null;
 
+  const intialEntryTypeFiltertoRender = entryTypeChip
+    ? [entryTypeChip, ...lastSearchedFilters]
+    : lastSearchedFilters;
+
   return (
     <Box
       sx={{
@@ -40,11 +44,7 @@ export default function ResultsFilters() {
       <QueryAppliedItems
         handleFilterRemove={handleFilterRemove}
         variant="readonly"
-        customFilters={
-          entryTypeChip
-            ? [entryTypeChip, ...lastSearchedFilters]
-            : lastSearchedFilters
-        }
+        intialEntryTypeFiltertoRender={intialEntryTypeFiltertoRender}
       />
     </Box>
   );

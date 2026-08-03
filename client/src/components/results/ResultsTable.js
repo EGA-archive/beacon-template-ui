@@ -1,5 +1,6 @@
 import {
   BEACON_NETWORK_COLUMNS,
+  BEACON_NETWORK_TABLET_COLUMN_WIDTHS,
   BEACON_SINGLE_COLUMNS,
 } from "../../lib/tableConstants";
 import React, { lazy, Suspense } from "react";
@@ -34,6 +35,49 @@ import { getBeaconAggregationInfo, getDatasetType } from "./utils/beaconType";
 import useBeaconMetadata from "../../hooks/useBeaconMetaData";
 
 const ResultsTableModal = lazy(() => import("./modal/ResultsTableModal"));
+const COMPACT_RESULTS_TABLE_MAX_WIDTH = 764;
+
+const compactResultsTableTextStyle = {
+  [`@media (max-width: ${COMPACT_RESULTS_TABLE_MAX_WIDTH}px)`]: {
+    "& .MuiTableCell-root": {
+      fontSize: "12px",
+      lineHeight: 1.2,
+    },
+
+    "& > thead > tr > th": {
+      px: 1,
+    },
+
+    "& > tbody > tr > td:not([colspan])": {
+      px: 1,
+    },
+
+    "& .MuiTableBody-root .MuiTypography-root": {
+      fontSize: "12px",
+      lineHeight: 1.2,
+    },
+
+    '& [data-cy="results-table-details-button"]': {
+      fontSize: "10px",
+      lineHeight: 1,
+      minWidth: "60px",
+      minHeight: "22px",
+      height: "24px",
+      px: 0.75,
+      py: 0,
+      borderRadius: "6px",
+    },
+
+    '& [data-cy="results-table-details-button"] .MuiButton-startIcon': {
+      marginLeft: 0,
+      marginRight: "3px",
+    },
+
+    '& [data-cy="results-table-details-button"] .MuiSvgIcon-root': {
+      fontSize: "14px",
+    },
+  },
+};
 
 export default function ResultsTable() {
   const {
@@ -56,7 +100,18 @@ export default function ResultsTable() {
     backgroundColor: config.ui.colors.primary,
     fontWeight: 700,
     color: "white",
+    fontSize: "14px",
+    lineHeight: 1.3,
     transition: "background-color 0.3s ease",
+  };
+
+  const hiddenOnTabletStyle = {
+    display: {
+      xs: "none",
+      sm: "none",
+      md: "none",
+      lg: "table-cell",
+    },
   };
 
   const handleRowClick = (item) => {
@@ -98,6 +153,12 @@ export default function ResultsTable() {
                   fontStyle: "italic",
                   fontWeight: 400,
                   fontSize: "12px",
+                  lineHeight: 1.4,
+
+                  "@media (max-width: 764px)": {
+                    fontSize: "10px",
+                    lineHeight: 1.25,
+                  },
                 }}
               >
                 ({formatEntryTypeLabel(lastSearchedPathSegment)})
@@ -108,8 +169,25 @@ export default function ResultsTable() {
       : column
   );
 
+  const getResponsiveColumnWidth = (column) => {
+    if (config.beaconType === "singleBeacon") {
+      return column.width;
+    }
+
+    return {
+      xs: BEACON_NETWORK_TABLET_COLUMN_WIDTHS[column.id] || column.width,
+      lg: column.width,
+    };
+  };
+
   const getColumnWidth = (columnId) =>
     tableColumns.find((column) => column.id === columnId)?.width;
+
+  const getResponsiveColumnWidthById = (columnId) => {
+    const column = tableColumns.find((column) => column.id === columnId);
+
+    return column ? getResponsiveColumnWidth(column) : undefined;
+  };
 
   useEffect(() => {
     const initialExpandedRows = {};
@@ -336,6 +414,7 @@ export default function ResultsTable() {
             sx={{
               tableLayout: "fixed",
               width: "100%",
+              ...compactResultsTableTextStyle,
             }}
           >
             <TableHead>
@@ -346,7 +425,12 @@ export default function ResultsTable() {
                     align={column.align}
                     sx={{
                       ...headerCellStyle,
-                      width: column.width,
+                      // width: column.width,
+                      width: getResponsiveColumnWidth(column),
+                      ...(column.id === "maturity" ||
+                      column.id === "data_visibility"
+                        ? hiddenOnTabletStyle
+                        : {}),
                     }}
                   >
                     {column.label}
@@ -420,14 +504,16 @@ export default function ResultsTable() {
                           {/* Dataset */}
                           <TableCell
                             data-cy="results-table-cell-id"
-                            sx={{ fontWeight: "bold" }}
-                            style={{
-                              width: getColumnWidth("beacon_dataset"),
+                            sx={{
+                              fontWeight: "bold",
+                              width:
+                                getResponsiveColumnWidthById("beacon_dataset"),
                             }}
                           >
                             <Box
                               component="span"
                               sx={{
+                                backgroundColor: "gold",
                                 display: "block",
                                 minWidth: 0,
                                 whiteSpace: "normal",
@@ -450,10 +536,16 @@ export default function ResultsTable() {
                           </TableCell>
 
                           {/* Search Results */}
-                          <TableCell
+                          {/* <TableCell
                             sx={{ fontWeight: "bold" }}
                             style={{
                               width: getColumnWidth("response"),
+                            }}
+                          > */}
+                          <TableCell
+                            sx={{
+                              fontWeight: "bold",
+                              width: getResponsiveColumnWidthById("response"),
                             }}
                           >
                             <Box display="flex" alignItems="center" gap={3}>
@@ -541,8 +633,8 @@ export default function ResultsTable() {
 
                           {/* Contact */}
                           <TableCell
-                            style={{
-                              width: getColumnWidth("contact"),
+                            sx={{
+                              width: getResponsiveColumnWidthById("contact"),
                             }}
                           >
                             <Box
@@ -650,9 +742,11 @@ export default function ResultsTable() {
                         {/* Beacon name, falling back to Beacon ID */}
                         <TableCell
                           data-cy="results-table-cell-id"
-                          sx={{ fontWeight: "bold" }}
-                          style={{
-                            width: getColumnWidth("beacon_dataset"),
+                          sx={{
+                            backgroundColor: "gold",
+                            fontWeight: "bold",
+                            width:
+                              getResponsiveColumnWidthById("beacon_dataset"),
                           }}
                         >
                           <Box
@@ -668,6 +762,14 @@ export default function ResultsTable() {
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
+
+                                "@media (max-width: 764px)": {
+                                  width: "18px",
+                                  minWidth: "18px",
+                                  "& .MuiSvgIcon-root": {
+                                    fontSize: "18px",
+                                  },
+                                },
                               }}
                             >
                               {item.items?.length > 0 &&
@@ -690,7 +792,10 @@ export default function ResultsTable() {
 
                         {/* Beacon Maturity */}
                         <TableCell
-                          sx={{ fontWeight: "bold" }}
+                          sx={{
+                            fontWeight: "bold",
+                            ...hiddenOnTabletStyle,
+                          }}
                           style={{
                             width: getColumnWidth("maturity"),
                           }}
@@ -704,7 +809,10 @@ export default function ResultsTable() {
 
                         {/* Data Visibility */}
                         <TableCell
-                          sx={{ fontWeight: "bold" }}
+                          sx={{
+                            fontWeight: "bold",
+                            ...hiddenOnTabletStyle,
+                          }}
                           style={{
                             width: getColumnWidth("data_visibility"),
                           }}
@@ -714,9 +822,10 @@ export default function ResultsTable() {
 
                         {/* nº of Datasets */}
                         <TableCell
-                          sx={{ fontWeight: "bold" }}
-                          style={{
-                            width: getColumnWidth("datasets_count"),
+                          sx={{
+                            fontWeight: "bold",
+                            width:
+                              getResponsiveColumnWidthById("datasets_count"),
                           }}
                         >
                           {datasetCountValue}
@@ -724,9 +833,9 @@ export default function ResultsTable() {
 
                         {/* Search Results */}
                         <TableCell
-                          sx={{ fontWeight: "bold" }}
-                          style={{
-                            width: getColumnWidth("response"),
+                          sx={{
+                            fontWeight: "bold",
+                            width: getResponsiveColumnWidthById("response"),
                           }}
                         >
                           {beaconType === "boolean" &&
@@ -768,8 +877,8 @@ export default function ResultsTable() {
 
                         {/* Contact */}
                         <TableCell
-                          style={{
-                            width: getColumnWidth("contact"),
+                          sx={{
+                            width: getResponsiveColumnWidthById("contact"),
                           }}
                         >
                           <Box
@@ -811,6 +920,17 @@ export default function ResultsTable() {
                                   },
                                   "&:hover .defaultIcon": {
                                     display: "none",
+                                  },
+
+                                  "@media (max-width: 764px)": {
+                                    width: "34px",
+                                    height: "26px",
+                                    minWidth: "26px",
+                                    minHeight: "26px",
+
+                                    "& .MuiSvgIcon-root": {
+                                      fontSize: "18px",
+                                    },
                                   },
                                 }}
                               >

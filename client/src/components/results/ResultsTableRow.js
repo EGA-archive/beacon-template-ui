@@ -20,6 +20,15 @@ import { getDatasetType } from "./utils/beaconType";
 export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
   const { setActualLoadedCount } = useSelectedEntry();
 
+  const hiddenOnTabletStyle = {
+    display: {
+      xs: "none",
+      sm: "none",
+      md: "none",
+      lg: "table-cell",
+    },
+  };
+
   // This function decides what number to render in the response column at a dataset level
   const getDisplayedCount = (item, dataset) => {
     // If the dataset shows resultsCount then we return it directly (resultsCount is not a mandatory field in Beacon v2)
@@ -108,16 +117,29 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
                       {/* Dataset ID */}
                       <TableCell
                         sx={{
-                          width:
-                            BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset_name
-                              .width,
+                          backgroundColor: "violet",
+                          width: {
+                            xs: "60%",
+                            lg: BEACON_NETWORK_COLUMNS_EXPANDED
+                              .beacon_dataset_name.width,
+                          },
                         }}
                       >
+                        {/* <Box
+                          sx={{
+                            display: "flex",
+                            pl: 9,
+                            minWidth: 0,
+                          }}
+                        > */}
                         <Box
                           sx={{
                             display: "flex",
                             pl: 9,
                             minWidth: 0,
+                            "@media (max-width: 764px)": {
+                              pl: 2.5,
+                            },
                           }}
                         >
                           <Typography
@@ -129,6 +151,9 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
                               whiteSpace: "normal",
                               overflowWrap: "anywhere",
                               wordBreak: "break-word",
+                              "@media (max-width: 764px)": {
+                                pl: 0,
+                              },
                             }}
                           >
                             {dataset.dataset || <i>Undefined</i>}
@@ -137,7 +162,9 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
                       </TableCell>
 
                       {/* Empty column 1 */}
+                      {/* Beacon Maturity alignment column */}
                       <TableCell
+                        sx={hiddenOnTabletStyle}
                         style={{
                           width:
                             BEACON_NETWORK_COLUMNS_EXPANDED
@@ -146,15 +173,21 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
                       />
 
                       {/* Empty column 3 */}
+
+                      {/* Data Visibility alignment column */}
                       <TableCell
+                        sx={hiddenOnTabletStyle}
                         style={{
                           width:
                             BEACON_NETWORK_COLUMNS_EXPANDED
                               .beacon_dataset_empty_two.width,
                         }}
                       />
+
                       {/* Empty column 2 */}
+                      {/* nº of Datasets alignment column */}
                       <TableCell
+                        sx={hiddenOnTabletStyle}
                         style={{
                           width:
                             BEACON_NETWORK_COLUMNS_EXPANDED
@@ -164,13 +197,25 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
 
                       {/* Response (Boolean | Count | Record) + Details button for real datasets */}
                       <TableCell
-                        style={{
-                          width:
-                            BEACON_NETWORK_COLUMNS_EXPANDED
+                        sx={{
+                          width: {
+                            xs: "36%",
+                            lg: BEACON_NETWORK_COLUMNS_EXPANDED
                               .beacon_dataset_response.width,
+                          },
                         }}
                       >
-                        <Box display="flex" alignItems="center" gap={3}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 3,
+
+                            "@media (max-width: 764px)": {
+                              gap: 1,
+                            },
+                          }}
+                        >
                           <Typography variant="body2" fontWeight="bold">
                             {isBoolean
                               ? dataset.exists

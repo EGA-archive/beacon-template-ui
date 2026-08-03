@@ -21,6 +21,7 @@ export default function GenomicQueryBuilderHelp({
 
   const cards = [
     {
+      configKey: "sequenceQuery",
       title: "Retrieve by single variation",
       queryType: "Sequence Query",
       image: needHelpSequence,
@@ -35,6 +36,7 @@ export default function GenomicQueryBuilderHelp({
       ],
     },
     {
+      configKey: "geneId",
       title: "Retrieve by Gene HGNC symbol",
       queryType: "Gene ID",
       image: needHelpGene,
@@ -51,6 +53,7 @@ export default function GenomicQueryBuilderHelp({
       ],
     },
     {
+      configKey: "rangeQuery",
       title: "Retrieve all variants within or overlapping the genomic range",
       queryType: "Range Query",
       image: needHelpRange,
@@ -64,6 +67,7 @@ export default function GenomicQueryBuilderHelp({
       ],
     },
     {
+      configKey: "bracketQuery",
       title:
         "Retrieve all variants with start and end positions within defined ranges",
       queryType: "Bracket Query",
@@ -80,6 +84,10 @@ export default function GenomicQueryBuilderHelp({
       ],
     },
   ];
+
+  const enabledCards = cards.filter(
+    (card) => config.ui.genomicQueries.genomicQueryTypes[card.configKey]
+  );
 
   const helpRowGridStyles = {
     display: "grid",
@@ -330,7 +338,7 @@ export default function GenomicQueryBuilderHelp({
         </Box>
 
         {/* Query rows */}
-        {cards.map((card) => (
+        {enabledCards.map((card) => (
           <Box key={card.queryType} sx={getQueryRowStyles(card.queryType)}>
             <Box
               onClick={() => setSelectedQueryType(card.queryType)}

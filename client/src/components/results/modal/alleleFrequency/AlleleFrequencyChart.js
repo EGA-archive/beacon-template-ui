@@ -206,7 +206,7 @@ export default function AlleleFrequencyChart({
                 }}
               >
                 {/* Check with Sara */}
-                {/* <Label
+                <Label
                   value="Populations"
                   position="insideBottom"
                   offset={0}
@@ -216,7 +216,7 @@ export default function AlleleFrequencyChart({
                     fontWeight: 700,
                     fill: "#000",
                   }}
-                /> */}
+                />
               </XAxis>
 
               <YAxis

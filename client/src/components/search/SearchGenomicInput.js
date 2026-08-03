@@ -391,41 +391,52 @@ export default function SearchGenomicInput({
         }}
       >
         {/* Genome assembly dropdown */}
-        {activeInput === "genomic" && (
-          <Select
-            value={assembly}
-            onChange={(e) => setAssembly(e.target.value)}
-            onOpen={() => setIsAssemblyOpen(true)}
-            onClose={() => setIsAssemblyOpen(false)}
-            variant="standard"
-            disableUnderline
-            IconComponent={AssemblyArrowIcon}
-            sx={{
-              backgroundColor: "black",
-              color: "#fff",
-              fontSize: "12px",
-              fontWeight: 700,
-              fontFamily: '"Open Sans", sans-serif',
-              pl: 3,
-              pr: 2,
-              py: 0,
-              height: "47px",
-              borderTopLeftRadius: "999px",
-              borderBottomLeftRadius: "999px",
-              ".MuiSelect-icon": { color: "#fff", mr: 1 },
-              ".MuiSelect-iconOpen": { transform: "none" },
-            }}
-          >
-            {config.assemblyId.map((id) => (
-              <MenuItem key={id} value={id} sx={{ fontSize: "12px" }}>
-                {id}
-              </MenuItem>
-            ))}
-          </Select>
-        )}
+        <Select
+          value={assembly}
+          onChange={(e) => setAssembly(e.target.value)}
+          onOpen={() => setIsAssemblyOpen(true)}
+          onClose={() => setIsAssemblyOpen(false)}
+          variant="standard"
+          disableUnderline
+          IconComponent={AssemblyArrowIcon}
+          sx={{
+            backgroundColor: "black",
+            color: "#fff",
+            fontSize: "12px",
+            fontWeight: 700,
+            fontFamily: '"Open Sans", sans-serif',
+            pl: 3,
+            pr: 2,
+            py: 0,
+            height: "47px",
+            borderTopLeftRadius: "999px",
+            borderBottomLeftRadius: "999px",
+            ".MuiSelect-icon": { color: "#fff", mr: 1 },
+            ".MuiSelect-iconOpen": { transform: "none" },
+          }}
+        >
+          {config.assemblyId.map((id) => (
+            <MenuItem key={id} value={id} sx={{ fontSize: "12px" }}>
+              {id}
+            </MenuItem>
+          ))}
+        </Select>
 
         {/* Search icon */}
-        <Box sx={{ pl: 2, pr: 1, color: primaryDarkColor }}>
+        {/* <Box sx={{ pl: 2, pr: 1, color: primaryDarkColor }}>
+          <SearchIcon />
+        </Box> */}
+        <Box
+          sx={{
+            width: "48px",
+            height: "47px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            color: primaryDarkColor,
+          }}
+        >
           <SearchIcon />
         </Box>
 
@@ -438,8 +449,8 @@ export default function SearchGenomicInput({
             inputRef={inputRef}
             placeholder={
               activeInput === "genomic"
-                ? "Search by Genomic Query. Examples: 22-16050527-C-A or 22:16050527C>A"
-                : "Search by Genomic Query."
+                ? "Examples: 22-16050527-C-A or 22:16050527C>A"
+                : "Examples: 22-16050527-C-A or 22:16050527C>A"
             }
             fullWidth
             value={genomicDraft}

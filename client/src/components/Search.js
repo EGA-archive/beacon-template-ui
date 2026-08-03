@@ -100,9 +100,9 @@ export default function Search({
         const res = await fetch(`${config.apiUrl}/map`, {
           headers: authHeaders,
         });
-        const data = await res.json();
+        // const data = await res.json();
 
-        // const data = mockEntryTypes;
+        const data = mockEntryTypes;
 
         const endpointSets = data.response.endpointSets || {};
         const seen = new Set();

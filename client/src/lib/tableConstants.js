@@ -7,13 +7,69 @@ import config from "../config/runtimeConfig";
 const primaryColor = config.ui.colors.primary;
 
 export const BEACON_NETWORK_COLUMNS = [
+  // {
+  //   id: "beacon_dataset",
+  //   label: (
+  //     <Box
+  //       sx={{
+  //         display: "flex",
+  //         alignItems: "center",
+  //         gap: 1,
+  //         ml: 4,
+  //         "@media (max-width: 764px)": {
+  //           ml: 3,
+  //           gap: 0,
+  //         },
+  //       }}
+  //     >
+  //       Beacon
+  //       <KeyboardArrowRightRoundedIcon
+  //         sx={{
+  //           fontSize: "26px",
+  //           "@media (max-width: 764px)": {
+  //             fontSize: "18px",
+  //           },
+  //         }}
+  //       />
+  //       Dataset
+  //     </Box>
+  //   ),
+  //   align: "left",
+  //   width: "30%",
+  // },
   {
     id: "beacon_dataset",
     label: (
-      <Box display="flex" alignItems="center" gap={1} ml={4}>
-        Beacon
-        <KeyboardArrowRightRoundedIcon sx={{ fontSize: "26px" }} />
-        Dataset
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          ml: 4,
+          width: "fit-content",
+          backgroundColor: "greenyellow",
+          "@media (max-width: 764px)": {
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 0.25,
+            ml: 3,
+          },
+        }}
+      >
+        <Box>Beacon</Box>
+
+        <KeyboardArrowRightRoundedIcon
+          sx={{
+            fontSize: "26px",
+
+            "@media (max-width: 764px)": {
+              fontSize: "16px",
+              transform: "rotate(90deg)",
+            },
+          }}
+        />
+
+        <Box>Dataset</Box>
       </Box>
     ),
     align: "left",
@@ -38,18 +94,19 @@ export const BEACON_NETWORK_COLUMNS = [
               <ul>
                 <br></br>
                 <li>
-                  <b>DEV:</b> Service potentially unstable, not using real data,
-                  which availability and data should not be used in production
-                  setups.
+                  <b>Development:</b> Service potentially unstable, not using
+                  real data, which availability and data should not be used in
+                  production setups.
                 </li>
                 <br></br>
                 <li>
-                  <b>TEST:</b> The service is expected to be stable, meaning up
+                  <b>Test:</b> The service is expected to be stable, meaning up
                   and available, but does <b>not include real data.</b>
                 </li>
                 <br></br>
                 <li>
-                  <b>PROD:</b> Service stable, at production level standards,
+                  <b>Production:</b> Service stable, at production level
+                  standards,
                   <b> containing actual data.</b>
                 </li>
               </ul>
@@ -130,7 +187,7 @@ export const BEACON_NETWORK_COLUMNS = [
                 </li>
                 <br></br>
                 <li>
-                  <b>Deatiled records:</b>
+                  <b>Detailed records:</b>
                   <br></br>The dataset allows viewing individual matching
                   records.
                 </li>
@@ -227,6 +284,13 @@ export const BEACON_NETWORK_COLUMNS_EXPANDED = {
     width: "0%",
     align: "left",
   },
+};
+
+export const BEACON_NETWORK_TABLET_COLUMN_WIDTHS = {
+  beacon_dataset: "43%",
+  datasets_count: "21%",
+  response: "22%",
+  contact: "14%",
 };
 
 const dataVisibilityColumn = BEACON_NETWORK_COLUMNS.find(

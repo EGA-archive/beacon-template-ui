@@ -35,7 +35,7 @@ export default function GenomicSubmitButton({ disabled }) {
       }}
     >
       {/* Button label */}
-      Add Genomic Query
+      Add Sequence Genomic Query
     </Button>
   );
 }

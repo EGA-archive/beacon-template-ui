@@ -181,7 +181,7 @@ export default function TableToolbarControls({
                   fontSize: "12px",
                 }}
               >
-                Select column
+                Select columns
               </Box>
             </Box>
           )}

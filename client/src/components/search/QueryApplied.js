@@ -53,6 +53,12 @@ export default function QueryApplied({ variant }) {
   );
   const hasOnlyEntryTypeFilter = filtersWithoutEntryType.length === 0;
 
+  const hasMultipleEntryTypes = (entryTypes?.length ?? 0) > 1;
+
+  const resultTypeTooltip = hasMultipleEntryTypes
+    ? "The Result Type label cannot be cleared because queries need one Result Type selected. You can change the Result Type in the radio selector above."
+    : "The Result Type label cannot be cleared because queries need one Result Type selected.";
+
   const intialEntryTypeFiltertoRender = [
     resultTypeChip,
     ...filtersWithoutEntryType,
@@ -103,34 +109,10 @@ export default function QueryApplied({ variant }) {
             }}
           >
             {/* Clear All button */}
-            {/* <Button
-              onClick={handleClearAll}
-              sx={{
-                textTransform: "none",
-                fontSize: "14px",
-                pl: 2,
-                ml: 2,
-                backgroundColor: "transparent",
-                color: primaryDarkColor,
-              }}
-              startIcon={
-                <img
-                  src={deleteIcon}
-                  alt="Delete"
-                  style={{ width: 18, height: 18, marginRight: 4 }}
-                />
-              }
-            >
-              Clear All
-            </Button> */}
             <Tooltip
               arrow
               placement="top"
-              title={
-                hasOnlyEntryTypeFilter
-                  ? "The Result Type label cannot be cleared because queries need one Result Type selected. You can change the Result Type in the radio selector above."
-                  : ""
-              }
+              title={hasOnlyEntryTypeFilter ? resultTypeTooltip : ""}
             >
               <Box component="span">
                 <Button

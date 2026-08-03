@@ -51,7 +51,7 @@ export default function SearchFiltersInput({
         <SearchIcon
           sx={{
             color: primaryDarkColor,
-            mr: 1,
+            mr: 1.5,
             flexShrink: 0,
           }}
         />

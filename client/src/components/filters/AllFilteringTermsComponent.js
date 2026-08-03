@@ -174,7 +174,12 @@ export default function AllFilteringTermsComponent({
             // Left side: search icon
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ color: primaryDarkColor, mr: 1 }} />
+                <SearchIcon
+                  sx={{
+                    color: primaryDarkColor,
+                    mr: 1,
+                  }}
+                />
               </InputAdornment>
             ),
             // Right side: clear button, only visible when query is not empty
