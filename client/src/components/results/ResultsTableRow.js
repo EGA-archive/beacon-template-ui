@@ -10,11 +10,23 @@ import {
   Button,
   Tooltip,
 } from "@mui/material";
-import { BEACON_NETWORK_COLUMNS_EXPANDED } from "../../lib/tableConstants";
+import {
+  BEACON_NETWORK_COLUMNS_EXPANDED,
+  BEACON_NETWORK_TABLET_COLUMN_WIDTHS,
+} from "../../lib/tableConstants";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import config from "../../config/runtimeConfig";
 import { getDatasetType } from "./utils/beaconType";
+
+const BEACON_NETWORK_TABLET_EXPANDED_WIDTHS = {
+  dataset: BEACON_NETWORK_TABLET_COLUMN_WIDTHS.beacon_dataset,
+  spacer: BEACON_NETWORK_TABLET_COLUMN_WIDTHS.datasets_count,
+  response: `calc(
+    ${BEACON_NETWORK_TABLET_COLUMN_WIDTHS.response} +
+    ${BEACON_NETWORK_TABLET_COLUMN_WIDTHS.contact}
+  )`,
+};
 
 // This component renders only for Beacon Networks
 export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
@@ -85,7 +97,10 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
             <Table
               stickyHeader
               aria-label="Results table"
-              sx={{ tableLayout: "fixed" }}
+              sx={{
+                tableLayout: "fixed",
+                width: "100%",
+              }}
             >
               <TableBody
                 sx={{
@@ -117,21 +132,13 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
                       {/* Dataset ID */}
                       <TableCell
                         sx={{
-                          backgroundColor: "violet",
                           width: {
-                            xs: "60%",
+                            xs: BEACON_NETWORK_TABLET_EXPANDED_WIDTHS.dataset,
                             lg: BEACON_NETWORK_COLUMNS_EXPANDED
                               .beacon_dataset_name.width,
                           },
                         }}
                       >
-                        {/* <Box
-                          sx={{
-                            display: "flex",
-                            pl: 9,
-                            minWidth: 0,
-                          }}
-                        > */}
                         <Box
                           sx={{
                             display: "flex",
@@ -143,6 +150,7 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
                           }}
                         >
                           <Typography
+                            data-cy="results-subrow-dataset-name"
                             variant="body2"
                             sx={{
                               pl: 6.5,
@@ -151,8 +159,17 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
                               whiteSpace: "normal",
                               overflowWrap: "anywhere",
                               wordBreak: "break-word",
+
                               "@media (max-width: 764px)": {
                                 pl: 0,
+                              },
+                              "@media (max-width: 535px)": {
+                                fontSize: "11px",
+                                lineHeight: 1.15,
+                              },
+                              "@media (max-width: 435px)": {
+                                fontSize: "10px",
+                                lineHeight: 1,
                               },
                             }}
                           >
@@ -186,12 +203,14 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
 
                       {/* Empty column 2 */}
                       {/* nº of Datasets alignment column */}
+                      {/* Compact spacer matching the nº of Datasets column */}
                       <TableCell
-                        sx={hiddenOnTabletStyle}
-                        style={{
-                          width:
-                            BEACON_NETWORK_COLUMNS_EXPANDED
+                        sx={{
+                          width: {
+                            xs: BEACON_NETWORK_TABLET_EXPANDED_WIDTHS.spacer,
+                            lg: BEACON_NETWORK_COLUMNS_EXPANDED
                               .beacon_dataset_empty_three.width,
+                          },
                         }}
                       />
 
@@ -199,9 +218,12 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
                       <TableCell
                         sx={{
                           width: {
-                            xs: "36%",
+                            xs: BEACON_NETWORK_TABLET_EXPANDED_WIDTHS.response,
                             lg: BEACON_NETWORK_COLUMNS_EXPANDED
                               .beacon_dataset_response.width,
+                            "@media (max-width: 764px)": {
+                              paddingLeft: "8px",
+                            },
                           },
                         }}
                       >
@@ -303,6 +325,7 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
 
                       {/* Empty */}
                       <TableCell
+                        sx={hiddenOnTabletStyle}
                         style={{
                           width:
                             BEACON_NETWORK_COLUMNS_EXPANDED.beacon_empty_three

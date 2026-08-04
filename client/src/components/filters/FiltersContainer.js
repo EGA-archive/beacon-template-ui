@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Box, Tabs, Tab, Typography } from "@mui/material";
 import CommonFilters from "./CommonFilters";
 import GenomicAnnotations from "../genomic/GenomicAnnotations";
@@ -7,10 +7,42 @@ import { ReactComponent as FilterIcon } from "../../assets/logos/filteringterms.
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import config from "../../config/runtimeConfig";
 
+const stackSearchAndCommonFilters = "@media (max-width:1100px)";
+const sideBySideSearchAndFilters = "@media (min-width:1101px)";
+
+/**
+ * Connects each search input with the tab that should open.
+ */
+const tabLabelByInput = {
+  genomic: "Genomic Annotations",
+  filter: "Common Filters",
+  common: "Common Filters",
+};
+
+/**
+ * Creates the Common Filters tab information.
+ */
+const buildCommonFiltersTab = () => ({
+  label: "Common Filters",
+  title: "Most Common Filters",
+  component: <CommonFilters />,
+  titleIcon: (
+    <FilterIcon
+      className="filterIcon"
+      style={{
+        "--icon-color": config.ui.colors.darkPrimary,
+      }}
+    />
+  ),
+});
+
+/**
+ * Creates the Genomic Annotations tab information.
+ */
 const buildGenomicAnnotationsTab = (setActiveInput) => ({
   label: "Genomic Annotations",
-  component: <GenomicAnnotations setActiveInput={setActiveInput} />,
   title: "Genomic Query Builder Examples",
+  component: <GenomicAnnotations setActiveInput={setActiveInput} />,
   titleIcon: (
     <DnaIcon
       className="dnaIcon"
@@ -22,169 +54,203 @@ const buildGenomicAnnotationsTab = (setActiveInput) => ({
   ),
 });
 
-const buildCommonFiltersTab = () => ({
-  label: "Common Filters",
-  component: <CommonFilters />,
-  title: "Most Common Filters",
-  titleIcon: (
-    <FilterIcon
-      className="filterIcon"
-      style={{
-        "--icon-color": config.ui.colors.darkPrimary,
+/**
+ * Displays the tab buttons at the top of the filters box.
+ */
+function FilterTabs({ tabs, tabValue, onChange }) {
+  return (
+    <Tabs
+      value={tabValue}
+      onChange={onChange}
+      aria-label="Filter tabs"
+      sx={{
+        backgroundColor: "#F5F5F5",
+        padding: "4px",
+        width: {
+          md: "290px",
+          lg: "338px",
+        },
+
+        "& .MuiTabs-indicator": {
+          display: "none",
+        },
+
+        "& .MuiTabs-flexContainer": {
+          justifyContent: {
+            xs: "flex-start",
+            md: "center",
+          },
+        },
       }}
-    />
-  ),
-});
-
-function TabPanel(props) {
-  // Reusable wrapper that renders the content of each tab when active
-  const { children, value, index, ...other } = props;
-  return (
-    <div
-      role="tabpanel"
-      className="tabpanel"
-      hidden={value !== index}
-      id={`filter-tabpanel-${index}`}
-      aria-labelledby={`filter-tab-${index}`}
-      {...other}
     >
-      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
-    </div>
-  );
-}
+      {tabs.map((tab, index) => {
+        const isSelected = tabValue === index;
+        const isLastTab = index === tabs.length - 1;
 
-// Main container that decides whether to show "Common Filters" and/or "Genomic Annotations"
-//  Behavior:
-//  - Renders tabs dynamically based on config and available entry types.
-// - Automatically switches to the “Genomic Annotations” tab whenever the activeInput is set to "genomic".
-//  - Resets the active tab when entry type changes.
-export default function FiltersContainer({
-  activeInput,
-  setActiveInput,
-  searchHeight, // height of the filter box (passed as prop)
-  hasGenomicAnnotationsConfig, // boolean: should show Genomic Annotations?
-  hasCommonFiltersConfig, // boolean: should show Common Filters?
-}) {
-  // Grab the currently selected entry type and the list of all entry types from context
-  const { entryTypes } = useSelectedEntry();
-
-  // Track which tab is active
-  const [tabValue, setTabValue] = useState(0);
-
-  // Handle user tab change
-  const handleChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
-
-  // Detect if genomic entry type exists and/or is selected
-  const hasGenomic = entryTypes.some(
-    (entry) => entry.pathSegment === "g_variants"
-  );
-
-  /**
-   * Build the tabs in a fixed order.
-   *
-   * Selecting a different entry type or input must not change
-   * the physical position of the tabs. It should only change
-   * which tab is currently selected/highlighted.
-   */
-  const tabs = [];
-
-  if (hasCommonFiltersConfig) {
-    tabs.push(buildCommonFiltersTab());
-  }
-
-  if (hasGenomicAnnotationsConfig && hasGenomic) {
-    tabs.push(buildGenomicAnnotationsTab(setActiveInput));
-  }
-
-  // If no tabs were added (both configs are false) → don't render anything
-  if (!tabs.length) return null;
-
-  useEffect(() => {
-    if (!tabs.length || !activeInput) return;
-
-    const targetByInput = {
-      genomic: "Genomic Annotations",
-      filter: "Common Filters",
-      common: "Common Filters",
-    };
-
-    const targetLabel = targetByInput[activeInput];
-    if (!targetLabel) return;
-
-    const targetIndex = tabs.findIndex((tab) => tab.label === targetLabel);
-    if (targetIndex !== -1 && targetIndex !== tabValue) {
-      setTabValue(targetIndex);
-    }
-  }, [activeInput]);
-
-  const stackSearchAndCommonFilters = "@media (max-width:1100px)";
-
-  return (
-    <Box>
-      {/* This is the tabs container for: Common Filters and Genomic Annotations. The top part only */}
-      <Tabs
-        value={tabValue}
-        onChange={handleChange}
-        aria-label="Filter tabs"
-        sx={{
-          backgroundColor: "#F5F5F5",
-          borderRadius: "0px",
-          padding: "4px",
-          width: { md: "290px", lg: "338px" },
-          "& .MuiTabs-indicator": {
-            display: "none",
-          },
-          "& .MuiTabs-flexContainer": {
-            justifyContent: {
-              xs: "flex-start",
-              md: "center",
-              lg: "center",
-            },
-          },
-        }}
-      >
-        {/* This is for the labels only */}
-        {tabs.map((tab, i) => (
+        return (
           <Tab
             key={tab.label}
             label={tab.label}
             disableRipple
             sx={{
               textTransform: "none",
-              paddingX: { xs: "12px", md: "9.5px", lg: "12px" },
+              paddingX: {
+                xs: "12px",
+                md: "9.5px",
+                lg: "12px",
+              },
               fontSize: "13px",
               borderRadius: "8px 8px 0 0",
-              fontWeight: tabValue === i ? "bold" : "normal",
+              fontWeight: isSelected ? "bold" : "normal",
               minHeight: "unset",
               minWidth: "auto",
-              color: tabValue === i ? "#000" : "#9E9E9E",
-              marginRight: i !== tabs.length - 1 ? 1.5 : 0,
-              backgroundColor: tabValue === i ? "#fff" : "#e0e0e0",
-              boxShadow:
-                tabValue === i ? "0px 1px 3px rgba(0,0,0,0.1)" : "none",
+              color: isSelected ? "#000" : "#9E9E9E",
+              marginRight: isLastTab ? 0 : 1.5,
+              backgroundColor: isSelected ? "#fff" : "#e0e0e0",
+              boxShadow: isSelected ? "0px 1px 3px rgba(0,0,0,0.1)" : "none",
+
               "&:hover": {
-                backgroundColor: tabValue === i ? "#fff" : "#e0e0e0",
-                color: tabValue === i ? "#000" : "black",
+                backgroundColor: isSelected ? "#fff" : "#e0e0e0",
+                color: isSelected ? "#000" : "black",
               },
+
               "&.Mui-selected": {
                 color: "#000",
               },
             }}
           />
-        ))}
-      </Tabs>
-      {/* This is for entire box where the filters are located, excluding the tabs on top */}
+        );
+      })}
+    </Tabs>
+  );
+}
+
+/**
+ * Displays the content of the currently selected tab.
+ */
+function FilterContent({ tabs, tabValue }) {
+  const activeTab = tabs[tabValue];
+
+  if (!activeTab) return null;
+
+  return (
+    <Box sx={{ pt: 2, padding: "20px" }}>
+      <Typography
+        variant="body1"
+        sx={{
+          fontWeight: "bold",
+          fontSize: "14px",
+          lineHeight: "19px",
+          color: "black",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "6px",
+          mb: 0.5,
+          whiteSpace: "nowrap",
+        }}
+      >
+        {activeTab.titleIcon}
+        {activeTab.title}
+      </Typography>
+
+      {activeTab.component}
+    </Box>
+  );
+}
+
+/**
+ * Displays Common Filters and, when available, Genomic Annotations.
+ *
+ * When all Entry Types are non-genomic, Common Filters is the only possible
+ * section. In that case, the tab button is hidden and the content is shown
+ * directly.
+ */
+export default function FiltersContainer({
+  activeInput,
+  setActiveInput,
+  searchHeight,
+  hasGenomicAnnotationsConfig,
+  hasCommonFiltersConfig,
+}) {
+  const { entryTypes } = useSelectedEntry();
+  const [tabValue, setTabValue] = useState(0);
+
+  /**
+   * Check whether Genomic Variants is available.
+   */
+  const hasGenomic = entryTypes.some(
+    (entry) => entry.pathSegment === "g_variants"
+  );
+
+  /**
+   * True when Entry Types exist, but none of them is Genomic Variants.
+   */
+  const hasOnlyNonGenomicEntryTypes = entryTypes.length > 0 && !hasGenomic;
+
+  /**
+   * Build only the tabs that are allowed by the configuration.
+   *
+   * useMemo prevents this array from being rebuilt on every render.
+   */
+  const tabs = useMemo(
+    () => [
+      ...(hasCommonFiltersConfig ? [buildCommonFiltersTab()] : []),
+
+      ...(hasGenomicAnnotationsConfig && hasGenomic
+        ? [buildGenomicAnnotationsTab(setActiveInput)]
+        : []),
+    ],
+    [
+      hasCommonFiltersConfig,
+      hasGenomicAnnotationsConfig,
+      hasGenomic,
+      setActiveInput,
+    ]
+  );
+
+  /**
+   Open the correct tab when the user activates a search input.
+   */
+  useEffect(() => {
+    const targetLabel = tabLabelByInput[activeInput];
+    if (!targetLabel) return;
+    const targetIndex = tabs.findIndex((tab) => tab.label === targetLabel);
+    if (targetIndex !== -1) {
+      setTabValue(targetIndex);
+    }
+  }, [activeInput, tabs]);
+
+  // Nothing is shown when no filter sections are enabled.
+  if (!tabs.length) return null;
+  return (
+    <Box>
+      {/*
+       * Tabs are useful only when a genomic Entry Type exists.
+       * Otherwise, Common Filters is shown directly.
+       */}
+      {!hasOnlyNonGenomicEntryTypes && (
+        <FilterTabs
+          tabs={tabs}
+          tabValue={tabValue}
+          onChange={(event, newValue) => setTabValue(newValue)}
+        />
+      )}
+      {/*
+       * Main filters box.
+       * The top margin changes when the tab buttons are hidden so that the
+       * Filters box stays aligned with the Search box on larger screens.
+       */}
       <Box
         sx={{
           boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.05)",
           borderRadius: "8px",
           backgroundColor: "white",
-          mt: "-4.7px",
-          // overflow: "hidden",
           overflowY: "auto",
           overflowX: "hidden",
+          mt: hasOnlyNonGenomicEntryTypes ? 0 : "-4.7px",
+          [sideBySideSearchAndFilters]: {
+            mt: hasOnlyNonGenomicEntryTypes ? "43px" : "-4.7px",
+          },
           height: {
             lg: `${searchHeight}px`,
             md: `${searchHeight}px`,
@@ -196,31 +262,7 @@ export default function FiltersContainer({
           },
         }}
       >
-        {tabs.map((tab, i) => (
-          <TabPanel value={tabValue} index={i} key={tab.label}>
-            <Box sx={{ padding: "20px" }}>
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: "bold",
-                  fontSize: "14px",
-                  lineHeight: "19px",
-                  color: "black",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  mb: 0.5,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {tab.titleIcon}
-                {tab.title}
-              </Typography>
-
-              {tab.component}
-            </Box>
-          </TabPanel>
-        ))}
+        <FilterContent tabs={tabs} tabValue={tabValue} />
       </Box>
     </Box>
   );

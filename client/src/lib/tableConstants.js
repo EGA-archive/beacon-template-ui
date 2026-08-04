@@ -47,7 +47,7 @@ export const BEACON_NETWORK_COLUMNS = [
           gap: 1,
           ml: 4,
           width: "fit-content",
-          backgroundColor: "greenyellow",
+          // backgroundColor: "greenyellow",
           "@media (max-width: 764px)": {
             flexDirection: "column",
             alignItems: "center",
@@ -237,9 +237,33 @@ export const BEACON_NETWORK_COLUMNS = [
     align: "left",
     width: "15%",
   },
+  // {
+  //   id: "datasets_count",
+  //   label: "nº of Datasets",
+  //   align: "left",
+  //   numeric: true,
+  //   width: "15%",
+  // },
   {
     id: "datasets_count",
-    label: "nº of Datasets",
+    label: (
+      <Box
+        component="span"
+        sx={{
+          display: "inline-flex",
+          gap: 0.5,
+          "@media (max-width: 764px)": {
+            flexDirection: "column",
+            gap: 0,
+            lineHeight: 1.5,
+          },
+        }}
+      >
+        <Box component="span">nº</Box>
+        <Box component="span">of</Box>
+        <Box component="span">Datasets</Box>
+      </Box>
+    ),
     align: "left",
     numeric: true,
     width: "15%",
@@ -288,9 +312,9 @@ export const BEACON_NETWORK_COLUMNS_EXPANDED = {
 
 export const BEACON_NETWORK_TABLET_COLUMN_WIDTHS = {
   beacon_dataset: "43%",
-  datasets_count: "21%",
-  response: "22%",
-  contact: "14%",
+  datasets_count: "20%",
+  response: "30%",
+  contact: "20%",
 };
 
 const dataVisibilityColumn = BEACON_NETWORK_COLUMNS.find(

@@ -29,12 +29,16 @@ export default function FilterTermsExtra() {
     setExtraFilter,
     setSelectedFilter,
     setIsExtraFilterValid,
+    entryTypes,
   } = useSelectedEntry();
 
   // Local state to hold operator, input value, and error message
   const [selectedOperator, setSelectedOperator] = useState(">");
   const [selectedValue, setSelectedValue] = useState("");
   const [error, setError] = useState("");
+
+  const isSingleNonGenomic =
+    entryTypes.length === 1 && entryTypes[0]?.pathSegment !== "g_variants";
 
   // Used to scroll the container into view when a new alphanumeric filter is active
   const { valueInputRef } = useSelectedEntry();
@@ -177,15 +181,6 @@ export default function FilterTermsExtra() {
 
   // This effect updates the global "isExtraFilterValid" state based on the current extraFilter type and the user's input.
   // This ensures the validation applies ONLY to alphanumeric filters.
-  // useEffect(() => {
-  //   if (!extraFilter || extraFilter.type !== "alphanumeric") {
-  //     setIsExtraFilterValid(true);
-  //     return;
-  //   }
-
-  //   setIsExtraFilterValid(selectedValue.trim() !== "");
-  // }, [extraFilter, selectedValue, setIsExtraFilterValid]);
-
   useEffect(() => {
     // If an alphanumeric extra filter is active (not yet added), disable Search
     if (extraFilter?.type === "alphanumeric") {
@@ -207,7 +202,7 @@ export default function FilterTermsExtra() {
         justifyContent: "center",
         alignItems: "center",
         flexWrap: "wrap",
-        // Sara, to be discussed
+        mt: isSingleNonGenomic ? 2 : 0,
         borderRadius: "10px",
         border: "1px solid #E0E0E0",
         padding: "15px 15px",

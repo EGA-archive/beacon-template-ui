@@ -55,14 +55,13 @@ export default function QueryApplied({ variant }) {
 
   const hasMultipleEntryTypes = (entryTypes?.length ?? 0) > 1;
 
-  const resultTypeTooltip = hasMultipleEntryTypes
+  const clearAllTooltip = hasMultipleEntryTypes
     ? "The Result Type label cannot be cleared because queries need one Result Type selected. You can change the Result Type in the radio selector above."
-    : "The Result Type label cannot be cleared because queries need one Result Type selected.";
+    : "There are no filters to clear.";
 
-  const intialEntryTypeFiltertoRender = [
-    resultTypeChip,
-    ...filtersWithoutEntryType,
-  ];
+  const intialEntryTypeFiltertoRender = hasMultipleEntryTypes
+    ? [resultTypeChip, ...filtersWithoutEntryType]
+    : filtersWithoutEntryType;
 
   return (
     <Box
@@ -72,6 +71,7 @@ export default function QueryApplied({ variant }) {
         mt: "16px",
         borderRadius: "10px",
         border: "1px solid #E0E0E0",
+        minHeight: "85px",
       }}
     >
       <Box
@@ -112,7 +112,7 @@ export default function QueryApplied({ variant }) {
             <Tooltip
               arrow
               placement="top"
-              title={hasOnlyEntryTypeFilter ? resultTypeTooltip : ""}
+              title={hasOnlyEntryTypeFilter ? clearAllTooltip : ""}
             >
               <Box component="span">
                 <Button

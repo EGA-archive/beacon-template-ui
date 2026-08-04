@@ -59,6 +59,23 @@ export const singleEntryCustomLabels = {
   datasets: "Datasets",
 };
 
+// Descriptions shown below the Search title when only one Entry Type is available
+export const singleEntryTypeDescriptions = {
+  individuals:
+    "Find information about patients or participants included in the dataset, such as phenotypes, diagnoses, or treatments.",
+  biosamples:
+    "Find information about biological samples, such as organ of origin, sample processing or diagnostic markers.",
+  g_variants: "Find genetic variants and their associated genomic information.",
+  analyses:
+    "Find information about the type of analyses performed on genomic data.",
+  analysis:
+    "Find information about the type of analyses performed on genomic data.",
+  runs: "Find information about the sequencing such as library strategy or platform.",
+  datasets: "Find datasets matching specific characteristics or metadata.",
+  cohorts:
+    "Find groups of individuals sharing common characteristics or study criteria.",
+};
+
 // Descriptions for entry types (used in tooltips)
 export const entryTypeDescriptions = {
   analyses: "query analysis metadata (e.g. analysis pipelines, methods)",

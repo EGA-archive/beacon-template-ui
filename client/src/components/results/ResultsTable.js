@@ -36,6 +36,8 @@ import useBeaconMetadata from "../../hooks/useBeaconMetaData";
 
 const ResultsTableModal = lazy(() => import("./modal/ResultsTableModal"));
 const COMPACT_RESULTS_TABLE_MAX_WIDTH = 764;
+const MOBILE_RESULTS_TABLE_MAX_WIDTH = 535;
+const SMALL_MOBILE_RESULTS_TABLE_MAX_WIDTH = 467;
 
 const compactResultsTableTextStyle = {
   [`@media (max-width: ${COMPACT_RESULTS_TABLE_MAX_WIDTH}px)`]: {
@@ -75,6 +77,20 @@ const compactResultsTableTextStyle = {
 
     '& [data-cy="results-table-details-button"] .MuiSvgIcon-root': {
       fontSize: "14px",
+    },
+  },
+
+  [`@media (max-width: ${MOBILE_RESULTS_TABLE_MAX_WIDTH}px)`]: {
+    '& .MuiTableBody-root [data-cy="results-subrow-dataset-name"]': {
+      fontSize: "11px",
+      lineHeight: 1.15,
+    },
+  },
+
+  [`@media (max-width: ${SMALL_MOBILE_RESULTS_TABLE_MAX_WIDTH}px)`]: {
+    '& .MuiTableBody-root [data-cy="results-subrow-dataset-name"]': {
+      fontSize: "10px",
+      lineHeight: 1.1,
     },
   },
 };
@@ -154,7 +170,6 @@ export default function ResultsTable() {
                   fontWeight: 400,
                   fontSize: "12px",
                   lineHeight: 1.4,
-
                   "@media (max-width: 764px)": {
                     fontSize: "10px",
                     lineHeight: 1.25,
@@ -513,7 +528,6 @@ export default function ResultsTable() {
                             <Box
                               component="span"
                               sx={{
-                                backgroundColor: "gold",
                                 display: "block",
                                 minWidth: 0,
                                 whiteSpace: "normal",
@@ -536,12 +550,6 @@ export default function ResultsTable() {
                           </TableCell>
 
                           {/* Search Results */}
-                          {/* <TableCell
-                            sx={{ fontWeight: "bold" }}
-                            style={{
-                              width: getColumnWidth("response"),
-                            }}
-                          > */}
                           <TableCell
                             sx={{
                               fontWeight: "bold",
@@ -743,7 +751,6 @@ export default function ResultsTable() {
                         <TableCell
                           data-cy="results-table-cell-id"
                           sx={{
-                            backgroundColor: "gold",
                             fontWeight: "bold",
                             width:
                               getResponsiveColumnWidthById("beacon_dataset"),

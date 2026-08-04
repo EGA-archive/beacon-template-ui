@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useMediaQuery } from "@mui/material";
 import config from "../config/runtimeConfig";
 import { useSelectedEntry } from "./context/SelectedEntryContext";
 import GenomicQueryBuilderButton from "./genomic/GenomicQueryBuilderButton";
@@ -16,6 +16,7 @@ import ResultTypeSection from "./search/utils/ResultTypeSection";
 import {
   formatEntryLabel,
   singleEntryCustomLabels,
+  singleEntryTypeDescriptions,
   prioritizeEntries,
 } from "../components/common/textFormatting";
 import mockEntryTypes from "./search/mockEntryTypes.json";
@@ -70,6 +71,8 @@ export default function Search({
   const inputRef = useRef(null);
   const [isGenomicDescriptionMultiline, setIsGenomicDescriptionMultiline] =
     useState(false);
+
+  const isBelow600px = useMediaQuery("(max-width:599px)");
 
   // Get authentication headers (includes Bearer token if user is logged in)
   const authHeaders = useAuthHeaders();
@@ -209,11 +212,15 @@ export default function Search({
 
   const isSingleEntryType = entryTypes.length === 1;
   const onlyEntryPath = entryTypes[0]?.pathSegment;
+  const singleEntryDescription = isSingleEntryType
+    ? singleEntryTypeDescriptions[onlyEntryPath]
+    : null;
 
   const hasGenomic = entryTypes.some((e) => e.pathSegment === "g_variants");
 
   // CASE A
   const isSingleNonGenomic = isSingleEntryType && !hasGenomic;
+  const moveAllFilteringTermsBelowInput = isSingleNonGenomic && isBelow600px;
 
   // CASE C
   const isSingleGenomic = isSingleEntryType && hasGenomic;
@@ -300,6 +307,8 @@ export default function Search({
       )}
 
       <FilteringTermsSection
+        hasGenomicSectionAbove={showGenomicSearch}
+        hasOneEntryTypeColumn={!isSingleEntryType && !hasTwoColumns}
         isGenomicDescriptionMultiline={isGenomicDescriptionMultiline}
         activeInput={activeInput}
         setActiveInput={setActiveInput}
@@ -339,7 +348,7 @@ export default function Search({
         {/* Main component title: Search */}
         <Typography
           sx={{
-            mb: 2,
+            mb: singleEntryDescription ? 1 : 2,
             fontWeight: 700,
             fontFamily: '"Open Sans", sans-serif',
             fontSize: entryTypes.length === 1 ? "18px" : "16px",
@@ -352,9 +361,20 @@ export default function Search({
               }`
             : "Search"}
         </Typography>
+
+        {singleEntryDescription && (
+          <Typography
+            sx={{
+              fontSize: "12px",
+            }}
+          >
+            {singleEntryDescription}
+          </Typography>
+        )}
         {isSingleNonGenomic && (
-          <Box sx={{ mt: 2 }}>
+          <Box>
             <FilteringTermsSection
+              moveAllFilteringTermsBelowInput={moveAllFilteringTermsBelowInput}
               activeInput={activeInput}
               setActiveInput={setActiveInput}
               selectedPathSegment={selectedPathSegment}
@@ -368,7 +388,7 @@ export default function Search({
           <Box
             sx={{
               display: "flex",
-              gap: hasTwoColumns ? 3 : 2,
+              gap: 3,
               alignItems: "flex-start",
               mb: 2,
             }}
@@ -385,6 +405,7 @@ export default function Search({
             <Box
               sx={{
                 flex: 1,
+                minWidth: 0,
                 height: "100%",
               }}
             >
@@ -392,7 +413,7 @@ export default function Search({
             </Box>
           </Box>
         )}
-        {isSingleGenomic && <Box sx={{ mt: 2 }}>{searchInputsSection}</Box>}
+        {isSingleGenomic && <Box>{searchInputsSection}</Box>}
         {extraFilter && <FilterTermsExtra />}
         {selectedPathSegment && <QueryApplied />}
         <Box

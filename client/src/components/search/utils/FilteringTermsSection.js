@@ -11,6 +11,9 @@ export default function FilteringTermsSection({
   onAllFilteringClick,
   filteringButtonRef,
   isGenomicDescriptionMultiline,
+  hasGenomicSectionAbove = false,
+  moveAllFilteringTermsBelowInput = false,
+  hasOneEntryTypeColumn = false,
 }) {
   return (
     <>
@@ -19,7 +22,10 @@ export default function FilteringTermsSection({
           display: "flex",
           alignItems: "center",
           gap: 1,
-          mt: isGenomicDescriptionMultiline ? 5 : 5.5,
+          mt: hasGenomicSectionAbove
+            ? (isGenomicDescriptionMultiline ? 5 : 5.5) +
+              (hasOneEntryTypeColumn ? 2 : 0)
+            : 0,
         }}
       >
         <Typography
@@ -88,12 +94,35 @@ export default function FilteringTermsSection({
           setActiveInput={setActiveInput}
           placeholder={getFilteringPlaceholder(selectedPathSegment)}
           action={
-            <Box ref={filteringButtonRef}>
-              <AllFilteringTermsButton onClick={onAllFilteringClick} />
-            </Box>
+            !moveAllFilteringTermsBelowInput ? (
+              <Box ref={filteringButtonRef}>
+                <AllFilteringTermsButton onClick={onAllFilteringClick} />
+              </Box>
+            ) : null
           }
         />
       </Box>
+
+      {moveAllFilteringTermsBelowInput && (
+        <Box
+          ref={filteringButtonRef}
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            maxWidth: "220px",
+            mx: "auto",
+            mt: 1.5,
+
+            "& .MuiButton-root": {
+              width: "100%",
+              whiteSpace: "nowrap",
+            },
+          }}
+        >
+          <AllFilteringTermsButton onClick={onAllFilteringClick} />
+        </Box>
+      )}
     </>
   );
 }

@@ -132,6 +132,7 @@ export default function AllFilteringTermsComponent({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+
           mb: 2,
         }}
       >

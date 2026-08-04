@@ -20,7 +20,7 @@ export default function ResultTypeSection({
     <>
       <Box
         sx={{
-          width: "240px",
+          width: hasTwoColumns ? "240px" : "190px",
           flexShrink: 0,
         }}
       >
