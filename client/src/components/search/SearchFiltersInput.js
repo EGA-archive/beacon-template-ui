@@ -33,6 +33,7 @@ export default function SearchFiltersInput({
    * when the Result Type selector is visible.
    */
   const buttonsOutsideInputLayout = "@media (max-width:870px)";
+  const mobileSearchLayout = "@media (max-width:599px)";
 
   return (
     <Box
@@ -137,8 +138,14 @@ export default function SearchFiltersInput({
               flexShrink: 0,
               ml: 1,
 
+              // Multi-entry layouts move the button outside from 870px downward.
               [buttonsOutsideInputLayout]: {
                 display: hasEntryTypeSelector ? "none" : "flex",
+              },
+
+              // On xs, always remove the button from the input.
+              [mobileSearchLayout]: {
+                display: "none",
               },
             }}
           >

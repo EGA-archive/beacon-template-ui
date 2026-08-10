@@ -68,7 +68,10 @@ export default function QueryApplied({ variant }) {
       sx={{
         display: "block",
         backgroundColor: "white",
-        mt: "16px",
+        mt: {
+          xs: "32px",
+          sm: "16px",
+        },
         borderRadius: "10px",
         border: "1px solid #E0E0E0",
         minHeight: "85px",

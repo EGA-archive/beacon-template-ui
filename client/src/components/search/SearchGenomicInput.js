@@ -21,6 +21,7 @@ import { useSelectedEntry } from "../../components/context/SelectedEntryContext"
 export default function SearchGenomicInput({
   activeInput,
   setActiveInput,
+
   primaryDarkColor,
   assembly,
   setAssembly,
@@ -531,8 +532,13 @@ export default function SearchGenomicInput({
               display: "flex",
               alignItems: "center",
               flexShrink: 0,
+
               [buttonsOutsideInputLayout]: {
                 display: hasEntryTypeSelector ? "none" : "flex",
+              },
+
+              [mobileSearchLayout]: {
+                display: "none",
               },
             }}
           >
@@ -553,7 +559,7 @@ export default function SearchGenomicInput({
        * From 870px downward, move the Genomic Query Builder
        * below the genomic input when the Result Type selector exists.
        */}
-      {action && hasEntryTypeSelector && (
+      {action && (
         <Box
           sx={{
             display: "none",
@@ -563,7 +569,13 @@ export default function SearchGenomicInput({
             mx: "auto",
             mt: 1.5,
 
+            // Multi-entry layouts move the button outside from 870px downward.
             [buttonsOutsideInputLayout]: {
+              display: hasEntryTypeSelector ? "flex" : "none",
+            },
+
+            // On xs, always move the button outside.
+            [mobileSearchLayout]: {
               display: "flex",
             },
 

@@ -40,6 +40,8 @@ export default function EntryTypeSelector({
   const ontologyFourColumnLayout =
     "@media (min-width:640px) and (max-width:870px)";
 
+  const hasExactlyTwoEntryTypes = entryTypes.length === 2;
+
   /**
    * Standard intermediate genomic layout:
    * two-column selectors use eight rows so the ninth
@@ -200,7 +202,9 @@ export default function EntryTypeSelector({
              * Compact ontology-only columns use their content width.
              */
             gridTemplateColumns: {
-              xs: "repeat(3, minmax(0, 1fr))",
+              xs: hasExactlyTwoEntryTypes
+                ? "repeat(2, minmax(0, 1fr))"
+                : "repeat(3, minmax(0, 1fr))",
 
               sm: shouldStackOntologyLayout
                 ? "repeat(3, minmax(0, 1fr))"
@@ -266,14 +270,15 @@ export default function EntryTypeSelector({
                 ? "10px"
                 : 2,
             },
-
             rowGap: {
               xs: 1,
               sm: shouldStackOntologyLayout ? 1 : 0,
             },
-
             alignItems: "center",
-            justifyItems: "stretch",
+            justifyItems: {
+              xs: hasExactlyTwoEntryTypes ? "center" : "stretch",
+              sm: "stretch",
+            },
           }}
         >
           {entryTypes.map((entry) => (
@@ -289,7 +294,7 @@ export default function EntryTypeSelector({
                  * the width required by their content.
                  */
                 width: {
-                  xs: "100%",
+                  xs: hasExactlyTwoEntryTypes ? "max-content" : "100%",
 
                   sm: shouldStackOntologyLayout
                     ? "100%"

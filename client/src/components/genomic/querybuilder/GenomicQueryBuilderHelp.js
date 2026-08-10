@@ -16,7 +16,7 @@ export default function GenomicQueryBuilderHelp({
   const primaryDarkColor = config.ui.colors.darkPrimary;
   const HELP_LABEL_COLUMN_WIDTH = {
     xs: "23%",
-    sm: "23%",
+    sm: "30%",
   };
 
   const cards = [
@@ -101,6 +101,82 @@ export default function GenomicQueryBuilderHelp({
       md: 4,
     },
     alignItems: "center",
+  };
+
+  const getExampleAlignmentStyles = (queryType) => {
+    /**
+     * 1265px and above.
+     */
+    const extraLargeScreenOffsets = {
+      "Sequence Query": "-7px",
+      "Gene ID": 0,
+      "Range Query": "-28px",
+      "Bracket Query": "-44px",
+    };
+
+    /**
+     * 1129px to 1264px.
+     */
+    const largeScreenOffsets = {
+      "Sequence Query": 0,
+      "Gene ID": 0,
+      "Range Query": "-18px",
+      "Bracket Query": "-28px",
+    };
+
+    /**
+     * 900px to 1128px.
+     */
+    const mediumScreenOffsets = {
+      "Sequence Query": 0,
+      "Gene ID": 0,
+      "Range Query": "-9px",
+      "Bracket Query": "-20px",
+    };
+
+    /**
+     * 600px to 899px.
+     * Adjust these values as needed.
+     */
+    const smallScreenOffsets = {
+      "Sequence Query": 0,
+      "Gene ID": 0,
+      "Range Query": 1,
+      "Bracket Query": 1,
+    };
+
+    /**
+     * Below 600px.
+     * Adjust these values as needed.
+     */
+    const extraSmallScreenOffsets = {
+      "Sequence Query": 0,
+      "Gene ID": 0,
+      "Range Query": 1,
+      "Bracket Query": 1,
+    };
+
+    return {
+      "@media (min-width:1265px)": {
+        mt: extraLargeScreenOffsets[queryType] ?? 0,
+      },
+
+      "@media (min-width:1129px) and (max-width:1264px)": {
+        mt: largeScreenOffsets[queryType] ?? 0,
+      },
+
+      "@media (min-width:900px) and (max-width:1128px)": {
+        mt: mediumScreenOffsets[queryType] ?? 0,
+      },
+
+      "@media (min-width:600px) and (max-width:899px)": {
+        mt: smallScreenOffsets[queryType] ?? 0,
+      },
+
+      "@media (max-width:599px)": {
+        mt: extraSmallScreenOffsets[queryType] ?? 0,
+      },
+    };
   };
 
   const getQueryRowStyles = (queryType) => {
@@ -191,8 +267,22 @@ export default function GenomicQueryBuilderHelp({
     <Box
       sx={{
         display: "flex",
-        flexDirection: "column",
+
+        // xs + sm: keep examples beside each other when space allows.
+        flexDirection: {
+          xs: "row",
+          md: "column",
+        },
+
+        // Move the next example to a new row only when necessary.
+        flexWrap: {
+          xs: "wrap",
+          md: "nowrap",
+        },
+
+        alignItems: "flex-start",
         gap: 1.5,
+        maxWidth: "100%",
       }}
     >
       {card.examples.map((example, index) => (
@@ -200,6 +290,8 @@ export default function GenomicQueryBuilderHelp({
           key={`${card.queryType}-${index}`}
           onClick={() => handleExampleClick(card, example)}
           sx={{
+            width: "fit-content",
+            maxWidth: "100%",
             p: "8px 10px",
             borderRadius: "6px",
             border: `1px solid ${primaryDarkColor}`,
@@ -230,6 +322,8 @@ export default function GenomicQueryBuilderHelp({
       sx={{
         fontFamily: '"Open Sans", sans-serif',
         // backgroundColor: {
+        //   xxl: "yellow",
+        //   xl: "yellowgreen",
         //   lg: "lightsalmon",
         //   md: "pink",
         //   sm: "lightgreen",
@@ -364,7 +458,7 @@ export default function GenomicQueryBuilderHelp({
               />
             </Box>
 
-            <Box
+            {/* <Box
               //  Check with Sara
               // This is the alignment of the Bracket Query label
               sx={{
@@ -377,6 +471,17 @@ export default function GenomicQueryBuilderHelp({
                         lg: "start",
                       }
                     : "center",
+              }}
+            >
+              {renderExamples(card)}
+            </Box> */}
+            <Box
+              sx={{
+                alignSelf: "center",
+
+                // Fine-tune the vertical alignment of each clickable example
+                // with its corresponding SVG.
+                ...getExampleAlignmentStyles(card.queryType),
               }}
             >
               {renderExamples(card)}

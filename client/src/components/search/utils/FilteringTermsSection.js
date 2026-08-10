@@ -24,6 +24,7 @@ export default function FilteringTermsSection({
    * Ontology-only layouts keep the button outside at all sizes.
    */
   const buttonsOutsideInputLayout = "@media (max-width:870px)";
+  const mobileSearchLayout = "@media (max-width:599px)";
 
   return (
     <>
@@ -180,9 +181,8 @@ export default function FilteringTermsSection({
        * Other multi-entry layouts:
        * button moves outside from 870px downward.
        */}
-      {hasEntryTypeSelector && !moveAllFilteringTermsBelowInput && (
+      {!moveAllFilteringTermsBelowInput && (
         <Box
-          ref={isOntologyOnlyLayout ? filteringButtonRef : null}
           sx={{
             display: isOntologyOnlyLayout ? "flex" : "none",
             justifyContent: "center",
@@ -191,7 +191,13 @@ export default function FilteringTermsSection({
             mx: "auto",
             mt: 1.5,
 
+            // Multi-entry layouts: outside from 870px downward.
             [buttonsOutsideInputLayout]: {
+              display: hasEntryTypeSelector ? "flex" : "none",
+            },
+
+            // Single or multiple Entry Types: always outside on xs.
+            [mobileSearchLayout]: {
               display: "flex",
             },
 
