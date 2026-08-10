@@ -237,6 +237,7 @@ export default function AllFilteringTermsComponent({
         <FilteringTermsTable
           filteringTerms={{ response: { filteringTerms: filteredTerms } }} // Pass filtered results
           defaultScope={selectedPathSegment} // Scope comes from selected entry
+          searchQuery={searchQuery}
           searchWasPerformed={searchQuery.trim().length > 0} // Used for conditional rendering
           loading={loading} // Show loader while fetching
           handleChangePage={handleChangePage} // Pagination: change page

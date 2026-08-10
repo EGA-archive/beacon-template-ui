@@ -2,6 +2,7 @@ import {
   BEACON_NETWORK_COLUMNS,
   BEACON_NETWORK_TABLET_COLUMN_WIDTHS,
   BEACON_SINGLE_COLUMNS,
+  BEACON_SINGLE_TABLET_COLUMN_WIDTHS,
 } from "../../lib/tableConstants";
 import React, { lazy, Suspense } from "react";
 import {
@@ -23,6 +24,8 @@ import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRigh
 import InfoIcon from "@mui/icons-material/Info";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
+import AlleleFrequenciesButton from "../results/modal/alleleFrequency/AlleleFrequenciesButton";
+import { hasAlleleFrequencies } from "./modal/alleleFrequency/hasAlleleFrequencies";
 import LocalPostOfficeRoundedIcon from "@mui/icons-material/LocalPostOfficeRounded";
 import LocalPostOfficeOutlinedIcon from "@mui/icons-material/LocalPostOfficeOutlined";
 import config from "../../config/runtimeConfig";
@@ -33,6 +36,7 @@ import CohortsTable from "./CohortsTable";
 import DatasetsTable from "./DatasetsTable";
 import { getBeaconAggregationInfo, getDatasetType } from "./utils/beaconType";
 import useBeaconMetadata from "../../hooks/useBeaconMetaData";
+import { openAlleleFrequencyPage } from "../results/utils/openAlleleFrequencyPage";
 
 const ResultsTableModal = lazy(() => import("./modal/ResultsTableModal"));
 const COMPACT_RESULTS_TABLE_MAX_WIDTH = 764;
@@ -69,7 +73,20 @@ const compactResultsTableTextStyle = {
       py: 0,
       borderRadius: "6px",
     },
+    '& [data-cy="results-table-af-button"]': {
+      fontSize: "10px",
+      lineHeight: 1,
+      width: "48px",
+      minWidth: "48px",
+      minHeight: "22px",
+      height: "24px",
+      borderRadius: "6px",
+      gap: "4px",
+    },
 
+    '& [data-cy="results-table-af-button"] .af-label': {
+      fontSize: "10px",
+    },
     '& [data-cy="results-table-details-button"] .MuiButton-startIcon': {
       marginLeft: 0,
       marginRight: "3px",
@@ -186,7 +203,10 @@ export default function ResultsTable() {
 
   const getResponsiveColumnWidth = (column) => {
     if (config.beaconType === "singleBeacon") {
-      return column.width;
+      return {
+        xs: BEACON_SINGLE_TABLET_COLUMN_WIDTHS[column.id] || column.width,
+        lg: column.width,
+      };
     }
 
     return {
@@ -491,6 +511,19 @@ export default function ResultsTable() {
                       const isCount = dataset.type === "count";
                       const isBoolean = dataset.type === "boolean";
 
+                      const singleResult =
+                        isRecord &&
+                        displayedCount === 1 &&
+                        dataset.results?.length === 1
+                          ? dataset.results[0]
+                          : null;
+
+                      const showAlleleFrequencyIcon =
+                        singleResult &&
+                        hasAlleleFrequencies(
+                          singleResult.frequencyInPopulations
+                        );
+
                       const dataVisibilityValue =
                         DATA_VISIBILITY_LABELS[dataset.type] || "-";
 
@@ -541,9 +574,12 @@ export default function ResultsTable() {
 
                           {/* Data Visibility */}
                           <TableCell
-                            sx={{ fontWeight: "bold" }}
-                            style={{
-                              width: getColumnWidth("data_visibility"),
+                            sx={{
+                              fontWeight: "bold",
+                              // Hide together with the Data Visibility header on compact screens.
+                              ...hiddenOnTabletStyle,
+                              width:
+                                getResponsiveColumnWidthById("data_visibility"),
                             }}
                           >
                             <Box component="strong">{dataVisibilityValue}</Box>
@@ -572,70 +608,108 @@ export default function ResultsTable() {
                                     ).format(displayedCount)
                                   : "-"}
                               </Box>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 1,
+                                }}
+                              >
+                                {isRecord && (
+                                  <Tooltip
+                                    title={
+                                      hasData
+                                        ? "View dataset details"
+                                        : "No details available (empty result)"
+                                    }
+                                    arrow
+                                  >
+                                    <span>
+                                      <Button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
 
-                              {isRecord && (
-                                <Tooltip
-                                  title={
-                                    hasData
-                                      ? "View dataset details"
-                                      : "No details available (empty result)"
-                                  }
-                                  arrow
-                                >
-                                  <span>
-                                    <Button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
+                                          if (!hasData) return;
 
-                                        if (!hasData) return;
-
-                                        handleOpenModal({
-                                          beaconId,
-                                          datasetId,
-                                          dataTable: dataset.results || [],
-                                          displayedCount,
-                                          actualLoadedCount,
-                                          headers: dataset.headers || [],
-                                        });
-                                      }}
-                                      variant="outlined"
-                                      data-cy="results-table-details-button"
-                                      startIcon={<CalendarViewMonthIcon />}
-                                      disabled={!hasData}
-                                      sx={{
-                                        textTransform: "none",
-                                        fontSize: "13px",
-                                        fontWeight: 400,
-                                        fontFamily: '"Open Sans", sans-serif',
-                                        color: hasData
-                                          ? config.ui.colors.darkPrimary
-                                          : "#999",
-                                        borderColor: hasData
-                                          ? config.ui.colors.darkPrimary
-                                          : "#ccc",
-                                        borderRadius: "8px",
-                                        px: 1.5,
-                                        py: 0.5,
-                                        minHeight: "28px",
-                                        minWidth: "84px",
-                                        "& .MuiButton-startIcon": {
-                                          marginRight: "6px",
+                                          handleOpenModal({
+                                            beaconId,
+                                            datasetId,
+                                            dataTable: dataset.results || [],
+                                            displayedCount,
+                                            actualLoadedCount,
+                                            headers: dataset.headers || [],
+                                          });
+                                        }}
+                                        variant="outlined"
+                                        data-cy="results-table-details-button"
+                                        startIcon={<CalendarViewMonthIcon />}
+                                        disabled={!hasData}
+                                        sx={{
+                                          textTransform: "none",
+                                          fontSize: "13px",
+                                          fontWeight: 400,
+                                          fontFamily: '"Open Sans", sans-serif',
                                           color: hasData
                                             ? config.ui.colors.darkPrimary
-                                            : "#bbb",
-                                        },
-                                        "&:hover": {
-                                          backgroundColor: hasData
-                                            ? `${config.ui.colors.darkPrimary}10`
-                                            : "transparent",
-                                        },
-                                      }}
-                                    >
-                                      Details
-                                    </Button>
-                                  </span>
-                                </Tooltip>
-                              )}
+                                            : "#999",
+                                          borderColor: hasData
+                                            ? config.ui.colors.darkPrimary
+                                            : "#ccc",
+                                          borderRadius: "8px",
+                                          px: 1.5,
+                                          py: 0.5,
+                                          minHeight: "28px",
+                                          minWidth: "84px",
+                                          "& .MuiButton-startIcon": {
+                                            marginRight: "6px",
+                                            color: hasData
+                                              ? config.ui.colors.darkPrimary
+                                              : "#bbb",
+                                          },
+                                          "&:hover": {
+                                            backgroundColor: hasData
+                                              ? `${config.ui.colors.darkPrimary}10`
+                                              : "transparent",
+                                          },
+                                        }}
+                                      >
+                                        Details
+                                      </Button>
+                                    </span>
+                                  </Tooltip>
+                                )}
+                                {showAlleleFrequencyIcon && (
+                                  <Tooltip
+                                    title="View allele frequency results"
+                                    arrow
+                                  >
+                                    <span>
+                                      <AlleleFrequenciesButton
+                                        iconOnly
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+
+                                          openAlleleFrequencyPage({
+                                            item: singleResult,
+                                            beaconId,
+                                            beaconName:
+                                              findBeaconName(beaconId),
+                                            datasetId,
+                                            entryTypeId:
+                                              lastSearchedPathSegment,
+                                            appliedQuery: {
+                                              entryType:
+                                                lastSearchedPathSegment,
+                                              filters:
+                                                lastSearchedFilters || [],
+                                            },
+                                          });
+                                        }}
+                                      />
+                                    </span>
+                                  </Tooltip>
+                                )}
+                              </Box>
                             </Box>
                           </TableCell>
 

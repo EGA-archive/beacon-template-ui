@@ -18,6 +18,9 @@ import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import config from "../../config/runtimeConfig";
 import { getDatasetType } from "./utils/beaconType";
+import AlleleFrequenciesButton from "./modal/alleleFrequency/AlleleFrequenciesButton";
+import { hasAlleleFrequencies } from "./modal/alleleFrequency/hasAlleleFrequencies";
+import { openAlleleFrequencyPage } from "../results/utils/openAlleleFrequencyPage";
 
 const BEACON_NETWORK_TABLET_EXPANDED_WIDTHS = {
   dataset: BEACON_NETWORK_TABLET_COLUMN_WIDTHS.beacon_dataset,
@@ -30,7 +33,8 @@ const BEACON_NETWORK_TABLET_EXPANDED_WIDTHS = {
 
 // This component renders only for Beacon Networks
 export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
-  const { setActualLoadedCount } = useSelectedEntry();
+  const { setActualLoadedCount, lastSearchedFilters, lastSearchedPathSegment } =
+    useSelectedEntry();
 
   const hiddenOnTabletStyle = {
     display: {
@@ -117,6 +121,17 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
                   const isRecord = dataset.type === "record";
                   const isCount = dataset.type === "count";
                   const isBoolean = dataset.type === "boolean";
+
+                  const singleResult =
+                    isRecord &&
+                    displayedCount === 1 &&
+                    dataset.results?.length === 1
+                      ? dataset.results[0]
+                      : null;
+
+                  const showAlleleFrequencyIcon =
+                    singleResult &&
+                    hasAlleleFrequencies(singleResult.frequencyInPopulations);
 
                   return (
                     <TableRow
@@ -232,7 +247,6 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
                             display: "flex",
                             alignItems: "center",
                             gap: 3,
-
                             "@media (max-width: 764px)": {
                               gap: 1,
                             },
@@ -317,6 +331,33 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
                                 >
                                   Details
                                 </Button>
+                              </span>
+                            </Tooltip>
+                          )}
+                          {showAlleleFrequencyIcon && (
+                            <Tooltip
+                              title="View allele frequency results"
+                              arrow
+                            >
+                              <span>
+                                <AlleleFrequenciesButton
+                                  iconOnly
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+
+                                    openAlleleFrequencyPage({
+                                      item: singleResult,
+                                      beaconId: item.beaconId,
+                                      beaconName,
+                                      datasetId: dataset.dataset,
+                                      entryTypeId: lastSearchedPathSegment,
+                                      appliedQuery: {
+                                        entryType: lastSearchedPathSegment,
+                                        filters: lastSearchedFilters || [],
+                                      },
+                                    });
+                                  }}
+                                />
                               </span>
                             </Tooltip>
                           )}

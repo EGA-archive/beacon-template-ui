@@ -127,7 +127,6 @@ export default function AminoAcidChangeFields({
         <Box
           sx={{
             width: "100%",
-            color: "red",
             fontSize: "12px",
             mt: 0.5,
             textAlign: "left",

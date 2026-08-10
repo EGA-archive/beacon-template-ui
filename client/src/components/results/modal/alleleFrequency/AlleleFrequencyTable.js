@@ -8,12 +8,11 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-
 import {
   formatAlleleFrequency,
   formatCount,
 } from "../../utils/alleleFrequencyUtils";
-
+import HighlightedText from "../../../common/HighlightedText";
 import TableToolbarControls from "../../table/TableToolbarControls";
 import { downloadCsvFile } from "../../utils/downloadCsvFile";
 import ResultsEmpty from "../../ResultsEmpty";
@@ -103,10 +102,15 @@ export default function AlleleFrequencyTable({
    * This behaves like the Results Table search:
    * the search is not limited only to currently visible columns.
    */
-  const filteredRows = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
 
-    if (!normalizedSearchTerm) {
+  const filteredRows = useMemo(() => {
+    const searchWords = searchTerm
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean);
+
+    if (searchWords.length === 0) {
       return rows;
     }
 
@@ -116,7 +120,7 @@ export default function AlleleFrequencyTable({
         .join(" ")
         .toLowerCase();
 
-      return rowText.includes(normalizedSearchTerm);
+      return searchWords.every((word) => rowText.includes(word));
     });
   }, [rows, availableColumns, searchTerm]);
 
@@ -237,8 +241,7 @@ export default function AlleleFrequencyTable({
                   onMouseEnter={() => onHighlightRow?.(row.id)}
                   onMouseLeave={() => onHighlightRow?.(null)}
                   sx={(theme) => ({
-                    cursor: "pointer",
-
+                    cursor: "auto",
                     backgroundColor:
                       highlightedRowId === row.id
                         ? theme.palette.action.hover
@@ -256,7 +259,10 @@ export default function AlleleFrequencyTable({
                       key={column.id}
                       align={column.id === "population" ? "left" : "center"}
                     >
-                      {getDisplayValue(row, column.id)}
+                      <HighlightedText
+                        text={getDisplayValue(row, column.id)}
+                        searchQuery={searchTerm}
+                      />
                     </TableCell>
                   ))}
                 </TableRow>

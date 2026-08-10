@@ -270,6 +270,7 @@ export default function ResultsPageHeader({
           alignItems: "center",
           gap: 2,
           mb: 2,
+          flexWrap: "wrap",
         }}
       >
         <Typography
@@ -286,22 +287,32 @@ export default function ResultsPageHeader({
           label={formatEntryLabel(appliedQuery?.entryType)}
           scope="entryType"
         />
-
-        {appliedQuery?.filters?.map((filter, index) => (
-          <FilterLabelRemovable
-            key={index}
-            disableTooltip
-            disableClick
-            variant="simple"
-            label={filter.label}
-            type={filter.type}
-            scope={filter.scope}
-            scopes={filter.scopes}
-            queryType={filter.queryType}
-            queryParams={filter.queryParams}
-            bgColor={filter.bgColor || "common"}
-          />
-        ))}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            flexWrap: "wrap",
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
+          {appliedQuery?.filters?.map((filter, index) => (
+            <FilterLabelRemovable
+              key={index}
+              disableTooltip
+              disableClick
+              variant="simple"
+              label={filter.label}
+              type={filter.type}
+              scope={filter.scope}
+              scopes={filter.scopes}
+              queryType={filter.queryType}
+              queryParams={filter.queryParams}
+              bgColor={filter.bgColor || "common"}
+            />
+          ))}
+        </Box>
       </Box>
     </>
   );

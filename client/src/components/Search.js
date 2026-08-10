@@ -204,9 +204,9 @@ export default function Search({
         });
 
         // Use this when testing with the real API response:
-        // const data = await response.json();
+        const data = await response.json();
 
-        const data = mockEntryTypes;
+        // const data = mockEntryTypes;
 
         const endpointSets = data.response.endpointSets || {};
         const seen = new Set();
@@ -522,12 +522,12 @@ export default function Search({
            * Temporary debugging colors.
            * Remove these when the responsive layout is complete.
            */
-          backgroundColor: {
-            lg: "lightsalmon",
-            md: "pink",
-            sm: "lightgreen",
-            xs: "lightblue",
-          },
+          // backgroundColor: {
+          //   lg: "lightsalmon",
+          //   md: "pink",
+          //   sm: "lightgreen",
+          //   xs: "lightblue",
+          // },
 
           [SEARCH_MARGIN_QUERY]: {
             mb: 0,

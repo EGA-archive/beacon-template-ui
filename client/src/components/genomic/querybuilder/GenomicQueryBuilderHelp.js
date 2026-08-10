@@ -321,14 +321,6 @@ export default function GenomicQueryBuilderHelp({
     <Box
       sx={{
         fontFamily: '"Open Sans", sans-serif',
-        // backgroundColor: {
-        //   xxl: "yellow",
-        //   xl: "yellowgreen",
-        //   lg: "lightsalmon",
-        //   md: "pink",
-        //   sm: "lightgreen",
-        //   xs: "lightblue",
-        // },
       }}
     >
       {/* Intro */}

@@ -323,6 +323,16 @@ export const BEACON_SINGLE_COLUMNS = [
   },
 ];
 
+/**
+ * Single Beacon widths when Data Visibility is hidden.
+ * Dataset and Search Results absorb the space previously occupied by Data Visibility.
+ */
+export const BEACON_SINGLE_TABLET_COLUMN_WIDTHS = {
+  beacon_dataset: "42%",
+  response: "38%",
+  contact: "20%",
+};
+
 export const COHORTS_TABLE = [
   {
     id: "cohort_id",

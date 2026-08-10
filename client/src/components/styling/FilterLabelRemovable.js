@@ -36,8 +36,6 @@ export default function FilterLabelRemovable({
     setEditingGenomicFilter,
   } = useSelectedEntry();
 
-  const isExpanded = expandedKey === keyValue;
-
   const isSimple = variant === "simple";
   const isEntryTypeChip = scope === "entryType";
   const isRemovable = variant === "removable" && !isEntryTypeChip;
@@ -48,6 +46,8 @@ export default function FilterLabelRemovable({
   const isMultiScopeChip = isRemovable && scopes.length > 1;
 
   const isExpandable = isMultiScopeChip;
+
+  const isExpanded = isExpandable && expandedKey === keyValue;
 
   // Common filter chips use a very light primary color.
   const commonFilterBg = alpha(config.ui.colors.primary, 0.05);
@@ -199,8 +199,12 @@ export default function FilterLabelRemovable({
               ? chipBackgroundColor
               : chipHoverColor,
           },
-          maxWidth: isExpanded ? "400px" : "auto",
+          // maxWidth: isExpanded ? "400px" : "auto",
+          // height: isExpanded ? "auto" : "fit-content",
+          width: isGenomicChip && isSimple ? "fit-content" : "auto",
+          maxWidth: isExpanded ? "400px" : "100%",
           height: isExpanded ? "auto" : "fit-content",
+          minWidth: 0,
         }}
       >
         <Box display="flex" alignItems="center" gap={1}>
@@ -208,6 +212,8 @@ export default function FilterLabelRemovable({
             sx={{
               fontSize: "14px",
               fontWeight: isEntryTypeChip ? 600 : 400,
+              minWidth: 0,
+              whiteSpace: "normal",
             }}
             data-cy="filter-chip"
           >

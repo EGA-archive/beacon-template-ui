@@ -13,7 +13,6 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useEffect, useState } from "react";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
-
 import config from "../../../config/runtimeConfig";
 import { ReactComponent as SelectColumn } from "../../../assets/logos/SelectColumn.svg";
 import DownloadTablePopover from "../modal/DownloadTablePopover";

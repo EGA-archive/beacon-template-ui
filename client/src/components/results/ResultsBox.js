@@ -14,12 +14,6 @@ export default function ResultsBox() {
     <Box
       sx={{
         p: "32px",
-        // backgroundColor: {
-        //   lg: "lightsalmon",
-        //   md: "pink",
-        //   sm: "lightgreen",
-        //   xs: "lightblue",
-        // },
       }}
     >
       <Box

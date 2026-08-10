@@ -18,6 +18,7 @@ import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import { FILTERING_TERMS_COLUMNS } from "../../lib/tableConstants";
 import { capitalize } from "../common/textFormatting";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import HighlightedText from "../common/HighlightedText";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
   assignDefaultScopesToTerms,
@@ -35,6 +36,7 @@ export default function FilteringTermsTable({
   searchWasPerformed,
   loading,
   handleChangePage,
+  searchQuery = "",
   handleChangeRowsPerPage,
   page,
   rowsPerPage,
@@ -376,15 +378,25 @@ export default function FilteringTermsTable({
 
                           {/* Column 2: ID */}
                           <TableCell data-cy="filtering-term-id">
-                            {term.id}
+                            <HighlightedText
+                              text={term.id}
+                              searchQuery={searchQuery}
+                            />
                           </TableCell>
                           {/* Column 3: Label + Type */}
                           <TableCell data-cy="filtering-term-label">
-                            {" "}
-                            {displayLabel?.trim() ? item.label : "–"}
+                            <HighlightedText
+                              text={displayLabel?.trim() ? item.label : "–"}
+                              searchQuery={searchQuery}
+                            />
                           </TableCell>
                           {/* Column 4: Rendering Filter Types*/}
-                          <TableCell>{capitalize(item.type)}</TableCell>
+                          <TableCell>
+                            <HighlightedText
+                              text={capitalize(item.type)}
+                              searchQuery={searchQuery}
+                            />
+                          </TableCell>
                           {/* Column 5: Available scopes as selectable chips */}
                           <TableCell data-cy="filtering-term-scope">
                             {item.scopes.length > 0 &&
@@ -407,7 +419,12 @@ export default function FilteringTermsTable({
                                     }}
                                     sx={getSelectableScopeStyles(isSelected)}
                                   >
-                                    {capitalize(scopeAlias[scope] || scope)}
+                                    <HighlightedText
+                                      text={capitalize(
+                                        scopeAlias[scope] || scope
+                                      )}
+                                      searchQuery={searchQuery}
+                                    />
                                   </Box>
                                 );
                               })}

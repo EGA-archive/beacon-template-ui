@@ -29,7 +29,7 @@ import VariationCell from "../modal/cellRenderers/VariationCell";
 import CaseLevelDataCell from "../modal/cellRenderers/CaseLevelDataCell";
 import useAuthHeaders from "../../../hooks/useAuthHeaders";
 import DownloadLimitDialog from "../modal/DownloadLimitDialog";
-import { highlightText } from "../utils/highlightText";
+import HighlightedText from "../../common/HighlightedText";
 import defaultsortingicon from "../../../assets/logos/default-sorting-icon.svg";
 import sortascIcon from "../../../assets/logos/sort-asc.svg";
 import sortdescIcon from "../../../assets/logos/sort-desc.svg";
@@ -158,15 +158,21 @@ const ResultsTableModalBody = ({
 
   /** Filter data by search term */
   useEffect(() => {
+    const searchWords = searchTerm
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean);
+
     const filtered = dataTable.filter((item) => {
-      if (!searchTerm) return true;
+      if (searchWords.length === 0) return true;
 
       const rowString = sortedHeaders
         .map((h) => summarizeValue(item[h.id], h.id))
         .join(" ")
         .toLowerCase();
 
-      return rowString.includes(searchTerm.toLowerCase());
+      return searchWords.every((word) => rowString.includes(word));
     });
 
     setFilteredData(filtered);
@@ -474,10 +480,10 @@ const ResultsTableModalBody = ({
                                 onOpenAlleleFrequency={onOpenAlleleFrequency}
                               />
                             ) : (
-                              highlightText(
-                                renderCellContent(item, col.id),
-                                searchTerm
-                              )
+                              <HighlightedText
+                                text={renderCellContent(item, col.id)}
+                                searchQuery={searchTerm}
+                              />
                             );
                           })()}
                         </StyledTableCell>
