@@ -8,35 +8,139 @@ import {
 import { formatEntryLabel } from "../common/textFormatting";
 import config from "../../config/runtimeConfig";
 
-// This component shows the available entry types (previously fetched from the API) as radio buttons.
-// The user can select only one entry type at a time and the first one will be always pre-selected.
+/**
+ * Displays the available Entry Types as radio buttons.
+ *
+ * Special layouts:
+ *
+ * Mobile:
+ * - full-width selector
+ * - three columns filled left-to-right
+ * - automatic height
+ *
+ * Ontology-only with more than two Entry Types, between 600px and 870px:
+ * - uses the same stacked/grid behavior as mobile
+ *
+ * Ontology-only above 870px:
+ * - maximum two Entry Types vertically per column
+ * - compact fixed height
+ * - columns size themselves according to their labels
+ */
 export default function EntryTypeSelector({
   entryTypes,
   selectedPathSegment,
   setSelectedPathSegment,
   hasTwoColumns,
+  isIntermediateSearchLayout = false,
   loading,
+  isOntologyOnlyLayout = false,
+  shouldStackOntologyLayout = false,
+  ontologySelectorWidth,
 }) {
+  const ontologyFourColumnLayout =
+    "@media (min-width:640px) and (max-width:870px)";
+
+  /**
+   * Standard intermediate genomic layout:
+   * two-column selectors use eight rows so the ninth
+   * Entry Type starts at the top of column two.
+   */
+  const gridRowCount =
+    isIntermediateSearchLayout && hasTwoColumns
+      ? 8
+      : hasTwoColumns
+      ? 4
+      : entryTypes.length;
+
+  /**
+   * Standard selector heights.
+   * Ontology-specific heights are handled separately below.
+   */
+  const selectorHeight = isIntermediateSearchLayout
+    ? "279px"
+    : hasTwoColumns
+    ? "197px"
+    : "180px";
+
+  /**
+   * Ontology-only desktop layout:
+   * maximum two Entry Types vertically per column.
+   */
+  const ontologyColumnCount = Math.ceil(entryTypes.length / 2);
+
   return (
-    // Outer container that holds all the radio button options.
     <Box
       data-testid="entrytype-selector"
       sx={{
-        border: "1px solid black",
+        border: isIntermediateSearchLayout
+          ? "1.5px solid black"
+          : "1px solid black",
         borderRadius: "28px",
-        // Internal space between the border and the radio options.
-        p: "10px",
-        // Use a wider container when the options are displayed in two columns.
+
+        /**
+         * The stacked ontology layout uses the same compact
+         * padding as mobile.
+         */
+        px: {
+          // Keep the current mobile padding.
+          xs: "10px",
+
+          // Ontology-only from 600px upward uses 14px horizontal padding.
+          sm: isOntologyOnlyLayout
+            ? "14px"
+            : isIntermediateSearchLayout
+            ? "13px"
+            : "10px",
+        },
+        py: {
+          xs: "10px",
+          sm: shouldStackOntologyLayout
+            ? "10px"
+            : isOntologyOnlyLayout
+            ? 0
+            : isIntermediateSearchLayout
+            ? "15px"
+            : "10px",
+        },
+
         width: "100%",
-        maxWidth: hasTwoColumns ? "260px" : "190px",
-        // Fixed height keeps the selector aligned with the search input section.
-        height: "197px",
-        // Includes padding and border inside the declared width and height.
+
+        /**
+         * Mobile and stacked ontology layouts use all
+         * the available width.
+         */
+        maxWidth: {
+          xs: "none",
+
+          sm: shouldStackOntologyLayout
+            ? "none"
+            : isOntologyOnlyLayout
+            ? `${ontologySelectorWidth}px`
+            : hasTwoColumns
+            ? "260px"
+            : "190px",
+        },
+
+        /**
+         * Mobile and stacked ontology layouts grow naturally.
+         *
+         * Compact ontology-only layouts above 870px
+         * keep the smaller fixed height.
+         */
+        height: {
+          xs: "auto",
+
+          sm: shouldStackOntologyLayout
+            ? "auto"
+            : isOntologyOnlyLayout
+            ? "88px"
+            : selectorHeight,
+        },
+
         boxSizing: "border-box",
       }}
     >
       {loading ? (
-        // Show the spinner only inside the entry-type selector.
         <Box
           data-testid="entrytypes-loader"
           sx={{
@@ -56,62 +160,147 @@ export default function EntryTypeSelector({
         </Box>
       ) : (
         <RadioGroup
-          // The currently selected entry type.
           value={selectedPathSegment}
-          // Update the selected entry type when the user clicks a radio button.
           onChange={(event) => setSelectedPathSegment(event.target.value)}
           sx={{
-            // CSS Grid allows us to control rows and columns.
             display: "grid",
-
-            // Use all the available space inside the outer container.
             width: "100%",
-            height: "100%",
 
-            // With two columns, fill the first column before moving to the second.
-            // With one column, place the options from top to bottom.
-            gridAutoFlow: hasTwoColumns ? "column" : "row",
+            /**
+             * Stacked layouts determine their height from
+             * the number of generated rows.
+             */
+            height: {
+              xs: "auto",
+              sm: shouldStackOntologyLayout ? "auto" : "100%",
+            },
 
-            // In two-column mode, each column can contain up to four options.
-            // In one-column mode, create one equal row for every entry type.
-            gridTemplateRows: hasTwoColumns
-              ? "repeat(4, 1fr)"
-              : `repeat(${entryTypes.length}, 1fr)`,
+            /**
+             * Mobile and stacked ontology layouts fill
+             * left-to-right before moving to the next row.
+             *
+             * Compact ontology-only layouts fill downward first.
+             */
+            gridAutoFlow: {
+              xs: "row",
 
-            // Create either two equal columns or one full-width column.
-            gridTemplateColumns: hasTwoColumns
-              ? "repeat(2, minmax(0, 1fr))"
-              : "1fr",
+              sm: shouldStackOntologyLayout
+                ? "row"
+                : isOntologyOnlyLayout
+                ? "column"
+                : hasTwoColumns
+                ? "column"
+                : "row",
+            },
 
-            // Space between the two columns.
-            columnGap: 2,
+            /**
+             * Mobile and stacked ontology layouts always
+             * use three equal columns.
+             *
+             * Compact ontology-only columns use their content width.
+             */
+            gridTemplateColumns: {
+              xs: "repeat(3, minmax(0, 1fr))",
 
-            // Vertically center each option inside its grid row.
+              sm: shouldStackOntologyLayout
+                ? "repeat(3, minmax(0, 1fr))"
+                : isOntologyOnlyLayout
+                ? `repeat(${ontologyColumnCount}, max-content)`
+                : hasTwoColumns
+                ? "repeat(2, minmax(0, 1fr))"
+                : "1fr",
+            },
+            /**
+             * In the stacked ontology layout, wider intermediate screens
+             * can comfortably fit four Entry Types per row.
+             */
+            [ontologyFourColumnLayout]: {
+              gridTemplateColumns: shouldStackOntologyLayout
+                ? "repeat(4, minmax(0, 1fr))"
+                : undefined,
+            },
+
+            /**
+             * Mobile-style layouts generate rows automatically.
+             *
+             * Compact ontology-only layouts always have two rows.
+             */
+            gridTemplateRows: {
+              xs: "none",
+
+              sm: shouldStackOntologyLayout
+                ? "none"
+                : isOntologyOnlyLayout
+                ? "repeat(2, minmax(0, 1fr))"
+                : `repeat(${gridRowCount}, minmax(0, 1fr))`,
+            },
+
+            gridAutoRows: {
+              xs: "minmax(42px, auto)",
+
+              sm: shouldStackOntologyLayout ? "minmax(42px, auto)" : "auto",
+            },
+
+            /**
+             * Compact ontology columns size themselves based
+             * on their longest label and use the remaining space.
+             */
+            justifyContent: {
+              xs: "stretch",
+
+              sm: shouldStackOntologyLayout
+                ? "stretch"
+                : isOntologyOnlyLayout
+                ? "space-between"
+                : "stretch",
+            },
+
+            columnGap: {
+              xs: 1,
+
+              sm: shouldStackOntologyLayout
+                ? 1
+                : isOntologyOnlyLayout
+                ? 1
+                : isIntermediateSearchLayout
+                ? "10px"
+                : 2,
+            },
+
+            rowGap: {
+              xs: 1,
+              sm: shouldStackOntologyLayout ? 1 : 0,
+            },
+
             alignItems: "center",
-
-            // Make each option use all the available width of its grid cell.
             justifyItems: "stretch",
           }}
         >
-          {/* Create one radio option for every available entry type. */}
           {entryTypes.map((entry) => (
             <FormControlLabel
-              // React uses this unique value to track each option.
               key={entry.id}
-              // This is the value saved when the radio option is selected.
               value={entry.pathSegment}
               data-testid={`entrytype-radio-${entry.pathSegment}`}
               sx={{
-                // Make each radio option fill its grid cell.
-                width: "100%",
+                /**
+                 * Mobile-style layouts fill their grid cell.
+                 *
+                 * Compact ontology-only layouts use only
+                 * the width required by their content.
+                 */
+                width: {
+                  xs: "100%",
 
-                // Prevent long labels from forcing the column to become wider.
+                  sm: shouldStackOntologyLayout
+                    ? "100%"
+                    : isOntologyOnlyLayout
+                    ? "max-content"
+                    : "100%",
+                },
+
                 minWidth: 0,
-
-                // Remove the default Material UI margins.
                 m: 0,
 
-                // Allow the text label to use the remaining horizontal space.
                 "& .MuiFormControlLabel-label": {
                   flex: 1,
                   minWidth: 0,
@@ -120,18 +309,49 @@ export default function EntryTypeSelector({
               control={
                 <Radio
                   sx={{
-                    // Use the configured primary color for the radio button.
                     color: config.ui.colors.primary,
 
-                    // Control the clickable space around the radio icon.
-                    p: "7px",
+                    /**
+                     * Stacked ontology layouts use the same radio
+                     * spacing as mobile.
+                     *
+                     * Compact ontology layouts remove unnecessary
+                     * left padding to save horizontal space.
+                     */
+                    pl: {
+                      xs: "7px",
 
-                    // Keep the same primary color when the radio is selected.
+                      sm: shouldStackOntologyLayout
+                        ? "7px"
+                        : isOntologyOnlyLayout
+                        ? 0
+                        : "7px",
+                    },
+
+                    pr: {
+                      xs: "7px",
+
+                      sm: shouldStackOntologyLayout
+                        ? "7px"
+                        : isOntologyOnlyLayout
+                        ? "4px"
+                        : "7px",
+                    },
+
+                    py: {
+                      xs: "7px",
+
+                      sm: shouldStackOntologyLayout
+                        ? "7px"
+                        : isOntologyOnlyLayout
+                        ? "4px"
+                        : "7px",
+                    },
+
                     "&.Mui-checked": {
                       color: config.ui.colors.primary,
                     },
 
-                    // Make the radio icon slightly smaller.
                     "& .MuiSvgIcon-root": {
                       fontSize: "19px",
                     },
@@ -141,23 +361,36 @@ export default function EntryTypeSelector({
               label={
                 <Box
                   sx={{
-                    // Let the label use the full width available.
-                    width: "100%",
+                    width: {
+                      xs: "100%",
 
-                    // Make the selected entry type bold.
+                      sm: shouldStackOntologyLayout
+                        ? "100%"
+                        : isOntologyOnlyLayout
+                        ? "auto"
+                        : "100%",
+                    },
+
                     fontWeight:
                       selectedPathSegment === entry.pathSegment ? 700 : 400,
 
-                    fontSize: "14px",
+                    fontSize: {
+                      xs: "14px",
+                      sm: shouldStackOntologyLayout ? "13px" : "14px",
+                    },
 
-                    // Allow long labels to move onto a second line.
+                    "@media (max-width:560px)": {
+                      fontSize: "13px",
+                    },
+
+                    "@media (max-width:460px)": {
+                      fontSize: "12px",
+                    },
+
                     whiteSpace: "normal",
-
-                    // Keep multi-line labels compact and readable.
                     lineHeight: 1.2,
                   }}
                 >
-                  {/* Convert technical entry type names into readable labels. */}
                   {formatEntryLabel(entry.pathSegment)}
                 </Box>
               }

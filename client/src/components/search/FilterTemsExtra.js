@@ -290,13 +290,24 @@ export default function FilterTermsExtra() {
         />
       </Box>
       {/* Add + Cancel buttons */}
-      <Box
+      {/* <Box
         sx={{
           display: "flex",
           alignItems: "center",
           fontFamily: '"Open Sans", sans-serif',
           padding: "0px",
           maxWidth: "30px",
+          gap: 2,
+        }}
+      > */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+          fontFamily: '"Open Sans", sans-serif',
+          p: 0,
           gap: 2,
         }}
       >

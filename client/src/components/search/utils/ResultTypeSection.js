@@ -13,14 +13,38 @@ export default function ResultTypeSection({
   setSelectedPathSegment,
   isSingleEntryType,
   onlyEntryPath,
+  isIntermediateSearchLayout = false,
+  isOntologyOnlyLayout = false,
   hasTwoColumns,
   loading,
+  shouldStackOntologyLayout = false,
 }) {
+  /**
+   * Ontology-only layout:
+   * keep a maximum of two Entry Types vertically in each column.
+   *
+   * Each additional column adds some width, up to 400px.
+   */
+  const ontologyColumnCount = Math.ceil(entryTypes.length / 2);
+
+  const ontologySelectorWidth = Math.min(
+    190 + Math.max(ontologyColumnCount - 1, 0) * 70,
+    400
+  );
   return (
     <>
       <Box
         sx={{
-          width: hasTwoColumns ? "240px" : "190px",
+          width: {
+            xs: "100%",
+            sm: shouldStackOntologyLayout
+              ? "100%"
+              : isOntologyOnlyLayout
+              ? `${ontologySelectorWidth}px`
+              : hasTwoColumns
+              ? "240px"
+              : "190px",
+          },
           flexShrink: 0,
         }}
       >
@@ -82,7 +106,7 @@ export default function ResultTypeSection({
               fontSize: "12px",
             }}
           >
-            Which information do you want to get?
+            Which information do you need?
           </Typography>
         </Box>
 
@@ -96,6 +120,10 @@ export default function ResultTypeSection({
             selectedPathSegment={selectedPathSegment}
             setSelectedPathSegment={setSelectedPathSegment}
             hasTwoColumns={hasTwoColumns}
+            isIntermediateSearchLayout={isIntermediateSearchLayout}
+            isOntologyOnlyLayout={isOntologyOnlyLayout}
+            shouldStackOntologyLayout={shouldStackOntologyLayout}
+            ontologySelectorWidth={ontologySelectorWidth}
             loading={loading}
           />
         </Box>

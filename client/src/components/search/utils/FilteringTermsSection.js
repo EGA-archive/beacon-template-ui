@@ -14,18 +14,43 @@ export default function FilteringTermsSection({
   hasGenomicSectionAbove = false,
   moveAllFilteringTermsBelowInput = false,
   hasOneEntryTypeColumn = false,
+  hasEntryTypeSelector = false,
+  isOntologyOnlyLayout = false,
 }) {
+  /**
+   * For regular multi-entry layouts, buttons move outside
+   * their inputs from 870px downward.
+   *
+   * Ontology-only layouts keep the button outside at all sizes.
+   */
+  const buttonsOutsideInputLayout = "@media (max-width:870px)";
+
   return (
     <>
+      {/* Filtering Terms title */}
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
           gap: 1,
-          mt: hasGenomicSectionAbove
-            ? (isGenomicDescriptionMultiline ? 5 : 5.5) +
-              (hasOneEntryTypeColumn ? 2 : 0)
-            : 0,
+          mt: {
+            // Ontology-only mobile is already stacked.
+            xs: isOntologyOnlyLayout ? 0 : "40px",
+            // Ontology-only sm+ does not need genomic spacing.
+            // Single Entry Type: use 30px from sm upward.
+            sm: !hasEntryTypeSelector
+              ? "30px"
+              : isOntologyOnlyLayout
+              ? 0
+              : hasGenomicSectionAbove
+              ? hasOneEntryTypeColumn
+                ? 0
+                : isGenomicDescriptionMultiline
+                ? 5
+                : 5.5
+              : 0,
+          },
+          mb: hasOneEntryTypeColumn ? 1 : 0,
         }}
       >
         <Typography
@@ -37,6 +62,7 @@ export default function FilteringTermsSection({
         >
           Filtering Terms
         </Typography>
+
         <InfoTooltip testId="filtering-terms-tooltip">
           <Typography
             sx={{
@@ -58,8 +84,8 @@ export default function FilteringTermsSection({
             }}
           >
             <li>
-              Use filtering terms to narrow down your search results (e.g.
-              diseases, sex, age, or clinical characteristics).
+              Use filtering terms to narrow down your search results, such as
+              diseases, sex, age, or clinical characteristics.
             </li>
 
             <li>
@@ -69,32 +95,74 @@ export default function FilteringTermsSection({
 
             <li>
               Filtering terms are{" "}
-              <strong>independent of the Result Type</strong> (e.g. Individuals,
-              Biosamples, etc.) selected.
+              <strong>independent of the Result Type</strong>, such as
+              Individuals or Biosamples.
             </li>
           </Box>
         </InfoTooltip>
       </Box>
+
+      {/* Filtering Terms description */}
       <Typography
         sx={{
           fontSize: "12px",
-          mt: 1,
+          mt: hasOneEntryTypeColumn ? 0.5 : 1,
+
+          mb: {
+            // Ontology-only mobile keeps the compact stacked layout.
+            xs: isOntologyOnlyLayout
+              ? 0
+              : hasOneEntryTypeColumn && !isGenomicDescriptionMultiline
+              ? 2
+              : 0,
+
+            // Ontology-only sm+ keeps 16px before the input.
+            sm: isOntologyOnlyLayout
+              ? 2
+              : hasOneEntryTypeColumn && !isGenomicDescriptionMultiline
+              ? 2
+              : 0,
+          },
         }}
       >
         Filtering options available for this dataset.
       </Typography>
+
+      {/* Filtering Terms input */}
       <Box
         sx={{
-          mt: isGenomicDescriptionMultiline ? 1 : "15px",
-          fontSize: "12px",
+          mt: {
+            xs: isOntologyOnlyLayout
+              ? 1
+              : hasOneEntryTypeColumn
+              ? 1
+              : isGenomicDescriptionMultiline
+              ? 1
+              : "15px",
+
+            sm: isOntologyOnlyLayout
+              ? 0
+              : hasOneEntryTypeColumn
+              ? 1
+              : isGenomicDescriptionMultiline
+              ? 1
+              : "15px",
+          },
         }}
       >
         <SearchFiltersInput
+          hasEntryTypeSelector={hasEntryTypeSelector}
           activeInput={activeInput}
           setActiveInput={setActiveInput}
           placeholder={getFilteringPlaceholder(selectedPathSegment)}
           action={
-            !moveAllFilteringTermsBelowInput ? (
+            /**
+             * Ontology-only:
+             * never render All Filtering Terms inside the input.
+             *
+             * Other layouts keep the existing behavior.
+             */
+            !isOntologyOnlyLayout && !moveAllFilteringTermsBelowInput ? (
               <Box ref={filteringButtonRef}>
                 <AllFilteringTermsButton onClick={onAllFilteringClick} />
               </Box>
@@ -103,6 +171,43 @@ export default function FilteringTermsSection({
         />
       </Box>
 
+      {/*
+       * Multiple Entry Types.
+       *
+       * Ontology-only:
+       * button is always outside.
+       *
+       * Other multi-entry layouts:
+       * button moves outside from 870px downward.
+       */}
+      {hasEntryTypeSelector && !moveAllFilteringTermsBelowInput && (
+        <Box
+          ref={isOntologyOnlyLayout ? filteringButtonRef : null}
+          sx={{
+            display: isOntologyOnlyLayout ? "flex" : "none",
+            justifyContent: "center",
+            width: "100%",
+            maxWidth: "220px",
+            mx: "auto",
+            mt: 1.5,
+
+            [buttonsOutsideInputLayout]: {
+              display: "flex",
+            },
+
+            "& .MuiButton-root": {
+              width: "100%",
+              whiteSpace: "nowrap",
+            },
+          }}
+        >
+          <AllFilteringTermsButton onClick={onAllFilteringClick} />
+        </Box>
+      )}
+
+      {/*
+       * Single non-genomic Entry Type mobile behavior.
+       */}
       {moveAllFilteringTermsBelowInput && (
         <Box
           ref={filteringButtonRef}

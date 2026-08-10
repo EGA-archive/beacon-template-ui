@@ -7,36 +7,6 @@ import config from "../config/runtimeConfig";
 const primaryColor = config.ui.colors.primary;
 
 export const BEACON_NETWORK_COLUMNS = [
-  // {
-  //   id: "beacon_dataset",
-  //   label: (
-  //     <Box
-  //       sx={{
-  //         display: "flex",
-  //         alignItems: "center",
-  //         gap: 1,
-  //         ml: 4,
-  //         "@media (max-width: 764px)": {
-  //           ml: 3,
-  //           gap: 0,
-  //         },
-  //       }}
-  //     >
-  //       Beacon
-  //       <KeyboardArrowRightRoundedIcon
-  //         sx={{
-  //           fontSize: "26px",
-  //           "@media (max-width: 764px)": {
-  //             fontSize: "18px",
-  //           },
-  //         }}
-  //       />
-  //       Dataset
-  //     </Box>
-  //   ),
-  //   align: "left",
-  //   width: "30%",
-  // },
   {
     id: "beacon_dataset",
     label: (
@@ -47,7 +17,6 @@ export const BEACON_NETWORK_COLUMNS = [
           gap: 1,
           ml: 4,
           width: "fit-content",
-          // backgroundColor: "greenyellow",
           "@media (max-width: 764px)": {
             flexDirection: "column",
             alignItems: "center",

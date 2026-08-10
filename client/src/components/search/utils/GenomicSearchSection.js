@@ -21,6 +21,8 @@ export default function GenomicSearchSection({
   genomicAction,
   setIsGenomicDescriptionMultiline,
   isGenomicDescriptionMultiline,
+  hasOneEntryTypeColumn = false,
+  hasEntryTypeSelector = false,
 }) {
   const descriptionRef = useRef(null);
 
@@ -55,6 +57,7 @@ export default function GenomicSearchSection({
           display: "flex",
           alignItems: "center",
           gap: 1,
+          mb: hasOneEntryTypeColumn ? 1 : 0,
         }}
       >
         <Typography
@@ -133,35 +136,13 @@ export default function GenomicSearchSection({
           </Box>
         </InfoTooltip>
       </Box>
-
-      {/* <Box
-        sx={{
-          height: "35px",
-        }}
-      >
-        <Typography
-          sx={{
-            fontSize: "12px",
-            mt: 1,
-            backgroundColor: "lavenderblush",
-          }}
-        >
-          {genomicQueryDescription}
-        </Typography>
-      </Box> */}
-      <Box
-      // sx={{
-      //   minHeight: {
-      //     xs: "auto",
-      //     md: "35px",
-      //   },
-      // }}
-      >
+      <Box>
         <Typography
           ref={descriptionRef}
           sx={{
             fontSize: "12px",
-            mt: 1,
+            mt: hasOneEntryTypeColumn ? 0.5 : 1,
+            mb: hasOneEntryTypeColumn && !isGenomicDescriptionMultiline ? 2 : 0,
             lineHeight: "17px",
           }}
         >
@@ -169,7 +150,15 @@ export default function GenomicSearchSection({
         </Typography>
       </Box>
 
-      <Box sx={{ mt: 1 }}>
+      <Box
+        sx={
+          {
+            // In the compact one-column layout, add enough space so the
+            // Genomic Query input starts at the same height as the radio box.
+            // mt: hasOneEntryTypeColumn ? 2.25 : 1,
+          }
+        }
+      >
         <SearchGenomicInput
           isGenomicDescriptionMultiline={isGenomicDescriptionMultiline}
           activeInput={activeInput}
@@ -184,6 +173,8 @@ export default function GenomicSearchSection({
           message={message}
           setMessage={setMessage}
           action={genomicAction}
+          hasOneEntryTypeColumn={hasOneEntryTypeColumn}
+          hasEntryTypeSelector={hasEntryTypeSelector}
         />
       </Box>
     </>

@@ -32,11 +32,19 @@ export default function SearchGenomicInput({
   setMessage,
   action,
   isGenomicDescriptionMultiline,
+  hasOneEntryTypeColumn,
+  hasEntryTypeSelector = false,
 }) {
   const { openGenomicQueryBuilder } = useSelectedEntry();
   const inputRef = useRef(null); // For managing focus on the input field
 
   const genomicQueryTypes = config?.ui?.genomicQueries?.genomicQueryTypes ?? {};
+
+  // Buttons move outside the inputs from 870px downward.
+  const buttonsOutsideInputLayout = "@media (max-width:870px)";
+
+  // Additional mobile rearrangement begins below 600px.
+  const mobileSearchLayout = "@media (max-width:599px)";
 
   const GENOMIC_QUERY_BUILDER_OPTIONS = [
     {
@@ -318,15 +326,6 @@ export default function SearchGenomicInput({
       alternateBases: alt,
     };
 
-    // Create unique ID
-    // const uniqueId = `genomic-free-${Date.now().toString(36)}-${Math.random()
-    //   .toString(36)
-    //   .slice(2, 7)}`;
-
-    // const newGenomicFilter = {
-    //   id: uniqueId,
-    //   key: uniqueId,
-
     // Build deterministic ID from query parameters
     const validEntries = Object.entries(queryParams).filter(
       ([_, value]) =>
@@ -366,17 +365,22 @@ export default function SearchGenomicInput({
     ) : (
       <KeyboardArrowRightRoundedIcon {...props} />
     );
-
   return (
     <Box
       sx={{
         display: "flex",
         flexDirection: "column",
         flex: activeInput === "genomic" ? 1 : 0.3,
-        mt: isGenomicDescriptionMultiline ? 0 : "15px",
+        fontSize: "12px",
+
+        mt: hasOneEntryTypeColumn
+          ? 1
+          : isGenomicDescriptionMultiline
+          ? 1
+          : "15px",
       }}
     >
-      {/* Input container */}
+      {/* Main genomic input container */}
       <Box
         sx={{
           display: "flex",
@@ -393,7 +397,7 @@ export default function SearchGenomicInput({
         {/* Genome assembly dropdown */}
         <Select
           value={assembly}
-          onChange={(e) => setAssembly(e.target.value)}
+          onChange={(event) => setAssembly(event.target.value)}
           onOpen={() => setIsAssemblyOpen(true)}
           onClose={() => setIsAssemblyOpen(false)}
           variant="standard"
@@ -411,21 +415,31 @@ export default function SearchGenomicInput({
             height: "47px",
             borderTopLeftRadius: "999px",
             borderBottomLeftRadius: "999px",
-            ".MuiSelect-icon": { color: "#fff", mr: 1 },
-            ".MuiSelect-iconOpen": { transform: "none" },
+
+            ".MuiSelect-icon": {
+              color: "#fff",
+              mr: 1,
+            },
+
+            ".MuiSelect-iconOpen": {
+              transform: "none",
+            },
           }}
         >
           {config.assemblyId.map((id) => (
-            <MenuItem key={id} value={id} sx={{ fontSize: "12px" }}>
+            <MenuItem
+              key={id}
+              value={id}
+              sx={{
+                fontSize: "12px",
+              }}
+            >
               {id}
             </MenuItem>
           ))}
         </Select>
 
         {/* Search icon */}
-        {/* <Box sx={{ pl: 2, pr: 1, color: primaryDarkColor }}>
-          <SearchIcon />
-        </Box> */}
         <Box
           sx={{
             width: "48px",
@@ -440,23 +454,27 @@ export default function SearchGenomicInput({
           <SearchIcon />
         </Box>
 
-        {/* Main input */}
-        <Box sx={{ position: "relative", flex: 1 }}>
+        {/* Main genomic query input */}
+        <Box
+          sx={{
+            position: "relative",
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
           <InputBase
             onClick={() => {
               setActiveInput("genomic");
             }}
             inputRef={inputRef}
-            placeholder={
-              activeInput === "genomic"
-                ? "Examples: 22-16050527-C-A or 22:16050527C>A"
-                : "Examples: 22-16050527-C-A or 22:16050527C>A"
-            }
+            placeholder="Examples: 22-16050527-C-A or 22:16050527C>A"
             fullWidth
             value={genomicDraft}
-            onChange={(e) => setGenomicDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") commitGenomicDraft();
+            onChange={(event) => setGenomicDraft(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                commitGenomicDraft();
+              }
             }}
             sx={{
               fontFamily: '"Open Sans", sans-serif',
@@ -465,10 +483,11 @@ export default function SearchGenomicInput({
             }}
           />
 
-          {/* Clear icon */}
+          {/* Show the clear icon only when the input contains text */}
           {activeInput === "genomic" && genomicDraft?.trim() && (
             <Box
               role="button"
+              aria-label="Clear genomic query"
               onClick={() => setGenomicDraft("")}
               sx={{
                 position: "absolute",
@@ -484,22 +503,37 @@ export default function SearchGenomicInput({
                 backgroundColor: alpha(primaryDarkColor, 0.1),
                 color: primaryDarkColor,
                 cursor: "pointer",
+
                 "&:hover": {
                   backgroundColor: alpha(primaryDarkColor, 0.2),
                 },
               }}
             >
-              <ClearIcon sx={{ fontSize: "16px" }} />
+              <ClearIcon
+                sx={{
+                  fontSize: "16px",
+                }}
+              />
             </Box>
           )}
         </Box>
-        {/* Optional action displayed inside the genomic search bar */}
+
+        {/*
+         * Normal layout:
+         * Keep the Genomic Query Builder button inside the input.
+         *
+         * Compact layout:
+         * Hide it inside the input when the Result Type selector is visible.
+         */}
         {action && (
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
               flexShrink: 0,
+              [buttonsOutsideInputLayout]: {
+                display: hasEntryTypeSelector ? "none" : "flex",
+              },
             }}
           >
             {action}
@@ -507,7 +541,49 @@ export default function SearchGenomicInput({
         )}
       </Box>
 
-      {/* Add button and message */}
+      {/*
+       * Compact layout only:
+       * Show the Genomic Query Builder button below the input.
+       *
+       * It stays hidden when:
+       * - the screen is outside the 600px to 870px range
+       * - there is no Result Type selector
+       */}
+      {/*
+       * From 870px downward, move the Genomic Query Builder
+       * below the genomic input when the Result Type selector exists.
+       */}
+      {action && hasEntryTypeSelector && (
+        <Box
+          sx={{
+            display: "none",
+            justifyContent: "center",
+            width: "100%",
+            maxWidth: "220px",
+            mx: "auto",
+            mt: 1.5,
+
+            [buttonsOutsideInputLayout]: {
+              display: "flex",
+            },
+
+            // GenomicQueryBuilderButton has its own outer Box.
+            "& > *": {
+              width: "100%",
+            },
+
+            // Keep the button on one line and fill the wrapper.
+            "& .MuiButton-root": {
+              width: "100%",
+              whiteSpace: "nowrap",
+            },
+          }}
+        >
+          {action}
+        </Box>
+      )}
+
+      {/* Show suggestions and actions when the user has typed a genomic query */}
       {activeInput === "genomic" && genomicDraft?.trim() && (
         <Box>
           <Box
@@ -524,6 +600,7 @@ export default function SearchGenomicInput({
               backgroundColor: "#fff",
             }}
           >
+            {/* Example genomic queries */}
             <Box
               sx={{
                 width: "100%",
@@ -534,8 +611,8 @@ export default function SearchGenomicInput({
             >
               Examples:&nbsp;
               <span
-                onClick={(e) => {
-                  e.stopPropagation();
+                onClick={(event) => {
+                  event.stopPropagation();
                   setGenomicDraft("22-16050527-C-A");
                 }}
                 style={{
@@ -549,8 +626,8 @@ export default function SearchGenomicInput({
               </span>
               &nbsp;or&nbsp;
               <span
-                onClick={(e) => {
-                  e.stopPropagation();
+                onClick={(event) => {
+                  event.stopPropagation();
                   setGenomicDraft("22:16050527C>A");
                 }}
                 style={{
@@ -564,6 +641,7 @@ export default function SearchGenomicInput({
               </span>
             </Box>
 
+            {/* Option to add the detected genomic variant */}
             {hasGenomicBuilderQueries && (
               <Box
                 sx={{
@@ -584,15 +662,19 @@ export default function SearchGenomicInput({
                     alignItems: "center",
                     justifyContent: "center",
                     cursor: isVariant ? "pointer" : "default",
+
                     "& .unchecked": {
                       display: "block",
                     },
+
                     "& .checked": {
                       display: "none",
                     },
+
                     "&:hover .unchecked": {
                       display: isVariant ? "none" : "block",
                     },
+
                     "&:hover .checked": {
                       display: isVariant ? "block" : "none",
                     },
@@ -605,6 +687,7 @@ export default function SearchGenomicInput({
                       fontSize: 16,
                     }}
                   />
+
                   <CheckCircleIcon
                     className="checked"
                     sx={{
@@ -625,6 +708,8 @@ export default function SearchGenomicInput({
                 )}
               </Box>
             )}
+
+            {/* Option to open the Genomic Query Builder */}
             <Box
               sx={{
                 width: "100%",
@@ -674,6 +759,7 @@ export default function SearchGenomicInput({
                     fontSize: 16,
                   }}
                 />
+
                 <CheckCircleIcon
                   className="checked"
                   sx={{
@@ -682,6 +768,7 @@ export default function SearchGenomicInput({
                   }}
                 />
               </Box>
+
               <Box
                 onClick={() => {
                   openGenomicQueryBuilder?.();
@@ -697,7 +784,13 @@ export default function SearchGenomicInput({
               </Box>
             </Box>
           </Box>
-          <Box sx={{ mt: message ? 2 : 0 }}>
+
+          {/* Validation or error message */}
+          <Box
+            sx={{
+              mt: message ? 2 : 0,
+            }}
+          >
             {message === COMMON_MESSAGES.invalidGenomicQuery ? (
               <CommonMessage
                 type="warning"

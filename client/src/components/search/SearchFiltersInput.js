@@ -6,21 +6,36 @@ import SearchIcon from "@mui/icons-material/Search";
 import FilteringTermsDropdownResults from "../filters/FilteringTermsDropdownResults";
 import config from "../../config/runtimeConfig";
 
-// This component displays a filtering term input bar where users can type in text-based filters.
-// It includes a search icon, an input field, a "clear" icon, and a button to commit the filter.
-// When the user presses Enter or clicks the "Add" button, the filter is added to the list of selected filters.
+/**
+ * Displays the Filtering Terms search input.
+ *
+ * On larger screens, the optional All Filtering Terms button stays
+ * inside the input.
+ *
+ * From 870px downward, the button is hidden inside the input when
+ * the Result Type selector is present. FilteringTermsSection then
+ * displays the same button underneath the input.
+ */
 export default function SearchFiltersInput({
   activeInput,
   setActiveInput,
   placeholder,
   action,
+  hasEntryTypeSelector = false,
 }) {
-  const [searchInput, setSearchInput] = useState(""); // Local state to track the text typed by the user
+  // Store the text currently entered by the user.
+  const [searchInput, setSearchInput] = useState("");
+
   const primaryDarkColor = config.ui.colors.darkPrimary;
+
+  /**
+   * From 870px downward, action buttons move outside their inputs
+   * when the Result Type selector is visible.
+   */
+  const buttonsOutsideInputLayout = "@media (max-width:870px)";
 
   return (
     <Box
-      // onClick={() => setActiveInput("filter")} // When user clicks this area, it becomes the active input
       onClick={() => {
         setActiveInput("filter");
       }}
@@ -29,14 +44,14 @@ export default function SearchFiltersInput({
         display: "flex",
         flexDirection: "column",
         alignItems: "stretch",
+        position: "relative",
+        height: "47px",
+        px: 2,
+        py: 1,
         border: `1.5px solid ${primaryDarkColor}`,
         borderRadius: "999px",
         backgroundColor: "#fff",
         transition: "flex 0.3s ease",
-        position: "relative",
-        px: 2,
-        py: 1,
-        height: "47px",
       }}
     >
       <Box
@@ -47,7 +62,7 @@ export default function SearchFiltersInput({
           minWidth: 0,
         }}
       >
-        {/* Search icon */}
+        {/* Filtering Terms search icon */}
         <SearchIcon
           sx={{
             color: primaryDarkColor,
@@ -56,7 +71,7 @@ export default function SearchFiltersInput({
           }}
         />
 
-        {/* Text input */}
+        {/* Filtering Terms text input */}
         <InputBase
           data-testid="filtering-input"
           placeholder={placeholder}
@@ -70,12 +85,13 @@ export default function SearchFiltersInput({
           }}
         />
 
-        {/* Clear button appears only when text has been entered */}
+        {/* Clear the current text */}
         {searchInput.trim() && (
           <Box
             role="button"
             aria-label="Clear filtering terms search"
             onClick={(event) => {
+              // Prevent the click from activating the parent input again.
               event.stopPropagation();
               setSearchInput("");
             }}
@@ -91,16 +107,28 @@ export default function SearchFiltersInput({
               backgroundColor: alpha(primaryDarkColor, 0.1),
               color: primaryDarkColor,
               cursor: "pointer",
+
               "&:hover": {
                 backgroundColor: alpha(primaryDarkColor, 0.2),
               },
             }}
           >
-            <ClearIcon sx={{ fontSize: "16px" }} />
+            <ClearIcon
+              sx={{
+                fontSize: "16px",
+              }}
+            />
           </Box>
         )}
 
-        {/* Optional action displayed inside the search bar */}
+        {/*
+         * Above 870px:
+         * keep All Filtering Terms inside the input.
+         *
+         * From 870px downward:
+         * hide it here when the Result Type selector is visible.
+         * FilteringTermsSection displays the external copy instead.
+         */}
         {action && (
           <Box
             sx={{
@@ -108,13 +136,18 @@ export default function SearchFiltersInput({
               alignItems: "center",
               flexShrink: 0,
               ml: 1,
+
+              [buttonsOutsideInputLayout]: {
+                display: hasEntryTypeSelector ? "none" : "flex",
+              },
             }}
           >
             {action}
           </Box>
         )}
       </Box>
-      {/* Dropdown component that shows matching filtering terms */}
+
+      {/* Display matching Filtering Terms underneath the input */}
       <FilteringTermsDropdownResults
         searchInput={searchInput}
         onCloseDropdown={() => setSearchInput("")}

@@ -7,8 +7,8 @@ import { ReactComponent as FilterIcon } from "../../assets/logos/filteringterms.
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import config from "../../config/runtimeConfig";
 
-const stackSearchAndCommonFilters = "@media (max-width:1100px)";
-const sideBySideSearchAndFilters = "@media (min-width:1101px)";
+const stackSearchAndCommonFilters = "@media (max-width:1180px)";
+const sideBySideSearchAndFilters = "@media (min-width:1181px)";
 
 /**
  * Connects each search input with the tab that should open.

@@ -101,10 +101,10 @@ export default function HomePage({
     return () => window.removeEventListener("setActiveInput", handler);
   }, []);
 
-  const stackSearchandCommonFilters = "@media (max-width:1100px)";
+  const stackSearchandCommonFilters = "@media (max-width:1180px)";
 
   const twoValuesStackSearchandCommonFilters =
-    "@media (min-width:900px) and (max-width:1100px)";
+    "@media (min-width:900px) and (max-width:1180px)";
 
   return (
     <>
