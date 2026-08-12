@@ -141,7 +141,14 @@ export default function TableToolbarControls({
     <Box
       sx={{
         display: "flex",
-        justifyContent: "flex-end",
+        justifyContent: {
+          xs: "center",
+          sm: "flex-end",
+        },
+        width: {
+          xs: "100%",
+          sm: "auto",
+        },
         alignItems: "center",
         gap: {
           xs: 1,
@@ -149,6 +156,7 @@ export default function TableToolbarControls({
           md: 2,
           lg: 3,
         },
+
         flexWrap: "wrap",
       }}
     >
@@ -177,7 +185,11 @@ export default function TableToolbarControls({
                 component="span"
                 sx={{
                   color: colors.darkPrimary,
-                  fontSize: "12px",
+                  fontSize: {
+                    lg: "12px",
+                    sm: "11px",
+                    xs: "11px",
+                  },
                 }}
               >
                 Select columns
@@ -187,9 +199,7 @@ export default function TableToolbarControls({
           sx={{
             borderRadius: "24px",
             height: "40px",
-
             animation: shouldPulse ? "pulseBorder 3s ease-in-out 8" : "none",
-
             "@keyframes pulseBorder": {
               "0%": {
                 boxShadow: "0 0 0 0 rgba(25, 118, 210, 0.28)",
@@ -217,10 +227,11 @@ export default function TableToolbarControls({
               py: 0.5,
               width: {
                 xs: "120px",
-                sm: "150px",
-                md: "150px",
+                sm: "130px",
+                md: "140px",
                 lg: "200px",
               },
+
               height: "40px",
             },
           }}
@@ -304,8 +315,8 @@ export default function TableToolbarControls({
         sx={{
           width: {
             xs: "160px",
-            sm: "170px",
-            md: "170px",
+            sm: "160px",
+            md: "160px",
             lg: "237px",
           },
 
