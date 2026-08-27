@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Box,
+  Link,
   Paper,
   Table,
   TableBody,
@@ -8,12 +9,47 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Link,
 } from "@mui/material";
+import LaunchIcon from "@mui/icons-material/Launch";
 import { lighten } from "@mui/system";
+
 import config from "../../config/runtimeConfig";
 import { DATASETS_TABLE } from "../../lib/tableConstants";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
+
+/**
+ * On compact screens we only show:
+ * ID | Description | External URL
+ *
+ * Name and DUO return from lg upward.
+ */
+const hiddenOnCompactScreens = {
+  display: {
+    xs: "none",
+    sm: "none",
+    md: "none",
+    lg: "table-cell",
+  },
+};
+
+/**
+ * Compact layout gives most of the available space
+ * to the useful text columns.
+ */
+const COMPACT_COLUMN_WIDTHS = {
+  dataset_id: "25%",
+  dataset_description: "65%",
+  dataset_external_url: "10%",
+};
+
+const DESKTOP_COLUMN_WIDTHS = Object.fromEntries(
+  DATASETS_TABLE.map((column) => [column.id, column.width])
+);
+
+const getResponsiveColumnWidth = (columnId) => ({
+  xs: COMPACT_COLUMN_WIDTHS[columnId] || DESKTOP_COLUMN_WIDTHS[columnId],
+  lg: DESKTOP_COLUMN_WIDTHS[columnId],
+});
 
 export default function DatasetsTable() {
   const { rawItems } = useSelectedEntry();
@@ -26,6 +62,13 @@ export default function DatasetsTable() {
     transition: "background-color 0.3s ease",
   };
 
+  const toggleDescription = (index) => {
+    setExpandedRows((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
   return (
     <Paper
       sx={{
@@ -36,150 +79,231 @@ export default function DatasetsTable() {
       }}
     >
       <TableContainer>
-        <Table stickyHeader aria-label="Datasets results table">
+        <Table
+          sx={{
+            width: "100%",
+            tableLayout: "fixed",
+          }}
+        >
           <TableHead>
             <TableRow>
-              {DATASETS_TABLE.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  sx={{ ...headerCellStyle, width: column.width }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
+              {DATASETS_TABLE.map((column) => {
+                const isHiddenOnCompact =
+                  column.id === "dataset_name" || column.id === "dataset_duo";
+
+                const isExternalUrl = column.id === "dataset_external_url";
+
+                return (
+                  <TableCell
+                    key={column.id}
+                    align={column.align}
+                    sx={{
+                      ...headerCellStyle,
+                      width: getResponsiveColumnWidth(column.id),
+
+                      ...(isHiddenOnCompact ? hiddenOnCompactScreens : {}),
+
+                      // Match the compact header with the centered URL icon.
+                      ...(isExternalUrl
+                        ? {
+                            textAlign: {
+                              xs: "center",
+                              lg: column.align,
+                            },
+                          }
+                        : {}),
+                    }}
+                  >
+                    {column.label}
+                  </TableCell>
+                );
+              })}
             </TableRow>
           </TableHead>
 
           <TableBody>
-            {rawItems?.map((dataset, index) => (
-              <TableRow
-                key={index}
-                sx={{
-                  "&:hover": {
-                    backgroundColor: lighten(config.ui.colors.darkPrimary, 0.9),
-                  },
-                  "& td": {
-                    borderBottom: "1px solid rgba(224,224,224,1)",
-                    py: 1.5,
-                    verticalAlign: "top",
-                  },
-                }}
-              >
-                <TableCell
-                  sx={{
-                    minWidth: "110px",
-                    whiteSpace: "wrap",
-                    wordBreak: "break-all",
-                    overflowWrap: "break-word",
-                  }}
-                >
-                  <strong>{dataset.id || "-"}</strong>
-                </TableCell>
-                <TableCell
-                  sx={{
-                    minWidth: "150px",
-                    whiteSpace: "wrap",
-                    wordBreak: "break-all",
-                  }}
-                >
-                  {dataset.name || "-"}
-                </TableCell>
-                <TableCell
-                  sx={{
-                    wordBreak: "break-word",
-                    overflowWrap: "break-word",
-                    whiteSpace: "normal",
-                  }}
-                >
-                  {dataset.description ? (
-                    <>
-                      {expandedRows[index] ? (
-                        dataset.description
-                      ) : (
-                        <>
-                          {dataset.description.slice(0, 200)}
-                          {dataset.description.length > 200 && "..."}
-                        </>
-                      )}
+            {rawItems?.map((dataset, index) => {
+              const description = dataset.description || "";
+              const isExpanded = expandedRows[index];
+              const hasLongDescription = description.length > 200;
 
-                      {dataset.description.length > 200 && (
+              return (
+                <TableRow
+                  key={dataset.id || index}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: lighten(
+                        config.ui.colors.darkPrimary,
+                        0.9
+                      ),
+                    },
+
+                    "& td": {
+                      borderBottom: "1px solid rgba(224,224,224,1)",
+                      py: 1.5,
+                      verticalAlign: "top",
+                    },
+                  }}
+                >
+                  {/* Dataset ID */}
+                  <TableCell
+                    sx={{
+                      width: getResponsiveColumnWidth("dataset_id"),
+                      whiteSpace: "normal",
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    <strong>{dataset.id || "-"}</strong>
+                  </TableCell>
+
+                  {/* Name hidden below lg */}
+                  <TableCell
+                    sx={{
+                      ...hiddenOnCompactScreens,
+                      width: DESKTOP_COLUMN_WIDTHS.dataset_name,
+                      whiteSpace: "normal",
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    {dataset.name || "-"}
+                  </TableCell>
+
+                  {/* Description */}
+                  <TableCell
+                    sx={{
+                      width: getResponsiveColumnWidth("dataset_description"),
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                    }}
+                  >
+                    {description ? (
+                      <>
+                        {isExpanded || !hasLongDescription
+                          ? description
+                          : `${description.slice(0, 200)}...`}
+
+                        {hasLongDescription && (
+                          <Box
+                            component="button"
+                            type="button"
+                            onClick={() => toggleDescription(index)}
+                            sx={{
+                              display: "inline",
+                              ml: 0.5,
+                              p: 0,
+                              border: 0,
+                              background: "none",
+                              color: config.ui.colors.primary,
+                              cursor: "pointer",
+                              fontSize: "0.75rem",
+                              fontStyle: "italic",
+                            }}
+                          >
+                            {isExpanded ? "Read less" : "Read more"}
+                          </Box>
+                        )}
+                      </>
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
+
+                  {/* External URL
+                      Compact: centered MUI icon
+                      Desktop: full URL text */}
+                  <TableCell
+                    sx={{
+                      width: getResponsiveColumnWidth("dataset_external_url"),
+
+                      textAlign: {
+                        xs: "center",
+                        lg: "left",
+                      },
+                    }}
+                  >
+                    {dataset.externalUrl ? (
+                      <Link
+                        href={dataset.externalUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Open external dataset URL"
+                        sx={{
+                          color: config.ui.colors.darkPrimary,
+                          textDecoration: "none",
+
+                          display: {
+                            xs: "inline-flex",
+                            lg: "inline",
+                          },
+
+                          alignItems: "center",
+                          justifyContent: "center",
+
+                          "&:hover": {
+                            textDecoration: {
+                              xs: "none",
+                              lg: "underline",
+                            },
+                          },
+                        }}
+                      >
+                        {/* Full URL from lg upward */}
                         <Box
-                          component="button"
-                          onClick={() =>
-                            setExpandedRows((prev) => ({
-                              ...prev,
-                              [index]: !prev[index],
-                            }))
-                          }
+                          component="span"
                           sx={{
-                            display: "inline",
-                            ml: 0.5,
-                            background: "none",
-                            color: config.ui.colors.primary,
-                            cursor: "pointer",
-                            fontSize: "0.75rem",
-                            fontStyle: "italic",
+                            display: {
+                              xs: "none",
+                              lg: "inline",
+                            },
+                            overflowWrap: "anywhere",
                           }}
                         >
-                          {expandedRows[index] ? "Read less" : "Read more"}
+                          {dataset.externalUrl}
                         </Box>
-                      )}
-                    </>
-                  ) : (
-                    "-"
-                  )}
-                </TableCell>
 
-                <TableCell
-                  sx={{
-                    minWidth: "100px",
-                    whiteSpace: "wrap",
-                    wordBreak: "break-all",
-                  }}
-                >
-                  {dataset.externalUrl ? (
-                    <Link
-                      href={dataset.externalUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      sx={{
-                        color: config.ui.colors.darkPrimary,
-                        textDecoration: "none",
-                        "&:hover": {
-                          textDecoration: "underline",
-                        },
-                      }}
-                    >
-                      {dataset.externalUrl}
-                    </Link>
-                  ) : (
-                    "-"
-                  )}
-                </TableCell>
+                        {/* Compact external-link icon */}
+                        <LaunchIcon
+                          sx={{
+                            display: {
+                              xs: "block",
+                              lg: "none",
+                            },
+                            color: config.ui.colors.darkPrimary,
+                            fontSize: "20px",
+                          }}
+                        />
+                      </Link>
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
 
-                <TableCell
-                  sx={{
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                    overflowWrap: "break-word",
-                    verticalAlign: "top",
-                  }}
-                >
-                  {dataset?.dataUseConditions?.duoDataUse?.length > 0 ? (
-                    <Box>
-                      {dataset.dataUseConditions.duoDataUse.map((duo) => (
-                        <Box key={duo.id}>
-                          <strong>{duo.id}</strong> ({duo.label})
-                        </Box>
-                      ))}
-                    </Box>
-                  ) : (
-                    "-"
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
+                  {/* DUO hidden below lg */}
+                  <TableCell
+                    sx={{
+                      ...hiddenOnCompactScreens,
+                      width: DESKTOP_COLUMN_WIDTHS.dataset_duo,
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                    }}
+                  >
+                    {dataset?.dataUseConditions?.duoDataUse?.length > 0 ? (
+                      <Box>
+                        {dataset.dataUseConditions.duoDataUse.map((duo) => (
+                          <Box key={duo.id}>
+                            <strong>{duo.id}</strong> ({duo.label})
+                          </Box>
+                        ))}
+                      </Box>
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>

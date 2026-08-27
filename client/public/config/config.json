@@ -86,11 +86,11 @@
         }
       ]
     },
-    "showLogin": false,
+    "showLogin": true,
     "auth": {
       "providerType": "private",
       "oidc": {
-        "clientId": "",
+        "clientId": "a5e08da0-9e30-45c4-b4c4-4c45ab8262c6",
         "authority": "https://login.aai.lifescience-ri.eu/oidc",
         "autoSignIn": false,
         "responseType": "code",
@@ -232,6 +232,12 @@
         "rangeQuery": true,
         "bracketQuery": true,
         "hgvsQuery": true
+      },
+      "searchInputExample": {
+        "referenceName": "22",
+        "position": 16050527,
+        "referenceBases": "C",
+        "alternateBases": "A"
       },
       "genomicQueryBuilder": {
         "showAlternateBases": true,

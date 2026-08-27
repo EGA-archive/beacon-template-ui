@@ -41,6 +41,35 @@ export default function SearchGenomicInput({
 
   const genomicQueryTypes = config?.ui?.genomicQueries?.genomicQueryTypes ?? {};
 
+  const genomicInputExample = config?.ui?.genomicQueries?.searchInputExample;
+
+  const getGenomicInputExamples = (example) => {
+    if (!example) return [];
+
+    const { referenceName, position, referenceBases, alternateBases } = example;
+
+    if (
+      !referenceName ||
+      position === undefined ||
+      !referenceBases ||
+      !alternateBases
+    ) {
+      return [];
+    }
+
+    return [
+      `${referenceName}-${position}-${referenceBases}-${alternateBases}`,
+      `${referenceName}:${position}${referenceBases}>${alternateBases}`,
+    ];
+  };
+
+  const genomicInputExamples = getGenomicInputExamples(genomicInputExample);
+
+  const genomicInputPlaceholder =
+    genomicInputExamples.length > 0
+      ? `Examples: ${genomicInputExamples.join(" or ")}`
+      : "Enter genomic variant";
+
   // Buttons move outside the inputs from 870px downward.
   const buttonsOutsideInputLayout = "@media (max-width:870px)";
 
@@ -468,7 +497,7 @@ export default function SearchGenomicInput({
               setActiveInput("genomic");
             }}
             inputRef={inputRef}
-            placeholder="Examples: 22-16050527-C-A or 22:16050527C>A"
+            placeholder={genomicInputPlaceholder}
             fullWidth
             value={genomicDraft}
             onChange={(event) => setGenomicDraft(event.target.value)}
@@ -613,45 +642,39 @@ export default function SearchGenomicInput({
             }}
           >
             {/* Example genomic queries */}
-            <Box
-              sx={{
-                width: "100%",
-                backgroundColor: "#F1F1F1",
-                px: 6,
-                py: 1,
-              }}
-            >
-              Examples:&nbsp;
-              <span
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setGenomicDraft("22-16050527-C-A");
-                }}
-                style={{
-                  color: config.ui.colors.primary,
-                  textDecoration: "underline",
-                  cursor: "pointer",
-                  fontWeight: 600,
+            {genomicInputExamples.length > 0 && (
+              <Box
+                sx={{
+                  width: "100%",
+                  backgroundColor: "#F1F1F1",
+                  px: 6,
+                  py: 1,
                 }}
               >
-                22-16050527-C-A
-              </span>
-              &nbsp;or&nbsp;
-              <span
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setGenomicDraft("22:16050527C>A");
-                }}
-                style={{
-                  color: config.ui.colors.primary,
-                  textDecoration: "underline",
-                  cursor: "pointer",
-                  fontWeight: 600,
-                }}
-              >
-                22:16050527C&gt;A
-              </span>
-            </Box>
+                Examples:&nbsp;
+                {genomicInputExamples.map((example, index) => (
+                  <Box key={example} component="span">
+                    {index > 0 && <> or </>}
+
+                    <Box
+                      component="span"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setGenomicDraft(example);
+                      }}
+                      sx={{
+                        color: config.ui.colors.primary,
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {example}
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            )}
 
             {/* Option to add the detected genomic variant */}
             {hasGenomicBuilderQueries && (
