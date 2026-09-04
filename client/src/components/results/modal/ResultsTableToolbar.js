@@ -36,7 +36,7 @@ export default function ResultsTableToolbar({
           }}
         >
           Total Results:{" "}
-          {count
+          {count != null
             ? new Intl.NumberFormat(navigator.language).format(count)
             : "—"}
           <Box

@@ -6,9 +6,6 @@ import { buildDetailedTableQuery } from "../modal/buildDetailedTableQuery";
 
 /**
  * Finds the result set belonging to the selected dataset.
- *
- * Beacon ID is preferred because different Beacons may expose datasets
- * with the same ID. Dataset ID alone is used as a fallback.
  */
 const findDatasetResultSet = (resultSets, beaconId, datasetId) =>
   resultSets.find(
@@ -16,51 +13,58 @@ const findDatasetResultSet = (resultSets, beaconId, datasetId) =>
   ) || resultSets.find((resultSet) => resultSet.id === datasetId);
 
 /**
- * Refetches detailed dataset records when they cannot be transferred
- * from the original Results tab.
- *
- * This is used when the page is refreshed or opened directly from a URL.
- * When authentication is enabled, the request includes the current
- * user's Bearer token so the backend can authorize dataset access.
+ * Finds the selected variant inside the refreshed dataset records.
+ * Record ID is preferred.
+ * HGVS ID provides a second way of identifying the variant
+ * when available.
  */
-export const useDatasetDetailedRecordsFallback = ({
-  shouldFetchRecords,
-  hasTransferredRecords,
-  entryTypePath,
-  queryFilters,
+const findSelectedVariant = (records, variantId, genomicHGVSId) =>
+  records.find((record) => variantId && record.id === variantId) ||
+  records.find(
+    (record) =>
+      genomicHGVSId && record.identifiers?.genomicHGVSId === genomicHGVSId
+  );
+
+/**
+ * Refetches the selected variant when Allele Frequency data
+ * is unavailable in the current browser's localStorage.
+ *
+ * The request uses the current user's Bearer token so the
+ * Beacon decides whether that user can access the dataset.
+ */
+export const useAlleleFrequencyFallback = ({
+  shouldFetch,
+  entryTypeId,
+  selectedFilters,
   beaconId,
   datasetId,
-  setRecords,
-  setTotalResults,
+  variantId,
+  genomicHGVSId,
+  setData,
   setLoading,
   setError,
 }) => {
   const authHeaders = useAuthHeaders();
 
   useEffect(() => {
-    // Records were already received from the original Results tab.
-    if (!shouldFetchRecords || hasTransferredRecords) {
+    if (!shouldFetch) {
       return undefined;
     }
-
-    // The request cannot be reconstructed without these values.
-    if (!entryTypePath || !datasetId) {
+    if (!entryTypeId || !datasetId || (!variantId && !genomicHGVSId)) {
       setLoading(false);
-      setError("The detailed table request context is incomplete.");
+      setError("The allele frequency request context is incomplete.");
       return undefined;
     }
-
     const controller = new AbortController();
 
-    const fetchDetailedRecords = async () => {
+    const fetchAlleleFrequency = async () => {
       try {
         setLoading(true);
         setError("");
-        setRecords([]);
 
-        const requestUrl = `${config.apiUrl}/${entryTypePath}`;
+        const requestUrl = `${config.apiUrl}/${entryTypeId}`;
 
-        const requestBody = buildDetailedTableQuery(queryFilters);
+        const requestBody = buildDetailedTableQuery(selectedFilters);
 
         const response = await fetch(requestUrl, {
           method: "POST",
@@ -69,36 +73,32 @@ export const useDatasetDetailedRecordsFallback = ({
           signal: controller.signal,
         });
 
-        /**
-         * Authentication succeeded, but the backend determined
-         * that this user cannot access the requested dataset.
-         */
         if (response.status === 403) {
-          setRecords([]);
-          setTotalResults(null);
+          setData(null);
+
           setError("You do not have permission to access this dataset.");
+
           return;
         }
 
-        /**
-         * The token is missing, invalid or no longer accepted.
-         */
         if (response.status === 401) {
-          setRecords([]);
-          setTotalResults(null);
+          setData(null);
+
           setError(
             "Your authentication session is no longer valid. Please log in again."
           );
+
           return;
         }
 
         if (!response.ok) {
           throw new Error(
-            `Detailed table request failed with status ${response.status}`
+            `Allele frequency request failed with status ${response.status}`
           );
         }
 
         const responseData = await response.json();
+
         const resultSets = responseData.response?.resultSets;
 
         if (!Array.isArray(resultSets)) {
@@ -121,25 +121,30 @@ export const useDatasetDetailedRecordsFallback = ({
           ? selectedResultSet.results
           : [];
 
-        setRecords(records);
-
-        setTotalResults(
-          Number.isFinite(selectedResultSet.resultsCount)
-            ? selectedResultSet.resultsCount
-            : null
+        const selectedVariant = findSelectedVariant(
+          records,
+          variantId,
+          genomicHGVSId
         );
+
+        if (!selectedVariant) {
+          throw new Error(
+            "The selected variant was not found in the refreshed results."
+          );
+        }
+
+        setData(selectedVariant);
       } catch (error) {
-        // Abort is expected when the component unmounts.
         if (error.name === "AbortError") return;
 
         console.error(
-          "[DatasetDetailedTable] Unable to fetch fallback records:",
+          "[AlleleFrequency] Unable to fetch selected variant:",
           error
         );
 
-        setRecords([]);
-        setTotalResults(null);
-        setError("Unable to load the detailed table records.");
+        setData(null);
+
+        setError("Unable to load the allele frequency data.");
       } finally {
         if (!controller.signal.aborted) {
           setLoading(false);
@@ -147,19 +152,19 @@ export const useDatasetDetailedRecordsFallback = ({
       }
     };
 
-    fetchDetailedRecords();
+    fetchAlleleFrequency();
 
     return () => controller.abort();
   }, [
-    shouldFetchRecords,
-    hasTransferredRecords,
-    entryTypePath,
-    queryFilters,
+    shouldFetch,
+    entryTypeId,
+    selectedFilters,
     beaconId,
     datasetId,
+    variantId,
+    genomicHGVSId,
     authHeaders,
-    setRecords,
-    setTotalResults,
+    setData,
     setLoading,
     setError,
   ]);

@@ -21,6 +21,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { SelectedEntryProvider } from "./components/context/SelectedEntryContext";
+import ProtectedRoute from "./auth/ProtectedRoute";
 
 if (window.Cypress) {
   window.__beaconTestHooks = {
@@ -136,19 +137,25 @@ export default function App() {
                   <Route path="/login" element={<Login />} />
                 </>
               )}
-
               <Route
                 path="/dataset-detailed-table"
-                element={<DatasetDetailedTablePage />}
+                element={
+                  <ProtectedRoute>
+                    <DatasetDetailedTablePage />
+                  </ProtectedRoute>
+                }
               />
               <Route
                 path="/allele-frequency"
-                element={<AlleleFrequencyPage />}
+                element={
+                  <ProtectedRoute>
+                    <AlleleFrequencyPage />
+                  </ProtectedRoute>
+                }
               />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </Box>
-
           <Footer navItems={navItems} />
           <LoginModal
             open={loginModalOpen}

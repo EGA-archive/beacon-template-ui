@@ -3,13 +3,17 @@ import ReactDOM from "react-dom/client";
 import { AuthProvider } from "oidc-react";
 import { loadRuntimeConfig } from "./config/loadRuntimeConfig";
 import { setRuntimeConfig } from "./config/runtimeConfig";
+import { AUTH_RETURN_PATH_KEY } from "./auth/authConstants";
+import OidcCallbackGate from "./auth/OidcCallbackGate";
 import "./index.css";
 
-// Builds the OIDC configuration using the runtime configuration
+/**
+ * Builds the OIDC configuration from runtime config.
+ * Authentication is completely skipped when login is disabled.
+ */
 function buildOidcConfig(config) {
   const ui = config.ui;
 
-  // If login is disabled, do not load AuthProvider
   if (!ui?.showLogin) return null;
 
   const auth = ui.auth;
@@ -22,17 +26,32 @@ function buildOidcConfig(config) {
   const { oidc } = auth;
   const clientId = oidc.clientId;
 
-  // Public clients use a client ID only.
-  // No client secret should be stored or used in the browser.
+  // Browser clients use a client ID only.
+  // Client secrets must never be stored in frontend configuration.
   if (!clientId) {
     console.error("clientId is required but was not found in config.json.");
     return null;
   }
 
   return {
+    /**
+     * After OIDC login, return the user to the protected URL
+     * they originally tried to access.
+     */
     onSignIn: async () => {
-      window.history.replaceState(null, "", "/login");
+      const savedPath = sessionStorage.getItem(AUTH_RETURN_PATH_KEY);
+
+      sessionStorage.removeItem(AUTH_RETURN_PATH_KEY);
+
+      // Only allow local application paths.
+      const returnPath =
+        savedPath && savedPath.startsWith("/") && !savedPath.startsWith("//")
+          ? savedPath
+          : "/";
+
+      window.location.replace(returnPath);
     },
+
     authority: oidc.authority,
     clientId,
     autoSignIn: oidc.autoSignIn,
@@ -46,26 +65,24 @@ function buildOidcConfig(config) {
 
 async function bootstrap() {
   try {
-    // 1. Load the latest runtime config from /config/config.json
+    // Load runtime configuration before importing the application.
     const config = await loadRuntimeConfig();
 
-    // 2. Populate the shared runtime config object
     setRuntimeConfig(config);
 
-    // 3. Load App only AFTER runtime config is available
     const { default: App } = await import("./App");
 
-    // 4. Build authentication configuration
     const oidcConfig = buildOidcConfig(config);
 
-    // 5. Start React
     const root = ReactDOM.createRoot(document.getElementById("root"));
 
     root.render(
       <React.StrictMode>
         {oidcConfig ? (
           <AuthProvider {...oidcConfig}>
-            <App />
+            <OidcCallbackGate>
+              <App />
+            </OidcCallbackGate>
           </AuthProvider>
         ) : (
           <App />

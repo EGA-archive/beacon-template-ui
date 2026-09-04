@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  Box,
   Paper,
   Table,
   TableBody,
@@ -10,12 +9,6 @@ import {
   TableRow,
 } from "@mui/material";
 
-import {
-  BEACON_NETWORK_COLUMNS,
-  BEACON_NETWORK_TABLET_COLUMN_WIDTHS,
-  BEACON_SINGLE_COLUMNS,
-  BEACON_SINGLE_TABLET_COLUMN_WIDTHS,
-} from "../../lib/tableConstants";
 import config from "../../config/runtimeConfig";
 import useBeaconMetadata from "../../hooks/useBeaconMetaData";
 
@@ -24,20 +17,17 @@ import CohortsTable from "./CohortsTable";
 import DatasetsTable from "./DatasetsTable";
 import NetworkBeaconResultsRows from "./table/NetworkBeaconResultsRows";
 import SingleBeaconResultsRows from "./table/SingleBeaconResultsRows";
+import useResultsTableColumns from "./table/useResultsTableColumns";
 
 import {
   hiddenOnTabletStyle,
-  resultsHeaderSubtitleStyle,
   resultsTableHeaderCellStyle,
   resultsTablePaperStyle,
   resultsTableStyle,
 } from "./table/resultsTableStyles";
 
 import { openDatasetDetailedTablePage } from "./utils/openDatasetDetailedTablePage";
-import {
-  findBeaconEmail,
-  formatEntryTypeLabel,
-} from "./utils/resultsTableUtils";
+import { findBeaconEmail } from "./utils/resultsTableUtils";
 
 export default function ResultsTable() {
   const {
@@ -55,6 +45,20 @@ export default function ResultsTable() {
   const isSingleBeacon = config.beaconType === "singleBeacon";
 
   /**
+   * Build the columns and responsive widths
+   * required by the current Beacon type.
+   */
+  const {
+    tableColumns,
+    getColumnWidth,
+    getResponsiveColumnWidth,
+    getResponsiveColumnWidthById,
+  } = useResultsTableColumns({
+    isSingleBeacon,
+    entryType: lastSearchedPathSegment,
+  });
+
+  /**
    * Toggle the dataset rows belonging to a Network Beacon.
    */
   const handleToggleRow = (item) => {
@@ -66,54 +70,6 @@ export default function ResultsTable() {
       ...prev,
       [beaconId]: !prev[beaconId],
     }));
-  };
-
-  const baseColumns = isSingleBeacon
-    ? BEACON_SINGLE_COLUMNS
-    : BEACON_NETWORK_COLUMNS;
-
-  /**
-   * Add the searched entry type underneath the Search Results heading.
-   */
-  const tableColumns = baseColumns.map((column) =>
-    column.id === "response"
-      ? {
-          ...column,
-          label: (
-            <Box>
-              <Box>Search Results</Box>
-
-              <Box sx={resultsHeaderSubtitleStyle}>
-                ({formatEntryTypeLabel(lastSearchedPathSegment)})
-              </Box>
-            </Box>
-          ),
-        }
-      : column
-  );
-
-  /**
-   * Use compact widths below lg and the configured
-   * column widths on desktop.
-   */
-  const getResponsiveColumnWidth = (column) => {
-    const compactWidths = isSingleBeacon
-      ? BEACON_SINGLE_TABLET_COLUMN_WIDTHS
-      : BEACON_NETWORK_TABLET_COLUMN_WIDTHS;
-
-    return {
-      xs: compactWidths[column.id] || column.width,
-      lg: column.width,
-    };
-  };
-
-  const getColumnWidth = (columnId) =>
-    tableColumns.find((column) => column.id === columnId)?.width;
-
-  const getResponsiveColumnWidthById = (columnId) => {
-    const column = tableColumns.find((column) => column.id === columnId);
-
-    return column ? getResponsiveColumnWidth(column) : undefined;
   };
 
   /**
@@ -134,13 +90,14 @@ export default function ResultsTable() {
   }, [resultData]);
 
   /**
-   * Open the selected dataset in the dedicated detailed-table page.
+   * Open the selected dataset in its dedicated detailed-table page.
    */
   const handleOpenDetails = (subRow) => {
     openDatasetDetailedTablePage({
       subRow,
       entryTypeId: lastSearchedPathSegment,
       selectedFilters: lastSearchedFilters || [],
+
       contactEmail: findBeaconEmail(
         beaconsInfo,
         subRow.beaconId,
@@ -149,7 +106,7 @@ export default function ResultsTable() {
     });
   };
 
-  // Entry types with dedicated table components.
+  // Entry types with dedicated Results tables.
   if (["cohort", "cohorts"].includes(selectedEntryType)) {
     return <CohortsTable />;
   }
@@ -184,6 +141,7 @@ export default function ResultsTable() {
                     align={column.align}
                     sx={{
                       ...resultsTableHeaderCellStyle,
+
                       width: getResponsiveColumnWidth(column),
 
                       ...(hideOnCompact ? hiddenOnTabletStyle : {}),

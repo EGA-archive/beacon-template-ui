@@ -16,7 +16,7 @@ import config from "../../../../config/runtimeConfig";
 const primaryDarkColor = config.ui.colors.darkPrimary;
 
 const WIDTH_PER_POPULATION = 38;
-const MINIMUM_CHART_WIDTH = 420;
+const MINIMUM_CHART_WIDTH = 300;
 const HOVER_PADDING_RATIO = 0.4;
 
 /**
@@ -47,8 +47,15 @@ export default function AlleleFrequencyChart({
   const hoverBackgroundColor = theme.palette.action.hover;
 
   /**
+   * Charts with many populations need more horizontal space to keep bars and labels readable on compact screens.
+   * Smaller charts may continue shrinking based on their actual number of populations.
+   */
+  const compactChartMinWidth = hasManyPopulations
+    ? 900
+    : getAlleleFrequencyChartWidth(rows.length);
+
+  /**
    * Creates a full-height hover area for each population.
-   *
    * The area remains visually transparent until the population is highlighted.
    * This makes hovering work even when the allele frequency is 0.
    */
@@ -134,7 +141,6 @@ export default function AlleleFrequencyChart({
       sx={{
         width: "100%",
         minWidth: 0,
-        // Remove Recharts focus/click outlines from chart elements.
         "& .recharts-wrapper *:focus": {
           outline: "none !important",
         },
@@ -162,8 +168,9 @@ export default function AlleleFrequencyChart({
       {/*
        * This container becomes horizontally scrollable when the chart is wider than the available page space/when the chart has more than 14 populations.
        */}
-      <Box
+      {/* <Box
         sx={{
+          backgroundColor: "lavender",
           width: "100%",
           overflowX: "auto",
           display: "flex",
@@ -176,6 +183,35 @@ export default function AlleleFrequencyChart({
         <Box
           sx={{
             width: "100%",
+            overflowX: "scroll",
+            height: "360px",
+            backgroundColor: "lemonchiffon",
+          }}
+        > */}
+      {/*
+       * The chart remains responsive while enough horizontal space is available.
+       *
+       * On sm and xs:
+       * - charts with more than 14 populations keep a 900px minimum width;
+       * - smaller charts may shrink further based on their population count.
+       *
+       * Once that minimum width no longer fits, this container becomes
+       * horizontally scrollable instead of compressing the chart further.
+       */}
+      <Box
+        sx={{
+          width: "100%",
+          overflowX: "auto",
+          overflowY: "hidden",
+        }}
+      >
+        <Box
+          sx={{
+            width: "100%",
+            minWidth: {
+              xs: `${compactChartMinWidth}px`,
+              md: 0,
+            },
             height: "360px",
           }}
         >
@@ -186,7 +222,6 @@ export default function AlleleFrequencyChart({
               margin={{
                 top: 10,
                 right: 20,
-                // Check with Sara
                 bottom: 10,
                 // bottom: -30,
                 left: 20,

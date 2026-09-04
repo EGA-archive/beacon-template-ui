@@ -173,11 +173,13 @@ export default function TableToolbarControls({
                 display: "flex",
                 alignItems: "center",
                 gap: 1,
+                // backgroundColor: "pink",
               }}
             >
               <SelectColumn
                 sx={{
                   color: colors.darkPrimary,
+                  backgroundColor: "red",
                 }}
               />
 

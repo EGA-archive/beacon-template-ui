@@ -9,6 +9,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  useMediaQuery,
 } from "@mui/material";
 import LaunchIcon from "@mui/icons-material/Launch";
 import { lighten } from "@mui/system";
@@ -33,13 +34,27 @@ const hiddenOnCompactScreens = {
 };
 
 /**
- * Compact layout gives most of the available space
- * to the useful text columns.
+ * Compact column widths.
+ *
+ * On sm and xs, more space is reserved for External URL
+ * so its header is not squeezed.
  */
 const COMPACT_COLUMN_WIDTHS = {
-  dataset_id: "25%",
-  dataset_description: "65%",
-  dataset_external_url: "10%",
+  dataset_id: {
+    xs: "25%",
+    sm: "25%",
+    md: "25%",
+  },
+  dataset_description: {
+    xs: "55%",
+    sm: "55%",
+    md: "65%",
+  },
+  dataset_external_url: {
+    xs: "20%",
+    sm: "20%",
+    md: "10%",
+  },
 };
 
 const DESKTOP_COLUMN_WIDTHS = Object.fromEntries(
@@ -47,13 +62,20 @@ const DESKTOP_COLUMN_WIDTHS = Object.fromEntries(
 );
 
 const getResponsiveColumnWidth = (columnId) => ({
-  xs: COMPACT_COLUMN_WIDTHS[columnId] || DESKTOP_COLUMN_WIDTHS[columnId],
+  ...COMPACT_COLUMN_WIDTHS[columnId],
   lg: DESKTOP_COLUMN_WIDTHS[columnId],
 });
 
 export default function DatasetsTable() {
   const { rawItems } = useSelectedEntry();
   const [expandedRows, setExpandedRows] = useState({});
+
+  /**
+   * xs + sm use a shorter description preview.
+   * md and larger keep the existing 200-character preview.
+   */
+  const isSmallScreen = useMediaQuery("(max-width:899px)");
+  const descriptionLimit = isSmallScreen ? 120 : 200;
 
   const headerCellStyle = {
     backgroundColor: config.ui.colors.darkPrimary,
@@ -103,7 +125,6 @@ export default function DatasetsTable() {
 
                       ...(isHiddenOnCompact ? hiddenOnCompactScreens : {}),
 
-                      // Match the compact header with the centered URL icon.
                       ...(isExternalUrl
                         ? {
                             textAlign: {
@@ -125,7 +146,8 @@ export default function DatasetsTable() {
             {rawItems?.map((dataset, index) => {
               const description = dataset.description || "";
               const isExpanded = expandedRows[index];
-              const hasLongDescription = description.length > 200;
+
+              const hasLongDescription = description.length > descriptionLimit;
 
               return (
                 <TableRow
@@ -151,6 +173,11 @@ export default function DatasetsTable() {
                       width: getResponsiveColumnWidth("dataset_id"),
                       whiteSpace: "normal",
                       overflowWrap: "anywhere",
+                      fontSize: {
+                        md: "0.875rem",
+                        sm: "12px",
+                        xs: "11px",
+                      },
                     }}
                   >
                     <strong>{dataset.id || "-"}</strong>
@@ -175,13 +202,18 @@ export default function DatasetsTable() {
                       whiteSpace: "normal",
                       wordBreak: "break-word",
                       overflowWrap: "break-word",
+                      fontSize: {
+                        md: "0.875rem",
+                        sm: "12px",
+                        xs: "11px",
+                      },
                     }}
                   >
                     {description ? (
                       <>
                         {isExpanded || !hasLongDescription
                           ? description
-                          : `${description.slice(0, 200)}...`}
+                          : `${description.slice(0, descriptionLimit)}...`}
 
                         {hasLongDescription && (
                           <Box
@@ -209,13 +241,12 @@ export default function DatasetsTable() {
                     )}
                   </TableCell>
 
-                  {/* External URL
-                      Compact: centered MUI icon
-                      Desktop: full URL text */}
+                  {/* External URL:
+                      icon on compact screens,
+                      full URL on desktop */}
                   <TableCell
                     sx={{
                       width: getResponsiveColumnWidth("dataset_external_url"),
-
                       textAlign: {
                         xs: "center",
                         lg: "left",
@@ -270,7 +301,11 @@ export default function DatasetsTable() {
                               lg: "none",
                             },
                             color: config.ui.colors.darkPrimary,
-                            fontSize: "20px",
+                            fontSize: {
+                              md: "20px",
+                              sm: "17px",
+                              xs: "16px",
+                            },
                           }}
                         />
                       </Link>

@@ -53,6 +53,19 @@ export default function DatasetDetailedTablePage() {
   const [fetchError, setFetchError] = useState("");
 
   /**
+   * Total number of results reported by the selected dataset.
+   *
+   * When the page is opened from the Results table, the count is already
+   * available in the stored context.
+   *
+   * When the page is opened directly or refreshed, the fallback request
+   * updates this value from the fresh Beacon response.
+   */
+  const [totalResults, setTotalResults] = useState(
+    storedContext.displayedCount ?? null
+  );
+
+  /**
    * Try to receive the records that are already loaded in the main Results table.
    *
    * isWaitingForTransferredRecords:
@@ -89,6 +102,7 @@ export default function DatasetDetailedTablePage() {
     beaconId,
     datasetId,
     setRecords: setDataTable,
+    setTotalResults,
     setLoading,
     setError: setFetchError,
   });
@@ -190,6 +204,7 @@ export default function DatasetDetailedTablePage() {
           borderRadius: "12px",
           boxShadow: "0px 2px 8px rgba(0,0,0,0.08)",
           p: 3,
+          mb: 2,
         }}
       >
         {/* Shared header with page title, Beacon, dataset and applied query, same as per the AF Page*/}
@@ -218,7 +233,7 @@ export default function DatasetDetailedTablePage() {
               beaconId={beaconId}
               datasetId={datasetId}
               contactEmail={contactEmail}
-              displayedCount={storedContext.displayedCount}
+              displayedCount={totalResults}
               headers={[]}
               visibleColumns={visibleColumns}
               setVisibleColumns={setVisibleColumns}
