@@ -10,7 +10,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import config from "../../../config/runtimeConfig";
@@ -66,6 +66,25 @@ export default function TableToolbarControls({
   const isDownloadEnabled = config.ui?.download?.enabled ?? true;
 
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  /**
+   * Keep the column menu below its Select control.
+   *
+   * The available height is measured when the menu opens,
+   * so the list scrolls internally instead of moving upward
+   * and covering the toolbar.
+   */
+  const columnsSelectRef = useRef(null);
+  const [columnsMenuMaxHeight, setColumnsMenuMaxHeight] = useState(400);
+
+  const handleColumnsMenuOpen = () => {
+    const anchorBottom =
+      columnsSelectRef.current?.getBoundingClientRect().bottom ?? 0;
+
+    const availableHeight = window.innerHeight - anchorBottom - 8;
+
+    setColumnsMenuMaxHeight(Math.max(0, Math.min(400, availableHeight)));
+  };
 
   /**
    * Automatically select a reasonable number of columns
@@ -145,6 +164,13 @@ export default function TableToolbarControls({
           xs: "center",
           sm: "flex-end",
         },
+        // backgroundColor: {
+        //   xl: "red",
+        //   lg: "lightsalmon",
+        //   md: "pink",
+        //   sm: "lightgreen",
+        //   xs: "lightblue",
+        // },
         width: {
           xs: "100%",
           sm: "auto",
@@ -161,12 +187,38 @@ export default function TableToolbarControls({
       }}
     >
       {/* Column selector */}
-      <FormControl size="small">
+      <FormControl size="small" ref={columnsSelectRef}>
         <Select
           multiple
           displayEmpty
           value={visibleColumns}
           onChange={handleColumnSelectionChange}
+          onOpen={handleColumnsMenuOpen}
+          MenuProps={{
+            // Do not position the menu around the selected item.
+            variant: "menu",
+
+            // Attach the top of the menu to the bottom of the Select.
+            anchorOrigin: {
+              vertical: "bottom",
+              horizontal: "left",
+            },
+            transformOrigin: {
+              vertical: "top",
+              horizontal: "left",
+            },
+
+            marginThreshold: 8,
+
+            // Use only the space available below the Select.
+            // Long lists scroll inside the menu.
+            PaperProps: {
+              sx: {
+                maxHeight: columnsMenuMaxHeight,
+                overflowY: "auto",
+              },
+            },
+          }}
           renderValue={() => (
             <Box
               sx={{

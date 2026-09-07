@@ -23,7 +23,6 @@ export default function HomePage({
 }) {
   // State to store the height of the Search component, for aligning filters
   const [searchHeight, setSearchHeight] = useState(null);
-  const [hasModalBeenTriggered, setHasModalBeenTriggered] = useState(false);
   const auth = useAuth();
   const isLoggedIn = !!auth?.userData;
   const location = useLocation();
@@ -34,44 +33,82 @@ export default function HomePage({
   }, []);
 
   useEffect(() => {
-    // Change later this is only for testing
-    if (window.Cypress) return;
+    // Authentication protection is not needed when login is disabled.
+    if (!config.ui.showLogin) return undefined;
 
-    // The login modal does not show if:
-    // - the user is already logged in
-    // - the modal was already triggered once
-    // - the user is currently on the login page
+    // Keep the existing Cypress behaviour for now.
+    if (window.Cypress) return undefined;
 
     const isLoggingOut = localStorage.getItem("isLoggingOut") === "true";
-    if (isLoggingOut) return;
 
-    if (isLoggedIn || hasModalBeenTriggered || isOnLoginPage) return;
+    if (isLoggingOut || isLoggedIn || isOnLoginPage) {
+      return undefined;
+    }
 
-    // Handler for detecting the first user interaction: click or keydown
-    const handleFirstInteraction = (e) => {
-      // If the first interaction is a click on a "Log In" button, skip modal
-      const isLoginButton = e?.target?.closest(".login-button");
-      const isBurgerMenu = e?.target?.closest('[data-cy="burger-menu"]');
+    /**
+     * Intercept unauthenticated interactions BEFORE they reach
+     * React components.
+     *
+     * Using the capture phase is important here.
+     * Without it, a component such as All Filtering Terms can
+     * update its state and start an API request before the
+     * Login Required modal appears.
+     */
+    const handleUnauthenticatedInteraction = (event) => {
+      const target = event.target;
+
+      /**
+       * Allow the user to explicitly open the login flow.
+       */
+      const isLoginButton = target?.closest?.(".login-button");
+
+      /**
+       * Allow the responsive navigation menu to open so the
+       * user can still reach the Login button on mobile.
+       */
+      const isBurgerMenu = target?.closest?.('[data-cy="burger-menu"]');
+
       if (isLoginButton || isBurgerMenu) {
         return;
       }
 
-      // Open the login modal since it's the first non-login interaction
-      setLoginModalOpen(true);
-      setHasModalBeenTriggered(true);
+      /**
+       * Stop the interaction before React handlers receive it.
+       *
+       * This prevents actions such as:
+       * - opening All Filtering Terms;
+       * - opening the Genomic Query Builder;
+       * - running Search;
+       * - triggering other query-related UI actions.
+       */
+      event.preventDefault();
+      event.stopPropagation();
 
-      window.removeEventListener("click", handleFirstInteraction);
-      window.removeEventListener("keydown", handleFirstInteraction);
+      setLoginModalOpen(true);
     };
 
-    window.addEventListener("click", handleFirstInteraction, { once: true });
-    window.addEventListener("keydown", handleFirstInteraction, { once: true });
+    /**
+     * capture: true means this listener runs before React's
+     * normal click/keyboard handlers.
+     */
+    window.addEventListener("click", handleUnauthenticatedInteraction, true);
+
+    window.addEventListener("keydown", handleUnauthenticatedInteraction, true);
 
     return () => {
-      window.removeEventListener("click", handleFirstInteraction);
-      window.removeEventListener("keydown", handleFirstInteraction);
+      window.removeEventListener(
+        "click",
+        handleUnauthenticatedInteraction,
+        true
+      );
+
+      window.removeEventListener(
+        "keydown",
+        handleUnauthenticatedInteraction,
+        true
+      );
     };
-  }, [isLoggedIn, hasModalBeenTriggered, setLoginModalOpen, isOnLoginPage]);
+  }, [isLoggedIn, isOnLoginPage, setLoginModalOpen]);
 
   // Get from context whether the user already submitted a search
   const { hasSearchBeenTriggered } = useSelectedEntry();

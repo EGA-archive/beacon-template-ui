@@ -238,6 +238,7 @@ export default function ResultsPageHeader({
           columnGap: 2,
           rowGap: 1,
           mb: 2,
+          mt: 2,
         }}
       >
         <Typography

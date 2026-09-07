@@ -18,6 +18,8 @@ const primaryDarkColor = config.ui.colors.darkPrimary;
 const WIDTH_PER_POPULATION = 38;
 const MINIMUM_CHART_WIDTH = 300;
 const HOVER_PADDING_RATIO = 0.4;
+const CHART_PLOT_HEIGHT = 260;
+const MINIMUM_X_AXIS_HEIGHT = 40;
 
 /**
  * Calculates how much horizontal space the chart needs.
@@ -53,6 +55,30 @@ export default function AlleleFrequencyChart({
   const compactChartMinWidth = hasManyPopulations
     ? 900
     : getAlleleFrequencyChartWidth(rows.length);
+
+  /**
+   * Reserve vertical space for the longest rotated population label.
+   *
+   * At fontSize 10 and -45 degrees, each character contributes
+   * approximately 4px of vertical space.
+   *
+   * The additional 38px leaves room for the axis title and spacing.
+   */
+  const longestPopulationLabelLength = rows.reduce(
+    (longest, row) => Math.max(longest, String(row.population ?? "").length),
+    0
+  );
+
+  const xAxisHeight = Math.max(
+    MINIMUM_X_AXIS_HEIGHT,
+    Math.ceil(longestPopulationLabelLength * 4 + 38)
+  );
+
+  /**
+   * Keep the plotting area approximately the same height.
+   * Only the space needed for population labels changes.
+   */
+  const chartHeight = CHART_PLOT_HEIGHT + xAxisHeight;
 
   /**
    * Creates a full-height hover area for each population.
@@ -166,35 +192,10 @@ export default function AlleleFrequencyChart({
       </Typography>
 
       {/*
-       * This container becomes horizontally scrollable when the chart is wider than the available page space/when the chart has more than 14 populations.
-       */}
-      {/* <Box
-        sx={{
-          backgroundColor: "lavender",
-          width: "100%",
-          overflowX: "auto",
-          display: "flex",
-          justifyContent: {
-            xs: "center",
-            lg: hasManyPopulations ? "center" : "flex-start",
-          },
-        }}
-      >
-        <Box
-          sx={{
-            width: "100%",
-            overflowX: "scroll",
-            height: "360px",
-            backgroundColor: "lemonchiffon",
-          }}
-        > */}
-      {/*
        * The chart remains responsive while enough horizontal space is available.
-       *
        * On sm and xs:
        * - charts with more than 14 populations keep a 900px minimum width;
        * - smaller charts may shrink further based on their population count.
-       *
        * Once that minimum width no longer fits, this container becomes
        * horizontally scrollable instead of compressing the chart further.
        */}
@@ -212,7 +213,7 @@ export default function AlleleFrequencyChart({
               xs: `${compactChartMinWidth}px`,
               md: 0,
             },
-            height: "360px",
+            height: `${chartHeight}px`,
           }}
         >
           <ResponsiveContainer width="100%" height="100%">
@@ -231,6 +232,29 @@ export default function AlleleFrequencyChart({
               <XAxis
                 dataKey="population"
                 interval={0}
+                height={xAxisHeight}
+                tick={renderPopulationTick}
+                axisLine={{
+                  stroke: "#000",
+                }}
+                tickLine={{
+                  stroke: "#000",
+                }}
+              >
+                <Label
+                  value="Populations"
+                  position="insideBottom"
+                  offset={0}
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    fill: "#000",
+                  }}
+                />
+              </XAxis>
+              {/* <XAxis
+                dataKey="population"
+                interval={0}
                 height={100}
                 tick={renderPopulationTick}
                 axisLine={{
@@ -240,7 +264,6 @@ export default function AlleleFrequencyChart({
                   stroke: "#000",
                 }}
               >
-                {/* Check with Sara */}
                 <Label
                   value="Populations"
                   position="insideBottom"
@@ -252,8 +275,7 @@ export default function AlleleFrequencyChart({
                     fill: "#000",
                   }}
                 />
-              </XAxis>
-
+              </XAxis> */}
               <YAxis
                 domain={[0, yAxisMaximum]}
                 tickFormatter={formatAlleleFrequency}

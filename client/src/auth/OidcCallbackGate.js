@@ -37,7 +37,7 @@ export default function OidcCallbackGate({ children }) {
             mb: 1,
           }}
         >
-          Completing sign in...
+          Completing log in...
         </Typography>
 
         <Typography

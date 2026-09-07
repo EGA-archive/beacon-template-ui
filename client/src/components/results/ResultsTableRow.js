@@ -325,7 +325,7 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
                                           : config.ui.colors.darkPrimary,
                                     },
                                     "&:hover": {
-                                      backgroundColor: "transparent",
+                                      backgroundColor: "rgba(2, 52, 82, 0.08)",
                                     },
                                   }}
                                 >
