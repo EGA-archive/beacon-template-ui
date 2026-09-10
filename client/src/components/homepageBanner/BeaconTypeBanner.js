@@ -1,4 +1,4 @@
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import BeaconNetworkBanner from "./BeaconNetworkBanner";
 import SingleBeaconBanner from "./SingleBeaconBanner";
 import { Box } from "@mui/material";

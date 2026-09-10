@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import ResultsFilters from "./ResultsFilters";
 
 export default function ResultsEmpty({ message }) {
   return (
@@ -6,22 +7,31 @@ export default function ResultsEmpty({ message }) {
       sx={{
         height: "100%",
         minBlockSize: "400px",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        textAlign: "center",
-        px: 2,
+        px: 4,
+        py: 3,
       }}
     >
-      <Typography
+      <ResultsFilters />
+
+      <Box
         sx={{
-          color: "black",
-          fontWeight: 700,
-          fontSize: "16px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          textAlign: "center",
+          minHeight: "250px",
         }}
       >
-        {message || "No results"}
-      </Typography>
+        <Typography
+          sx={{
+            color: "black",
+            fontWeight: 700,
+            fontSize: "16px",
+          }}
+        >
+          {message || "No results"}
+        </Typography>
+      </Box>
     </Box>
   );
 }

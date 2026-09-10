@@ -1,5 +1,5 @@
 import { Box, Typography, Grid } from "@mui/material";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import { logosHelper } from "../../lib/logosHelper";
 
 /**

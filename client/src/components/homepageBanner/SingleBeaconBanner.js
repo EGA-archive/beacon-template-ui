@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { alpha } from "@mui/material/styles";
 import { Box, Typography, Tabs, Tab, Link } from "@mui/material";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import Loader from "../common/Loader";
 

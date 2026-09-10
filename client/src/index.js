@@ -1,78 +1,52 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
 import { AuthProvider } from "oidc-react";
-import config from "./config/config.json";
+import { loadRuntimeConfig } from "./config/loadRuntimeConfig";
+import { setRuntimeConfig } from "./config/runtimeConfig";
+import { createOidcConfig } from "./auth/createOidcConfig";
+import OidcCallbackGate from "./auth/OidcCallbackGate";
 import "./index.css";
 
-// Builds the OIDC configuration using settings from config.json
-function buildOidcConfig() {
-  const ui = config.ui;
+/**
+ * Starts the application after runtime configuration is loaded.
+ */
+async function bootstrap() {
+  try {
+    const config = await loadRuntimeConfig();
 
-  // If login is disabled, do not load AuthProvider
-  if (!ui?.showLogin) return null;
+    // Validate authentication before starting the application.
+    const oidcConfig = createOidcConfig(config);
 
-  const auth = ui.auth;
-  if (!auth?.oidc) {
-    console.error("Login is enabled but auth.oidc is missing in config.json.");
-    return null;
-  }
+    setRuntimeConfig(config);
 
-  const { providerType = "public", oidc } = auth;
-  const isPrivate = providerType === "private";
+    // Import App only after runtime configuration is available.
+    const { default: App } = await import("./App");
 
-  // Prefer env variables; fallback to config
-  const clientId = process.env.REACT_APP_CLIENT_ID;
-  const clientSecret = process.env.REACT_APP_CLIENT_SECRET;
+    const root = ReactDOM.createRoot(document.getElementById("root"));
 
-  // Basic validation
-  if (!clientId) {
-    console.error("clientId is required but was not found.");
-    return null;
-  }
-
-  if (isPrivate && !clientSecret) {
-    console.error(
-      "providerType is 'private' but no clientSecret was found. Both clientId and clientSecret are required."
+    root.render(
+      <React.StrictMode>
+        {oidcConfig ? (
+          <AuthProvider {...oidcConfig}>
+            <OidcCallbackGate>
+              <App />
+            </OidcCallbackGate>
+          </AuthProvider>
+        ) : (
+          <App />
+        )}
+      </React.StrictMode>
     );
-    return null;
-  }
+  } catch (error) {
+    console.error("Failed to start the application:", error);
 
-  if (!isPrivate && clientSecret) {
-    console.warn(
-      "providerType is 'public', but a clientSecret was provided. It will not be used."
-    );
-  }
+    const rootElement = document.getElementById("root");
 
-  // OIDC configuration passed to AuthProvider
-  return {
-    onSignIn: async () => {
-      window.history.replaceState(null, "", "/login");
-    },
-    authority: oidc.authority,
-    clientId,
-    ...(isPrivate ? { clientSecret } : {}),
-    autoSignIn: oidc.autoSignIn,
-    responseType: oidc.responseType,
-    automaticSilentRenew: oidc.automaticSilentRenew,
-    redirectUri: oidc.redirectUri,
-    scope: oidc.scope,
-    revokeAccessTokenOnSignout: oidc.revokeAccessTokenOnSignout,
-  };
+    if (rootElement) {
+      rootElement.textContent =
+        "The application could not start because its configuration could not be loaded.";
+    }
+  }
 }
 
-const oidcConfig = buildOidcConfig();
-
-const root = ReactDOM.createRoot(document.getElementById("root"));
-
-root.render(
-  <React.StrictMode>
-    {oidcConfig ? (
-      <AuthProvider {...oidcConfig}>
-        <App />
-      </AuthProvider>
-    ) : (
-      <App />
-    )}
-  </React.StrictMode>
-);
+bootstrap();

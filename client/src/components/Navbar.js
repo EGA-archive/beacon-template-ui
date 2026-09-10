@@ -13,7 +13,7 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PropTypes from "prop-types";
-import config from "../config/config.json";
+import config from "../config/runtimeConfig";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthSafe as useAuth } from "../components/pages/login/useAuthSafe";
 import { useSelectedEntry } from "../components/context/SelectedEntryContext";
@@ -264,7 +264,7 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
               textTransform: "none",
               fontFamily: '"Open Sans", sans-serif',
               fontWeight: 700,
-              fontSize: "16px",
+              fontSize: "14px",
               color: config.ui.colors.primary,
             }}
           >
@@ -297,7 +297,7 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
                         textTransform: "none",
                         fontFamily: '"Open Sans", sans-serif',
                         fontWeight: 400,
-                        fontSize: "16px",
+                        fontSize: "13px",
                         color: config.ui.colors.primary,
                       }}
                     >
@@ -309,7 +309,6 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
                       component={Link}
                       to={item.url}
                       className={isLogin ? "login-button" : undefined}
-                      // Here
                       sx={{
                         px: 3,
                         py: 1,
@@ -317,7 +316,7 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
                         textTransform: "none",
                         fontFamily: '"Open Sans", sans-serif',
                         fontWeight: isActive ? 700 : 400,
-                        fontSize: "16px",
+                        fontSize: "13px",
                         color: isActive ? "white" : config.ui.colors.primary,
                         backgroundColor: isActive
                           ? config.ui.colors.primary
@@ -351,7 +350,10 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
                 size="small"
                 aria-label="logout"
                 data-cy="logout-button"
-                sx={{ color: config.ui.colors.primary }}
+                sx={{
+                  color: config.ui.colors.primary,
+                  pl: 0,
+                }}
               >
                 <LogoutIcon fontSize="small" />
               </IconButton>

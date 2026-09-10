@@ -1,6 +1,6 @@
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 import { Box, Tooltip } from "@mui/material";
-import config from "../config/config.json";
+import config from "../config/runtimeConfig";
 
 // This is a helper component for the tables' structure
 
@@ -10,10 +10,35 @@ export const BEACON_NETWORK_COLUMNS = [
   {
     id: "beacon_dataset",
     label: (
-      <Box display="flex" alignItems="center" gap={1} ml={4}>
-        Beacon
-        <KeyboardArrowRightRoundedIcon sx={{ fontSize: "26px" }} />
-        Dataset
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          ml: 4,
+          width: "fit-content",
+          "@media (max-width: 764px)": {
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 0.25,
+            ml: 3,
+          },
+        }}
+      >
+        <Box>Beacon</Box>
+
+        <KeyboardArrowRightRoundedIcon
+          sx={{
+            fontSize: "26px",
+
+            "@media (max-width: 764px)": {
+              fontSize: "16px",
+              transform: "rotate(90deg)",
+            },
+          }}
+        />
+
+        <Box>Dataset</Box>
       </Box>
     ),
     align: "left",
@@ -21,15 +46,9 @@ export const BEACON_NETWORK_COLUMNS = [
   },
   {
     id: "maturity",
-    label: "Beacon Maturity",
-    align: "left",
-    width: "15%",
-  },
-  {
-    id: "datasets_count",
     label: (
       <Box display="flex" alignItems="center" gap={1}>
-        nº of Datasets
+        Beacon Maturity
         <Tooltip
           title={
             <Box
@@ -38,8 +57,28 @@ export const BEACON_NETWORK_COLUMNS = [
                 fontFamily: '"Open Sans", sans-serif',
               }}
             >
-              If dataset-level response is not enabled, the Beacon only returns
-              boolean or count response summarized across datasets.
+              <b>Beacon Maturity:</b> Declares the level of maturity of the
+              Beacon instance. Available values are:
+              <br></br>
+              <ul>
+                <br></br>
+                <li>
+                  <b>Development:</b> Service potentially unstable, not using
+                  real data, which availability and data should not be used in
+                  production setups.
+                </li>
+                <br></br>
+                <li>
+                  <b>Test:</b> The service is expected to be stable, meaning up
+                  and available, but does <b>not include real data.</b>
+                </li>
+                <br></br>
+                <li>
+                  <b>Production:</b> Service stable, at production level
+                  standards,
+                  <b> containing actual data.</b>
+                </li>
+              </ul>
             </Box>
           }
           placement="top-start"
@@ -83,36 +122,150 @@ export const BEACON_NETWORK_COLUMNS = [
       </Box>
     ),
     align: "left",
-    numeric: true,
-    width: "20%",
+    width: "15%",
   },
-
+  {
+    id: "data_visibility",
+    label: (
+      <Box display="flex" alignItems="center" gap={1}>
+        Data Visibility
+        <Tooltip
+          title={
+            <Box
+              sx={{
+                p: 1,
+                fontFamily: '"Open Sans", sans-serif',
+              }}
+            >
+              <b>Results Visibility</b>
+              <br></br>
+              Data owners decide how much information can be displayed for each
+              dataset based on privacy, consent, and data-sharing policies.
+              <br></br>
+              <ul>
+                <br></br>
+                <li>
+                  <b>Presence only (boolean):</b>
+                  <br></br>The dataset only indicates whether matching data
+                  exists.
+                </li>
+                <br></br>
+                <li>
+                  <b>Count:</b>
+                  <br></br>The dataset reports the number of matching records.
+                </li>
+                <br></br>
+                <li>
+                  <b>Detailed records:</b>
+                  <br></br>The dataset allows viewing individual matching
+                  records.
+                </li>
+              </ul>
+            </Box>
+          }
+          placement="top-start"
+          arrow
+          componentsProps={{
+            tooltip: {
+              sx: {
+                backgroundColor: "#fff",
+                color: "#000",
+                border: "1px solid black",
+                maxWidth: "300px",
+              },
+            },
+            arrow: {
+              sx: {
+                color: "#fff",
+                "&::before": { border: "1px solid black" },
+              },
+            },
+          }}
+        >
+          <Box
+            component="span"
+            sx={{
+              cursor: "pointer",
+              width: "18px",
+              height: "18px",
+              borderRadius: "50%",
+              backgroundColor: "white",
+              color: primaryColor,
+              textAlign: "center",
+              fontSize: "12px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            i
+          </Box>
+        </Tooltip>
+      </Box>
+    ),
+    align: "left",
+    width: "15%",
+  },
+  // {
+  //   id: "datasets_count",
+  //   label: "nº of Datasets",
+  //   align: "left",
+  //   numeric: true,
+  //   width: "15%",
+  // },
+  {
+    id: "datasets_count",
+    label: (
+      <Box
+        component="span"
+        sx={{
+          display: "inline-flex",
+          gap: 0.5,
+          "@media (max-width: 764px)": {
+            flexDirection: "column",
+            gap: 0,
+            lineHeight: 1.5,
+          },
+        }}
+      >
+        <Box component="span">nº</Box>
+        <Box component="span">of</Box>
+        <Box component="span">Datasets</Box>
+      </Box>
+    ),
+    align: "left",
+    numeric: true,
+    width: "15%",
+  },
   {
     id: "response",
-    label: "Response",
+    label: "Search Results",
     width: "15%",
     align: "left",
   },
-
   {
     id: "contact",
     label: "Contact",
     width: "10%",
-    align: "left",
+    align: "center",
   },
 ];
 
 export const BEACON_NETWORK_COLUMNS_EXPANDED = {
   beacon_dataset_name: {
-    width: "25%",
+    width: "40%",
     align: "left",
   },
   beacon_dataset_empty_one: {
-    width: "20%",
+    width: "5%",
     align: "left",
   },
   beacon_dataset_empty_two: {
     width: "20%",
+    align: "left",
+  },
+  beacon_dataset_empty_three: {
+    width: "10%",
     align: "left",
   },
 
@@ -126,6 +279,25 @@ export const BEACON_NETWORK_COLUMNS_EXPANDED = {
   },
 };
 
+export const BEACON_NETWORK_TABLET_COLUMN_WIDTHS = {
+  beacon_dataset: "43%",
+  datasets_count: "20%",
+  response: "30%",
+  contact: "20%",
+};
+
+const dataVisibilityColumn = BEACON_NETWORK_COLUMNS.find(
+  (column) => column.id === "data_visibility"
+);
+
+const responseColumn = BEACON_NETWORK_COLUMNS.find(
+  (column) => column.id === "response"
+);
+
+const contactColumn = BEACON_NETWORK_COLUMNS.find(
+  (column) => column.id === "contact"
+);
+
 export const BEACON_SINGLE_COLUMNS = [
   {
     id: "beacon_dataset",
@@ -135,81 +307,31 @@ export const BEACON_SINGLE_COLUMNS = [
       </Box>
     ),
     align: "left",
-    width: "20%",
+    width: "35%",
   },
   {
-    id: "response",
-    label: (
-      <Box display="flex" alignItems="center" gap={1}>
-        Response
-        <Tooltip
-          title={
-            <Box
-              sx={{
-                p: 1,
-                fontFamily: '"Open Sans", sans-serif',
-              }}
-            >
-              The response can be a Boolean (yes/no), a count or detailed
-              records.
-            </Box>
-          }
-          placement="top-start"
-          arrow
-          componentsProps={{
-            tooltip: {
-              sx: {
-                backgroundColor: "#fff",
-                color: "#000",
-                border: "1px solid black",
-                maxWidth: "300px",
-              },
-            },
-            arrow: {
-              sx: {
-                color: "#fff",
-                "&::before": { border: "1px solid black" },
-              },
-            },
-          }}
-        >
-          <Box
-            component="span"
-            sx={{
-              cursor: "pointer",
-              width: "18px",
-              height: "18px",
-              borderRadius: "50%",
-              backgroundColor: "white",
-              color: primaryColor,
-              textAlign: "center",
-              fontSize: "12px",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            i
-          </Box>
-        </Tooltip>
-      </Box>
-    ),
-    width: "20%",
-    align: "left",
+    ...dataVisibilityColumn,
+    width: "25%",
   },
   {
-    id: "details",
-    label: "Details",
-    width: "15%",
-    align: "left",
+    ...responseColumn,
+    width: "30%",
   },
   {
-    id: "contact",
-    label: "Contact",
+    ...contactColumn,
     width: "10%",
-    align: "left",
   },
 ];
+
+/**
+ * Single Beacon widths when Data Visibility is hidden.
+ * Dataset and Search Results absorb the space previously occupied by Data Visibility.
+ */
+export const BEACON_SINGLE_TABLET_COLUMN_WIDTHS = {
+  beacon_dataset: "42%",
+  response: "38%",
+  contact: "20%",
+};
 
 export const COHORTS_TABLE = [
   {

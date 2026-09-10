@@ -7,11 +7,13 @@ import NetworkMembers from "./components/pages/NetworkMembers";
 import Login from "./components/pages/login/Login";
 import HomePage from "./components/pages/HomePage";
 import { CssBaseline, Box } from "@mui/material";
-import config from "./config/config.json";
+import config from "./config/runtimeConfig";
 import { useState, useEffect } from "react";
 import LoginModal from "./components/common/LoginModal";
 import { logosHelper } from "./lib/logosHelper";
-
+import { CookieBanner } from "@ega/beacon-cookie-consent";
+import DatasetDetailedTablePage from "./components/pages/DatasetDetailedTablePage";
+import AlleleFrequencyPage from "./components/results/modal/alleleFrequency/AlleleFrequencyPage";
 import {
   BrowserRouter as Router,
   Routes,
@@ -19,6 +21,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { SelectedEntryProvider } from "./components/context/SelectedEntryContext";
+import ProtectedRoute from "./auth/ProtectedRoute";
 
 if (window.Cypress) {
   window.__beaconTestHooks = {
@@ -84,9 +87,13 @@ export default function App() {
             minHeight: "100vh",
             display: "flex",
             flexDirection: "column",
+            width: "100%",
+            minWidth: 0,
+            overflowX: "hidden",
           }}
         >
           <CssBaseline />
+          <CookieBanner config={config.ui?.cookies} />
           <Navbar
             title={config.ui.title}
             main={logosHelper(config.ui.logos.main)}
@@ -130,10 +137,25 @@ export default function App() {
                   <Route path="/login" element={<Login />} />
                 </>
               )}
+              <Route
+                path="/dataset-detailed-table"
+                element={
+                  <ProtectedRoute>
+                    <DatasetDetailedTablePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/allele-frequency"
+                element={
+                  <ProtectedRoute>
+                    <AlleleFrequencyPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </Box>
-
           <Footer navItems={navItems} />
           <LoginModal
             open={loginModalOpen}

@@ -1,16 +1,20 @@
-import config from "../../../src/config/config.json";
-
 // This test tests the login access via the login button in the navbar
 
 describe("Login via Navbar (real redirect)", () => {
-  if (!config.ui.showLogin) {
-    it("skipped because showLogin is disabled in config", () => {
-      cy.log("Login feature disabled, skipping login flow test.");
+  let config;
+
+  before(() => {
+    cy.request("/config/config.json").then((response) => {
+      config = response.body;
     });
-    return;
-  }
+  });
 
   it("navigates to LifeScience AAI login page after clicking Log in", () => {
+    if (!config.ui.showLogin) {
+      cy.log("Login feature disabled, skipping login flow test.");
+      return;
+    }
+
     // 1. Visit homepage
     cy.visit("/");
 
@@ -37,7 +41,6 @@ describe("Login via Navbar (real redirect)", () => {
       );
     });
 
-    // 6. Optional: wait for you to manually inspect the screen before Cypress closes it
     cy.wait(300);
 
     cy.origin("https://login.aai.lifescience-ri.eu", () => {
@@ -46,39 +49,32 @@ describe("Login via Navbar (real redirect)", () => {
         "https://login.aai.lifescience-ri.eu"
       );
 
-      // click GitHub option
+      // Click GitHub option
       cy.get('a[href*="github"]').should("be.visible").click();
     });
 
     cy.origin("https://github.com", () => {
-      // wait for GitHub login form to appear
       cy.get('input[name="login"]').should("be.visible");
       cy.get('input[name="password"]').should("be.visible");
 
-      // fill credentials from environment variables (never hard-code)
       cy.get('input[name="login"]').type(Cypress.env("GITHUB_USERNAME"));
+
       cy.get('input[name="password"]').type(Cypress.env("GITHUB_PASSWORD"), {
-        log: false, // prevents showing the password in Cypress logs
+        log: false,
       });
 
-      // click Sign in
       cy.get('input[name="commit"], button[name="commit"]').click();
     });
 
     cy.origin("https://login.aai.lifescience-ri.eu", () => {
-      // Wait for "Continue" button to appear and click it
       cy.get('input[name="continue"]').should("be.visible").click();
 
-      // Wait 10 seconds for the redirection to complete
       cy.wait(10000);
     });
 
-    // 7. Now we are back on localhost and verify Navbar & Footer UI
-    // Ensure redirected back to app
-    // Confirm we’re indeed back on localhost (any path)
+    // 6. Verify we returned to the app
     cy.url().should("match", /^http:\/\/localhost:3000(\/.*)?$/);
 
-    // Wait for the app to rehydrate
     cy.wait(2000);
 
     // Navbar checks

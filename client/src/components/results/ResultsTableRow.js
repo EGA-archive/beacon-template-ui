@@ -10,16 +10,40 @@ import {
   Button,
   Tooltip,
 } from "@mui/material";
-import { BEACON_NETWORK_COLUMNS_EXPANDED } from "../../lib/tableConstants";
+import {
+  BEACON_NETWORK_COLUMNS_EXPANDED,
+  BEACON_NETWORK_TABLET_COLUMN_WIDTHS,
+} from "../../lib/tableConstants";
 import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
-import config from "../../config/config.json";
-import { lighten } from "@mui/system";
+import config from "../../config/runtimeConfig";
 import { getDatasetType } from "./utils/beaconType";
+import AlleleFrequenciesButton from "./modal/alleleFrequency/AlleleFrequenciesButton";
+import { hasAlleleFrequencies } from "./modal/alleleFrequency/hasAlleleFrequencies";
+import { openAlleleFrequencyPage } from "../results/utils/openAlleleFrequencyPage";
+
+const BEACON_NETWORK_TABLET_EXPANDED_WIDTHS = {
+  dataset: BEACON_NETWORK_TABLET_COLUMN_WIDTHS.beacon_dataset,
+  spacer: BEACON_NETWORK_TABLET_COLUMN_WIDTHS.datasets_count,
+  response: `calc(
+    ${BEACON_NETWORK_TABLET_COLUMN_WIDTHS.response} +
+    ${BEACON_NETWORK_TABLET_COLUMN_WIDTHS.contact}
+  )`,
+};
 
 // This component renders only for Beacon Networks
-export default function ResultsTableRow({ item, handleOpenModal }) {
-  const { setActualLoadedCount } = useSelectedEntry();
+export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
+  const { setActualLoadedCount, lastSearchedFilters, lastSearchedPathSegment } =
+    useSelectedEntry();
+
+  const hiddenOnTabletStyle = {
+    display: {
+      xs: "none",
+      sm: "none",
+      md: "none",
+      lg: "table-cell",
+    },
+  };
 
   // This function decides what number to render in the response column at a dataset level
   const getDisplayedCount = (item, dataset) => {
@@ -56,8 +80,6 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
     return dataset.results?.length || "-";
   };
 
-  const datasetBgColor = lighten(config.ui.colors.primary, 0.9);
-
   // Prepare items to ensure structure is consistent
   const safeItems = (item.items || []).map((ds) => {
     const datasetType = getDatasetType(ds);
@@ -79,11 +101,15 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
             <Table
               stickyHeader
               aria-label="Results table"
-              sx={{ tableLayout: "fixed" }}
+              sx={{
+                tableLayout: "fixed",
+                width: "100%",
+              }}
             >
               <TableBody
                 sx={{
-                  backgroundColor: datasetBgColor,
+                  // backgroundColor: datasetBgColor,
+                  backgroundColor: "#f5f5f5",
                 }}
               >
                 {safeItems.map((dataset, i) => {
@@ -96,43 +122,81 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
                   const isCount = dataset.type === "count";
                   const isBoolean = dataset.type === "boolean";
 
+                  const singleResult =
+                    isRecord &&
+                    displayedCount === 1 &&
+                    dataset.results?.length === 1
+                      ? dataset.results[0]
+                      : null;
+
+                  const showAlleleFrequencyIcon =
+                    singleResult &&
+                    hasAlleleFrequencies(singleResult.frequencyInPopulations);
+
                   return (
-                    <TableRow key={i}>
+                    <TableRow
+                      key={i}
+                      sx={{
+                        height: "55px",
+                        "& > td": {
+                          height: "55px",
+                          py: 0,
+                        },
+                      }}
+                    >
                       {/* Dataset ID */}
                       <TableCell
-                        style={{
-                          width:
-                            BEACON_NETWORK_COLUMNS_EXPANDED.beacon_dataset_name
-                              .width,
+                        sx={{
+                          width: {
+                            xs: BEACON_NETWORK_TABLET_EXPANDED_WIDTHS.dataset,
+                            lg: BEACON_NETWORK_COLUMNS_EXPANDED
+                              .beacon_dataset_name.width,
+                          },
                         }}
                       >
-                        <Box sx={{ display: "flex", pl: 9 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            pl: 9,
+                            minWidth: 0,
+                            "@media (max-width: 764px)": {
+                              pl: 2.5,
+                            },
+                          }}
+                        >
                           <Typography
+                            data-cy="results-subrow-dataset-name"
+                            variant="body2"
                             sx={{
                               pl: 6.5,
+                              minWidth: 0,
+                              width: "100%",
                               whiteSpace: "normal",
-                              wordWrap: "break-word",
-                              maxWidth: {
-                                xs: "250px",
-                                sm: "350px",
-                                md: "450px",
-                                lg: "550px",
-                                xl: "650px",
+                              overflowWrap: "anywhere",
+                              wordBreak: "break-word",
+
+                              "@media (max-width: 764px)": {
+                                pl: 0,
+                              },
+                              "@media (max-width: 535px)": {
+                                fontSize: "11px",
+                                lineHeight: 1.15,
+                              },
+                              "@media (max-width: 435px)": {
+                                fontSize: "10px",
+                                lineHeight: 1,
                               },
                             }}
-                            variant="body2"
                           >
-                            {dataset.dataset ? (
-                              dataset.dataset
-                            ) : (
-                              <i>Undefined</i>
-                            )}
+                            {dataset.dataset || <i>Undefined</i>}
                           </Typography>
                         </Box>
                       </TableCell>
 
                       {/* Empty column 1 */}
+                      {/* Beacon Maturity alignment column */}
                       <TableCell
+                        sx={hiddenOnTabletStyle}
                         style={{
                           width:
                             BEACON_NETWORK_COLUMNS_EXPANDED
@@ -140,8 +204,11 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
                         }}
                       />
 
-                      {/* Empty column 2 */}
+                      {/* Empty column 3 */}
+
+                      {/* Data Visibility alignment column */}
                       <TableCell
+                        sx={hiddenOnTabletStyle}
                         style={{
                           width:
                             BEACON_NETWORK_COLUMNS_EXPANDED
@@ -149,15 +216,42 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
                         }}
                       />
 
+                      {/* Empty column 2 */}
+                      {/* nº of Datasets alignment column */}
+                      {/* Compact spacer matching the nº of Datasets column */}
+                      <TableCell
+                        sx={{
+                          width: {
+                            xs: BEACON_NETWORK_TABLET_EXPANDED_WIDTHS.spacer,
+                            lg: BEACON_NETWORK_COLUMNS_EXPANDED
+                              .beacon_dataset_empty_three.width,
+                          },
+                        }}
+                      />
+
                       {/* Response (Boolean | Count | Record) + Details button for real datasets */}
                       <TableCell
-                        style={{
-                          width:
-                            BEACON_NETWORK_COLUMNS_EXPANDED
+                        sx={{
+                          width: {
+                            xs: BEACON_NETWORK_TABLET_EXPANDED_WIDTHS.response,
+                            lg: BEACON_NETWORK_COLUMNS_EXPANDED
                               .beacon_dataset_response.width,
+                            "@media (max-width: 764px)": {
+                              paddingLeft: "8px",
+                            },
+                          },
                         }}
                       >
-                        <Box display="flex" alignItems="center" gap={3}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 3,
+                            "@media (max-width: 764px)": {
+                              gap: 1,
+                            },
+                          }}
+                        >
                           <Typography variant="body2" fontWeight="bold">
                             {isBoolean
                               ? dataset.exists
@@ -188,6 +282,7 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
                                   onClick={() =>
                                     handleOpenModal({
                                       beaconId: item.beaconId,
+                                      beaconName,
                                       datasetId: dataset.dataset,
                                       dataTable: dataset.results || [],
                                       displayedCount,
@@ -230,11 +325,7 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
                                           : config.ui.colors.darkPrimary,
                                     },
                                     "&:hover": {
-                                      backgroundColor:
-                                        !dataset.results ||
-                                        dataset.results.length === 0
-                                          ? "transparent"
-                                          : `${config.ui.colors.darkPrimary}10`,
+                                      backgroundColor: "rgba(2, 52, 82, 0.08)",
                                     },
                                   }}
                                 >
@@ -243,11 +334,39 @@ export default function ResultsTableRow({ item, handleOpenModal }) {
                               </span>
                             </Tooltip>
                           )}
+                          {showAlleleFrequencyIcon && (
+                            <Tooltip
+                              title="View allele frequency results"
+                              arrow
+                            >
+                              <span>
+                                <AlleleFrequenciesButton
+                                  iconOnly
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+
+                                    openAlleleFrequencyPage({
+                                      item: singleResult,
+                                      beaconId: item.beaconId,
+                                      beaconName,
+                                      datasetId: dataset.dataset,
+                                      entryTypeId: lastSearchedPathSegment,
+                                      appliedQuery: {
+                                        entryType: lastSearchedPathSegment,
+                                        filters: lastSearchedFilters || [],
+                                      },
+                                    });
+                                  }}
+                                />
+                              </span>
+                            </Tooltip>
+                          )}
                         </Box>
                       </TableCell>
 
                       {/* Empty */}
                       <TableCell
+                        sx={hiddenOnTabletStyle}
                         style={{
                           width:
                             BEACON_NETWORK_COLUMNS_EXPANDED.beacon_empty_three

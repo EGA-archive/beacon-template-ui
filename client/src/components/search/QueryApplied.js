@@ -1,14 +1,21 @@
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Tooltip } from "@mui/material";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import QueryAppliedItems from "./QueryAppliedItems";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import deleteIcon from "../../assets/logos/delete.svg";
+import { formatEntryLabel } from "../common/textFormatting";
 
 // This component shows a summary of filters the user has applied.
 // It allows them to remove individual filters or clear all at once.
 export default function QueryApplied({ variant }) {
   // Get context functions to update filters and result states
-  const { setSelectedFilter, setQueryDirty } = useSelectedEntry();
+  const {
+    selectedFilter,
+    setSelectedFilter,
+    setQueryDirty,
+    selectedPathSegment,
+    entryTypes,
+  } = useSelectedEntry();
 
   // Get the primary color from config file
   const primaryDarkColor = config.ui.colors.darkPrimary;
@@ -22,21 +29,52 @@ export default function QueryApplied({ variant }) {
     // setHasSearchResult(true);
   };
 
+  // This clear all filters except for the Result Type (also called Entry Type one)
   const handleClearAll = () => {
-    // Clear all filters
+    if (hasOnlyEntryTypeFilter) return;
     setSelectedFilter([]);
-
     setQueryDirty(true);
   };
+
+  const activePathSegment =
+    selectedPathSegment || entryTypes?.[0]?.pathSegment || "individuals";
+
+  const resultTypeChip = {
+    id: `result-type-${activePathSegment}`,
+    key: `result-type-${activePathSegment}`,
+    label: `${formatEntryLabel(activePathSegment)}`,
+    scope: "entryType",
+    type: "entryType",
+    bgColor: "entryType",
+  };
+
+  const filtersWithoutEntryType = selectedFilter.filter(
+    (filter) => filter.scope !== "entryType"
+  );
+  const hasOnlyEntryTypeFilter = filtersWithoutEntryType.length === 0;
+
+  const hasMultipleEntryTypes = (entryTypes?.length ?? 0) > 1;
+
+  const clearAllTooltip = hasMultipleEntryTypes
+    ? "The Result Type label cannot be cleared because queries need one Result Type selected. You can change the Result Type in the radio selector above."
+    : "There are no filters to clear.";
+
+  const intialEntryTypeFiltertoRender = hasMultipleEntryTypes
+    ? [resultTypeChip, ...filtersWithoutEntryType]
+    : filtersWithoutEntryType;
 
   return (
     <Box
       sx={{
         display: "block",
         backgroundColor: "white",
-        mt: 3,
+        mt: {
+          xs: "32px",
+          sm: "16px",
+        },
         borderRadius: "10px",
         border: "1px solid #E0E0E0",
+        minHeight: "85px",
       }}
     >
       <Box
@@ -74,26 +112,49 @@ export default function QueryApplied({ variant }) {
             }}
           >
             {/* Clear All button */}
-            <Button
-              onClick={handleClearAll}
-              sx={{
-                textTransform: "none",
-                fontSize: "14px",
-                pl: 2,
-                ml: 2,
-                backgroundColor: "transparent",
-                color: primaryDarkColor,
-              }}
-              startIcon={
-                <img
-                  src={deleteIcon}
-                  alt="Delete"
-                  style={{ width: 18, height: 18, marginRight: 4 }}
-                />
-              }
+            <Tooltip
+              arrow
+              placement="top"
+              title={hasOnlyEntryTypeFilter ? clearAllTooltip : ""}
             >
-              Clear All
-            </Button>
+              <Box component="span">
+                <Button
+                  onClick={handleClearAll}
+                  disabled={hasOnlyEntryTypeFilter}
+                  sx={{
+                    textTransform: "none",
+                    fontSize: "14px",
+                    pl: 2,
+                    ml: 2,
+                    backgroundColor: "transparent",
+                    color: hasOnlyEntryTypeFilter
+                      ? "#9E9E9E"
+                      : primaryDarkColor,
+
+                    "&.Mui-disabled": {
+                      color: "#9E9E9E",
+                    },
+                  }}
+                  startIcon={
+                    <img
+                      src={deleteIcon}
+                      alt="Delete"
+                      style={{
+                        width: 18,
+                        height: 18,
+                        marginRight: 4,
+                        opacity: hasOnlyEntryTypeFilter ? 0.35 : 1,
+                        filter: hasOnlyEntryTypeFilter
+                          ? "grayscale(1)"
+                          : "none",
+                      }}
+                    />
+                  }
+                >
+                  Clear All
+                </Button>
+              </Box>
+            </Tooltip>
           </Box>
         </Box>
 
@@ -101,6 +162,7 @@ export default function QueryApplied({ variant }) {
         <QueryAppliedItems
           handleFilterRemove={handleFilterRemove} // Pass handler to remove a single filter
           variant={variant} // Used to distinguish between query types, if needed
+          intialEntryTypeFiltertoRender={intialEntryTypeFiltertoRender}
         />
       </Box>
     </Box>

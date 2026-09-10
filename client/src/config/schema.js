@@ -1,125 +1,319 @@
 const Joi = require("joi");
 
-// This defines the hexColor vaild string
-const hexColor = Joi.string().pattern(/^#[0-9A-Fa-f]{6}$/);
+/**
+ * Reusable validation rules
+ */
 
-// This defines which ones are the allowed entry types
-// Might need to re-think it because of the free text entryTypes
-// TODO
-const allowedEntryTypes = [
+const nonEmptyString = Joi.string().trim().min(1);
+
+const hexColor = Joi.string()
+  .pattern(/^#[0-9A-Fa-f]{6}$/)
+  .messages({
+    "string.pattern.base":
+      'Color must be a valid 6-digit hex value (e.g. "#3176B1")',
+  });
+
+const httpUrl = Joi.string()
+  .uri({ scheme: ["http", "https"] })
+  .messages({
+    "string.uri": "URL must be a valid HTTP or HTTPS URL",
+  });
+
+const httpsUrl = Joi.string()
+  .uri({ scheme: ["https"] })
+  .messages({
+    "string.uri": "URL must be a valid HTTPS URL",
+  });
+
+const relativePath = Joi.string().uri({ relativeOnly: true });
+
+/**
+ * Accepted reference names:
+ * 1-22, X, Y, M, MT
+ * Optionally prefixed with "chr".
+ */
+const referenceName = Joi.string()
+  .pattern(/^(?:chr)?(?:[1-9]|1[0-9]|2[0-2]|X|Y|M|MT)$/)
+  .messages({
+    "string.pattern.base":
+      'referenceName must be 1-22, X, Y, M or MT, optionally prefixed with "chr"',
+  });
+
+/**
+ * Uppercase IUPAC nucleotide codes, excluding U.
+ * "." and "-" are accepted as standalone values.
+ */
+const nucleotideSequence = Joi.string()
+  .pattern(/^(?:[ACGTRYSWKMBDHVN]+|[.-])$/)
+  .messages({
+    "string.pattern.base":
+      "Only uppercase IUPAC nucleotide codes excluding U are allowed. '.' and '-' are allowed as standalone values.",
+  });
+
+/**
+ * Backend identifiers currently recognized as genomic variation.
+ *
+ * These are not display labels and are not used to restrict
+ * entryTypesOrder.
+ */
+const GENOMIC_VARIATION_ENTRY_TYPES = [
   "g_variants",
-  "individuals",
-  "biosamples",
-  "runs",
-  "analyses",
-  "datasets",
-  "cohorts",
+  "genomicVariations",
+  "genomicVariation",
 ];
 
+const DEFAULT_COOKIE_MESSAGE =
+  "This website requires cookies, and the limited processing of your personal data in order to function. By using the site you agree to this as outlined in our Privacy Notice and Terms of Use.";
+
+const DEFAULT_COOKIE_BUTTON_TEXT = "I understand";
+
+/**
+ * About page content.
+ *
+ * All three sections are individually optional.
+ */
+const aboutContentSchema = Joi.object({
+  logos: Joi.array().items(relativePath).min(1).optional(),
+
+  descriptions: Joi.array().items(nonEmptyString).min(1).optional(),
+
+  fundingOrgs: Joi.array()
+    .items(
+      Joi.object({
+        title: nonEmptyString.required(),
+
+        logos: Joi.array().items(relativePath).min(1).required(),
+      })
+    )
+    .min(1)
+    .optional(),
+});
+
+/**
+ * OIDC configuration.
+ *
+ * Fields are optional in the base schema so an incomplete
+ * authentication configuration may remain when login is disabled.
+ * The required fields are enforced when showLogin is true.
+ */
+const oidcSchema = Joi.object({
+  clientId: nonEmptyString,
+
+  authority: httpsUrl,
+
+  autoSignIn: Joi.boolean(),
+
+  responseType: Joi.string().valid("code"),
+
+  automaticSilentRenew: Joi.boolean(),
+
+  redirectUri: httpUrl,
+
+  scope: nonEmptyString,
+
+  revokeAccessTokenOnSignout: Joi.boolean(),
+});
+
+const authSchema = Joi.object({
+  providerType: Joi.string().valid("private", "public"),
+
+  oidc: oidcSchema,
+});
+
+const requiredAuthSchema = authSchema
+  .fork(
+    [
+      "providerType",
+      "oidc",
+      "oidc.clientId",
+      "oidc.authority",
+      "oidc.responseType",
+      "oidc.redirectUri",
+      "oidc.scope",
+    ],
+    (field) => field.required()
+  )
+  .required();
+
+/**
+ * At least one genomic query type must be enabled.
+ *
+ * Individual switches default to true.
+ */
+const genomicQueryTypesSchema = Joi.object({
+  sequenceQuery: Joi.boolean().default(true),
+  geneId: Joi.boolean().default(true),
+  rangeQuery: Joi.boolean().default(true),
+  bracketQuery: Joi.boolean().default(true),
+  hgvsQuery: Joi.boolean().default(true),
+}).custom((value, helpers) => {
+  const hasEnabledQueryType = Object.values(value).some(
+    (enabled) => enabled === true
+  );
+
+  if (!hasEnabledQueryType) {
+    return helpers.message(
+      "At least one genomic query type must be enabled (set as true)"
+    );
+  }
+
+  return value;
+}, "Genomic query type validation");
+
+/**
+ * Genomic query configuration.
+ *
+ * The query builder is optional.
+ * If provided, its internal rules still apply.
+ */
+const genomicQueriesSchema = Joi.object({
+  genomicQueryTypes: genomicQueryTypesSchema.required(),
+
+  searchInputExample: Joi.object({
+    referenceName: referenceName.required(),
+
+    position: Joi.number().integer().min(0).required().messages({
+      "number.base": "position must be a number",
+      "number.integer": "position must be an integer",
+      "number.min": "position cannot be negative",
+    }),
+
+    referenceBases: nucleotideSequence.required(),
+
+    alternateBases: nucleotideSequence.required(),
+  }).optional(),
+
+  genomicQueryBuilder: Joi.object({
+    showAlternateBases: Joi.boolean().default(true),
+
+    showAminoacidChange: Joi.boolean().default(true),
+
+    chromosomeLibrary: Joi.array()
+      .items(nonEmptyString)
+      .min(1)
+      .required()
+      .messages({
+        "any.required":
+          "chromosomeLibrary is required under genomicQueryBuilder",
+      }),
+
+    aminoAcidNotation: Joi.alternatives().conditional("showAminoacidChange", {
+      is: true,
+
+      then: Joi.array().items(nonEmptyString).min(1).required().messages({
+        "any.required":
+          "aminoAcidNotation is required when showAminoacidChange is true",
+      }),
+
+      otherwise: Joi.forbidden(),
+    }),
+  }).optional(),
+});
+
+/**
+ * Main runtime configuration schema.
+ */
 const schema = Joi.object({
+  /**
+   * Beacon configuration
+   */
+
   beaconType: Joi.string().valid("singleBeacon", "networkBeacon").required(),
 
-  apiUrl: Joi.string()
-    .pattern(/^https:\/\/.+/)
-    .required()
-    .messages({
-      "string.pattern.base":
-        'API_URL must be a valid HTTPS URL (e.g., "https://example.com/api")',
-      "any.required": "API_URL is required",
-    }),
+  apiUrl: httpUrl.required(),
 
-  assemblyId: Joi.array()
-    .items(Joi.string().min(1))
-    .min(1)
-    .required()
-    .messages({
-      "any.required": "assemblyId is required",
-      "array.min": "At least one assemblyId must be provided",
-      "string.min": "assemblyId values cannot be empty strings",
-    }),
+  assemblyId: Joi.array().items(nonEmptyString).min(1).required().messages({
+    "any.required": "assemblyId is required",
+    "array.min": "At least one assemblyId must be provided",
+  }),
 
-  // Set this value according to the variant type used in your VCF file.
-  // variationType is a requiered array with at least one item
-  // Each item is an object with jsonName and displayName
-  // jsonName is a technical key, must follow your VFC annotations
-  // displayName is label shown to the user in the UI associated to the jsonName
+  queryCoordinatesAre0Based: Joi.boolean().default(true),
+
+  /**
+   * Variant types available in the UI.
+   */
   variationType: Joi.array()
     .items(
       Joi.object({
         jsonName: Joi.string()
-          .pattern(/^[A-Za-z0-9_]+$/) // allow letters, numbers, underscore
+          .pattern(/^[A-Za-z0-9_]+$/)
           .required()
           .messages({
             "string.pattern.base":
               "jsonName must contain only letters, numbers, or underscores",
-            "any.required":
-              "Each variationType entry must include a 'jsonName' key",
+            "any.required": "Each variationType entry must include a jsonName",
           }),
-        displayName: Joi.string().min(1).required().messages({
-          "any.required":
-            "Each variationType entry must include a 'displayName' key",
+
+        displayName: nonEmptyString.required().messages({
+          "any.required": "Each variationType entry must include a displayName",
         }),
       })
     )
     .min(1)
     .required()
     .messages({
-      "any.required": "variationType is required.",
-      "array.min": "At least one variationType must be provided.",
+      "any.required": "variationType is required",
+      "array.min": "At least one variationType must be provided",
     }),
 
+  /**
+   * UI configuration
+   */
   ui: Joi.object({
-    title: Joi.string().min(3).max(100).required(),
-    favicon: Joi.string()
-      .custom((value, helpers) => {
-        const isRelative = value.startsWith("/");
-        const isAbsolute = /^https?:\/\/.+/.test(value);
+    title: Joi.string().trim().min(3).max(100).required(),
 
-        if (!isRelative && !isAbsolute) {
-          return helpers.error("any.invalid");
-        }
-        return value;
-      })
-      .optional()
-      .messages({
-        "any.invalid":
-          "favicon must be a relative path (e.g., /assets/favicon.ico) or a full URL (https://...)",
-      }),
+    favicon: Joi.alternatives().try(relativePath, httpUrl).optional(),
 
+    /**
+     * UI colors
+     */
     colors: Joi.object({
       primary: hexColor.required(),
       darkPrimary: hexColor.required(),
       secondary: hexColor.required(),
     }).required(),
 
+    /**
+     * Main and founder logos.
+     *
+     * The main logo is optional.
+     * Founder logos use objects with src and url.
+     */
     logos: Joi.object({
-      main: Joi.string().uri({ relativeOnly: true }).required(),
+      main: relativePath.optional(),
+
       founders: Joi.array()
-        .items(Joi.string().uri({ relativeOnly: true }))
-        .max(3),
+        .items(
+          Joi.object({
+            src: relativePath.required(),
+            url: httpsUrl.required(),
+          })
+        )
+        .max(3)
+        .optional(),
     }).required(),
 
-    showExternalNavBarLink: Joi.boolean().optional(),
+    /**
+     * External navigation links
+     */
+    showExternalNavBarLink: Joi.boolean().default(false),
 
     externalNavBarLink: Joi.alternatives().conditional(
       "showExternalNavBarLink",
       {
         is: true,
+
         then: Joi.array()
           .items(
             Joi.object({
-              label: Joi.string().min(1).max(30).required(),
-              url: Joi.string()
-                .pattern(/^https:\/\/.+/)
-                .required()
-                .messages({
-                  "string.pattern.base":
-                    "Each externalNavBarLink URL must be a valid HTTPS link (e.g., https://...)",
-                }),
+              label: Joi.string().trim().min(1).max(30).required(),
+
+              url: httpUrl.required(),
             })
           )
           .min(1)
           .required(),
+
         otherwise: Joi.forbidden().messages({
           "any.unknown":
             "externalNavBarLink is not allowed when showExternalNavBarLink is false",
@@ -127,113 +321,120 @@ const schema = Joi.object({
       }
     ),
 
+    /**
+     * About page
+     *
+     * Each content section is optional.
+     * When the page is enabled, at least one section
+     * must be provided.
+     */
     showAboutPage: Joi.boolean().default(false),
 
-    about: Joi.alternatives().conditional("showAboutPage", {
+    about: aboutContentSchema.when("showAboutPage", {
       is: true,
-      then: Joi.object({
-        logos: Joi.array()
-          .items(Joi.string().uri({ relativeOnly: true }))
-          .min(1),
-        descriptions: Joi.array().items(Joi.string().min(1)).min(1),
-        fundingOrgs: Joi.array()
-          .items(
-            Joi.object({
-              title: Joi.string().min(1).required(),
-              logos: Joi.array()
-                .items(Joi.string().uri({ relativeOnly: true }))
-                .min(1)
-                .required(),
-            })
-          )
-          .min(1),
-      })
-        // require at least one of the three when showAboutPage = true
+
+      then: aboutContentSchema
         .or("logos", "descriptions", "fundingOrgs")
         .required(),
 
-      // If About page is OFF, the object is optional and unconstrained
-      otherwise: Joi.object({
-        logos: Joi.array()
-          .items(Joi.string().uri({ relativeOnly: true }))
-          .min(1),
-        descriptions: Joi.array().items(Joi.string().min(1)).min(1),
-        fundingOrgs: Joi.array()
-          .items(
-            Joi.object({
-              title: Joi.string().min(1).required(),
-              logos: Joi.array()
-                .items(Joi.string().uri({ relativeOnly: true }))
-                .min(1)
-                .required(),
-            })
-          )
-          .min(1),
-      }).optional(),
+      otherwise: aboutContentSchema.optional(),
     }),
 
-    showLogin: Joi.boolean().default(true),
-    auth: Joi.object({
-      providerType: Joi.string().valid("private", "public", "none").required(),
-      oidc: Joi.object({
-        authority: Joi.string()
-          .pattern(/^https:\/\/.+/)
-          .required()
-          .messages({
-            "string.pattern.base": "OIDC authority must be a valid HTTPS URL",
-          }),
+    /**
+     * Download functionality
+     */
+    download: Joi.object({
+      enabled: Joi.boolean().default(true),
+    }).default(),
 
-        autoSignIn: Joi.boolean().optional(),
-        responseType: Joi.string().valid("code").required(),
-        automaticSilentRenew: Joi.boolean().optional(),
-        redirectUri: Joi.string().uri().required(),
-        scope: Joi.string().min(1).required(),
-        revokeAccessTokenOnSignout: Joi.boolean().optional(),
-      }).required(),
-    }).optional(),
+    /**
+     * Cookie consent
+     *
+     * Text receives defaults when omitted.
+     * Links are optional and may be replaced, removed,
+     * or extended by deployers.
+     *
+     * Every link object must contain both label and URL.
+     */
+    cookies: Joi.object({
+      enabled: Joi.boolean().default(true),
 
-    contact: Joi.object({
-      showContactPage: Joi.boolean().optional(),
-      apiPath: Joi.string().uri().optional(),
-      recipientKey: Joi.string().min(1).optional(),
-    }).optional(),
-
-    showPrivacyPolicy: Joi.boolean().required(),
-    privacyPolicyFile: Joi.string()
-      .uri({ relativeOnly: true })
-      .required()
-      .messages({
-        "any.required": "privacyPolicyFile is required under ui",
+      message: nonEmptyString.when("enabled", {
+        is: true,
+        then: Joi.required().default(DEFAULT_COOKIE_MESSAGE),
+        otherwise: Joi.optional(),
       }),
 
-    entryTypesOrder: Joi.array()
-      .items(
-        Joi.string()
-          .valid(...allowedEntryTypes)
-          .disallow("")
-      )
-      .max(7)
-      .optional()
-      .messages({
-        "array.max": "You can specify a maximum of 7 entry types for ordering.",
-        "any.invalid": "Empty strings are not allowed in entryTypesOrder.",
+      buttonText: nonEmptyString.when("enabled", {
+        is: true,
+        then: Joi.required().default(DEFAULT_COOKIE_BUTTON_TEXT),
+        otherwise: Joi.optional(),
       }),
 
-    // This is optional, but when the user decides to fill in the field, then there are rules.
-    // This field gives a lot of freedom to the beacon user
+      links: Joi.array()
+        .items(
+          Joi.object({
+            label: nonEmptyString.required().messages({
+              "string.empty": "Cookie link label cannot be empty",
+              "any.required": "Cookie link label is required",
+            }),
+
+            url: httpUrl.required().messages({
+              "string.empty": "Cookie link URL cannot be empty",
+              "any.required":
+                "Cookie link URL is required when a label is provided",
+            }),
+          })
+        )
+        .default([]),
+    }).default(),
+
+    /**
+     * Authentication
+     *
+     * Login is disabled by default.
+     * When enabled, the complete OIDC configuration
+     * and providerType are required.
+     */
+    showLogin: Joi.boolean().default(false),
+
+    auth: authSchema.when("showLogin", {
+      is: true,
+      then: requiredAuthSchema,
+      otherwise: authSchema.optional(),
+    }),
+
+    /**
+     * Entry type ordering
+     *
+     * Entry type identifiers are defined by the backend.
+     * No fixed list or maximum is imposed here.
+     *
+     * If omitted or empty, the UI should preserve
+     * the order returned by the backend.
+     */
+    entryTypesOrder: Joi.array().items(nonEmptyString).unique().default([]),
+
+    /**
+     * Common filters
+     *
+     * Every filterLabels key must correspond to a
+     * declared filterCategories value.
+     */
     commonFilters: Joi.object({
       filterCategories: Joi.array()
-        .items(Joi.string().min(1).max(20))
+        .items(Joi.string().trim().min(1).max(20))
         .max(3)
         .required(),
 
       filterLabels: Joi.object()
         .pattern(
-          Joi.string().valid(...Joi.ref("...filterCategories")),
+          Joi.string(),
           Joi.array()
             .items(
               Joi.object({
-                id: Joi.string().min(1).required(),
+                id: nonEmptyString.required(),
+
                 type: Joi.string()
                   .valid(
                     "ontology",
@@ -243,20 +444,38 @@ const schema = Joi.object({
                     "custom"
                   )
                   .required(),
-                key: Joi.string().min(1).max(100).optional(),
-                label: Joi.string().min(1).max(100).optional(),
-                scopes: Joi.array().items(Joi.string()).optional(), // TO DISCUSS BEACON TEAM - scopes as free text
+
+                key: Joi.string().trim().min(1).max(100).optional(),
+
+                label: Joi.string().trim().min(1).max(100).optional(),
+
+                scopes: Joi.array().items(nonEmptyString).optional(),
               })
             )
             .max(6)
         )
         .required(),
-    }).optional(),
+    })
+      .custom((value, helpers) => {
+        const unknownCategories = Object.keys(value.filterLabels).filter(
+          (category) => !value.filterCategories.includes(category)
+        );
 
-    // This is also optional
-    // This field directs the user into choosing at least one of the following strings
-    // If the user does not fill anything related to the genomicAnnotations
-    // This field might need further development (TODO)
+        if (unknownCategories.length > 0) {
+          return helpers.message(
+            `filterLabels contains categories not listed in filterCategories: ${unknownCategories.join(
+              ", "
+            )}`
+          );
+        }
+
+        return value;
+      }, "Filter category validation")
+      .optional(),
+
+    /**
+     * Genomic annotation categories
+     */
     genomicAnnotations: Joi.object({
       visibleGenomicCategories: Joi.array()
         .items(
@@ -277,45 +496,30 @@ const schema = Joi.object({
         }),
     }).optional(),
 
-    // This is also optional
-    // The default value will always be true if not set false explicitly
-    genomicQueries: Joi.object({
-      genomicQueryTypes: Joi.object({
-        sequenceQuery: Joi.boolean().default(true),
-        geneId: Joi.boolean().default(true),
-        rangeQuery: Joi.boolean().default(true),
-        bracketQuery: Joi.boolean().default(true),
-        hgvsQuery: Joi.boolean().default(true),
-      }).optional(),
-      genomicQueryBuilder: Joi.object({
-        showAlternateBases: Joi.boolean().default(true),
-        showAminoacidChange: Joi.boolean().default(true),
-        chromosomeLibrary: Joi.array()
-          .items(Joi.string().min(1))
-          .min(1)
-          .required()
-          .messages({
-            "any.required":
-              "chromosomeLibrary is required under genomicQueryBuilder",
-          }),
-        aminoAcidNotation: Joi.alternatives().conditional(
-          "showAminoacidChange",
-          {
-            is: true,
-            then: Joi.array()
-              .items(Joi.string().min(1))
-              .min(1)
-              .required()
-              .messages({
-                "any.required":
-                  "aminoAcidNotation is required when showAminoacidChange is true",
-              }),
-            otherwise: Joi.forbidden(),
-          }
-        ),
-      }).required(),
-    }).optional(),
+    /**
+     * Genomic queries
+     *
+     * When backend entry-type IDs are supplied through
+     * Joi context, this section is required if the backend
+     * supports a recognized genomic variation entry type.
+     *
+     * If the section is present, at least one query type
+     * must be enabled.
+     */
+    genomicQueries: genomicQueriesSchema.optional().when("$entryTypeIds", {
+      is: Joi.array().has(Joi.string().valid(...GENOMIC_VARIATION_ENTRY_TYPES)),
+
+      then: Joi.required(),
+    }),
   }).required(),
+}).prefs({
+  // Reject values such as "true" instead of silently
+  // converting them to booleans.
+  convert: false,
+
+  // Collect all validation errors instead of stopping
+  // at the first one.
+  abortEarly: false,
 });
 
 module.exports = schema;

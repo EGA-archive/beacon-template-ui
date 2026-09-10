@@ -4,9 +4,9 @@ describe("Beacon type rendering", () => {
   let beaconType = null;
 
   before(() => {
-    // Load the real config file directly from the app
-    cy.readFile("src/config/config.json").then((config) => {
-      beaconType = config.beaconType;
+    // Load the runtime config served by the app
+    cy.request("/config/config.json").then((response) => {
+      beaconType = response.body.beaconType;
       cy.log(`Detected beaconType: ${beaconType}`);
     });
   });

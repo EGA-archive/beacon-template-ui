@@ -1,4 +1,5 @@
 import { Box } from "@mui/material";
+import { highlightText } from "../../utils/highlightText";
 
 /**
  * Renders Measures in a strict, canonical format:
@@ -8,7 +9,7 @@ import { Box } from "@mui/material";
  * Format:
  * <b>Assay label</b>: value (2 decimals) unit label (date)
  */
-export default function MeasuresCell({ value }) {
+export default function MeasuresCell({ value, searchTerm }) {
   if (!Array.isArray(value) || value.length === 0) return "-";
 
   const formatMeasure = (measure) => {
@@ -24,9 +25,9 @@ export default function MeasuresCell({ value }) {
 
     return (
       <>
-        <b>{label}</b>: {roundedValue}
-        {unitLabel ? ` ${unitLabel}` : ""}
-        {date ? ` (${date})` : ""}
+        <b>{label}</b>: {highlightText(roundedValue, searchTerm)}
+        {unitLabel ? <> {highlightText(unitLabel, searchTerm)}</> : ""}
+        {date ? <> ({highlightText(date, searchTerm)})</> : ""}
       </>
     );
   };

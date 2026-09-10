@@ -1,0 +1,133 @@
+import { Box, Typography } from "@mui/material";
+import InfoTooltip from "./InfoTooltip";
+import EntryTypeSelector from "../../search/EntryTypeSelector";
+import {
+  formatEntryLabel,
+  singleEntryCustomLabels,
+  entryTypeDescriptions,
+} from "../../../components/common/textFormatting";
+
+export default function ResultTypeSection({
+  entryTypes,
+  selectedPathSegment,
+  setSelectedPathSegment,
+  isSingleEntryType,
+  onlyEntryPath,
+  isIntermediateSearchLayout = false,
+  isOntologyOnlyLayout = false,
+  hasTwoColumns,
+  loading,
+  shouldStackOntologyLayout = false,
+}) {
+  /**
+   * Ontology-only layout:
+   * keep a maximum of two Entry Types vertically in each column.
+   *
+   * Each additional column adds some width, up to 400px.
+   */
+  const ontologyColumnCount = Math.ceil(entryTypes.length / 2);
+
+  const ontologySelectorWidth = Math.min(
+    190 + Math.max(ontologyColumnCount - 1, 0) * 70,
+    400
+  );
+  return (
+    <>
+      <Box
+        sx={{
+          width: {
+            xs: "100%",
+            sm: shouldStackOntologyLayout
+              ? "100%"
+              : isOntologyOnlyLayout
+              ? `${ontologySelectorWidth}px`
+              : hasTwoColumns
+              ? "240px"
+              : "190px",
+          },
+          flexShrink: 0,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            mb: 1,
+          }}
+        >
+          {/* Accounts for a title change when there is only one entry type */}
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontFamily: '"Open Sans", sans-serif',
+              fontSize: entryTypes.length === 1 ? "16px" : "14px",
+            }}
+          >
+            {isSingleEntryType
+              ? `Result Type: ${
+                  singleEntryCustomLabels[onlyEntryPath] ||
+                  formatEntryLabel(onlyEntryPath)
+                }`
+              : "Result Type"}
+          </Typography>
+          <InfoTooltip testId="entrytypes-tooltip-trigger">
+            <Box
+              component="ul"
+              data-testid="entrytypes-tooltip-content"
+              sx={{
+                listStyleType: "disc",
+                pl: "20px",
+                fontFamily: '"Open Sans", sans-serif',
+              }}
+            >
+              {entryTypes.map((entry) => (
+                <li key={entry.pathSegment}>
+                  <b>{formatEntryLabel(entry.pathSegment)}</b>:{" "}
+                  {entryTypeDescriptions[entry.pathSegment] ||
+                    `No description for ${entry.pathSegment}`}
+                </li>
+              ))}
+            </Box>
+          </InfoTooltip>
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{
+              fontFamily: '"Open Sans", sans-serif',
+              fontSize: "12px",
+            }}
+          >
+            Which information do you need?
+          </Typography>
+        </Box>
+
+        <Box
+          sx={{
+            flexShrink: 0,
+          }}
+        >
+          <EntryTypeSelector
+            entryTypes={entryTypes}
+            selectedPathSegment={selectedPathSegment}
+            setSelectedPathSegment={setSelectedPathSegment}
+            hasTwoColumns={hasTwoColumns}
+            isIntermediateSearchLayout={isIntermediateSearchLayout}
+            isOntologyOnlyLayout={isOntologyOnlyLayout}
+            shouldStackOntologyLayout={shouldStackOntologyLayout}
+            ontologySelectorWidth={ontologySelectorWidth}
+            loading={loading}
+          />
+        </Box>
+      </Box>
+    </>
+  );
+}

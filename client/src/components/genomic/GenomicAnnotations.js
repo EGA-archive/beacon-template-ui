@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import { useState, useMemo } from "react";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import CommonMessage from "../../components/common/CommonMessage";
 import FilterLabelRemovable from "../styling/FilterLabelRemovable";

@@ -11,8 +11,9 @@
     { "jsonName": "CNV", "displayName": "CNV" },
     { "jsonName": "BND", "displayName": "BND" }
   ],
+  "queryCoordinatesAre0Based": true,
   "ui": {
-    "title": "EGA Beacon Browser",
+    "title": "EGA Beacon Template UI",
     "favicon": "/assets/logos/favicon.ico",
     "colors": {
       "primary": "#3176B1",
@@ -67,16 +68,34 @@
         }
       ]
     },
-
+    "download": {
+      "enabled": true
+    },
+    "cookies": {
+      "enabled": true,
+      "message": "This website requires cookies, and the limited processing of your personal data in order to function. By using the site you agree to this as outlined in our Privacy Notice and Terms of Use.",
+      "buttonText": "I understand",
+      "links": [
+        {
+          "label": "Privacy Notice",
+          "url": "https://ega-archive.org/data-protection/privacy-notice/ega-website/"
+        },
+        {
+          "label": "Terms of Use",
+          "url": "https://ega-archive.org/legal-notice/"
+        }
+      ]
+    },
     "showLogin": false,
     "auth": {
       "providerType": "private",
       "oidc": {
+        "clientId": "a5e08da0-9e30-45c4-b4c4-4c45ab8262c6",
         "authority": "https://login.aai.lifescience-ri.eu/oidc",
         "autoSignIn": false,
         "responseType": "code",
         "automaticSilentRenew": true,
-        "redirectUri": "http://localhost:3000/",
+        "redirectUri": "http://localhost:3000",
         "scope": "openid profile email ga4gh_passport_v1 offline_access",
         "revokeAccessTokenOnSignout": true
       }
@@ -90,7 +109,6 @@
       "datasets",
       "runs"
     ],
-
     "commonFilters": {
       "filterCategories": [
         "Demographics",
@@ -205,7 +223,6 @@
         "Molecular Effect"
       ]
     },
-
     "genomicQueries": {
       "genomicQueryTypes": {
         "sequenceQuery": true,
@@ -213,6 +230,12 @@
         "rangeQuery": true,
         "bracketQuery": true,
         "hgvsQuery": true
+      },
+      "searchInputExample": {
+        "referenceName": "22",
+        "position": 16050527,
+        "referenceBases": "C",
+        "alternateBases": "A"
       },
       "genomicQueryBuilder": {
         "showAlternateBases": true,

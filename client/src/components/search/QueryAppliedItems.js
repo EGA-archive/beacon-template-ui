@@ -9,7 +9,7 @@ import CommonMessage, {
 export default function QueryAppliedItems({
   handleFilterRemove,
   variant = "removable",
-  customFilters,
+  intialEntryTypeFiltertoRender,
 }) {
   // Get the current filters and setter from context
   const {
@@ -21,8 +21,6 @@ export default function QueryAppliedItems({
     lastSearchedPathSegment,
     hasSearchResults,
   } = useSelectedEntry();
-
-  const filtersToRender = customFilters || selectedFilter;
 
   // Track which label is expanded (if any)
   const [expandedKey, setExpandedKey] = useState(false);
@@ -103,6 +101,8 @@ export default function QueryAppliedItems({
     setQueryDirty,
   ]);
 
+  const filtersToRender = intialEntryTypeFiltertoRender || selectedFilter;
+
   return (
     <Box>
       {/* Show error message if there's a duplicate */}
@@ -149,6 +149,8 @@ export default function QueryAppliedItems({
               expandedKey={expandedKey}
               setExpandedKey={setExpandedKey}
               variant={variant}
+              disableTooltip={variant === "readonly"}
+              disableClick={variant === "readonly"}
             />
           );
         })}
