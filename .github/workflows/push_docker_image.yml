@@ -2,9 +2,9 @@ name: Create and publish a Docker image
 
 on:
   push:
-    branches: ['main']
+    branches: ["main"]
     tags:
-      - '*.*.*'
+      - "*.*.*"
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -36,8 +36,8 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
+            type=ref,event=tag
             type=ref,event=pr
-            # set latest tag for master branch
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

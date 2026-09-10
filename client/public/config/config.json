@@ -109,7 +109,6 @@
       "datasets",
       "runs"
     ],
-
     "commonFilters": {
       "filterCategories": [
         "Demographics",
@@ -224,7 +223,6 @@
         "Molecular Effect"
       ]
     },
-
     "genomicQueries": {
       "genomicQueryTypes": {
         "sequenceQuery": true,

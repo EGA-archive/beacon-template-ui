@@ -1,11 +1,7 @@
+import { validateRuntimeConfig } from "./validateRuntimeConfig";
+
 /**
- * Loads the application configuration at runtime.
- *
- * The config file lives in /public/config and is fetched by the browser
- * when the application starts.
- *
- * `cache: "no-store"` ensures that a refreshed page requests the latest
- * version of the configuration instead of using a cached copy.
+ * Loads and validates the application configuration at runtime.
  */
 export async function loadRuntimeConfig() {
   const response = await fetch("/config/config.json", {
@@ -18,5 +14,7 @@ export async function loadRuntimeConfig() {
     );
   }
 
-  return response.json();
+  const config = await response.json();
+
+  return validateRuntimeConfig(config);
 }
