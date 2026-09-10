@@ -18,7 +18,8 @@
     # COPY backend ./backend
     # COPY backend/.env ./backend
     
-    RUN yarn install --frozen-lockfile
+    RUN yarn config set network-timeout 600000 -g \
+    && yarn install --frozen-lockfile
     
     # create the production build
     RUN yarn build
