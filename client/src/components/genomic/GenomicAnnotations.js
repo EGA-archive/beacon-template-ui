@@ -54,37 +54,77 @@ export default function GenomicAnnotations() {
     [molecularEffects]
   );
 
-  /**
-   * STEP 2:
-   * Build the list of molecular effect items to display
-   * Rules:
-   * - Use backend versions of predefined labels when available
-   * - Always show at least two items if backend contains enough
-   */
   const molecularEffectsToRender = useMemo(() => {
     const predefined = filterLabels["Molecular Effect"] || [];
-    const predefinedIds = predefined.map((p) => p.id);
 
-    // Try to match predefined molecular effect IDs with backend results
+    /**
+     * Convert a backend molecular effect into the same shape
+     * used by the predefined genomic annotation filters.
+     *
+     * This is important because useGenomicAnnotationClick
+     * needs to know that the item is an ontology filter
+     * scoped to genomic variations.
+     */
+    const normalizeMolecularEffect = (backendEffect) => {
+      const predefinedEffect = predefined.find(
+        (item) => item.id === backendEffect.id
+      );
+
+      return {
+        ...predefinedEffect,
+        ...backendEffect,
+
+        key: backendEffect.key ?? predefinedEffect?.key ?? backendEffect.id,
+
+        id: backendEffect.id,
+
+        label:
+          backendEffect.label ?? predefinedEffect?.label ?? backendEffect.id,
+
+        type: "ontology",
+
+        scope:
+          backendEffect.scope ?? predefinedEffect?.scope ?? "genomicVariation",
+      };
+    };
+
+    const normalizedBackendEffects = filteredBackendEffects.map(
+      normalizeMolecularEffect
+    );
+
+    const predefinedIds = predefined.map((item) => item.id);
+
+    /**
+     * Prioritize predefined molecular effects when they
+     * are available from the backend.
+     */
     const matches = predefinedIds
-      .map((id) => filteredBackendEffects.find((t) => t.id === id))
+      .map((id) => normalizedBackendEffects.find((item) => item.id === id))
       .filter(Boolean);
 
     if (matches.length > 0) {
       const result = [...matches];
 
-      // If fewer than 2, fill from backend
+      /**
+       * Always display at least two molecular effects when
+       * enough allowed effects are available from the backend.
+       */
       if (result.length < 2) {
-        const remaining = filteredBackendEffects.filter(
-          (b) => !predefinedIds.includes(b.id)
+        const remaining = normalizedBackendEffects.filter(
+          (item) => !predefinedIds.includes(item.id)
         );
+
         return [...result, ...remaining.slice(0, 2 - result.length)];
       }
+
       return result;
     }
 
-    // If predefined items are missing, fallback to first 2 backend molecular effects
-    return filteredBackendEffects.slice(0, 2);
+    /**
+     * If none of the predefined effects are available,
+     * use the first two allowed backend effects.
+     */
+    return normalizedBackendEffects.slice(0, 2);
   }, [filteredBackendEffects]);
 
   // All possible genomic annotation categories available in the UI

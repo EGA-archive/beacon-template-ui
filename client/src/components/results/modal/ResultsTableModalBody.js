@@ -247,7 +247,7 @@ const ResultsTableModalBody = ({
 
   /** Export CSV */
   const handleExport = useCallback(
-    (downloadMode = "view") => {
+    (downloadMode = "view", onProgress) => {
       return exportCSV({
         dataTable: sortedFilteredData,
         sortedHeaders,
@@ -261,6 +261,7 @@ const ResultsTableModalBody = ({
         authHeaders,
         selectedFilters,
         downloadMode,
+        onProgress,
         onDownloadLimitReached: (info) => {
           setDownloadLimitInfo(info);
         },

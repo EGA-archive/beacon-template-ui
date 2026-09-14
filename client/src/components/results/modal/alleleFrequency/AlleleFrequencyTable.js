@@ -141,23 +141,29 @@ export default function AlleleFrequencyTable({
    *
    * Download All:
    * - all population rows;
-   * - selected columns.
+   * - all available columns, including columns not currently selected.
    *
    * All AF population data is already loaded, so Download All
    * does not need another API request.
    */
-  const handleExport = (downloadMode = "view") => {
+  const handleExport = (downloadMode = "view", onProgress) => {
+    onProgress?.(0);
+
     const rowsToExport = downloadMode === "view" ? filteredRows : rows;
+
+    const columnsToExport =
+      downloadMode === "view" ? visibleColumnObjects : availableColumns;
 
     downloadCsvFile({
       rows: rowsToExport,
-      columns: visibleColumnObjects,
+      columns: columnsToExport,
       fileName: `beacon-allele-frequency-${
         new Date().toISOString().split("T")[0]
       }.csv`,
-
       getCellValue: (row, column) => getDisplayValue(row, column.id),
     });
+
+    onProgress?.(100);
   };
 
   return (

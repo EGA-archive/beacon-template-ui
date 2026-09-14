@@ -136,29 +136,19 @@ const requiredAuthSchema = authSchema
   .required();
 
 /**
- * At least one genomic query type must be enabled.
+ * Genomic query type switches.
  *
- * Individual switches default to true.
+ * The relationship requiring at least one enabled query type
+ * is validated at UI level when a genomic variation entry type
+ * is present.
  */
 const genomicQueryTypesSchema = Joi.object({
-  sequenceQuery: Joi.boolean().default(true),
-  geneId: Joi.boolean().default(true),
-  rangeQuery: Joi.boolean().default(true),
-  bracketQuery: Joi.boolean().default(true),
-  hgvsQuery: Joi.boolean().default(true),
-}).custom((value, helpers) => {
-  const hasEnabledQueryType = Object.values(value).some(
-    (enabled) => enabled === true
-  );
-
-  if (!hasEnabledQueryType) {
-    return helpers.message(
-      "At least one genomic query type must be enabled (set as true)"
-    );
-  }
-
-  return value;
-}, "Genomic query type validation");
+  sequenceQuery: Joi.boolean(),
+  geneId: Joi.boolean(),
+  rangeQuery: Joi.boolean(),
+  bracketQuery: Joi.boolean(),
+  hgvsQuery: Joi.boolean(),
+});
 
 /**
  * Genomic query configuration.
@@ -499,26 +489,75 @@ const schema = Joi.object({
     /**
      * Genomic queries
      *
-     * When backend entry-type IDs are supplied through
-     * Joi context, this section is required if the backend
-     * supports a recognized genomic variation entry type.
-     *
-     * If the section is present, at least one query type
-     * must be enabled.
+     * This section is optional at schema-property level.
+     * The UI-level relationship validation below makes it
+     * mandatory when a genomic variation entry type is present.
      */
-    genomicQueries: genomicQueriesSchema.optional().when("$entryTypeIds", {
-      is: Joi.array().has(Joi.string().valid(...GENOMIC_VARIATION_ENTRY_TYPES)),
+    genomicQueries: genomicQueriesSchema.optional(),
+  })
+    .custom((value, helpers) => {
+      const hasGenomicVariants = value.entryTypesOrder?.some((entryType) =>
+        GENOMIC_VARIATION_ENTRY_TYPES.includes(entryType)
+      );
 
-      then: Joi.required(),
-    }),
-  }).required(),
+      /**
+       * No genomic variation entry type is configured.
+       *
+       * genomicQueries may therefore be omitted, or it may be
+       * present with all query-type switches set to false.
+       */
+      if (!hasGenomicVariants) {
+        return value;
+      }
+
+      /**
+       * A genomic variation entry type is configured,
+       * therefore genomicQueries is mandatory.
+       */
+      if (!value.genomicQueries) {
+        return helpers.message(
+          "genomicQueries is required when g_variants is present in entryTypesOrder"
+        );
+      }
+
+      const queryTypes = value.genomicQueries.genomicQueryTypes;
+
+      /**
+       * If genomicQueryTypes is missing, its own required()
+       * validation will report the structural error.
+       */
+      if (!queryTypes) {
+        return value;
+      }
+
+      /**
+       * When genomic variation is available, at least
+       * one genomic query type must explicitly be enabled.
+       */
+      const hasEnabledQueryType = Object.values(queryTypes).some(
+        (enabled) => enabled === true
+      );
+
+      if (!hasEnabledQueryType) {
+        return helpers.message(
+          "At least one genomic query type must be enabled when g_variants is present"
+        );
+      }
+
+      return value;
+    }, "Genomic query configuration validation")
+    .required(),
 }).prefs({
-  // Reject values such as "true" instead of silently
-  // converting them to booleans.
+  /**
+   * Reject values such as "true" instead of silently
+   * converting them to booleans.
+   */
   convert: false,
 
-  // Collect all validation errors instead of stopping
-  // at the first one.
+  /**
+   * Collect all validation errors instead of stopping
+   * at the first one.
+   */
   abortEarly: false,
 });
 

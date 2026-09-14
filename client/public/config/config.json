@@ -226,10 +226,10 @@
     "genomicQueries": {
       "genomicQueryTypes": {
         "sequenceQuery": true,
-        "geneId": true,
-        "rangeQuery": true,
-        "bracketQuery": true,
-        "hgvsQuery": true
+        "geneId": false,
+        "rangeQuery": false,
+        "bracketQuery": false,
+        "hgvsQuery": false
       },
       "searchInputExample": {
         "referenceName": "22",
