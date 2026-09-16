@@ -219,7 +219,6 @@ export default function TableToolbarControls({
                 display: "flex",
                 alignItems: "center",
                 gap: 1,
-                // backgroundColor: "pink",
               }}
             >
               <SelectColumn

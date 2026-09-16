@@ -42,6 +42,11 @@ export default function EntryTypeSelector({
 
   const hasExactlyTwoEntryTypes = entryTypes.length === 2;
 
+  const hasManyEntryTypes = entryTypes.length > 8;
+
+  const shouldUseWideSelector =
+    hasManyEntryTypes && !isIntermediateSearchLayout && !isOntologyOnlyLayout;
+
   /**
    * Standard intermediate genomic layout:
    * two-column selectors use eight rows so the ninth
@@ -78,7 +83,6 @@ export default function EntryTypeSelector({
           ? "1.5px solid black"
           : "1px solid black",
         borderRadius: "28px",
-        backgroundColor: "khaki",
 
         /**
          * The stacked ontology layout uses the same compact
@@ -114,11 +118,12 @@ export default function EntryTypeSelector({
          */
         maxWidth: {
           xs: "none",
-
           sm: shouldStackOntologyLayout
             ? "none"
             : isOntologyOnlyLayout
             ? `${ontologySelectorWidth}px`
+            : shouldUseWideSelector
+            ? "100%"
             : hasTwoColumns
             ? "260px"
             : "190px",

@@ -3,9 +3,10 @@ import { downloadCsvFile } from "./downloadCsvFile";
 
 /**
  * Maximum number of records allowed in a CSV download.
- * This protects the browser from downloading extremely large datasets.
+ * Configurable through runtime config.
  */
-const MAX_DOWNLOAD_RECORDS = 10000;
+const MAX_DOWNLOAD_RECORDS =
+  config.ui.download?.maxRecordsDownloadableLimit ?? 10000;
 
 /**
  * Exports either:

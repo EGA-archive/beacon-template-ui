@@ -204,9 +204,9 @@ export default function Search({
         });
 
         // Use this when testing with the real API response:
-        // const data = await response.json();
+        const data = await response.json();
 
-        const data = mockEntryTypes;
+        // const data = mockEntryTypes;
 
         const endpointSets = data.response.endpointSets || {};
         const seen = new Set();

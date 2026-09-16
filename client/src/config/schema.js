@@ -62,6 +62,20 @@ const GENOMIC_VARIATION_ENTRY_TYPES = [
   "genomicVariation",
 ];
 
+/**
+ * Maps annotation queryType labels to the corresponding
+ * genomicQueryTypes configuration switch.
+ */
+const GENOMIC_QUERY_TYPE_CONFIG_KEYS = {
+  "Gene ID": "geneId",
+  "Range Query": "rangeQuery",
+  "Bracket Query": "bracketQuery",
+  "Sequence Query": "sequenceQuery",
+  "Genomic Allele Query (HGVS)": "hgvsQuery",
+};
+
+const CODE_PROVIDED_GENOMIC_ANNOTATION_CATEGORY = "Molecular Effects";
+
 const DEFAULT_COOKIE_MESSAGE =
   "This website requires cookies, and the limited processing of your personal data in order to function. By using the site you agree to this as outlined in our Privacy Notice and Terms of Use.";
 
@@ -201,6 +215,123 @@ const genomicQueriesSchema = Joi.object({
 });
 
 /**
+ * Genomic annotation query examples.
+ *
+ * Categories are configurable.
+ * Each example contains:
+ * - queryType
+ * - queryParams
+ * - optional custom label
+ *
+ * If label is omitted, the UI will infer it from queryParams.
+ */
+
+const geneIdAnnotationSchema = Joi.object({
+  label: nonEmptyString.optional(),
+
+  queryType: Joi.string().valid("Gene ID").required(),
+
+  queryParams: Joi.object({
+    geneId: nonEmptyString.required(),
+
+    refAa: nonEmptyString.optional(),
+
+    aaPosition: Joi.alternatives()
+      .try(Joi.number().integer().positive(), Joi.string().pattern(/^\d+$/))
+      .optional(),
+
+    altAa: nonEmptyString.optional(),
+  })
+    /**
+     * Amino-acid information must either be fully provided
+     * or fully omitted.
+     */
+    .and("refAa", "aaPosition", "altAa")
+    .required(),
+});
+
+const sequenceAnnotationSchema = Joi.object({
+  label: nonEmptyString.optional(),
+
+  queryType: Joi.string().valid("Sequence Query").required(),
+
+  queryParams: Joi.object({
+    assemblyId: nonEmptyString.required(),
+
+    referenceName: nonEmptyString.required(),
+
+    start: Joi.array()
+      .items(Joi.number().integer().min(0))
+      .length(1)
+      .required(),
+
+    referenceBases: nucleotideSequence.required(),
+
+    alternateBases: nucleotideSequence.required(),
+  }).required(),
+});
+
+const rangeAnnotationSchema = Joi.object({
+  label: nonEmptyString.optional(),
+
+  queryType: Joi.string().valid("Range Query").required(),
+
+  queryParams: Joi.object({
+    assemblyId: nonEmptyString.required(),
+
+    referenceName: nonEmptyString.required(),
+
+    start: Joi.array()
+      .items(Joi.number().integer().min(0))
+      .length(1)
+      .required(),
+
+    end: Joi.array().items(Joi.number().integer().min(0)).length(1).required(),
+  }).required(),
+});
+
+const bracketAnnotationSchema = Joi.object({
+  label: nonEmptyString.optional(),
+
+  queryType: Joi.string().valid("Bracket Query").required(),
+
+  queryParams: Joi.object({
+    assemblyId: nonEmptyString.required(),
+
+    referenceName: nonEmptyString.required(),
+
+    start: Joi.array()
+      .items(Joi.number().integer().min(0))
+      .length(2)
+      .required(),
+
+    end: Joi.array().items(Joi.number().integer().min(0)).length(2).required(),
+  }).required(),
+});
+
+const hgvsAnnotationSchema = Joi.object({
+  label: nonEmptyString.optional(),
+
+  queryType: Joi.string().valid("Genomic Allele Query (HGVS)").required(),
+
+  queryParams: Joi.object({
+    genomicAlleleShortForm: nonEmptyString.required(),
+  }).required(),
+});
+
+/**
+ * Any configured genomic annotation example must match
+ * one of the supported genomic query structures.
+ */
+const genomicAnnotationExampleSchema = Joi.alternatives().try(
+  geneIdAnnotationSchema,
+  sequenceAnnotationSchema,
+  rangeAnnotationSchema,
+  bracketAnnotationSchema,
+  hgvsAnnotationSchema
+);
+
+/**
  * Main runtime configuration schema.
  */
 const schema = Joi.object({
@@ -330,11 +461,11 @@ const schema = Joi.object({
       otherwise: aboutContentSchema.optional(),
     }),
 
-    /**
-     * Download functionality
-     */
+    // Download funcionality
     download: Joi.object({
       enabled: Joi.boolean().default(true),
+
+      maxRecordsDownloadableLimit: Joi.number().integer().min(1).default(10000),
     }).default(),
 
     /**
@@ -464,34 +595,86 @@ const schema = Joi.object({
       .optional(),
 
     /**
-     * Genomic annotation categories
+     * Genomic annotations
+     *
+     * Category names and their order are configurable.
+     * A maximum of three configurable categories is supported.
+     * Molecular Effect is handled separately by the application
+     * and is not configured here.
+     * Every annotationLabels key must correspond to a category
+     * declared in annotationCategories.
      */
     genomicAnnotations: Joi.object({
-      visibleGenomicCategories: Joi.array()
-        .items(
-          Joi.string().valid(
-            "SNP Examples",
-            "Genomic Variant Examples",
-            "Protein Examples",
-            "Molecular Effect"
-          )
-        )
+      annotationCategories: Joi.array()
+        .items(Joi.string().trim().min(1).max(50))
         .min(1)
+        .max(4)
+        .unique()
         .required()
         .messages({
           "any.required":
-            "visibleGenomicCategories is required under genomicAnnotations",
+            "annotationCategories is required under genomicAnnotations",
+
           "array.min":
-            "At least one genomicAnnotations category must be provided",
+            "At least one genomic annotation category must be provided",
+
+          "array.max":
+            "A maximum of 4 genomic annotation categories is supported",
+
+          "array.unique": "Genomic annotation category names must be unique",
         }),
-    }).optional(),
+
+      annotationLabels: Joi.object()
+        .pattern(
+          Joi.string(),
+          Joi.array().items(genomicAnnotationExampleSchema).min(1).max(6)
+        )
+        .required(),
+    })
+      .custom((value, helpers) => {
+        const annotationLabels = value.annotationLabels || {};
+
+        /**
+         * Every annotationLabels key must exist
+         * in annotationCategories.
+         */
+        const unknownCategories = Object.keys(annotationLabels).filter(
+          (category) => !value.annotationCategories.includes(category)
+        );
+
+        if (unknownCategories.length > 0) {
+          return helpers.message(
+            `annotationLabels contains categories not listed in annotationCategories: ${unknownCategories.join(
+              ", "
+            )}`
+          );
+        }
+
+        /**
+         * Every configured category must also have
+         * a matching annotationLabels array.
+         */
+        const missingCategories = value.annotationCategories.filter(
+          (category) =>
+            category !== CODE_PROVIDED_GENOMIC_ANNOTATION_CATEGORY &&
+            !annotationLabels[category]
+        );
+
+        if (missingCategories.length > 0) {
+          return helpers.message(
+            `annotationCategories contains categories with no annotationLabels: ${missingCategories.join(
+              ", "
+            )}`
+          );
+        }
+        return value;
+      }, "Genomic annotation category validation")
+      .optional(),
 
     /**
      * Genomic queries
-     *
      * This section is optional at schema-property level.
-     * The UI-level relationship validation below makes it
-     * mandatory when a genomic variation entry type is present.
+     * The UI-level relationship validation below makes it mandatory when a genomic variation entry type is present.
      */
     genomicQueries: genomicQueriesSchema.optional(),
   })
@@ -502,9 +685,7 @@ const schema = Joi.object({
 
       /**
        * No genomic variation entry type is configured.
-       *
-       * genomicQueries may therefore be omitted, or it may be
-       * present with all query-type switches set to false.
+       * genomicQueries may therefore be omitted, or it may be present with all query-type switches set to false.
        */
       if (!hasGenomicVariants) {
         return value;
@@ -542,6 +723,25 @@ const schema = Joi.object({
         return helpers.message(
           "At least one genomic query type must be enabled when g_variants is present"
         );
+      }
+
+      /**
+       * Genomic annotation examples may only use query types
+       * that are enabled under genomicQueries.genomicQueryTypes.
+       */
+      const annotationLabels = value.genomicAnnotations?.annotationLabels || {};
+
+      for (const [category, annotations] of Object.entries(annotationLabels)) {
+        for (const annotation of annotations) {
+          const configKey =
+            GENOMIC_QUERY_TYPE_CONFIG_KEYS[annotation.queryType];
+
+          if (configKey && queryTypes[configKey] !== true) {
+            return helpers.message(
+              `Genomic annotation category "${category}" uses "${annotation.queryType}", but "${configKey}" is not enabled in genomicQueryTypes`
+            );
+          }
+        }
       }
 
       return value;

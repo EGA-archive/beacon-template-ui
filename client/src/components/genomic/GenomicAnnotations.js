@@ -137,7 +137,7 @@ export default function GenomicAnnotations() {
 
   // Categories that the deployer chose to show in the UI (defined in config.json)
   const visibleFromConfig =
-    config.ui.genomicAnnotations?.visibleGenomicCategories || [];
+    config.ui.genomicAnnotations?.annotationCategories || [];
 
   // Filter categories based on deployer configuration and backend availability
   const categoriesToRender = allCategories.filter((cat) => {

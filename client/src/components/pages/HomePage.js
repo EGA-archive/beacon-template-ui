@@ -118,7 +118,7 @@ export default function HomePage({
 
   // Check if Genomic Annotations filters should be shown based on the config file
   const hasGenomicAnnotationsConfig =
-    !!config.ui?.genomicAnnotations?.visibleGenomicCategories;
+    !!config.ui?.genomicAnnotations?.annotationCategories;
 
   // Check if Common Filters should be shown based on config
   const hasCommonFiltersConfig =

@@ -31,6 +31,11 @@ export default function ResultTypeSection({
     190 + Math.max(ontologyColumnCount - 1, 0) * 70,
     400
   );
+
+  const hasManyentryTypes = entryTypes.length > 8;
+  const shouldUseWideSelector =
+    hasManyentryTypes && !isIntermediateSearchLayout && !isOntologyOnlyLayout;
+
   return (
     <>
       <Box
@@ -41,6 +46,8 @@ export default function ResultTypeSection({
               ? "100%"
               : isOntologyOnlyLayout
               ? `${ontologySelectorWidth}px`
+              : shouldUseWideSelector
+              ? "320px"
               : hasTwoColumns
               ? "240px"
               : "190px",
