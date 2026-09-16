@@ -36,11 +36,11 @@ export default function FilteringTermsSection({
           gap: 1,
           mt: {
             // Ontology-only mobile is already stacked.
-            xs: isOntologyOnlyLayout ? 0 : "40px",
+            xs: 0,
             // Ontology-only sm+ does not need genomic spacing.
             // Single Entry Type: use 30px from sm upward.
             sm: !hasEntryTypeSelector
-              ? "30px"
+              ? "0px"
               : isOntologyOnlyLayout
               ? 0
               : hasGenomicSectionAbove
@@ -51,7 +51,7 @@ export default function FilteringTermsSection({
                 : 5.5
               : 0,
           },
-          mb: hasOneEntryTypeColumn ? 1 : 0,
+          mb: 0,
         }}
       >
         <Typography
@@ -103,31 +103,45 @@ export default function FilteringTermsSection({
         </InfoTooltip>
       </Box>
 
-      {/* Filtering Terms description */}
-      <Typography
+      {/* Filtering Terms description + desktop action */}
+      <Box
         sx={{
-          fontSize: "12px",
-          mt: hasOneEntryTypeColumn ? 0.5 : 1,
-
-          mb: {
-            // Ontology-only mobile keeps the compact stacked layout.
-            xs: isOntologyOnlyLayout
-              ? 0
-              : hasOneEntryTypeColumn && !isGenomicDescriptionMultiline
-              ? 2
-              : 0,
-
-            // Ontology-only sm+ keeps 16px before the input.
-            sm: isOntologyOnlyLayout
-              ? 2
-              : hasOneEntryTypeColumn && !isGenomicDescriptionMultiline
-              ? 2
-              : 0,
-          },
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 2,
+          height: "26px",
+          mb: 1.9,
         }}
       >
-        Filtering options available for this dataset.
-      </Typography>
+        <Typography
+          sx={{
+            fontSize: "12px",
+          }}
+        >
+          Filtering options available for the data.
+        </Typography>
+        <Box
+          sx={{
+            display: "none",
+            flexShrink: 0,
+
+            // Single Entry Type:
+            // keep the button beside the description from 600px upward.
+            "@media (min-width:600px)": {
+              display: !hasEntryTypeSelector ? "flex" : "none",
+            },
+
+            // All layouts:
+            // use the desktop position above 870px.
+            "@media (min-width:871px)": {
+              display: "flex",
+            },
+          }}
+        >
+          <AllFilteringTermsButton onClick={onAllFilteringClick} />
+        </Box>
+      </Box>
 
       {/* Filtering Terms input */}
       <Box
@@ -184,7 +198,7 @@ export default function FilteringTermsSection({
       {!moveAllFilteringTermsBelowInput && (
         <Box
           sx={{
-            display: isOntologyOnlyLayout ? "flex" : "none",
+            display: "none",
             justifyContent: "center",
             width: "100%",
             maxWidth: "220px",

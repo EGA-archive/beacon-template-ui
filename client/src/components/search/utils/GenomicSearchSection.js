@@ -57,7 +57,7 @@ export default function GenomicSearchSection({
           display: "flex",
           alignItems: "center",
           gap: 1,
-          mb: hasOneEntryTypeColumn ? 1 : 0,
+          mb: 0,
         }}
       >
         <Typography
@@ -136,29 +136,48 @@ export default function GenomicSearchSection({
           </Box>
         </InfoTooltip>
       </Box>
-      <Box>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: "26px",
+          mb: 1.9,
+        }}
+      >
         <Typography
           ref={descriptionRef}
           sx={{
             fontSize: "12px",
-            mt: hasOneEntryTypeColumn ? 0.5 : 1,
-            mb: hasOneEntryTypeColumn && !isGenomicDescriptionMultiline ? 2 : 0,
-            lineHeight: "17px",
           }}
         >
           {genomicQueryDescription}
         </Typography>
+
+        {genomicAction && (
+          <Box
+            sx={{
+              display: "none",
+              flexShrink: 0,
+
+              // Single Genomic Entry Type:
+              // keep the button beside the description from 600px upward.
+              "@media (min-width:600px)": {
+                display: !hasEntryTypeSelector ? "flex" : "none",
+              },
+
+              // All layouts use the desktop position above 870px.
+              "@media (min-width:871px)": {
+                display: "flex",
+              },
+            }}
+          >
+            {genomicAction}
+          </Box>
+        )}
       </Box>
 
-      <Box
-        sx={
-          {
-            // In the compact one-column layout, add enough space so the
-            // Genomic Query input starts at the same height as the radio box.
-            // mt: hasOneEntryTypeColumn ? 2.25 : 1,
-          }
-        }
-      >
+      <Box>
         <SearchGenomicInput
           isGenomicDescriptionMultiline={isGenomicDescriptionMultiline}
           activeInput={activeInput}

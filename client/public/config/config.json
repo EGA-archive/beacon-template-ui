@@ -1,6 +1,6 @@
 {
-  "beaconType": "singleBeacon",
-  "apiUrl": "https://beacon-elixir-demo.ega-archive.org/api",
+  "beaconType": "networkBeacon",
+  "apiUrl": "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
   "variationType": [
     { "jsonName": "SNP", "displayName": "SNP" },
@@ -219,17 +219,16 @@
       "visibleGenomicCategories": [
         "SNP Examples",
         "Genomic Variant Examples",
-        "Protein Examples",
-        "Molecular Effect"
+        "Protein Examples"
       ]
     },
     "genomicQueries": {
       "genomicQueryTypes": {
         "sequenceQuery": true,
-        "geneId": false,
-        "rangeQuery": false,
-        "bracketQuery": false,
-        "hgvsQuery": false
+        "geneId": true,
+        "rangeQuery": true,
+        "bracketQuery": true,
+        "hgvsQuery": true
       },
       "searchInputExample": {
         "referenceName": "22",

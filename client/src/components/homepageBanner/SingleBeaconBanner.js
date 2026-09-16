@@ -33,8 +33,8 @@ export default function SingleBeaconBanner() {
     if (!status) return "Undefined";
     const normalized = status.toUpperCase();
     if (normalized === "PROD") return "Production";
-    if (normalized === "TEST") return "Test";
-    if (normalized === "DEV") return "Development";
+    if (normalized === "TEST") return "Non Production";
+    if (normalized === "DEV") return "Non Production";
     return status;
   };
 

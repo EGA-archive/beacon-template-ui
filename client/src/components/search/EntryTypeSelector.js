@@ -61,7 +61,7 @@ export default function EntryTypeSelector({
   const selectorHeight = isIntermediateSearchLayout
     ? "279px"
     : hasTwoColumns
-    ? "197px"
+    ? "199.9px"
     : "180px";
 
   /**
@@ -78,6 +78,7 @@ export default function EntryTypeSelector({
           ? "1.5px solid black"
           : "1px solid black",
         borderRadius: "28px",
+        backgroundColor: "khaki",
 
         /**
          * The stacked ontology layout uses the same compact

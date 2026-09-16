@@ -164,13 +164,7 @@ export default function TableToolbarControls({
           xs: "center",
           sm: "flex-end",
         },
-        // backgroundColor: {
-        //   xl: "red",
-        //   lg: "lightsalmon",
-        //   md: "pink",
-        //   sm: "lightgreen",
-        //   xs: "lightblue",
-        // },
+
         width: {
           xs: "100%",
           sm: "auto",
@@ -231,7 +225,6 @@ export default function TableToolbarControls({
               <SelectColumn
                 sx={{
                   color: colors.darkPrimary,
-                  backgroundColor: "red",
                 }}
               />
 

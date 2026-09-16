@@ -53,7 +53,6 @@ export default function ResultTypeSection({
             display: "flex",
             alignItems: "center",
             gap: 1,
-            mb: 1,
           }}
         >
           {/* Accounts for a title change when there is only one entry type */}
@@ -96,7 +95,10 @@ export default function ResultTypeSection({
           sx={{
             display: "flex",
             alignItems: "center",
-            mb: 2,
+            mb: 1.9,
+            justifyContent: "space-between",
+            gap: 2,
+            height: "26px",
           }}
         >
           <Typography

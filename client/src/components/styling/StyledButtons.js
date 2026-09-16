@@ -22,50 +22,54 @@ export default function StyledButtons({
 }) {
   // Base styling common to all buttons
   const baseStyles = {
-    borderRadius: "7px", // Makes button pill-shaped
-    textTransform: "none", // Keep label casing as-is
-    fontSize: { xs: "13px", sm: "14px" },
+    borderRadius: "7px",
+    textTransform: "none",
+    textDecoration: "underline",
+    fontSize: { xs: "12px", sm: "12px" },
     fontWeight: 400,
     fontFamily: '"Open Sans", sans-serif',
-    width: { xs: "120px", sm: "210px" },
-    height: { xs: "29px", sm: "29px" },
-    px: 2,
-    py: 0.5,
+    // width: { xs: "120px", sm: "210px" },
+    height: { xs: "29px", sm: "26px" },
+    // px: 2,
+    px: 0,
+    // py: 0.5,
   };
-
   // Styles for 'contained' vs 'outlined' variant
   const variantStyles =
     variant === "contained"
       ? {
           backgroundColor: primaryColor,
-          border: `1px solid ${primaryColor}`,
+          border: "none",
           color: "#fff",
           boxShadow: "none",
+
           "&:hover": {
             backgroundColor: "#fff",
-            border: `1px solid ${primaryColor}`,
+            border: "none",
             color: primaryColor,
+            textDecoration: "underline",
           },
+
           "&.Mui-disabled": {
             backgroundColor: "#F2F4F7",
-            borderColor: "#F2F4F7",
+            border: "none",
             color: "#98A2B3",
           },
         }
       : {
           backgroundColor: selected ? selectedBg : "white",
-          border: `1px solid ${
-            selected ? primaryDarkColor : unselectedBorderColor
-          }`,
+          border: "none",
           color: primaryDarkColor,
 
           "&:hover": {
             backgroundColor: selected ? selectedBg : lighten("#fff", 0.05),
-            border: `1px solid ${primaryDarkColor}`,
+            border: "none",
+            textDecoration: "underline",
           },
+
           "&.Mui-disabled": {
             backgroundColor: "#F2F4F7",
-            borderColor: "#F2F4F7",
+            border: "none",
             color: "#98A2B3",
           },
         };
