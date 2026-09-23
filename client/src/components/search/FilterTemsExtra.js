@@ -37,8 +37,8 @@ export default function FilterTermsExtra() {
   const [selectedValue, setSelectedValue] = useState("");
   const [error, setError] = useState("");
 
-  const isSingleNonGenomic =
-    entryTypes.length === 1 && entryTypes[0]?.pathSegment !== "g_variants";
+  // Any single Entry Type uses the same spacing before this section.
+  const isSingleEntryType = entryTypes.length === 1;
 
   // Used to scroll the container into view when a new alphanumeric filter is active
   const { valueInputRef } = useSelectedEntry();
@@ -55,12 +55,12 @@ export default function FilterTermsExtra() {
 
   // Main function that runs when the "+" button is clicked
   const handleAddFilter = () => {
-    setError(""); // clear any previous errors
+    setError("");
 
     // Step 1. If the input is empty, show an error and stop
     if (!selectedValue) {
       setError(COMMON_MESSAGES.fillFields);
-      setSelectedValue(""); // clear the input
+      setSelectedValue("");
       setTimeout(() => setError(""), 3000);
       return;
     }
@@ -68,12 +68,11 @@ export default function FilterTermsExtra() {
     // Step 2. If there is a value, continue
     setSelectedFilter((prevFilters) => {
       // Create a guaranteed unique key for this new filter
-      // This helps avoid problems when deleting or checking duplicates
       const uniqueId = `common-free-${Date.now().toString(36)}-${Math.random()
         .toString(36)
         .slice(2, 7)}`;
 
-      // Check if this same filter already exists (only for filters of type "alphanumeric")
+      // Check if this same filter already exists
       const isDuplicate =
         extraFilter.type === "alphanumeric" &&
         prevFilters.some(
@@ -84,7 +83,6 @@ export default function FilterTermsExtra() {
             (f.id === extraFilter.id || f.key === extraFilter.key)
         );
 
-      // If it’s a duplicate, show an error, clear the input, and stop
       if (isDuplicate) {
         setError(COMMON_MESSAGES.doubleFilter);
         setSelectedValue("");
@@ -96,18 +94,15 @@ export default function FilterTermsExtra() {
       let formattedOperator = selectedOperator;
       let formattedValue = selectedValue;
 
-      // Handle LIKE and !LIKE (contains / does not contain)
+      // Handle LIKE and !LIKE
       if (selectedOperator === "LIKE" || selectedOperator === "!LIKE") {
-        // Add wildcards if missing
         if (!selectedValue.includes("%")) {
           formattedValue = `%${selectedValue}%`;
         }
 
-        // Normalize operators for backend:
         formattedOperator = selectedOperator === "LIKE" ? "=" : "!";
       }
 
-      // Display-friendly operator text
       const operatorDisplay =
         selectedOperator === "!"
           ? "is not"
@@ -117,7 +112,6 @@ export default function FilterTermsExtra() {
           ? "does not contain"
           : selectedOperator;
 
-      // Construct the new filter object
       const extraFilterCustom = {
         id: extraFilter.id,
         key: uniqueId,
@@ -133,12 +127,10 @@ export default function FilterTermsExtra() {
           : undefined,
       };
 
-      // Used to track recently added filters
       const newKey = `${extraFilter.id || uniqueId}-${
         extraFilter.scope || "noScope"
       }`;
 
-      // Update setAddedFilters if it exists for short highlighting effect
       if (extraFilter.setAddedFilters) {
         extraFilter.setAddedFilters((prevSet) => {
           const newSet = new Set(prevSet);
@@ -162,33 +154,27 @@ export default function FilterTermsExtra() {
       setSelectedOperator(">");
       setSelectedValue("");
 
-      // Add the new filter to the list
       return [...prevFilters, extraFilterCustom];
     });
   };
 
   // Runs when user clicks the Cancel (X) button
   const handleCancelFilter = () => {
-    // Reset local inputs
     setSelectedOperator(">");
     setSelectedValue("");
     setError("");
 
-    // Remove the pending extra filter from global context
     setExtraFilter(null);
     setIsExtraFilterValid(true);
   };
 
-  // This effect updates the global "isExtraFilterValid" state based on the current extraFilter type and the user's input.
-  // This ensures the validation applies ONLY to alphanumeric filters.
+  // Keep the Search button disabled while an alphanumeric value is pending
   useEffect(() => {
-    // If an alphanumeric extra filter is active (not yet added), disable Search
     if (extraFilter?.type === "alphanumeric") {
       setIsExtraFilterValid(false);
       return;
     }
 
-    // Otherwise Search can be enabled (unless other logic disables it elsewhere)
     setIsExtraFilterValid(true);
   }, [extraFilter, setIsExtraFilterValid]);
 
@@ -202,7 +188,7 @@ export default function FilterTermsExtra() {
         justifyContent: "center",
         alignItems: "center",
         flexWrap: "wrap",
-        mt: isSingleNonGenomic ? 2 : 0,
+        mt: isSingleEntryType ? 2 : 0,
         borderRadius: "10px",
         border: "1px solid #E0E0E0",
         padding: "15px 15px",
@@ -231,9 +217,11 @@ export default function FilterTermsExtra() {
             border: `1px solid ${config.ui.colors.primary}`,
             borderRadius: "10px",
             transition: "flex 0.3s ease",
+
             "& .MuiOutlinedInput-notchedOutline": {
               border: "none",
             },
+
             "& .MuiSelect-select": {
               padding: "5px 12px",
             },
@@ -250,9 +238,11 @@ export default function FilterTermsExtra() {
               "& .MuiInputBase-root": {
                 border: "none",
               },
+
               "& fieldset": {
                 border: "none",
               },
+
               p: 0,
             }}
           >
@@ -265,6 +255,7 @@ export default function FilterTermsExtra() {
           </Select>
         </FormControl>
       </Box>
+
       {/* Input field for alphanumeric value */}
       <Box
         sx={{
@@ -289,17 +280,8 @@ export default function FilterTermsExtra() {
           }}
         />
       </Box>
+
       {/* Add + Cancel buttons */}
-      {/* <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          fontFamily: '"Open Sans", sans-serif',
-          padding: "0px",
-          maxWidth: "30px",
-          gap: 2,
-        }}
-      > */}
       <Box
         sx={{
           display: "flex",
@@ -328,6 +310,7 @@ export default function FilterTermsExtra() {
             minWidth: "30px",
             minHeight: "30px",
             padding: 0,
+
             "&:hover": {
               backgroundColor: config.ui.colors.primary,
               color: "white",
@@ -345,7 +328,7 @@ export default function FilterTermsExtra() {
             fontSize: "14px",
             fontWeight: 400,
             fontFamily: '"Open Sans", sans-serif',
-            border: `1px solid #e0e0e0`,
+            border: "1px solid #e0e0e0",
             backgroundColor: "white",
             color: "#9e9e9e",
             borderRadius: "50%",
@@ -354,6 +337,7 @@ export default function FilterTermsExtra() {
             minWidth: "30px",
             minHeight: "30px",
             padding: 0,
+
             "&:hover": {
               backgroundColor: "#8B0000",
               color: "white",

@@ -31,6 +31,11 @@ export default function ResultTypeSection({
     190 + Math.max(ontologyColumnCount - 1, 0) * 70,
     400
   );
+
+  const hasManyentryTypes = entryTypes.length > 8;
+  const shouldUseWideSelector =
+    hasManyentryTypes && !isIntermediateSearchLayout && !isOntologyOnlyLayout;
+
   return (
     <>
       <Box
@@ -41,6 +46,8 @@ export default function ResultTypeSection({
               ? "100%"
               : isOntologyOnlyLayout
               ? `${ontologySelectorWidth}px`
+              : shouldUseWideSelector
+              ? "320px"
               : hasTwoColumns
               ? "240px"
               : "190px",
@@ -53,7 +60,6 @@ export default function ResultTypeSection({
             display: "flex",
             alignItems: "center",
             gap: 1,
-            mb: 1,
           }}
         >
           {/* Accounts for a title change when there is only one entry type */}
@@ -96,7 +102,10 @@ export default function ResultTypeSection({
           sx={{
             display: "flex",
             alignItems: "center",
-            mb: 2,
+            mb: 1.9,
+            justifyContent: "space-between",
+            gap: 2,
+            height: "26px",
           }}
         >
           <Typography

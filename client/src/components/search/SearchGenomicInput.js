@@ -12,7 +12,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { GENOMIC_LABELS_MAP } from "../genomic/genomicLabelHelper";
 import { useSelectedEntry } from "../../components/context/SelectedEntryContext";
 
-// This component renders an input bar for adding free-text genomic queries.
+// This component renders an input bar for adding free-text/ copy and paste genomic queries .
 // It includes a dropdown for selecting the genome assembly coming from the config,
 // a search input field, a "clear" icon to reset input, and a button to add the query.
 // When the user presses Enter or clicks the "Add" button, the query is added to the filters.
@@ -21,7 +21,6 @@ import { useSelectedEntry } from "../../components/context/SelectedEntryContext"
 export default function SearchGenomicInput({
   activeInput,
   setActiveInput,
-
   primaryDarkColor,
   assembly,
   setAssembly,
@@ -445,12 +444,10 @@ export default function SearchGenomicInput({
             height: "47px",
             borderTopLeftRadius: "999px",
             borderBottomLeftRadius: "999px",
-
             ".MuiSelect-icon": {
               color: "#fff",
               mr: 1,
             },
-
             ".MuiSelect-iconOpen": {
               transform: "none",
             },
@@ -555,17 +552,17 @@ export default function SearchGenomicInput({
          * Compact layout:
          * Hide it inside the input when the Result Type selector is visible.
          */}
+
         {action && (
           <Box
             sx={{
-              display: "flex",
+              display: "none",
               alignItems: "center",
               flexShrink: 0,
-
               [buttonsOutsideInputLayout]: {
-                display: hasEntryTypeSelector ? "none" : "flex",
+                display: "none",
+                backgroundColor: "black",
               },
-
               [mobileSearchLayout]: {
                 display: "none",
               },
@@ -677,7 +674,7 @@ export default function SearchGenomicInput({
             )}
 
             {/* Option to add the detected genomic variant */}
-            {hasGenomicBuilderQueries && (
+            {/* {hasGenomicBuilderQueries && (
               <Box
                 sx={{
                   width: "100%",
@@ -738,12 +735,89 @@ export default function SearchGenomicInput({
                   </>
                 ) : (
                   <>
-                    Add <b>genomic query:</b> <code>{genomicDraft}</code>
+                    Add <b>sequence query:</b> <code>{genomicDraft}</code>
+                  </>
+                )}
+              </Box>
+            )} */}
+            {/* Option to add the detected genomic variant */}
+            {hasGenomicBuilderQueries && (
+              <Box
+                onClick={(event) => {
+                  // Prevent the parent dropdown click from submitting an invalid query.
+                  event.stopPropagation();
+
+                  if (isVariant) {
+                    commitGenomicDraft();
+                  }
+                }}
+                sx={{
+                  width: "100%",
+                  px: 3,
+                  py: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+
+                  // Blur/disable when the sequence-query structure is not detected.
+                  opacity: isVariant ? 1 : 0.4,
+                  cursor: isVariant ? "pointer" : "default",
+                }}
+              >
+                <Box
+                  sx={{
+                    position: "relative",
+                    width: 16,
+                    height: 16,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+
+                    "& .unchecked": {
+                      display: "block",
+                    },
+
+                    "& .checked": {
+                      display: "none",
+                    },
+
+                    "&:hover .unchecked": {
+                      display: isVariant ? "none" : "block",
+                    },
+
+                    "&:hover .checked": {
+                      display: isVariant ? "block" : "none",
+                    },
+                  }}
+                >
+                  <RadioButtonUncheckedIcon
+                    className="unchecked"
+                    sx={{
+                      color: isVariant ? config.ui.colors.primary : "grey",
+                      fontSize: 16,
+                    }}
+                  />
+
+                  <CheckCircleIcon
+                    className="checked"
+                    sx={{
+                      color: alpha(config.ui.colors.primary, 0.6),
+                      fontSize: 16,
+                    }}
+                  />
+                </Box>
+
+                {isVariant ? (
+                  <>
+                    Add <b>genomic variant:</b> <code>{cleanedValue}</code>
+                  </>
+                ) : (
+                  <>
+                    Add <b>sequence query:</b> <code>{genomicDraft}</code>
                   </>
                 )}
               </Box>
             )}
-
             {/* Option to open the Genomic Query Builder */}
             <Box
               sx={{

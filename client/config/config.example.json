@@ -72,7 +72,6 @@
     },
     "showLogin": false,
     "auth": {
-      "providerType": "private",
       "oidc": {
         "authority": "https://login.aai.lifescience-ri.eu/oidc",
         "autoSignIn": false,

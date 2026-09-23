@@ -58,26 +58,21 @@ export const BEACON_NETWORK_COLUMNS = [
               }}
             >
               <b>Beacon Maturity:</b> Declares the level of maturity of the
-              Beacon instance. Available values are:
+              Beacon instance.
               <br></br>
               <ul>
                 <br></br>
                 <li>
-                  <b>Development:</b> Service potentially unstable, not using
-                  real data, which availability and data should not be used in
-                  production setups.
+                  <b>Production:</b> The Beacon instance is stable, meets
+                  production-level standards, and contains real data.
                 </li>
                 <br></br>
                 <li>
-                  <b>Test:</b> The service is expected to be stable, meaning up
-                  and available, but does <b>not include real data.</b>
+                  <b>Non-production:</b> The Beacon instance is in development
+                  or testing. It may be potentially unstable and/or does not
+                  contain real data that can be trusted for real-world queries.
                 </li>
                 <br></br>
-                <li>
-                  <b>Production:</b> Service stable, at production level
-                  standards,
-                  <b> containing actual data.</b>
-                </li>
               </ul>
             </Box>
           }

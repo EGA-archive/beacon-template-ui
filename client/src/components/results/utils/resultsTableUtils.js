@@ -32,8 +32,8 @@ export const getBeaconStatusLabel = (status) => {
   const normalizedStatus = String(status).toUpperCase();
 
   if (normalizedStatus.includes("PROD")) return "Production";
-  if (normalizedStatus.includes("TEST")) return "Test";
-  if (normalizedStatus.includes("DEV")) return "Development";
+  if (normalizedStatus.includes("TEST")) return "Non Production";
+  if (normalizedStatus.includes("DEV")) return "Non Production";
 
   return status;
 };

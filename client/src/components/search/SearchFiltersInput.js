@@ -108,7 +108,6 @@ export default function SearchFiltersInput({
               backgroundColor: alpha(primaryDarkColor, 0.1),
               color: primaryDarkColor,
               cursor: "pointer",
-
               "&:hover": {
                 backgroundColor: alpha(primaryDarkColor, 0.2),
               },
@@ -133,17 +132,15 @@ export default function SearchFiltersInput({
         {action && (
           <Box
             sx={{
-              display: "flex",
+              display: "none",
               alignItems: "center",
               flexShrink: 0,
               ml: 1,
 
-              // Multi-entry layouts move the button outside from 870px downward.
               [buttonsOutsideInputLayout]: {
-                display: hasEntryTypeSelector ? "none" : "flex",
+                display: "none",
               },
 
-              // On xs, always remove the button from the input.
               [mobileSearchLayout]: {
                 display: "none",
               },

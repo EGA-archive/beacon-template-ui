@@ -52,13 +52,11 @@ export function createOidcConfig(config) {
   return {
     authority: oidc.authority,
     clientId: oidc.clientId,
-    autoSignIn: oidc.autoSignIn,
-    responseType: oidc.responseType,
-    automaticSilentRenew: oidc.automaticSilentRenew,
     redirectUri: oidc.redirectUri,
+    autoSignIn: oidc.autoSignIn,
+    responseType: "code",
+    automaticSilentRenew: oidc.automaticSilentRenew,
     scope: oidc.scope,
-    revokeAccessTokenOnSignout: oidc.revokeAccessTokenOnSignout,
-
     onSignIn: async () => {
       window.location.replace(getAuthReturnPath());
     },

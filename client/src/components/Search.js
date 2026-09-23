@@ -430,11 +430,8 @@ export default function Search({
     <Box
       sx={{
         flex: hasOneEntryTypeColumn ? 1 : "initial",
-
         display: hasOneEntryTypeColumn ? "flex" : "block",
-
         flexDirection: "column",
-
         /**
          * Put Genomic Query at the top and Filtering Terms at the bottom.
          * The remaining height becomes the dynamic space between them.
@@ -482,7 +479,11 @@ export default function Search({
         </Box>
       )}
 
-      <Box>
+      <Box
+        sx={{
+          mt: isSingleGenomic ? 3 : 0,
+        }}
+      >
         <FilteringTermsSection
           hasGenomicSectionAbove={showGenomicSearch}
           hasOneEntryTypeColumn={hasOneEntryTypeColumn}
@@ -522,13 +523,6 @@ export default function Search({
            * Temporary debugging colors.
            * Remove these when the responsive layout is complete.
            */
-          // backgroundColor: {
-          //   lg: "lightsalmon",
-          //   md: "pink",
-          //   sm: "lightgreen",
-          //   xs: "lightblue",
-          // },
-
           [SEARCH_MARGIN_QUERY]: {
             mb: 0,
           },
