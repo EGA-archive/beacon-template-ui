@@ -1,6 +1,6 @@
 {
-  "beaconType": "networkBeacon",
-  "apiUrl": "https://yourBeaconURL",
+  "beaconType": "singleBeacon",
+  "apiUrl": "https://beacon-elixir-demo.ega-archive.org/api",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
   "variationType": [
     { "jsonName": "SNP", "displayName": "SNP" },
@@ -13,6 +13,7 @@
   ],
   "queryCoordinatesAre0Based": true,
   "ui": {
+    "title": "EGA Beacon Template UI - egadev test",
     "favicon": "/assets/logos/favicon.ico",
     "colors": {
       "primary": "#3176B1",
@@ -68,18 +69,33 @@
       ]
     },
     "download": {
-      "enabled": true
+      "enabled": true,
+      "maxRecordsDownloadableLimit": 10000
+    },
+    "cookies": {
+      "enabled": true,
+      "message": "This website requires cookies, and the limited processing of your personal data in order to function. By using the site you agree to this as outlined in our Privacy Notice and Terms of Use.",
+      "buttonText": "I understand",
+      "links": [
+        {
+          "label": "Privacy Notice",
+          "url": "https://ega-archive.org/data-protection/privacy-notice/ega-website/"
+        },
+        {
+          "label": "Terms of Use",
+          "url": "https://ega-archive.org/legal-notice/"
+        }
+      ]
     },
     "showLogin": false,
     "auth": {
       "oidc": {
+        "clientId": "a5e08da0-9e30-45c4-b4c4-4c45ab8262c6",
         "authority": "https://login.aai.lifescience-ri.eu/oidc",
-        "autoSignIn": false,
-        "responseType": "code",
-        "automaticSilentRenew": true,
         "redirectUri": "http://localhost:3000",
-        "scope": "openid profile email ga4gh_passport_v1 offline_access",
-        "revokeAccessTokenOnSignout": true
+        "autoSignIn": false,
+        "automaticSilentRenew": true,
+        "scope": "openid profile email ga4gh_passport_v1 offline_access"
       }
     },
     "entryTypesOrder": [
@@ -89,9 +105,10 @@
       "analyses",
       "cohorts",
       "datasets",
-      "runs"
+      "runs",
+      "patients",
+      "collections"
     ],
-
     "commonFilters": {
       "filterCategories": [
         "Demographics",
@@ -199,14 +216,95 @@
       }
     },
     "genomicAnnotations": {
-      "visibleGenomicCategories": [
+      "annotationCategories": [
         "SNP Examples",
         "Genomic Variant Examples",
         "Protein Examples",
-        "Molecular Effect"
-      ]
-    },
+        "Molecular Effects"
+      ],
 
+      "annotationLabels": {
+        "SNP Examples": [
+          {
+            "queryType": "Gene ID",
+            "queryParams": {
+              "geneId": "CHR_START-DUXAP8"
+            }
+          },
+          {
+            "queryType": "Sequence Query",
+            "queryParams": {
+              "assemblyId": "GRCh37",
+              "referenceName": "11",
+              "start": [87202],
+              "referenceBases": "G",
+              "alternateBases": "T"
+            }
+          },
+          {
+            "queryType": "Genomic Allele Query (HGVS)",
+            "queryParams": {
+              "genomicAlleleShortForm": "NC_000017.11:g.43057063G>A"
+            }
+          }
+        ],
+        "Genomic Variant Examples": [
+          {
+            "queryType": "Gene ID",
+            "queryParams": {
+              "geneId": "BRCA1",
+              "refAa": "Pro",
+              "aaPosition": "1856",
+              "altAa": "Ser"
+            }
+          },
+          {
+            "queryType": "Genomic Allele Query (HGVS)",
+            "queryParams": {
+              "genomicAlleleShortForm": "NC_000008.10:g.467881_467885delinsA"
+            }
+          },
+          {
+            "queryType": "Bracket Query",
+            "queryParams": {
+              "assemblyId": "GRCh37",
+              "referenceName": "17",
+              "start": [43045703, 43045704],
+              "end": [43045704, 43045705]
+            }
+          },
+          {
+            "queryType": "Range Query",
+            "queryParams": {
+              "assemblyId": "GRCh37",
+              "referenceName": "2",
+              "start": [343675],
+              "end": [345681]
+            }
+          }
+        ],
+        "Protein Examples": [
+          {
+            "queryType": "Gene ID",
+            "queryParams": {
+              "geneId": "BRCA1",
+              "refAa": "Glu",
+              "aaPosition": "1817",
+              "altAa": "Ter"
+            }
+          },
+          {
+            "queryType": "Gene ID",
+            "queryParams": {
+              "geneId": "BRCA2",
+              "refAa": "Val",
+              "aaPosition": "25",
+              "altAa": "Gly"
+            }
+          }
+        ]
+      }
+    },
     "genomicQueries": {
       "genomicQueryTypes": {
         "sequenceQuery": true,
@@ -214,6 +312,12 @@
         "rangeQuery": true,
         "bracketQuery": true,
         "hgvsQuery": true
+      },
+      "searchInputExample": {
+        "referenceName": "22",
+        "position": 16050527,
+        "referenceBases": "C",
+        "alternateBases": "A"
       },
       "genomicQueryBuilder": {
         "showAlternateBases": true,
