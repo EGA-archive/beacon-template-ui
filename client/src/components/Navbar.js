@@ -114,6 +114,7 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
                   alt="Logo"
                   data-cy="navbar-logo"
                   sx={{
+                    height: "42px",
                     maxHeight: "42px",
                     width: "auto",
                     objectFit: "contain",

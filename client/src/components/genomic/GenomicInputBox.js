@@ -134,7 +134,7 @@ export default function GenomicInputBox({
               value={option.jsonName}
               sx={{ fontSize: "12px" }}
             >
-              {option.displayName}
+              {option.displayName || option.jsonName}
             </MenuItem>
           ))}
         </Select>

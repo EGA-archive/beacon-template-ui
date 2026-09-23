@@ -53,7 +53,7 @@ const QUERY_TYPE_LABELS = {
 };
 
 const enabledQueryTypes = Object.entries(
-  config.ui.genomicQueries.genomicQueryTypes
+  config.ui.genomicQueries?.genomicQueryTypes || {}
 )
   .filter(([_, enabled]) => enabled)
   .map(([key]) => ({

@@ -46,7 +46,8 @@ export default function Founders() {
               src={logosHelper(logo.src)} // helper handles local or external logo paths
               alt={`Founder ${index + 1}`}
               sx={{
-                maxHeight: "37px", // keeps logos visually aligned
+                height: "37px", // keeps logos visually aligned
+                maxHeight: "37px",
                 maxWidth: "140px", // prevents logos from becoming too wide
                 width: "auto",
                 objectFit: "contain", // ensures the logo keeps its proportions

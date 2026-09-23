@@ -86,7 +86,8 @@ export default function GenomicQueryBuilderHelp({
   ];
 
   const enabledCards = cards.filter(
-    (card) => config.ui.genomicQueries.genomicQueryTypes[card.configKey]
+    (card) =>
+      config.ui.genomicQueries?.genomicQueryTypes?.[card.configKey] === true
   );
 
   const helpRowGridStyles = {

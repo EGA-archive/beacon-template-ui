@@ -55,7 +55,7 @@ export default function GenomicAnnotations() {
   );
 
   const molecularEffectsToRender = useMemo(() => {
-    const predefined = filterLabels["Molecular Effect"] || [];
+    const predefined = filterLabels["Molecular Effects"] || [];
 
     /**
      * Convert a backend molecular effect into the same shape
@@ -128,22 +128,16 @@ export default function GenomicAnnotations() {
   }, [filteredBackendEffects]);
 
   // All possible genomic annotation categories available in the UI
-  const allCategories = [
-    "SNP Examples",
-    "Genomic Variant Examples",
-    "Protein Examples",
-    "Molecular Effect",
-  ];
-
-  // Categories that the deployer chose to show in the UI (defined in config.json)
-  const visibleFromConfig =
+  const allCategories =
     config.ui.genomicAnnotations?.annotationCategories || [];
 
-  // Filter categories based on deployer configuration and backend availability
+  // Filter configured categories based on backend availability.
   const categoriesToRender = allCategories.filter((cat) => {
-    if (cat === "Molecular Effect" && filteredBackendEffects.length === 0)
+    if (cat === "Molecular Effects" && filteredBackendEffects.length === 0) {
       return false;
-    return visibleFromConfig.includes(cat);
+    }
+
+    return true;
   });
 
   // Tracks which accordion category is open
@@ -165,9 +159,13 @@ export default function GenomicAnnotations() {
   });
 
   // Handles accordion expand/collapse state by replacing the whole state with one open panel
-  const handleAccordion = (cat) => (_, isExpanded) =>
-    setExpanded({ [cat]: isExpanded });
-
+  const handleAccordion = (cat) => (_, isExpanded) => {
+    const nextExpanded = {};
+    allCategories.forEach((category) => {
+      nextExpanded[category] = category === cat ? isExpanded : false;
+    });
+    setExpanded(nextExpanded);
+  };
   // Main click handler for selecting molecular effects or genomic example filters
   // This function decides WHAT to do depending on the type of the clicked filter.
   // It supports three cases:
@@ -200,7 +198,7 @@ export default function GenomicAnnotations() {
           l.label?.trim()
         );
         const items =
-          topic === "Molecular Effect"
+          topic === "Molecular Effects"
             ? molecularEffectsToRender
             : staticLabels || [];
 
