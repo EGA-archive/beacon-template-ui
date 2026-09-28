@@ -26,16 +26,24 @@ const httpsUrl = Joi.string()
 const relativePath = Joi.string().uri({ relativeOnly: true });
 
 /**
- * Accepted reference names:
- * 1-22, X, Y, M, MT
- * Optionally prefixed with "chr".
+ * Genomic reference name.
+ * The value must be a non-empty string.
+ * Valid reference names are determined by
+ * genomicQueries.chromosomeLibrary and are validated
+ * later through cross-field configuration validation.
+ * An optional "chr" prefix is handled during that validation.
  */
-const referenceName = Joi.string()
-  .pattern(/^(?:chr)?(?:[1-9]|1[0-9]|2[0-2]|X|Y|M|MT)$/)
-  .messages({
-    "string.pattern.base":
-      'referenceName must be 1-22, X, Y, M or MT, optionally prefixed with "chr"',
-  });
+const referenceName = nonEmptyString;
+
+/**
+ * Normalizes a reference name before comparing it
+ * with genomicQueries.chromosomeLibrary.
+ *
+ * "chr" is treated as an optional prefix and comparison
+ * is case-insensitive.
+ */
+const normalizeReferenceName = (value) =>
+  value.replace(/^chr/i, "").toUpperCase();
 
 /**
  * Uppercase IUPAC nucleotide codes, excluding U.
@@ -183,7 +191,6 @@ const oidcSchema = Joi.object({
 
   /**
    * Automatically redirect to the provider when silent renewal fails.
-   *
    * oidc-react defaults this to true.
    */
   autoSignOut: Joi.boolean().optional().messages({
@@ -226,28 +233,77 @@ const requiredAuthSchema = authSchema
 
 /**
  * Genomic query type switches.
- *
- * The relationship requiring at least one enabled query type
- * is validated at UI level when a genomic variation entry type
- * is present.
+ * The relationship requiring at least one enabled query type is validated at UI level when a genomic variation entry type is present.
  */
 const genomicQueryTypesSchema = Joi.object({
-  sequenceQuery: Joi.boolean(),
-  geneId: Joi.boolean(),
-  rangeQuery: Joi.boolean(),
-  bracketQuery: Joi.boolean(),
-  hgvsQuery: Joi.boolean(),
+  sequenceQuery: Joi.boolean().default(true),
+  geneId: Joi.boolean().default(true),
+  rangeQuery: Joi.boolean().default(true),
+  bracketQuery: Joi.boolean().default(true),
+  hgvsQuery: Joi.boolean().default(true),
 });
 
 /**
  * Genomic query configuration.
- *
- * The query builder is optional.
- * If provided, its internal rules still apply.
+ * chromosomeLibrary, showAminoacidChange and aminoAcidNotation are shared across genomic-query features.
+ * The Genomic Query Builder configuration is required when genomicQueries is configured.
  */
 const genomicQueriesSchema = Joi.object({
+  /**
+   * Shared chromosome / reference-name library.
+   * This is defined at genomicQueries level because it is used by the genomic input, genomic annotations and query builder.
+   * Cross-validation against referenceName is handled separately.
+   */
+  chromosomeLibrary: Joi.array()
+    .items(nonEmptyString)
+    .min(1)
+    .unique()
+    .required()
+    .messages({
+      "any.required": "chromosomeLibrary is required under genomicQueries",
+      "array.min": "At least one chromosome must be provided",
+      "array.unique": "chromosomeLibrary values must be unique",
+    }),
+
+  /**
+   * Controls whether amino-acid change inputs are available.
+   * This setting is shared by the Genomic Query Builder and genomic annotation examples.
+   */
+  showAminoacidChange: Joi.boolean().default(true),
+
+  /**
+   * Amino-acid notation shared by the Genomic Query Builder and genomic annotation examples.
+   * Required when amino-acid changes are enabled.
+   * It may remain configured when amino-acid changes are disabled.
+   */
+  aminoAcidNotation: Joi.when("showAminoacidChange", {
+    is: true,
+
+    then: Joi.array()
+      .items(nonEmptyString)
+      .min(1)
+      .unique()
+      .required()
+      .messages({
+        "any.required":
+          "aminoAcidNotation is required when showAminoacidChange is true",
+        "array.min":
+          "At least one amino-acid notation must be provided when showAminoacidChange is true",
+        "array.unique": "aminoAcidNotation values must be unique",
+      }),
+
+    otherwise: Joi.array().items(nonEmptyString).min(1).unique().optional(),
+  }),
+
+  /**
+   * Query types available in the UI.
+   */
   genomicQueryTypes: genomicQueryTypesSchema.required(),
 
+  /**
+   * Optional example displayed in the genomic search input.
+   * When provided, all four fields are required.
+   */
   searchInputExample: Joi.object({
     referenceName: referenceName.required(),
 
@@ -262,36 +318,18 @@ const genomicQueriesSchema = Joi.object({
     alternateBases: nucleotideSequence.required(),
   }).optional(),
 
+  /**
+   * Genomic Query Builder configuration.
+   * The builder is required when genomicQueries is configured.
+   * Builder-specific settings remain nested here.
+   */
   genomicQueryBuilder: Joi.object({
     showAlternateBases: Joi.boolean().default(true),
-
-    showAminoacidChange: Joi.boolean().default(true),
-
-    chromosomeLibrary: Joi.array()
-      .items(nonEmptyString)
-      .min(1)
-      .required()
-      .messages({
-        "any.required":
-          "chromosomeLibrary is required under genomicQueryBuilder",
-      }),
-
-    aminoAcidNotation: Joi.alternatives().conditional("showAminoacidChange", {
-      is: true,
-
-      then: Joi.array().items(nonEmptyString).min(1).required().messages({
-        "any.required":
-          "aminoAcidNotation is required when showAminoacidChange is true",
-      }),
-
-      otherwise: Joi.forbidden(),
-    }),
-  }).optional(),
+  }).required(),
 });
 
 /**
  * Genomic annotation query examples.
- *
  * Categories are configurable.
  * Each example contains:
  * - queryType
@@ -303,7 +341,6 @@ const genomicQueriesSchema = Joi.object({
 
 const geneIdAnnotationSchema = Joi.object({
   label: nonEmptyString.optional(),
-
   queryType: Joi.string().valid("Gene ID").required(),
 
   queryParams: Joi.object({
@@ -653,7 +690,8 @@ const schema = Joi.object({
     /**
      * Common filters.
      * Every filterLabels key must correspond to a category declared in filterCategories.
-     * A declared category may exist without configured labels.
+     * A declared category may contain an empty filter array.
+     * If all configured categories contain no filters, the Common Filters section is hidden by the UI.
      */
     commonFilters: Joi.object({
       filterCategories: Joi.array()
@@ -680,11 +718,8 @@ const schema = Joi.object({
                     "custom"
                   )
                   .required(),
-
-                key: Joi.string().trim().min(1).max(100).optional(),
-
-                label: Joi.string().trim().min(1).max(100).optional(),
-
+                key: Joi.string().trim().min(1).max(100).required(),
+                label: Joi.string().trim().min(1).max(100).required(),
                 scopes: Joi.array().items(nonEmptyString).optional(),
               })
             )
@@ -693,6 +728,10 @@ const schema = Joi.object({
         .required(),
     })
       .custom((value, helpers) => {
+        /**
+         * Every filterLabels key must correspond to a category
+         * declared in filterCategories.
+         */
         const unknownCategories = Object.keys(value.filterLabels).filter(
           (category) => !value.filterCategories.includes(category)
         );
@@ -705,23 +744,30 @@ const schema = Joi.object({
           );
         }
 
+        /**
+         * When commonFilters is configured, at least one
+         * actual filter must be provided.
+         */
+        const hasConfiguredFilter = Object.values(value.filterLabels).some(
+          (filters) => filters.length > 0
+        );
+
+        if (!hasConfiguredFilter) {
+          return helpers.message(
+            "commonFilters must contain at least one configured filter"
+          );
+        }
+
         return value;
       }, "Filter category validation")
       .optional(),
 
     /**
      * Genomic annotations
-     *
      * Category names and their order are configurable.
-     * A maximum of three configurable categories is supported,
-     * plus the optional code-provided "Molecular Effects" category.
-     *
-     * Molecular Effects can be enabled through annotationCategories,
-     * but its labels are provided by the application/backend and
-     * must not be configured inside annotationLabels.
-     *
-     * Every annotationLabels key must correspond to a category
-     * declared in annotationCategories.
+     * A maximum of three configurable categories is supported, plus the optional code-provided "Molecular Effects" category.
+     * Molecular Effects can be enabled through annotationCategories, but its labels are provided by the application/backend and must not be configured inside annotationLabels.
+     * Every annotationLabels key must correspond to a category declared in annotationCategories.
      */
     genomicAnnotations: Joi.object({
       annotationCategories: Joi.array()
@@ -758,8 +804,7 @@ const schema = Joi.object({
         );
 
         /**
-         * Molecular Effects is populated by application/backend logic
-         * and therefore cannot be manually configured in annotationLabels.
+         * Molecular Effects is populated by application/backend logic and therefore cannot be manually configured in annotationLabels.
          */
         if (
           Object.prototype.hasOwnProperty.call(
@@ -783,8 +828,7 @@ const schema = Joi.object({
         }
 
         /**
-         * Every annotationLabels key must exist
-         * in annotationCategories.
+         * Every annotationLabels key must exist in annotationCategories.
          */
         const unknownCategories = Object.keys(annotationLabels).filter(
           (category) => !value.annotationCategories.includes(category)
@@ -799,11 +843,8 @@ const schema = Joi.object({
         }
 
         /**
-         * Every configurable category must have
-         * a matching annotationLabels array.
-         *
-         * Molecular Effects is excluded because its values
-         * come from the application/backend.
+         * Every configurable category must have a matching annotationLabels array.
+         * Molecular Effects is excluded because its values come from the application/backend.
          */
         const missingCategories = value.annotationCategories.filter(
           (category) =>
@@ -848,10 +889,8 @@ const schema = Joi.object({
 
     /**
      * Genomic queries
-     *
      * This section is optional at schema-property level.
-     * The UI-level relationship validation below makes it mandatory
-     * when a genomic variation entry type is present.
+     * The UI-level relationship validation below makes it mandatory when a genomic variation entry type is present.
      */
     genomicQueries: genomicQueriesSchema.optional(),
   })
@@ -862,7 +901,7 @@ const schema = Joi.object({
 
       if (hasGenomicVariants && !value.genomicQueries) {
         return helpers.message(
-          "genomicQueries is required when g_variants is present in entryTypesOrder"
+          "genomicQueries is required when a recognized genomic variation entry type is present in entryTypesOrder"
         );
       }
 
@@ -877,8 +916,7 @@ const schema = Joi.object({
       }
 
       /**
-       * No genomic queries or configured genomic annotation examples
-       * require further query-type validation.
+       * No genomic queries or configured genomic annotation examples require further query-type validation.
        */
       if (!value.genomicQueries) {
         return value;
@@ -891,8 +929,7 @@ const schema = Joi.object({
       }
 
       /**
-       * When genomic variation is explicitly configured,
-       * at least one genomic query type must be enabled.
+       * When genomic variation is explicitly configured, at least one genomic query type must be enabled.
        */
       if (hasGenomicVariants) {
         const hasEnabledQueryType = Object.values(queryTypes).some(
@@ -901,14 +938,13 @@ const schema = Joi.object({
 
         if (!hasEnabledQueryType) {
           return helpers.message(
-            "At least one genomic query type must be enabled when g_variants is present"
+            "At least one genomic query type must be enabled when a recognized genomic variation entry type is present"
           );
         }
       }
 
       /**
-       * Genomic annotation examples may only use query types
-       * that are enabled under genomicQueries.genomicQueryTypes.
+       * Genomic annotation examples may only use query types that are enabled under genomicQueries.genomicQueryTypes.
        */
       const annotationLabels = value.genomicAnnotations?.annotationLabels || {};
 
@@ -927,17 +963,68 @@ const schema = Joi.object({
 
       return value;
     }, "Genomic query configuration validation")
+    .custom((value, helpers) => {
+      if (!value.genomicQueries) {
+        return value;
+      }
+
+      const chromosomeLibrary = value.genomicQueries.chromosomeLibrary || [];
+
+      const normalizedChromosomeLibrary = new Set(
+        chromosomeLibrary.map(normalizeReferenceName)
+      );
+
+      /**
+       * searchInputExample.referenceName must exist in the shared chromosomeLibrary.
+       */
+      const searchInputReferenceName =
+        value.genomicQueries.searchInputExample?.referenceName;
+
+      if (
+        searchInputReferenceName &&
+        !normalizedChromosomeLibrary.has(
+          normalizeReferenceName(searchInputReferenceName)
+        )
+      ) {
+        return helpers.message(
+          `searchInputExample referenceName "${searchInputReferenceName}" is not listed in genomicQueries.chromosomeLibrary`
+        );
+      }
+
+      /**
+       * Any genomic annotation example containing referenceName must use a value configured in chromosomeLibrary.
+       * This applies to Sequence, Range and Bracket queries.
+       */
+      const annotationLabels = value.genomicAnnotations?.annotationLabels || {};
+
+      for (const [category, annotations] of Object.entries(annotationLabels)) {
+        for (const annotation of annotations) {
+          const annotationReferenceName = annotation.queryParams?.referenceName;
+
+          if (
+            annotationReferenceName &&
+            !normalizedChromosomeLibrary.has(
+              normalizeReferenceName(annotationReferenceName)
+            )
+          ) {
+            return helpers.message(
+              `Genomic annotation category "${category}" uses referenceName "${annotationReferenceName}", but it is not listed in genomicQueries.chromosomeLibrary`
+            );
+          }
+        }
+      }
+
+      return value;
+    }, "Genomic reference-name validation")
 
     .custom((value, helpers) => {
       if (!value.genomicQueries) {
         return value;
       }
 
-      const aminoAcidNotation =
-        value.genomicQueries?.genomicQueryBuilder?.aminoAcidNotation || [];
+      const aminoAcidNotation = value.genomicQueries?.aminoAcidNotation || [];
 
-      const showAminoacidChange =
-        value.genomicQueries?.genomicQueryBuilder?.showAminoacidChange;
+      const showAminoacidChange = value.genomicQueries?.showAminoacidChange;
 
       const annotationLabels = value.genomicAnnotations?.annotationLabels || {};
 
@@ -947,19 +1034,19 @@ const schema = Joi.object({
 
           if ((refAa || altAa) && showAminoacidChange !== true) {
             return helpers.message(
-              `Genomic annotation category "${category}" uses an amino-acid change, but showAminoacidChange is not enabled in genomicQueryBuilder`
+              `Genomic annotation category "${category}" uses an amino-acid change, but showAminoacidChange is not enabled in genomicQueries`
             );
           }
 
           if (refAa && !aminoAcidNotation.includes(refAa)) {
             return helpers.message(
-              `Genomic annotation category "${category}" uses refAa "${refAa}", but it is not listed in genomicQueryBuilder.aminoAcidNotation`
+              `Genomic annotation category "${category}" uses refAa "${refAa}", but it is not listed in genomicQueries.aminoAcidNotation`
             );
           }
 
           if (altAa && !aminoAcidNotation.includes(altAa)) {
             return helpers.message(
-              `Genomic annotation category "${category}" uses altAa "${altAa}", but it is not listed in genomicQueryBuilder.aminoAcidNotation`
+              `Genomic annotation category "${category}" uses altAa "${altAa}", but it is not listed in genomicQueries.aminoAcidNotation`
             );
           }
         }
@@ -995,14 +1082,12 @@ const schema = Joi.object({
   }, "Genomic annotation assembly validation")
   .prefs({
     /**
-     * Reject values such as "true" instead of silently
-     * converting them to booleans.
+     * Reject values such as "true" instead of silently converting them to booleans.
      */
     convert: false,
 
     /**
-     * Collect all validation errors instead of stopping
-     * at the first one.
+     * Collect all validation errors instead of stopping at the first one.
      */
     abortEarly: false,
   });
