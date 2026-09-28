@@ -3,15 +3,10 @@ import config from "../../config/runtimeConfig";
 
 const minimumCoordinate = config.queryCoordinatesAre0Based ?? true ? 0 : 1;
 
-// Yup base pattern for Ref/Alt bases — allows IUPAC codes (excluding U), '.' and '-'
-export const basePattern = /^[ACGTRYSWKMBDHVN.\-]+$/;
+export const basePattern = /^(?:[ACGTRYSWKMBDHVN]+|[.-])$/;
 
 // Chromosome validator:
-// Accepts a variety of chromosome formats:
-// - Standard numeric chromosomes: "1" to "22"
-// - Sex chromosomes: "X", "Y" (case-insensitive)
 // - With or without "chr" prefix: e.g. "chr1", "chrX"
-// - RefSeq identifiers: starting with "refseq:" or "nc_"
 
 // Chromosome validator (dynamic from config)
 export const chromosomeValidator = Yup.string()
@@ -22,14 +17,16 @@ export const chromosomeValidator = Yup.string()
     function (input) {
       if (!input) return false;
 
-      const library =
-        config.ui.genomicQueries.genomicQueryBuilder.chromosomeLibrary;
+      const library = config.ui.genomicQueries.chromosomeLibrary;
 
-      // Normalize input (trim, uppercase)
-      const normalized = input.trim().toUpperCase();
+      // Normalize the optional "chr" prefix and compare case-insensitively.
+      const normalized = input.trim().replace(/^chr/i, "").toUpperCase();
 
-      // Only allow exact matches from library from the config
-      return library.map((c) => c.toUpperCase()).includes(normalized);
+      const normalizedLibrary = library.map((chromosome) =>
+        chromosome.trim().replace(/^chr/i, "").toUpperCase()
+      );
+
+      return normalizedLibrary.includes(normalized);
     }
   );
 

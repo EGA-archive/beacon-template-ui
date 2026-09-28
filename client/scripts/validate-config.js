@@ -4,7 +4,7 @@ const schema = require("../src/config/schema");
 
 const configPath = process.argv[2]
   ? path.resolve(process.argv[2])
-  : path.resolve(__dirname, "../public/config/config.json");
+  : path.resolve(__dirname, "../config/config.json");
 
 try {
   const rawConfig = fs.readFileSync(configPath, "utf8");

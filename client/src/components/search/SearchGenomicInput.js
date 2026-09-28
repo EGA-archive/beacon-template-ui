@@ -120,8 +120,10 @@ export default function SearchGenomicInput({
 
   const hasGenomicBuilderQueries = enabledBuilderQueries.length > 0;
 
-  const IUPAC_BASE_PATTERN = /^[ACGTUNRYSWKMBDHV\-.]+$/i;
-  const IUPAC_BASE_CLASS = "ACGTUNRYSWKMBDHV";
+  // IUPAC nucleotide codes used by the free-text genomic search.
+  // U is excluded because genomic sequence queries use DNA notation.
+  const IUPAC_BASE_PATTERN = /^[ACGTRYSWKMBDHVN]+$/;
+  const IUPAC_BASE_CLASS = "ACGTRYSWKMBDHVN";
 
   // Detect and normalize genomic variant format (e.g., 17:7674945G>A -> 17-7674945-G-A)
   const detectAndCleanVariant = (
@@ -170,7 +172,7 @@ export default function SearchGenomicInput({
     // Step 2: If ref/alt bases are stuck together (e.g., G>A → G-A)
     const withSplitBases = normalised.replace(
       new RegExp(
-        `(\\d+)([${IUPAC_BASE_CLASS}\\-.]+)-([${IUPAC_BASE_CLASS}\\-.]+)$`,
+        `(\\d+)([${IUPAC_BASE_CLASS}]+)-([${IUPAC_BASE_CLASS}]+)$`,
         "i"
       ),
       "$1-$2-$3"
@@ -179,8 +181,8 @@ export default function SearchGenomicInput({
     // Step 3: Final cleanup and uppercasing
     const cleaned = withSplitBases
       .toUpperCase()
-      .replace(/\./g, "")
-      .replace(/\//g, "")
+      // .replace(/\./g, "")
+      // .replace(/\//g, "")
       .replace(/\t+/g, "-")
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-")
@@ -193,7 +195,7 @@ export default function SearchGenomicInput({
       .join("|");
 
     const variantRegex = new RegExp(
-      `^(?:CHR)?(?:${chromPattern})-\\d+-[ACGTUNRYSWKMBDHV\\-.]+-[ACGTUNRYSWKMBDHV\\-.]+$`,
+      `^(?:CHR)?(?:${chromPattern})-\\d+-[${IUPAC_BASE_CLASS}]+-[${IUPAC_BASE_CLASS}]+$`,
       "i"
     );
 
@@ -216,10 +218,15 @@ export default function SearchGenomicInput({
   const validateGenomicVariant = (cleanedValue, chromosomeLibrary) => {
     const [chrom, pos, ref, alt] = cleanedValue.split("-");
 
-    const validChromosomes = chromosomeLibrary.map((c) => c.toUpperCase());
+    const normalizedChromosome = chrom.replace(/^chr/i, "").toUpperCase();
+
+    const validChromosomes = chromosomeLibrary.map((chromosome) =>
+      chromosome.replace(/^chr/i, "").toUpperCase()
+    );
+
     const basePattern = IUPAC_BASE_PATTERN;
 
-    const invalidChromosome = !validChromosomes.includes(chrom.toUpperCase());
+    const invalidChromosome = !validChromosomes.includes(normalizedChromosome);
 
     const invalidBases = !basePattern.test(ref) || !basePattern.test(alt);
 
@@ -241,7 +248,7 @@ export default function SearchGenomicInput({
   const { isVariant, cleanedValue, detectedAssembly } = detectAndCleanVariant(
     genomicDraft,
     config?.assemblyId ?? [],
-    config?.ui?.genomicQueries?.genomicQueryBuilder?.chromosomeLibrary ?? []
+    config?.ui?.genomicQueries?.chromosomeLibrary ?? []
   );
 
   // Keep dropdown synced with detected assembly
@@ -283,7 +290,7 @@ export default function SearchGenomicInput({
   // Commit the draft query to filters
   const commitGenomicDraft = () => {
     const chromosomeLibrary =
-      config?.ui?.genomicQueries?.genomicQueryBuilder?.chromosomeLibrary ?? [];
+      config?.ui?.genomicQueries?.chromosomeLibrary ?? [];
 
     const { isVariant, cleanedValue, detectedAssembly } = detectAndCleanVariant(
       genomicDraft,
@@ -401,7 +408,6 @@ export default function SearchGenomicInput({
         flexDirection: "column",
         flex: activeInput === "genomic" ? 1 : 0.3,
         fontSize: "12px",
-
         mt: hasOneEntryTypeColumn
           ? 1
           : isGenomicDescriptionMultiline
@@ -548,7 +554,6 @@ export default function SearchGenomicInput({
         {/*
          * Normal layout:
          * Keep the Genomic Query Builder button inside the input.
-         *
          * Compact layout:
          * Hide it inside the input when the Result Type selector is visible.
          */}
@@ -673,73 +678,6 @@ export default function SearchGenomicInput({
               </Box>
             )}
 
-            {/* Option to add the detected genomic variant */}
-            {/* {hasGenomicBuilderQueries && (
-              <Box
-                sx={{
-                  width: "100%",
-                  px: 3,
-                  py: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                }}
-              >
-                <Box
-                  sx={{
-                    position: "relative",
-                    width: 16,
-                    height: 16,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: isVariant ? "pointer" : "default",
-
-                    "& .unchecked": {
-                      display: "block",
-                    },
-
-                    "& .checked": {
-                      display: "none",
-                    },
-
-                    "&:hover .unchecked": {
-                      display: isVariant ? "none" : "block",
-                    },
-
-                    "&:hover .checked": {
-                      display: isVariant ? "block" : "none",
-                    },
-                  }}
-                >
-                  <RadioButtonUncheckedIcon
-                    className="unchecked"
-                    sx={{
-                      color: isVariant ? config.ui.colors.primary : "grey",
-                      fontSize: 16,
-                    }}
-                  />
-
-                  <CheckCircleIcon
-                    className="checked"
-                    sx={{
-                      color: alpha(config.ui.colors.primary, 0.6),
-                      fontSize: 16,
-                    }}
-                  />
-                </Box>
-
-                {isVariant ? (
-                  <>
-                    Add <b>genomic variant:</b> <code>{cleanedValue}</code>
-                  </>
-                ) : (
-                  <>
-                    Add <b>sequence query:</b> <code>{genomicDraft}</code>
-                  </>
-                )}
-              </Box>
-            )} */}
             {/* Option to add the detected genomic variant */}
             {hasGenomicBuilderQueries && (
               <Box

@@ -123,8 +123,9 @@ export default function HomePage({
   // Check if Common Filters should be shown based on config
   const hasCommonFiltersConfig =
     !!config.ui?.commonFilters?.filterCategories?.length &&
-    !!config.ui?.commonFilters?.filterLabels &&
-    Object.keys(config.ui.commonFilters.filterLabels).length > 0;
+    Object.values(config.ui?.commonFilters?.filterLabels || {}).some(
+      (filters) => filters?.length > 0
+    );
 
   const [activeInput, setActiveInput] = useState(null);
 

@@ -157,8 +157,7 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
               </Box>
             )}
 
-            {config.ui.genomicQueries.genomicQueryBuilder
-              .showAminoacidChange && (
+            {config.ui.genomicQueries.showAminoacidChange && (
               <Box sx={{ flex: "1 1 200px" }}>
                 <GenomicInputBox
                   name="aminoacidChange"

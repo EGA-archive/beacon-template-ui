@@ -201,8 +201,7 @@ export default function GenomicLocationRage({
             )}
 
             {/* Aminoacid Change text input */}
-            {config.ui.genomicQueries.genomicQueryBuilder
-              .showAminoacidChange && (
+            {config.ui.genomicQueries.showAminoacidChange && (
               <Box sx={{ flex: "1 1 200px" }}>
                 <GenomicInputBox
                   name="aminoacidChange"
