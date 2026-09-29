@@ -279,9 +279,7 @@ export default function Search({
 
   /**
    * Update the active input when the selected Entry Type changes.
-   *
-   * Also mark the query as changed when the user selects a different
-   * Entry Type after already running a search.
+   * Also mark the query as changed when the user selects a different Entry Type after already running a search.
    */
   useEffect(() => {
     setActiveInput(selectedPathSegment === "g_variants" ? "genomic" : "filter");
@@ -518,11 +516,6 @@ export default function Search({
           boxShadow: "0px 8px 11px 0px #9BA0AB24",
           p: "24px",
           backgroundColor: "#FFFFFF",
-
-          /**
-           * Temporary debugging colors.
-           * Remove these when the responsive layout is complete.
-           */
           [SEARCH_MARGIN_QUERY]: {
             mb: 0,
           },

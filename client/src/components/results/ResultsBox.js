@@ -6,9 +6,7 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 export default function ResultsBox() {
   const { lastSearchedPathSegment } = useSelectedEntry();
 
-  const shouldShowHiddenColumnsMessage = !["cohorts", "datasets"].includes(
-    lastSearchedPathSegment
-  );
+  const shouldShowHiddenColumnsMessage = lastSearchedPathSegment !== "cohorts";
 
   return (
     <Box

@@ -1,5 +1,5 @@
 import { COMMON_MESSAGES } from "../../common/CommonMessage";
-import { GENOMIC_LABELS_MAP } from "../genomicLabelHelper";
+import { buildGenomicLabel } from "../genomicLabelHelper";
 
 // Custom hook that centralizes the click logic for Genomic Annotation examples.
 //
@@ -60,13 +60,7 @@ export function useGenomicAnnotationClick({
       /**
        * Build the readable label displayed in Query Applied.
        */
-      const combinedLabel = validEntries
-        .map(([key, value]) => {
-          const displayKey = GENOMIC_LABELS_MAP[key] || key;
-
-          return `${displayKey}: ${value}`;
-        })
-        .join(" | ");
+      const combinedLabel = buildGenomicLabel(item.queryParams);
 
       const newFilter = {
         id: `genomic-${item.queryType}-${idLabel}`,

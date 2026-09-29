@@ -25,20 +25,7 @@
 
     "logos": {
       "main": "/assets/logos/main.svg",
-      "founders": [
-        {
-          "src": "/assets/logos/founder1.svg",
-          "url": "https://elixir-europe.org/"
-        },
-        {
-          "src": "/assets/logos/founder2.svg",
-          "url": "https://european-union.europa.eu/index_en"
-        },
-        {
-          "src": "/assets/logos/founder3.svg",
-          "url": "https://fundacionlacaixa.org/es/"
-        }
-      ]
+      "founders": []
     },
 
     "showExternalNavBarLink": true,
@@ -355,7 +342,6 @@
         "Y",
         "MT"
       ],
-
       "showAminoacidChange": true,
       "aminoAcidNotation": [
         "Ala",
