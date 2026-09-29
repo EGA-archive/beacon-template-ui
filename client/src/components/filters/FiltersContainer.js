@@ -189,7 +189,6 @@ export default function FiltersContainer({
 
   /**
    * Build only the tabs that are allowed by the configuration.
-   *
    * useMemo prevents this array from being rebuilt on every render.
    */
   const tabs = useMemo(

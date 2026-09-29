@@ -113,6 +113,10 @@ export default function HomePage({
   // Get from context whether the user already submitted a search
   const { hasSearchBeenTriggered } = useSelectedEntry();
 
+  const hasFounderLogos = (config?.ui?.logos?.founders || []).some(
+    (logo) => typeof logo?.src === "string" && logo.src.trim() !== ""
+  );
+
   const showBeaconBanner =
     !hasSearchBeenTriggered && selectedTool !== "allFilteringTerms";
 
@@ -190,7 +194,13 @@ export default function HomePage({
             sx={{
               width: { md: "290px", lg: "338px" },
               flexShrink: 0,
-              mt: { xs: "0px", md: "42px" },
+
+              // Keep space for the founders row only when founder logos exist.
+              mt: {
+                xs: "0px",
+                md: hasFounderLogos ? "42px" : "4px",
+              },
+
               mb: { xs: "20px", lg: "0px" },
               alignSelf: "flex-start",
               height: {
@@ -204,17 +214,18 @@ export default function HomePage({
               display: "flex",
               flexDirection: "column",
               gap: 2,
+
               [stackSearchandCommonFilters]: {
                 width: "100%",
                 height: "auto !important",
               },
+
               [twoValuesStackSearchandCommonFilters]: {
-                mt: "-18px",
+                mt: hasFounderLogos ? "-18px" : "0px",
                 mb: "45px",
               },
             }}
           >
-            {/* Filters section with optional groups (common and/or genomic) */}
             <FiltersContainer
               searchHeight={searchHeight}
               hasCommonFiltersConfig={hasCommonFiltersConfig}
@@ -224,7 +235,6 @@ export default function HomePage({
             />
           </Box>
         )}
-
         {/* Banner only shown before a search is triggered and if the user isn't on "allFilteringTerms" tool */}
         {showBeaconBanner && <BeaconTypeBanner />}
       </Box>

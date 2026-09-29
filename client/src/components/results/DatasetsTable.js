@@ -75,6 +75,7 @@ export default function DatasetsTable() {
    * md and larger keep the existing 200-character preview.
    */
   const isSmallScreen = useMediaQuery("(max-width:899px)");
+
   const descriptionLimit = isSmallScreen ? 120 : 200;
 
   const headerCellStyle = {
