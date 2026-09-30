@@ -17,7 +17,7 @@ export default function useBeaconMetadata() {
 
         const map = {};
         responses.forEach((b) => {
-          const id = b?.response?.id;
+          const id = b?.meta?.beaconId;
           const env = b?.response?.environment;
 
           if (id) map[id] = env;

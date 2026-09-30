@@ -98,6 +98,8 @@ describe("Network Members Page - core rendering tests", () => {
 
       const apiVersion = beacon?.meta?.apiVersion || "Undefined";
       const environment = res.environment || "Undefined";
+
+      console.log(environment);
       const name = res.name || "Undefined";
       const orgName = res.organization?.name || "Undefined";
       const description = (res.description || "").replace(/<[^>]*>/g, "");

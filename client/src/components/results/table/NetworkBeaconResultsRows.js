@@ -42,7 +42,6 @@ export default function NetworkBeaconResultsRows({
     <>
       {resultData.map((item, index) => {
         const beaconId = item.beaconId || item.id;
-        const hasDatasets = item.items?.length > 0;
 
         const itemEmail = findBeaconEmail(
           beaconsInfo,
@@ -52,26 +51,27 @@ export default function NetworkBeaconResultsRows({
 
         const beaconName = findBeaconName(beaconsInfo, item.beaconId);
 
-        const { type: beaconType, datasetCount } =
+        const { types: beaconTypes, datasetCount } =
           getBeaconAggregationInfo(item);
 
-        const dataVisibility = DATA_VISIBILITY_LABELS[beaconType] || "-";
+        const dataVisibility = beaconTypes
+          .map((type) => DATA_VISIBILITY_LABELS[type])
+          .filter(Boolean)
+          .join(" / ");
 
-        const datasetCountValue =
-          beaconType === "record" &&
-          datasetCount !== undefined &&
-          datasetCount !== null
-            ? datasetCount
-            : "-";
+        const hasDatasets = datasetCount > 0;
+        const isCountBeacon = !hasDatasets && beaconTypes.includes("count");
+        const isBooleanBeacon = !hasDatasets && beaconTypes.includes("boolean");
 
-        const searchResultValue =
-          beaconType === "count"
+        const datasetCountValue = hasDatasets ? datasetCount : "-";
+
+        const searchResultValue = isCountBeacon
+          ? numberFormatter.format(item.totalResultsCount)
+          : hasDatasets
+          ? item.totalResultsCount > 0
             ? numberFormatter.format(item.totalResultsCount)
-            : beaconType === "record"
-            ? item.totalResultsCount > 0
-              ? numberFormatter.format(item.totalResultsCount)
-              : "-"
-            : null;
+            : "-"
+          : null;
 
         return (
           <React.Fragment key={`network-${beaconId || index}`}>
@@ -189,7 +189,7 @@ export default function NetworkBeaconResultsRows({
                   width: getResponsiveColumnWidthById("response"),
                 }}
               >
-                {beaconType === "boolean" &&
+                {isBooleanBeacon &&
                   (item.exists ? (
                     "Yes"
                   ) : (

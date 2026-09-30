@@ -18,6 +18,7 @@ import CalendarViewMonthIcon from "@mui/icons-material/CalendarViewMonth";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import config from "../../config/runtimeConfig";
 import { getDatasetType } from "./utils/beaconType";
+import { DATA_VISIBILITY_LABELS } from "./utils/resultsTableUtils";
 import AlleleFrequenciesButton from "./modal/alleleFrequency/AlleleFrequenciesButton";
 import { hasAlleleFrequencies } from "./modal/alleleFrequency/hasAlleleFrequencies";
 import { openAlleleFrequencyPage } from "../results/utils/openAlleleFrequencyPage";
@@ -114,6 +115,8 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
               >
                 {safeItems.map((dataset, i) => {
                   const displayedCount = getDisplayedCount(item, dataset);
+                  const dataVisibility =
+                    DATA_VISIBILITY_LABELS[dataset.type] || "-";
                   const actualLoadedCount = dataset.results?.length || 0;
                   setActualLoadedCount(actualLoadedCount);
 
@@ -214,7 +217,9 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
                             BEACON_NETWORK_COLUMNS_EXPANDED
                               .beacon_dataset_empty_two.width,
                         }}
-                      />
+                      >
+                        {dataVisibility}
+                      </TableCell>
 
                       {/* Empty column 2 */}
                       {/* nº of Datasets alignment column */}
