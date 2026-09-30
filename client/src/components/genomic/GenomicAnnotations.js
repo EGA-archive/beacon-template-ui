@@ -13,6 +13,7 @@ import CommonMessage from "../../components/common/CommonMessage";
 import FilterLabelRemovable from "../styling/FilterLabelRemovable";
 import { filterLabels } from "../genomic/utils/GenomicFilterLabels";
 import { useGenomicAnnotationClick } from "../genomic/utils/useGenomicAnnotationClick";
+import { MOLECULAR_EFFECT_IDS } from "../genomic/utils/molecularEffects";
 
 /**
  * This component renders predefined genomic example queries inside collapsible sections
@@ -29,28 +30,9 @@ export default function GenomicAnnotations() {
     molecularEffects,
   } = useSelectedEntry();
 
-  // Only molecular effects with these IDs are allowed to appear in the UI
-  const ALLOWED_IDS = [
-    "ENSGLOSSARY:0000150",
-    "ENSGLOSSARY:0000161",
-    "SO:0001631",
-    "SO:0001623",
-    "SO:0001819",
-    "SO:0001632",
-    "SO:0001792",
-    "SO:0001988",
-    "SO:0001630",
-    "SO:0000605",
-    "SO:0001575",
-    "SO:0001624",
-    "SO:0001574",
-    "SO:0001567",
-    "SO:0001580",
-  ];
-
   // Filter molecular effects coming from the backend to keep only items in the allowed list
   const filteredBackendEffects = useMemo(
-    () => molecularEffects.filter((t) => ALLOWED_IDS.includes(t.id)),
+    () => molecularEffects.filter((t) => MOLECULAR_EFFECT_IDS.includes(t.id)),
     [molecularEffects]
   );
 

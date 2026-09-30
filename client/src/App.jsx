@@ -2,7 +2,6 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import About from "./components/pages/About";
 import ContactForm from "./components/pages/contact/ContactForm";
-import ContactSuccess from "./components/pages/contact/ContactSuccess";
 import NetworkMembers from "./components/pages/NetworkMembers";
 import Login from "./components/pages/login/Login";
 import HomePage from "./components/pages/HomePage";
@@ -57,7 +56,7 @@ export default function App() {
   const baseNavItems = [
     { label: "Network Members", url: "/network-members" },
     ...(config.ui.showAboutPage ? [{ label: "About", url: "/about" }] : []),
-    ...(config.ui.contact?.showContactPage
+    ...(config.ui.showContactPage
       ? [{ label: "Contact", url: "/contact" }]
       : []),
     ...(config.ui.showLogin ? [{ label: "Log in", url: "/login" }] : []),
@@ -126,10 +125,9 @@ export default function App() {
               {config.ui.showAboutPage && (
                 <Route path="/about" element={<About />} />
               )}
-              {config.ui.contact?.showContactPage && (
+              {config.ui.showContactPage && (
                 <>
                   <Route path="/contact" element={<ContactForm />} />
-                  <Route path="/contact-success" element={<ContactSuccess />} />
                 </>
               )}
               {config.ui.showLogin && (

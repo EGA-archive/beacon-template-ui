@@ -41,7 +41,7 @@ export function handleFilterSelection({
   setMessage,
   onSuccess = () => {},
 }) {
-  if (prevFilters.some((f) => f.key === item.key && f.scope === item.scope)) {
+  if (prevFilters.some((f) => f.id === item.id && f.scope === item.scope)) {
     setMessage(COMMON_MESSAGES.doubleFilter);
     setTimeout(() => setMessage(null), 3000);
     return prevFilters;

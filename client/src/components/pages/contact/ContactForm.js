@@ -1,25 +1,16 @@
 // Formik handles form state and validation
 import { useFormik } from "formik";
-import {
-  Box,
-  Typography,
-  Checkbox,
-  FormControlLabel,
-  Grid,
-} from "@mui/material";
+import { Box, Typography, Grid, Button } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { alpha } from "@mui/material/styles";
 import Founders from "../../Founders";
 import contactValidation from "./contactValidation";
 import config from "../../../config/runtimeConfig";
-import { useNavigate } from "react-router-dom";
 import FormTextField from "./FormTextField"; // Reusable input wrapper
 import StyledButton from "../../styling/StyledButtons";
 
 // Contact form component using MUI + Formik
 export default function ContactForm() {
-  const navigate = useNavigate();
-
   // Formik setup: field defaults, validation, spam checks, submit handler
   const formik = useFormik({
     initialValues: {
@@ -30,43 +21,36 @@ export default function ContactForm() {
       institution: "",
       comment: "",
       privacy: false,
-      website: "", // Honeypot: if filled, it's a bot
-      startedAt: Date.now(), // Anti-bot: block too-fast submits
     },
     validationSchema: contactValidation,
-    onSubmit: async (values, { resetForm }) => {
-      const tooFast = Date.now() - Number(values.startedAt) < 3000; // Prevents bots/scripts submitting too quickly
-      if (values.website || tooFast) return;
+    onSubmit: (values) => {
+      const subject = "Contact Form";
 
-      try {
-        const response = await fetch(config.ui.contact.apiPath, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          // Sends this payload to the backend
-          body: JSON.stringify({
-            name: `${values.firstName} ${values.lastName} (${values.jobTitle})`,
-            email: values.email,
-            subject: "Contact Form Submission",
-            message: values.comment,
-            recipientKey: config.ui.contact.recipientKey, // Maps to real email via backend config
-          }),
-        });
+      const body = [
+        `Name: ${values.firstName} ${values.lastName}`,
+        `Email: ${values.email}`,
+        `Job Title: ${values.jobTitle}`,
+        `Institution: ${values.institution}`,
+        "",
+        "Message:",
+        values.comment,
+      ].join("\n");
 
-        const result = await response.json();
-        if (result.success) {
-          resetForm(); // Reset the form
-          navigate("/contact-success"); // Redirect on success
-        } else {
-          alert("Error: " + (result.error || "Unknown error")); // Show backend error
-        }
-      } catch (err) {
-        alert("Failed to send message");
-      }
+      const mailtoUrl = `mailto:${
+        config.ui.contactEmail
+      }?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
+        body
+      )}`;
+
+      window.location.href = mailtoUrl;
     },
   });
 
   // Custom styling for input background and borders
   const bgColor = alpha(config.ui.colors.primary, 0.05);
+  const beaconTitle =
+    config.beaconType === "networkBeacon" ? "Beacon Network" : "Single Beacon";
+
   const textFieldStyles = {
     backgroundColor: bgColor,
     borderRadius: "7px",
@@ -94,11 +78,7 @@ export default function ContactForm() {
   };
 
   // Disable submit button unless form is valid, changed, and privacy checked
-  const isSubmitDisabled =
-    !formik.isValid ||
-    !formik.values.privacy ||
-    !formik.dirty ||
-    formik.isSubmitting;
+  const isSubmitDisabled = !formik.isValid || !formik.dirty;
 
   return (
     <>
@@ -136,9 +116,8 @@ export default function ContactForm() {
             variant="body2"
             sx={{ mb: 3, fontSize: "12px", fontWeight: 400, color: "#203241" }}
           >
-            If you have any questions about how the Beacon Network search
-            website works, please fill out this form and we will get back to
-            you.
+            If you have any questions about how the {beaconTitle} search website
+            works, please fill out this form and we will get back to you.
           </Typography>
 
           {/* Main form logic handled by Formik */}
@@ -229,48 +208,44 @@ export default function ContactForm() {
                   sx={{ textField: textFieldStyles, label: inputTitleStyle }}
                 />
               </Grid>
-
-              {/* Privacy policy consent checkbox */}
-              <Grid size={{ xs: 12 }}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="privacy"
-                      checked={formik.values.privacy}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                    />
-                  }
-                  label="Please check this box to accept our Privacy Policy."
-                  sx={{
-                    "& .MuiFormControlLabel-label": {
-                      fontFamily: '"Open Sans", sans-serif',
-                      fontWeight: 400,
-                      fontStyle: "normal",
-                      fontSize: "12px",
-                      lineHeight: "100%",
-                      letterSpacing: "0%",
-                    },
-                  }}
-                />
-                {/* Show error if checkbox is required and not checked */}
-                {formik.touched.privacy && formik.errors.privacy && (
-                  <Typography color="error" variant="caption">
-                    {formik.errors.privacy}
-                  </Typography>
-                )}
-              </Grid>
-
               {/* Submit button: disabled unless all conditions are valid */}
-              <Grid size={{ xs: 12 }} sx={{ textAlign: "right" }}>
-                <StyledButton
-                  icon={<SendIcon />}
-                  label="Send"
+              <Box
+                sx={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <Button
+                  data-cy="contact-send-button"
                   type="submit"
                   variant="contained"
                   disabled={isSubmitDisabled}
-                />
-              </Grid>
+                  sx={{
+                    borderRadius: "999px",
+                    textTransform: "none",
+                    fontSize: "14px",
+                    backgroundColor: config.ui.colors.primary,
+                    border: `1px solid ${config.ui.colors.primary}`,
+                    boxShadow: "none",
+                    "&:hover": {
+                      backgroundColor: "white",
+                      border: `1px solid ${config.ui.colors.primary}`,
+                      color: config.ui.colors.primary,
+                    },
+                    "&.Mui-disabled": {
+                      backgroundColor: "#d3d3d3",
+                      color: "#888",
+                      border: "1px solid #ccc",
+                      opacity: 1,
+                    },
+                  }}
+                  startIcon={<SendIcon />}
+                >
+                  Send
+                </Button>
+              </Box>
+              {/* </Grid> */}
             </Grid>
           </form>
         </Box>
