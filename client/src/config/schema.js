@@ -623,7 +623,6 @@ const schema = Joi.object({
      * Cookie consent
      * Text receives defaults when omitted.
      * Links are optional and may be replaced, removed,or extended by deployers.
-     *
      * Every link object must contain both label and URL.
      */
     cookies: Joi.object({

@@ -245,7 +245,6 @@ export default function ContactForm() {
                   Send
                 </Button>
               </Box>
-              {/* </Grid> */}
             </Grid>
           </form>
         </Box>

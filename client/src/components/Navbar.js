@@ -132,7 +132,6 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
               data-cy="navbar-title"
               className="font-sans"
               onClick={() => {
-                resetHomeState();
                 navigate("/");
                 setSelectedTool(null);
                 setMobileOpen(false);

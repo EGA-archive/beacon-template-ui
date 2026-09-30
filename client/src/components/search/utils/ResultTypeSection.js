@@ -47,7 +47,7 @@ export default function ResultTypeSection({
               : isOntologyOnlyLayout
               ? `${ontologySelectorWidth}px`
               : shouldUseWideSelector
-              ? "320px"
+              ? "345px"
               : hasTwoColumns
               ? "240px"
               : "190px",

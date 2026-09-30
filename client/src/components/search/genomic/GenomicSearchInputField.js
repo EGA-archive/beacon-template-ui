@@ -153,7 +153,6 @@ export default function GenomicSearchInputField({
           </Box>
         )}
       </Box>
-
       {children}
     </Box>
   );

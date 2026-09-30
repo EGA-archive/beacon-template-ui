@@ -207,8 +207,6 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
                         }}
                       />
 
-                      {/* Empty column 3 */}
-
                       {/* Data Visibility alignment column */}
                       <TableCell
                         sx={hiddenOnTabletStyle}

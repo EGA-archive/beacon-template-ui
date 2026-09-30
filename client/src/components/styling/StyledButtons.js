@@ -28,12 +28,10 @@ export default function StyledButtons({
     fontSize: { xs: "12px", sm: "12px" },
     fontWeight: 400,
     fontFamily: '"Open Sans", sans-serif',
-    // width: { xs: "120px", sm: "210px" },
     height: { xs: "29px", sm: "26px" },
-    // px: 2,
     px: 0,
-    // py: 0.5,
   };
+
   // Styles for 'contained' vs 'outlined' variant
   const variantStyles =
     variant === "contained"
@@ -95,7 +93,6 @@ export default function StyledButtons({
 
 // Colors from config and utilities
 const primaryColor = config.ui.colors.primary;
-const unselectedBorderColor = alpha(primaryColor, 0.15); // Light border for non-selected buttons
 const selectedBg = alpha(primaryColor, 0.15); // Light background when selected
 const primaryDarkColor = config.ui.colors.darkPrimary;
 

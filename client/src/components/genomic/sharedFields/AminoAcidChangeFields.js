@@ -31,8 +31,7 @@ export default function AminoAcidChangeFields({
   const [openSelect, setOpenSelect] = useState(null);
 
   // The amino acid list from configuration
-  const aminoAcidList =
-    config.ui.genomicQueries.genomicQueryBuilder.aminoAcidNotation || [];
+  const aminoAcidList = config.ui.genomicQueries.aminoAcidNotation || [];
 
   return (
     <Box sx={{ width: "100%" }}>

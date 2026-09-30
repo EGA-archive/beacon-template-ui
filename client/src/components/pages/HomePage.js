@@ -111,7 +111,11 @@ export default function HomePage({
   }, [isLoggedIn, isOnLoginPage, setLoginModalOpen]);
 
   // Get from context whether the user already submitted a search
-  const { hasSearchBeenTriggered } = useSelectedEntry();
+  const { hasSearchBeenTriggered, resetHomeState } = useSelectedEntry();
+
+  useEffect(() => {
+    resetHomeState();
+  }, []);
 
   const hasFounderLogos = (config?.ui?.logos?.founders || []).some(
     (logo) => typeof logo?.src === "string" && logo.src.trim() !== ""
@@ -148,6 +152,7 @@ export default function HomePage({
   const twoValuesStackSearchandCommonFilters =
     "@media (min-width:900px) and (max-width:1180px)";
 
+  console.log("HOME PAGE RENDERED", location.pathname);
   return (
     <>
       {/* Main container */}

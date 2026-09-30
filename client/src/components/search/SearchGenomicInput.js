@@ -41,6 +41,25 @@ export default function SearchGenomicInput({
 }) {
   const { openGenomicQueryBuilder } = useSelectedEntry();
   const inputRef = useRef(null); // For managing focus on the input field
+  const suggestionsRef = useRef(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const genomicQueryTypes = config?.ui?.genomicQueries?.genomicQueryTypes ?? {};
 
@@ -141,54 +160,62 @@ export default function SearchGenomicInput({
           : "15px",
       }}
     >
-      <GenomicSearchInputField
-        assembly={assembly}
-        assemblyIds={config.assemblyId}
-        genomicDraft={genomicDraft}
-        genomicInputPlaceholder={genomicInputPlaceholder}
-        primaryDarkColor={primaryDarkColor}
-        isAssemblyOpen={isAssemblyOpen}
-        inputRef={inputRef}
-        onAssemblyChange={setAssembly}
-        onAssemblyOpen={() => setIsAssemblyOpen(true)}
-        onAssemblyClose={() => setIsAssemblyOpen(false)}
-        onInputClick={() => setActiveInput("genomic")}
-        onInputChange={setGenomicDraft}
-        onInputKeyDown={(event) => {
-          if (event.key === "Enter") {
-            commitGenomicDraft();
-          }
+      <Box
+        ref={suggestionsRef}
+        sx={{
+          position: "relative",
+          width: "100%",
+          minWidth: 0,
         }}
-        onClear={() => setGenomicDraft("")}
       >
-        {action && (
-          <Box
-            sx={{
-              display: "none",
-              alignItems: "center",
-              flexShrink: 0,
-              [buttonsOutsideInputLayout]: {
+        <GenomicSearchInputField
+          assembly={assembly}
+          assemblyIds={config.assemblyId}
+          genomicDraft={genomicDraft}
+          genomicInputPlaceholder={genomicInputPlaceholder}
+          primaryDarkColor={primaryDarkColor}
+          isAssemblyOpen={isAssemblyOpen}
+          inputRef={inputRef}
+          onAssemblyChange={setAssembly}
+          onAssemblyOpen={() => setIsAssemblyOpen(true)}
+          onAssemblyClose={() => setIsAssemblyOpen(false)}
+          onInputClick={() => {
+            setActiveInput("genomic");
+            setShowSuggestions(true);
+          }}
+          onInputChange={(value) => {
+            setGenomicDraft(value);
+            setShowSuggestions(true);
+          }}
+          onInputKeyDown={(event) => {
+            if (event.key === "Enter") {
+              commitGenomicDraft();
+            }
+          }}
+          onClear={() => setGenomicDraft("")}
+        >
+          {action && (
+            <Box
+              sx={{
                 display: "none",
-                backgroundColor: "black",
-              },
-              [mobileSearchLayout]: {
-                display: "none",
-              },
-            }}
-          >
-            {action}
-          </Box>
-        )}
-      </GenomicSearchInputField>
+                alignItems: "center",
+                flexShrink: 0,
+                [buttonsOutsideInputLayout]: {
+                  display: "none",
+                  backgroundColor: "black",
+                },
+                [mobileSearchLayout]: {
+                  display: "none",
+                },
+              }}
+            >
+              {action}
+            </Box>
+          )}
+        </GenomicSearchInputField>
 
-      <GenomicSearchAction
-        action={action}
-        hasEntryTypeSelector={hasEntryTypeSelector}
-      />
-
-      {/* Show suggestions and actions when the user has typed a genomic query */}
-      {activeInput === "genomic" && genomicDraft?.trim() && (
-        <>
+        {/* Suggestions overlap the content below the genomic input */}
+        {showSuggestions && genomicDraft?.trim() && (
           <GenomicSearchSuggestions
             genomicDraft={genomicDraft}
             genomicInputExamples={genomicInputExamples}
@@ -205,14 +232,21 @@ export default function SearchGenomicInput({
             onAddString={commitStringQuery}
             onOpenBuilder={handleOpenGenomicQueryBuilder}
           />
+        )}
+      </Box>
 
-          <GenomicSearchMessage
-            message={message}
-            hasGenomicBuilderQueries={hasGenomicBuilderQueries}
-            genomicBuilderWarningList={genomicBuilderWarningList}
-            onOpenBuilder={handleOpenGenomicQueryBuilder}
-          />
-        </>
+      <GenomicSearchAction
+        action={action}
+        hasEntryTypeSelector={hasEntryTypeSelector}
+      />
+
+      {activeInput === "genomic" && genomicDraft?.trim() && (
+        <GenomicSearchMessage
+          message={message}
+          hasGenomicBuilderQueries={hasGenomicBuilderQueries}
+          genomicBuilderWarningList={genomicBuilderWarningList}
+          onOpenBuilder={handleOpenGenomicQueryBuilder}
+        />
       )}
     </Box>
   );

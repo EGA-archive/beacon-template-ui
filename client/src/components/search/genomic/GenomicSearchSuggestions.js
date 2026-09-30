@@ -27,6 +27,11 @@ export default function GenomicSearchSuggestions({
   return (
     <Box
       sx={{
+        position: "absolute",
+        top: "100%",
+        left: 0,
+        width: "100%",
+        zIndex: 5,
         mt: "8px",
       }}
     >
@@ -143,7 +148,7 @@ export default function GenomicSearchSuggestions({
 
             {isVariant ? (
               <>
-                Add <b>genomic variant:</b> <code>{cleanedValue}</code>
+                Add <b>sequence query:</b> <code>{cleanedValue}</code>
               </>
             ) : (
               <>
