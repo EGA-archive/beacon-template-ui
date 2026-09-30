@@ -72,7 +72,6 @@ export const BEACON_NETWORK_COLUMNS = [
                   or testing. It may be potentially unstable and/or does not
                   contain real data that can be trusted for real-world queries.
                 </li>
-                <br></br>
               </ul>
             </Box>
           }

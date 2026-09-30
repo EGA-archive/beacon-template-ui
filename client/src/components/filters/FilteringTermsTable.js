@@ -27,6 +27,7 @@ import {
 } from "../common/filteringTermsHelpers";
 import { getSelectableScopeStyles } from "../styling/selectableScopeStyles";
 import { alpha } from "@mui/material/styles";
+import { isMolecularEffect } from "../genomic/utils/molecularEffects";
 
 // This component displays a table of filtering terms.
 // It also lets users select a scope (like individual or biosample) when a filtering term is linked to multiple scopes.
@@ -212,7 +213,9 @@ export default function FilteringTermsTable({
                       const item = {
                         id: term.id,
                         key: uniqueId,
-                        bgColor: "common",
+                        bgColor: isMolecularEffect(term.id)
+                          ? "genomic"
+                          : "common",
                         label: displayLabel?.trim() ? displayLabel : term.id,
                         type: term.type,
                         scope: activeScope,

@@ -10,13 +10,14 @@
  * - Reuses filtering logic from filteringTermsHelpers
  */
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Paper, List, ListItem, Box } from "@mui/material";
 import config from "../../config/runtimeConfig";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import useFilteringTerms from "../../hooks/useFilteringTerms";
 import Loader from "../common/Loader";
+import { isMolecularEffect } from "../genomic/utils/molecularEffects";
 
 // Helper functions for filtering/searching terms
 import {
@@ -27,7 +28,12 @@ import {
 
 const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
   // Access setters from global context to update filters
-  const { extraFilter, setExtraFilter, setSelectedFilter } = useSelectedEntry();
+  const {
+    extraFilter,
+    setExtraFilter,
+    setSelectedFilter,
+    selectedPathSegment: selectedEntryType,
+  } = useSelectedEntry();
 
   const [message, setMessage] = useState(null); // For validation or feedback
   const [filteredTerms, setFilteredTerms] = useState([]); // Search result terms
@@ -35,7 +41,6 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
 
   // Get all filtering terms from API or local state
   const { filteringTerms } = useFilteringTerms();
-  const { selectedPathSegment: selectedEntryType } = useSelectedEntry();
 
   // Ref for detecting outside clicks (to close dropdown)
   const containerRef = useRef();
@@ -124,14 +129,10 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
               const { displayLabel, selectedScope, allScopes } =
                 getDisplayLabelAndScope(term, selectedEntryType);
 
-              const uniqueId = `common-free-${Date.now().toString(
-                36
-              )}-${Math.random().toString(36).slice(2, 7)}`;
-
               const item = {
                 id: term.id,
-                key: uniqueId,
-                bgColor: "common",
+                key: `${term.id}-${selectedScope || "no-scope"}`,
+                bgColor: isMolecularEffect(term.id) ? "genomic" : "common",
                 label: displayLabel?.trim() ? displayLabel : term.id,
                 type: term.type,
                 scope: selectedScope || null,
@@ -156,33 +157,14 @@ const FilteringTermsDropdownResults = ({ searchInput, onCloseDropdown }) => {
                       return;
                     }
 
-                    // setSelectedFilter((prev) => {
-                    //   const isDuplicate = prev.some(
-                    //     (filter) =>
-                    //       filter.label === item.label &&
-                    //       filter.scope === item.scope
-                    //   );
-                    setSelectedFilter((prev) => {
-                      const isDuplicate = prev.some(
-                        (filter) =>
-                          filter.id === item.id && filter.scope === item.scope
-                      );
-                      if (isDuplicate) {
-                        setMessage(COMMON_MESSAGES.doubleFilter);
-                        setTimeout(() => {
-                          setMessage(null);
-                          onCloseDropdown();
-                        }, 3000);
-
-                        return prev;
-                      }
-                      return handleFilterSelection({
+                    setSelectedFilter((prev) =>
+                      handleFilterSelection({
                         item,
                         prevFilters: prev,
                         setMessage,
                         onSuccess: onCloseDropdown,
-                      });
-                    });
+                      })
+                    );
                   }}
                   sx={{
                     display: "flex",

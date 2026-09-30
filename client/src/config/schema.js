@@ -601,6 +601,15 @@ const schema = Joi.object({
       otherwise: aboutContentSchema.optional(),
     }),
 
+    showContactPage: Joi.boolean().default(false),
+    contactEmail: Joi.string()
+      .email({ tlds: { allow: false } })
+      .when("showContactPage", {
+        is: true,
+        then: Joi.required(),
+        otherwise: Joi.optional(),
+      }),
+
     // Download functionality
     download: Joi.object({
       enabled: Joi.boolean().default(true).messages({

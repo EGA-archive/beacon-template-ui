@@ -3,10 +3,7 @@ import { useEffect, useRef } from "react";
 import { useFormikContext } from "formik";
 import config from "../../../config/runtimeConfig";
 import GenomicInputBox from "../GenomicInputBox";
-import {
-  mainBoxTypography,
-  textFieldStyle,
-} from "../styling/genomicInputBoxStyling";
+import { mainBoxTypography } from "../styling/genomicInputBoxStyling";
 import { normalizeVariationType } from "../../genomic/utils/variationType";
 
 export default function GeneIdForm({ selectedInput, setSelectedInput }) {

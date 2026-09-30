@@ -1,6 +1,6 @@
 {
-  "beaconType": "singleBeacon",
-  "apiUrl": "https://beacon-elixir-demo.ega-archive.org/api",
+  "beaconType": "networkBeacon",
+  "apiUrl": "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
   "variationType": [
     { "jsonName": "SNP", "displayName": "SNP" },
@@ -25,20 +25,31 @@
 
     "logos": {
       "main": "/assets/logos/main.svg",
-      "founders": []
+      "founders": [
+        {
+          "src": "/assets/logos/founder1.svg",
+          "url": "https://elixir-europe.org/"
+        },
+
+        {
+          "src": "/assets/logos/founder2.svg",
+          "url": "https://european-union.europa.eu/index_en"
+        },
+        {
+          "src": "/assets/logos/founder3.svg",
+          "url": "https://fundacionlacaixa.org/es/"
+        }
+      ]
     },
 
     "showExternalNavBarLink": true,
-
     "externalNavBarLink": [
       {
         "label": "AF Browser",
         "url": "https://af-beacon.ega-archive.org/"
       }
     ],
-
     "showAboutPage": true,
-
     "about": {
       "logos": [
         "/assets/logos/about1.svg",
@@ -63,6 +74,9 @@
         }
       ]
     },
+
+    "showContactPage": true,
+    "contactEmail": "giulia.cellerino@crg.eu",
 
     "download": {
       "enabled": true,

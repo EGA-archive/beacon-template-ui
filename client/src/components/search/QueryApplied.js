@@ -23,10 +23,11 @@ export default function QueryApplied({ variant }) {
   // Function to remove one specific filter
   const handleFilterRemove = (item) => {
     setSelectedFilter((prevFilters) =>
-      prevFilters.filter((filter) => filter.key !== item.key)
+      prevFilters.filter(
+        (filter) => !(filter.key === item.key && filter.scope === item.scope)
+      )
     );
     setQueryDirty(true);
-    // setHasSearchResult(true);
   };
 
   // This clear all filters except for the Result Type (also called Entry Type one)
