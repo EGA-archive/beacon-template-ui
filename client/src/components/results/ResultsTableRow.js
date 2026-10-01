@@ -34,8 +34,7 @@ const BEACON_NETWORK_TABLET_EXPANDED_WIDTHS = {
 
 // This component renders only for Beacon Networks
 export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
-  const { setActualLoadedCount, lastSearchedFilters, lastSearchedPathSegment } =
-    useSelectedEntry();
+  const { lastSearchedFilters, lastSearchedPathSegment } = useSelectedEntry();
 
   const hiddenOnTabletStyle = {
     display: {
@@ -118,7 +117,6 @@ export default function ResultsTableRow({ item, handleOpenModal, beaconName }) {
                   const dataVisibility =
                     DATA_VISIBILITY_LABELS[dataset.type] || "-";
                   const actualLoadedCount = dataset.results?.length || 0;
-                  setActualLoadedCount(actualLoadedCount);
 
                   // Direct semantic classification
                   const isRecord = dataset.type === "record";

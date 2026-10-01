@@ -18,6 +18,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import { SelectedEntryProvider } from "./components/context/SelectedEntryContext";
 import ProtectedRoute from "./auth/ProtectedRoute";
@@ -31,6 +32,14 @@ if (window.Cypress) {
   };
 }
 
+function RouteDebugger() {
+  const location = useLocation();
+
+  console.log("ROUTER:", location.pathname);
+  console.log("WINDOW:", window.location.pathname);
+
+  return null;
+}
 export default function App() {
   const [selectedTool, setSelectedTool] = useState(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -78,8 +87,9 @@ export default function App() {
   const navItems = [...cleanedExternalLinks, ...filteredBaseItems];
 
   return (
-    <SelectedEntryProvider>
-      <Router>
+    <Router>
+      <SelectedEntryProvider>
+        <RouteDebugger />
         <Box
           sx={{
             backgroundColor: "#F5F5F5",
@@ -160,7 +170,7 @@ export default function App() {
             onClose={() => setLoginModalOpen(false)}
           />
         </Box>
-      </Router>
-    </SelectedEntryProvider>
+      </SelectedEntryProvider>
+    </Router>
   );
 }
