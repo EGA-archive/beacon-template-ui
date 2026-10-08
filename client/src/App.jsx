@@ -6,6 +6,14 @@ import NetworkMembers from "./components/pages/NetworkMembers";
 import Login from "./components/pages/login/Login";
 import HomePage from "./components/pages/HomePage";
 import { CssBaseline, Box } from "@mui/material";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  Link,
+} from "react-router-dom";
 import config from "./config/runtimeConfig";
 import { useState, useEffect } from "react";
 import LoginModal from "./components/common/LoginModal";
@@ -13,13 +21,6 @@ import { logosHelper } from "./lib/logosHelper";
 import { CookieBanner } from "@ega/beacon-cookie-consent";
 import DatasetDetailedTablePage from "./components/pages/DatasetDetailedTablePage";
 import AlleleFrequencyPage from "./components/results/modal/alleleFrequency/AlleleFrequencyPage";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-} from "react-router-dom";
 import { SelectedEntryProvider } from "./components/context/SelectedEntryContext";
 import ProtectedRoute from "./auth/ProtectedRoute";
 
@@ -87,7 +88,7 @@ export default function App() {
   const navItems = [...cleanedExternalLinks, ...filteredBaseItems];
 
   return (
-    <Router>
+    <Router useTransitions={false}>
       <SelectedEntryProvider>
         <RouteDebugger />
         <Box

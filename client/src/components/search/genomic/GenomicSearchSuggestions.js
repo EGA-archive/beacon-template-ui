@@ -14,13 +14,25 @@ export default function GenomicSearchSuggestions({
   genomicBuilderCtaList,
   primaryColor,
   primaryDarkColor,
+  isAlleleFrequencyAvailable = true,
   onSelectExample,
   onAddSequence,
   onAddString,
+  onAddAlleleFrequency,
   onOpenBuilder,
 }) {
+  const normalizedDraft = genomicDraft.trim().toLowerCase();
+
+  const shouldShowAlleleFrequency =
+    isAlleleFrequencyAvailable &&
+    normalizedDraft.length >= 2 &&
+    (normalizedDraft === "af" ||
+      "allele frequency".startsWith(normalizedDraft) ||
+      "alele frequency".startsWith(normalizedDraft));
+
   const handleOpenBuilder = (event) => {
     event.stopPropagation();
+
     onOpenBuilder();
   };
 
@@ -36,12 +48,9 @@ export default function GenomicSearchSuggestions({
       }}
     >
       <Box
-        role="button"
-        onClick={onAddSequence}
         sx={{
           border: `1px solid ${primaryDarkColor}`,
           borderRadius: "21px",
-          cursor: "pointer",
           fontFamily: '"Open Sans", sans-serif',
           fontSize: "12px",
           p: 0,
@@ -80,6 +89,34 @@ export default function GenomicSearchSuggestions({
                 </Box>
               </Box>
             ))}
+          </Box>
+        )}
+        {shouldShowAlleleFrequency && (
+          <Box
+            onClick={(event) => {
+              event.stopPropagation();
+              onAddAlleleFrequency?.();
+            }}
+            sx={{
+              width: "100%",
+              px: 3,
+              py: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              cursor: "pointer",
+            }}
+          >
+            <RadioButtonUncheckedIcon
+              sx={{
+                color: primaryColor,
+                fontSize: 16,
+              }}
+            />
+
+            <Box>
+              Add <b>Allele Frequency</b>
+            </Box>
           </Box>
         )}
 

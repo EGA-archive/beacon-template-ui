@@ -15,10 +15,20 @@ import AlternateBasesFields from "./sharedFields/AlternateBasesFields";
 import BracketRangeFields from "./sharedFields/BracketRangeFields";
 
 /**
- * This is a reusable input component tailored for genomic query building.
- * Dynamically renders a TextField, Select, or customized components
- * like `Alternate BasesFields` or `AminoAcidChangeFields` based on the `name` or passed props.
- **/
+ * GenomicInputBox
+ *
+ * Reusable input component for the Genomic Query Builder.
+ *
+ * Primary responsibilities:
+ * - Connect each genomic input to Formik.
+ * - Render the appropriate field type depending on the input:
+ *   standard text field, dropdown, Alternate Bases, Aminoacid Change,
+ *   or Bracket Range.
+ * - Handle selectable/inactive fields used by mutually exclusive query options.
+ * - Apply consistent styling, validation, disabled states, and descriptions.
+ *
+ * Dropdown options are expected as a simple array of strings.
+ */
 export default function GenomicInputBox({
   name,
   label,
@@ -39,24 +49,32 @@ export default function GenomicInputBox({
   variant,
   containerSx,
 }) {
-  // Connect this field to Formik (value, error, helpers)
+  // Connect this field to Formik.
   const [field, meta, helpers] = useField(name);
+
+  // Tracks whether a Select dropdown is currently open.
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
 
-  // Show error only if user touched the field
+  // Only display Formik errors after the user has interacted with the field.
   const error = meta.touched && meta.error;
-  // Main color imported from the config.file
+
+  // Main UI color defined in the runtime configuration.
   const primaryDarkColor = config.ui.colors.darkPrimary;
-  // Disable input if it's selectable but not the active one
+
+  // Selectable fields are disabled until they become the active option.
   const isDisabled = (isSelectable && !isSelected) || disabled;
 
-  // Differentiate unavailable (disabled) vs inactive (selectable but not chosen)
-  const isUnavailable = disabled; // explicitly passed from parent (e.g. SNP logic)
+  // Differentiate between:
+  // - unavailable fields disabled by query logic
+  // - selectable fields that are simply not currently selected
+  const isUnavailable = disabled;
   const isInactiveSelectable = isSelectable && !isSelected && !disabled;
 
-  // This function returns different field types based on input name or options
+  /**
+   * Renders the appropriate input depending on the field type.
+   */
   const renderFieldByType = () => {
-    // Show custom fields if name is "alternateBases"
+    // Custom Alternate Bases input.
     if (name === "alternateBases") {
       return (
         <AlternateBasesFields
@@ -75,8 +93,9 @@ export default function GenomicInputBox({
         />
       );
     }
-    // Show custom fields if name is "aminoacidChange"
-    if (name === "aminoacidChange")
+
+    // Custom Aminoacid Change input.
+    if (name === "aminoacidChange") {
       return (
         <AminoAcidChangeFields
           isDisabled={isDisabled}
@@ -84,14 +103,15 @@ export default function GenomicInputBox({
           isUnavailable={isUnavailable}
         />
       );
-    if (name === "braketRangeFields")
-      return <BracketRangeFields isDisabled={isDisabled} />;
+    }
 
-    const normalizedOptions = options.map((opt) =>
-      typeof opt === "string" ? { jsonName: opt, displayName: opt } : opt
-    );
-    // If the input requires options, then it renders a dropdown menu
-    if (normalizedOptions.length > 0) {
+    // Custom approximate genomic position input.
+    if (name === "braketRangeFields") {
+      return <BracketRangeFields isDisabled={isDisabled} />;
+    }
+
+    // Render a dropdown when options are provided.
+    if (options.length > 0) {
       return (
         <Select
           fullWidth
@@ -112,14 +132,13 @@ export default function GenomicInputBox({
             "& .MuiSelect-select": {
               fontFamily: '"Open Sans", sans-serif',
               fontSize: "14px",
-              color: field.value ? config.ui.colors.darkPrimary : "#999",
+              color: field.value ? primaryDarkColor : "#999",
               padding: "12px 16px",
             },
           }}
           renderValue={(selected) =>
             selected ? (
-              normalizedOptions.find((o) => o.jsonName === selected)
-                ?.displayName || selected
+              selected
             ) : (
               <span style={{ color: "#999" }}>{placeholder}</span>
             )
@@ -128,20 +147,17 @@ export default function GenomicInputBox({
           <MenuItem value="" sx={{ fontSize: "12px" }}>
             {placeholder}
           </MenuItem>
-          {normalizedOptions.map((option) => (
-            <MenuItem
-              key={option.jsonName}
-              value={option.jsonName}
-              sx={{ fontSize: "12px" }}
-            >
-              {option.displayName || option.jsonName}
+
+          {options.map((option) => (
+            <MenuItem key={option} value={option} sx={{ fontSize: "12px" }}>
+              {option}
             </MenuItem>
           ))}
         </Select>
       );
     }
 
-    // Default case: render a standard text field
+    // Default input type.
     return (
       <TextField
         fullWidth
@@ -169,7 +185,6 @@ export default function GenomicInputBox({
     );
   };
 
-  // Final return: wrapper box with label and dynamic input
   return (
     <Box
       sx={{
@@ -181,13 +196,12 @@ export default function GenomicInputBox({
             ? "#BDBDBD"
             : primaryDarkColor
         }`,
-
         borderRadius: "10px",
         padding: "12px",
         backgroundColor: isUnavailable
-          ? "#F5F5F5" // light gray for unavailable
+          ? "#F5F5F5"
           : isInactiveSelectable
-          ? "#FAFAFA" // softer gray for inactive selectable
+          ? "#FAFAFA"
           : "white",
         opacity: isUnavailable ? 0.4 : 1,
         cursor: isInactiveSelectable ? "pointer" : "default",
@@ -201,10 +215,12 @@ export default function GenomicInputBox({
         ...(containerSx || {}),
       }}
       onClick={() => {
-        if (isInactiveSelectable) onSelect(); // make selectable boxes clickable
+        if (isInactiveSelectable) {
+          onSelect();
+        }
       }}
     >
-      {/* Top label + optional select logic */}
+      {/* Field title and selectable-state control */}
       <FieldHeader
         label={label}
         required={required}
@@ -214,7 +230,8 @@ export default function GenomicInputBox({
         isInactiveSelectable={isInactiveSelectable}
         isUnavailable={isUnavailable}
       />
-      {/* Optional description */}
+
+      {/* Optional helper description */}
       {description && (
         <FieldLabel
           isInactiveSelectable={isInactiveSelectable}
@@ -223,7 +240,8 @@ export default function GenomicInputBox({
           {description}
         </FieldLabel>
       )}
-      {/* Render the correct input */}
+
+      {/* Render the appropriate field */}
       {renderFieldByType()}
     </Box>
   );

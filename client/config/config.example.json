@@ -2,15 +2,7 @@
   "beaconType": "singleBeacon",
   "apiUrl": "https://beacon-elixir-demo.ega-archive.org/api",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
-  "variationType": [
-    { "jsonName": "SNP", "displayName": "SNP" },
-    { "jsonName": "DEL", "displayName": "DEL" },
-    { "jsonName": "DUP", "displayName": "DUP" },
-    { "jsonName": "INV", "displayName": "INV" },
-    { "jsonName": "INS", "displayName": "INS" },
-    { "jsonName": "CNV", "displayName": "CNV" },
-    { "jsonName": "BND", "displayName": "BND" }
-  ],
+  "variantType": ["SNP", "DEL", "DUP", "INV", "INS", "CNV", "BND"],
   "queryCoordinatesAre0Based": true,
 
   "ui": {
@@ -355,33 +347,52 @@
         "Y",
         "MT"
       ],
-
-      "showAminoacidChange": true,
+      "queryByAminoacidChange": true,
       "aminoAcidNotation": [
         "Ala",
-        "Arg",
-        "Asn",
-        "Asp",
         "Cys",
-        "Gln",
+        "Asp",
         "Glu",
+        "Phe",
         "Gly",
         "His",
         "Ile",
-        "Leu",
         "Lys",
+        "Leu",
         "Met",
-        "Phe",
+        "Asn",
         "Pro",
+        "Gln",
+        "Arg",
         "Ser",
-        "Ter",
         "Thr",
+        "Val",
         "Trp",
         "Tyr",
-        "Val",
-        "Xaa"
+        "CUSTOM",
+        "A",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "K",
+        "L",
+        "M",
+        "N",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "V",
+        "W",
+        "Y",
+        "Ter",
+        "*"
       ],
-
       "genomicQueryTypes": {
         "sequenceQuery": true,
         "geneId": true,
@@ -389,16 +400,11 @@
         "bracketQuery": true,
         "hgvsQuery": true
       },
-
       "searchInputExample": {
         "referenceName": "22",
         "position": 16050527,
         "referenceBases": "C",
         "alternateBases": "A"
-      },
-
-      "genomicQueryBuilder": {
-        "showAlternateBases": true
       }
     }
   }

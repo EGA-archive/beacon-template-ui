@@ -57,18 +57,31 @@ export default function HomePage({
     const handleUnauthenticatedInteraction = (event) => {
       const target = event.target;
 
+      console.log("GLOBAL CAPTURE CLICK:", {
+        target,
+        text: target?.textContent,
+        closestLink: target?.closest?.("a")?.getAttribute("href"),
+        pathname: window.location.pathname,
+      });
+
       /**
        * Allow the user to explicitly open the login flow.
        */
-      const isLoginButton = target?.closest?.(".login-button");
 
       /**
        * Allow the responsive navigation menu to open so the
        * user can still reach the Login button on mobile.
        */
+      const isLoginButton = target?.closest?.(".login-button");
+
       const isBurgerMenu = target?.closest?.('[data-cy="burger-menu"]');
 
-      if (isLoginButton || isBurgerMenu) {
+      const isNavbarLink =
+        target?.closest?.('[data-cy="navbar-title"]') ||
+        target?.closest?.('[data-cy="navbar-links"] a') ||
+        target?.closest?.('[data-cy="navbar-drawer"] a');
+
+      if (isLoginButton || isBurgerMenu || isNavbarLink) {
         return;
       }
 

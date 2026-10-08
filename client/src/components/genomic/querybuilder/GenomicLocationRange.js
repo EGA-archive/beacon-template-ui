@@ -4,19 +4,39 @@ import { useFormikContext } from "formik";
 import config from "../../../config/runtimeConfig";
 import GenomicInputBox from "../GenomicInputBox";
 import { mainBoxTypography } from "../styling/genomicInputBoxStyling";
-import { normalizeVariationType } from "../../genomic/utils/variationType";
+import { normalizeVariantType } from "../utils/variantType";
 
-// This component renders the "Genetic Location (Range)" form
-// It is used inside the Genomic Query Builder dialog
-// It receives the currently selected optional input from the parent component
+/**
+ * GenomicLocationRage
+ *
+ * Renders the "Genomic Location (Range)" form used inside the
+ * Genomic Query Builder.
+ *
+ * Primary responsibilities:
+ * - Require Assembly ID, Chromosome, Start, and End coordinates.
+ * - Allow the user to select one optional genomic parameter:
+ *   Variant Type, Alternate Bases, or Aminoacid Change.
+ * - Allow optional minimum and maximum variant length values.
+ * - Disable and clear variant length fields when the selected
+ *   Variant Type is SNP, since length is not applicable.
+ * - Automatically select Aminoacid Change when amino-acid values
+ *   are already present in the form.
+ */
 export default function GenomicLocationRage({
   selectedInput,
   setSelectedInput,
 }) {
   const { values, setFieldValue } = useFormikContext();
 
+  // Prevent the Aminoacid Change input from being auto-selected repeatedly.
   const hasAutoSelectedRef = useRef(false);
 
+  /**
+   * If amino-acid values already exist in the form, automatically
+   * select the Aminoacid Change input.
+   *
+   * This is useful when reopening or restoring an existing query.
+   */
   useEffect(() => {
     if (hasAutoSelectedRef.current) return;
 
@@ -29,18 +49,30 @@ export default function GenomicLocationRage({
     }
   }, [values.refAa, values.aaPosition, values.altAa, setSelectedInput]);
 
-  const isSNP = normalizeVariationType(values?.variationType) === "SNP";
+  /**
+   * SNP queries do not support variant length.
+   *
+   * normalizeVariantType keeps this check reliable regardless
+   * of how the Variant Type value is represented internally.
+   */
+  const isSNP = normalizeVariantType(values?.variantType) === "SNP";
   const lengthEnabled = !isSNP;
-  // Clear stale values when the selected variation type doesn't support length
+
+  /**
+   * Clear any existing variant length values when the selected
+   * Variant Type does not support them.
+   */
   useEffect(() => {
     if (!lengthEnabled) {
       setFieldValue("minVariantLength", "");
       setFieldValue("maxVariantLength", "");
     }
   }, [lengthEnabled, setFieldValue]);
+
   return (
     <Box>
-      {/* Main container split in two sections: Main and Optional parameters */}
+      {/* Main responsive layout: required parameters on the left,
+          optional parameters on the right */}
       <Box
         sx={{
           mt: 0,
@@ -52,7 +84,7 @@ export default function GenomicLocationRage({
           },
         }}
       >
-        {/* Left side - Main Parameters (required inputs) */}
+        {/* Required genomic location parameters */}
         <Box
           sx={{
             width: "30%",
@@ -61,7 +93,6 @@ export default function GenomicLocationRage({
             },
           }}
         >
-          {/* Title and helper text */}
           <Typography
             variant="h6"
             sx={{
@@ -73,11 +104,11 @@ export default function GenomicLocationRage({
           >
             Main Parameters
           </Typography>
+
           <Typography sx={{ ...mainBoxTypography, mt: 0 }}>
             Required (*)
           </Typography>
 
-          {/* Required fields like assemblyId, chromosome, start and end */}
           <Box
             sx={{
               display: "flex",
@@ -86,24 +117,24 @@ export default function GenomicLocationRage({
               width: "100%",
             }}
           >
-            {/* Dropdown for Assembly ID */}
+            {/* Reference genome assembly */}
             <GenomicInputBox
               name="assemblyId"
               label="Assembly ID"
               placeholder="Select Assembly ID"
               options={config.assemblyId}
-              required={true}
+              required
             />
 
-            {/* Text input for Chromosome */}
+            {/* Chromosome */}
             <GenomicInputBox
               name="chromosome"
               label="Chromosome"
               placeholder="ex. 22"
-              required={true}
+              required
             />
 
-            {/* Start and End fields rendered side-by-side */}
+            {/* Exact genomic start and end coordinates */}
             <Box
               sx={{
                 display: "flex",
@@ -117,15 +148,16 @@ export default function GenomicLocationRage({
                 <GenomicInputBox
                   name="start"
                   label="Start"
-                  required={true}
+                  required
                   placeholder="ex. 7572837"
                 />
               </Box>
+
               <Box sx={{ flex: 1, minWidth: "120px" }}>
                 <GenomicInputBox
                   name="end"
                   label="End"
-                  required={true}
+                  required
                   placeholder="ex. 7578641"
                 />
               </Box>
@@ -133,7 +165,7 @@ export default function GenomicLocationRage({
           </Box>
         </Box>
 
-        {/* Right side - Optional Parameters (select only one of the three mutually exclusive ones) */}
+        {/* Optional genomic query parameters */}
         <Box
           sx={{
             width: "70%",
@@ -153,11 +185,12 @@ export default function GenomicLocationRage({
           >
             Optional Parameters
           </Typography>
+
           <Typography sx={{ ...mainBoxTypography, mt: 0 }}>
             Please select one:
           </Typography>
 
-          {/* Optional inputs: only one should be selected at a time */}
+          {/* Mutually exclusive optional inputs */}
           <Box
             sx={{
               display: "flex",
@@ -168,40 +201,34 @@ export default function GenomicLocationRage({
               borderRadius: "10px",
             }}
           >
-            {/* Variation Type dropdown */}
+            {/* Variant Type dropdown */}
             <Box sx={{ flex: "1 1 200px" }}>
               <GenomicInputBox
-                name="variationType"
-                label="Variation Type"
-                description="Select the Variation Type"
-                placeholder="Select variation type"
-                options={(config?.variationType || []).map((opt) => ({
-                  jsonName: opt.jsonName,
-                  displayName: opt.displayName,
-                }))}
+                name="variantType"
+                label="Variant Type"
+                description="Select the Variant Type"
+                placeholder="Select variant type"
+                options={config?.variantType || []}
                 isSelectable
-                isSelected={selectedInput === "variationType"}
-                onSelect={() => setSelectedInput("variationType")}
+                isSelected={selectedInput === "variantType"}
+                onSelect={() => setSelectedInput("variantType")}
               />
             </Box>
 
-            {/* Bases Change text input */}
-            {config.ui.genomicQueries.genomicQueryBuilder
-              .showAlternateBases && (
-              <Box sx={{ flex: "1 1 200px" }}>
-                <GenomicInputBox
-                  variant="range"
-                  name="alternateBases"
-                  label="Alternate Bases"
-                  isSelectable
-                  isSelected={selectedInput === "alternateBases"}
-                  onSelect={() => setSelectedInput("alternateBases")}
-                />
-              </Box>
-            )}
+            {/* Alternate Bases */}
+            <Box sx={{ flex: "1 1 200px" }}>
+              <GenomicInputBox
+                variant="range"
+                name="alternateBases"
+                label="Alternate Bases"
+                isSelectable
+                isSelected={selectedInput === "alternateBases"}
+                onSelect={() => setSelectedInput("alternateBases")}
+              />
+            </Box>
 
-            {/* Aminoacid Change text input */}
-            {config.ui.genomicQueries.showAminoacidChange && (
+            {/* Aminoacid Change */}
+            {config.ui.genomicQueries.queryByAminoacidChange && (
               <Box sx={{ flex: "1 1 200px" }}>
                 <GenomicInputBox
                   name="aminoacidChange"
@@ -214,7 +241,6 @@ export default function GenomicLocationRage({
             )}
           </Box>
 
-          {/* Min and Max variant length are not exclusive, both can be filled */}
           <Typography
             sx={{
               ...mainBoxTypography,
@@ -224,6 +250,7 @@ export default function GenomicLocationRage({
             You can add the Variant Length:
           </Typography>
 
+          {/* Optional variant length range */}
           <Box
             sx={{
               display: "flex",
@@ -241,10 +268,7 @@ export default function GenomicLocationRage({
                 description="Select the Min Variant Length in bases"
                 placeholder="ex. 5"
                 endAdornmentLabel="Bases"
-                disabled={
-                  selectedInput === "variationType" &&
-                  values.variationType === "SNP"
-                }
+                disabled={!lengthEnabled}
               />
             </Box>
 
@@ -255,10 +279,7 @@ export default function GenomicLocationRage({
                 description="Select the Max Variant Length in bases"
                 placeholder="ex. 125"
                 endAdornmentLabel="Bases"
-                disabled={
-                  selectedInput === "variationType" &&
-                  values.variationType === "SNP"
-                }
+                disabled={!lengthEnabled}
               />
             </Box>
           </Box>

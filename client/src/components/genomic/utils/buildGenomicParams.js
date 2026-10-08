@@ -27,7 +27,7 @@ export const buildGenomicParams = (queryType, values, selectedInput) => {
 
       // Define the exclusive groups (same as in Dialog)
       const mutuallyExclusiveGroups = {
-        variationType: ["variationType"],
+        variantType: ["variantType"],
         alternateBases: ["alternateBases", "refBases", "altBases"],
         aminoacidChange: ["aminoacidChange", "refAa", "altAa", "aaPosition"],
       };
@@ -46,8 +46,8 @@ export const buildGenomicParams = (queryType, values, selectedInput) => {
       };
 
       // Add only the active exclusive group
-      if (selectedInput === "variationType" && values.variationType) {
-        params.variantType = values.variationType;
+      if (selectedInput === "variantType" && values.variantType) {
+        params.variantType = values.variantType;
       }
 
       if (selectedInput === "alternateBases" && values.alternateBases) {
@@ -67,7 +67,7 @@ export const buildGenomicParams = (queryType, values, selectedInput) => {
         referenceName: values.chromosome,
         start: [Number(values.startMin), Number(values.startMax)],
         end: [Number(values.endMin), Number(values.endMax)],
-        variantType: values.variationType || undefined,
+        variantType: values.variantType || undefined,
       };
       break;
 
@@ -84,7 +84,7 @@ export const buildGenomicParams = (queryType, values, selectedInput) => {
 
       // Define the exclusive groups (same as in Dialog)
       const mutuallyExclusiveGroups = {
-        variationType: ["variationType"],
+        variantType: ["variantType"],
         alternateBases: ["alternateBases", "refBases", "altBases"],
         aminoacidChange: ["aminoacidChange", "refAa", "altAa", "aaPosition"],
       };
@@ -102,8 +102,8 @@ export const buildGenomicParams = (queryType, values, selectedInput) => {
       };
 
       // Add only the fields from the active group
-      if (selectedInput === "variationType" && values.variationType) {
-        params.variantType = values.variationType;
+      if (selectedInput === "variantType" && values.variantType) {
+        params.variantType = values.variantType;
       }
 
       if (selectedInput === "alternateBases" && values.alternateBases) {

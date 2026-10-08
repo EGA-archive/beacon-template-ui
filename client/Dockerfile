@@ -5,10 +5,10 @@
     FROM node:22.19.0 AS build
 
     # set working directory
-    WORKDIR ./client
+    WORKDIR /client
     
     # add /client/node_modules/.bin to $PATH
-    ENV PATH /client/node_modules/.bin:$PATH
+    ENV PATH=/client/node_modules/.bin:$PATH
     
     # install app dependencies
     COPY package.json .
@@ -40,3 +40,6 @@
     RUN mkdir -p /usr/share/nginx/html/config
     
     EXPOSE 80
+
+    HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+        CMD wget -q --spider http://127.0.0.1/health || exit 1

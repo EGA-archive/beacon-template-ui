@@ -124,41 +124,6 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
             </Box>
 
             {/* Title text linking to homepage */}
-            {/* <Typography
-              data-cy="navbar-title"
-              className="font-sans"
-              // onClick={() => {
-              //   navigate("/");
-              //   setSelectedTool(null);
-              //   setMobileOpen(false);
-              // }}
-              onClick={() => {
-                console.log("NAVBAR TITLE CLICKED");
-                console.log("BEFORE NAVIGATE:", window.location.pathname);
-
-                navigate("/");
-
-                console.log("AFTER NAVIGATE:", window.location.pathname);
-
-                setSelectedTool(null);
-                setMobileOpen(false);
-              }}
-              sx={{
-                fontWeight: "bold",
-                fontFamily: '"Open Sans", sans-serif',
-                color: "white",
-                cursor: "pointer",
-                fontSize: "15px",
-                whiteSpace: "nowrap",
-                "@media (max-width: 410px)": { fontSize: "14px" },
-                "@media (min-width: 768px)": { fontSize: "16px" },
-                "@media (max-width: 930px) and (min-width: 900px)": {
-                  fontSize: "15.7px",
-                },
-              }}
-            >
-              {title}
-            </Typography> */}
             <Typography
               component={Link}
               to="/"

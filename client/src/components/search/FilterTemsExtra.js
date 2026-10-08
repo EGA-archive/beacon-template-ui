@@ -37,6 +37,10 @@ export default function FilterTermsExtra() {
   const [selectedValue, setSelectedValue] = useState("");
   const [error, setError] = useState("");
 
+  // Allele Frequency uses the standard alphanumeric filter flow, but only supports numeric comparison operators.
+  const isAlleleFrequency =
+    extraFilter?.label?.trim().toLowerCase() === "allele frequency";
+
   // Any single Entry Type uses the same spacing before this section.
   const isSingleEntryType = entryTypes.length === 1;
 
@@ -116,6 +120,9 @@ export default function FilterTermsExtra() {
         id: extraFilter.id,
         key: uniqueId,
         label: `${extraFilter.label} ${operatorDisplay} ${selectedValue}`,
+        filterLabel: extraFilter.label,
+        operatorDisplay,
+        displayValue: selectedValue,
         operator: formattedOperator,
         value: formattedValue,
         scope: extraFilter.scope || null,
@@ -150,6 +157,7 @@ export default function FilterTermsExtra() {
 
       // Step 4. Reset all local inputs after successfully adding the filter
       setIsExtraFilterValid(true);
+      extraFilter.onComplete?.();
       setExtraFilter(null);
       setSelectedOperator(">");
       setSelectedValue("");
@@ -163,7 +171,7 @@ export default function FilterTermsExtra() {
     setSelectedOperator(">");
     setSelectedValue("");
     setError("");
-
+    extraFilter?.onComplete?.();
     setExtraFilter(null);
     setIsExtraFilterValid(true);
   };
@@ -177,6 +185,15 @@ export default function FilterTermsExtra() {
 
     setIsExtraFilterValid(true);
   }, [extraFilter, setIsExtraFilterValid]);
+
+  useEffect(() => {
+    if (
+      isAlleleFrequency &&
+      (selectedOperator === "LIKE" || selectedOperator === "!LIKE")
+    ) {
+      setSelectedOperator(">");
+    }
+  }, [isAlleleFrequency, selectedOperator]);
 
   return (
     <Box
@@ -250,8 +267,12 @@ export default function FilterTermsExtra() {
             <MenuItem value="=">{"="}</MenuItem>
             <MenuItem value="<">{"<"}</MenuItem>
             <MenuItem value="!">{"≠"}</MenuItem>
-            <MenuItem value="LIKE">{"contains"}</MenuItem>
-            <MenuItem value="!LIKE">{"does not contain"}</MenuItem>
+            {!isAlleleFrequency && (
+              <MenuItem value="LIKE">{"contains"}</MenuItem>
+            )}
+            {!isAlleleFrequency && (
+              <MenuItem value="!LIKE">{"does not contain"}</MenuItem>
+            )}
           </Select>
         </FormControl>
       </Box>
@@ -271,9 +292,19 @@ export default function FilterTermsExtra() {
         }}
       >
         <InputBase
+          type={isAlleleFrequency ? "number" : "text"}
           placeholder="Value"
           value={selectedValue}
           onChange={(e) => setSelectedValue(e.target.value)}
+          inputProps={
+            isAlleleFrequency
+              ? {
+                  min: 0,
+                  max: 1,
+                  step: "any",
+                }
+              : undefined
+          }
           sx={{
             fontFamily: '"Open Sans", sans-serif',
             fontSize: "14px",

@@ -3,12 +3,22 @@ import config from "../../../config/runtimeConfig";
 import GenomicInputBox from "../GenomicInputBox";
 import { mainBoxTypography } from "../styling/genomicInputBoxStyling";
 
-// This form is used when the user selects "Genetic location approx (Bracket)"
-// It shows fields for approximate start/end location and other optional filters
+/**
+ * GenomicLocationBracket
+ *
+ * Renders the Genomic Query Builder form used for approximate genomic
+ * locations using bracket coordinates.
+ *
+ * Primary responsibilities:
+ * - Require Assembly ID, Chromosome, and Bracket Position.
+ * - Allow the user to optionally specify a Variant Type.
+ * - Present required and optional parameters in separate responsive columns.
+ */
 export default function GenomicLocationBracket() {
   return (
     <Box>
-      {/* Main layout: two columns (left for required, right for optional fields) */}
+      {/* Main responsive layout: required parameters on the left,
+          optional parameters on the right */}
       <Box
         sx={{
           mt: 0,
@@ -20,7 +30,7 @@ export default function GenomicLocationBracket() {
           },
         }}
       >
-        {/* LEFT COLUMN: Required Fields */}
+        {/* Required genomic location parameters */}
         <Box
           sx={{
             width: "60%",
@@ -29,7 +39,6 @@ export default function GenomicLocationBracket() {
             },
           }}
         >
-          {/* Section title and guidance text */}
           <Typography
             variant="h6"
             sx={{
@@ -41,6 +50,7 @@ export default function GenomicLocationBracket() {
           >
             Main Parameters
           </Typography>
+
           <Typography
             sx={{
               ...mainBoxTypography,
@@ -50,9 +60,8 @@ export default function GenomicLocationBracket() {
             Required (*)
           </Typography>
 
-          {/* Required inputs: Assembly, Chromosome, Start, End */}
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {/* Assembly ID and Chromosome */}
+            {/* Reference genome assembly and chromosome */}
             <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
               <Box sx={{ flex: 1, minWidth: "120px" }}>
                 <GenomicInputBox
@@ -63,6 +72,7 @@ export default function GenomicLocationBracket() {
                   required
                 />
               </Box>
+
               <Box sx={{ flex: 1, minWidth: "120px" }}>
                 <GenomicInputBox
                   name="chromosome"
@@ -73,22 +83,7 @@ export default function GenomicLocationBracket() {
               </Box>
             </Box>
 
-            {/* Approximate position range */}
-            {/* <GenomicInputBox
-              name="start"
-              label="Start Braket"
-              placeholder="ex. 5000000"
-              required
-              endAdornmentLabel="(Min)"
-            />
-            <GenomicInputBox
-              name="end"
-              label="End Braket"
-              placeholder="ex. 7676592"
-              required
-              endAdornmentLabel="(Min)"
-            /> */}
-
+            {/* Approximate genomic start/end position range */}
             <GenomicInputBox
               name="braketRangeFields"
               label="Bracket Position"
@@ -98,7 +93,7 @@ export default function GenomicLocationBracket() {
           </Box>
         </Box>
 
-        {/* RIGHT COLUMN: Optional Fields */}
+        {/* Optional query parameters */}
         <Box
           sx={{
             width: "40%",
@@ -118,24 +113,25 @@ export default function GenomicLocationBracket() {
           >
             Optional Parameters
           </Typography>
+
           <Typography
             sx={{
               ...mainBoxTypography,
               mt: 0,
             }}
           >
-            You can add the Variant Length:
+            You can add the Variant Type:
           </Typography>
 
-          {/* Optional: Variation Type dropdown */}
+          {/* Optional Variant Type filter */}
           <Box sx={{ display: "flex", gap: 2 }}>
             <Box sx={{ flex: 1 }}>
               <GenomicInputBox
-                name="variationType"
-                label="Variation Type"
-                description="Select the Variation Type"
-                placeholder="Select Variation Type"
-                options={config.variationType}
+                name="variantType"
+                label="Variant Type"
+                description="Select the Variant Type"
+                placeholder="Select Variant Type"
+                options={config.variantType}
               />
             </Box>
           </Box>

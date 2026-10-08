@@ -4,12 +4,36 @@ import { useFormikContext } from "formik";
 import config from "../../../config/runtimeConfig";
 import GenomicInputBox from "../GenomicInputBox";
 import { mainBoxTypography } from "../styling/genomicInputBoxStyling";
-import { normalizeVariationType } from "../../genomic/utils/variationType";
+import { normalizeVariantType } from "../utils/variantType";
 
+/**
+ * GeneIdForm
+ *
+ * Renders the Gene ID section of the Genomic Query Builder (GQB).
+ *
+ * Primary responsibilities:
+ * - Require a Gene ID as the main query parameter.
+ * - Allow the user to select one optional genomic parameter:
+ *   Variant Type, Alternate Bases, or Aminoacid Change.
+ * - Optionally allow minimum and maximum variant length values.
+ * - Disable and clear variant length fields when the selected
+ *   Variant Type is SNP, since length is not applicable.
+ * - Automatically select Aminoacid Change when amino-acid values
+ *   are already present in the form.
+ */
 export default function GeneIdForm({ selectedInput, setSelectedInput }) {
   const { values, setFieldValue } = useFormikContext();
+
+  // Prevents the Aminoacid Change input from being auto-selected
+  // repeatedly after the initial detection.
   const hasAutoSelectedRef = useRef(false);
 
+  /**
+   * If amino-acid values already exist in the form, automatically
+   * select the Aminoacid Change input.
+   *
+   * This is useful when reopening or restoring an existing genomic query.
+   */
   useEffect(() => {
     if (hasAutoSelectedRef.current) return;
 
@@ -22,15 +46,26 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
     }
   }, [values.refAa, values.aaPosition, values.altAa, setSelectedInput]);
 
-  const isSNP = normalizeVariationType(values?.variationType) === "SNP";
+  /**
+   * SNP queries do not support variant length.
+   *
+   * normalizeVariantType is used here so the check remains reliable
+   * regardless of how the Variant Type value is represented internally.
+   */
+  const isSNP = normalizeVariantType(values?.variatType) === "SNP";
   const lengthEnabled = !isSNP;
-  // Clear stale values when the selected variation type doesn't support length
+
+  /**
+   * Clear any existing length values when Variant Type changes to SNP.
+   * This prevents stale unsupported values from remaining in the query.
+   */
   useEffect(() => {
     if (!lengthEnabled) {
       setFieldValue("minVariantLength", "");
       setFieldValue("maxVariantLength", "");
     }
   }, [lengthEnabled, setFieldValue]);
+
   return (
     <Box>
       <Box
@@ -44,7 +79,7 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
           width: "100%",
         }}
       >
-        {/* Left panel: Gene ID */}
+        {/* Main required query parameter: Gene ID */}
         <Box
           sx={{
             width: "30%",
@@ -64,6 +99,7 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
           >
             Main Parameters
           </Typography>
+
           <Typography
             sx={{
               ...mainBoxTypography,
@@ -72,20 +108,16 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
           >
             Required (*)
           </Typography>
+
           <GenomicInputBox
             name="geneId"
             label="Gene ID"
             placeholder="ex. BRAF"
             required
-            containerSx={
-              {
-                // height: "135px",
-              }
-            }
           />
         </Box>
 
-        {/* Right panel: Optional mutually exclusive inputs */}
+        {/* Optional query parameters and genomic location */}
         <Box
           sx={{
             width: "70%",
@@ -105,6 +137,7 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
           >
             Optional Parameters
           </Typography>
+
           <Typography
             sx={{
               ...mainBoxTypography,
@@ -114,7 +147,7 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
             Please select one:
           </Typography>
 
-          {/* Mutually exclusive inputs */}
+          {/* Mutually exclusive optional query inputs */}
           <Box
             sx={{
               display: "flex",
@@ -127,34 +160,28 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
           >
             <Box sx={{ flex: "1 1 200px" }}>
               <GenomicInputBox
-                name="variationType"
-                label="Variation Type"
-                description="Select the Variation Type"
-                placeholder="Select variation type"
-                options={(config?.variationType || []).map((opt) => ({
-                  jsonName: opt.jsonName,
-                  displayName: opt.displayName,
-                }))}
+                name="variantType"
+                label="Variant Type"
+                description="Select the Variant Type"
+                placeholder="Select variant type"
+                options={config?.variantType || []}
                 isSelectable
-                isSelected={selectedInput === "variationType"}
-                onSelect={() => setSelectedInput("variationType")}
+                isSelected={selectedInput === "variantType"}
+                onSelect={() => setSelectedInput("variantType")}
               />
             </Box>
-            {config.ui.genomicQueries.genomicQueryBuilder
-              .showAlternateBases && (
-              <Box sx={{ flex: "1 1 200px" }}>
-                <GenomicInputBox
-                  variant="gene"
-                  name="alternateBases"
-                  label="Alternate Bases"
-                  isSelectable
-                  isSelected={selectedInput === "alternateBases"}
-                  onSelect={() => setSelectedInput("alternateBases")}
-                />
-              </Box>
-            )}
 
-            {config.ui.genomicQueries.showAminoacidChange && (
+            <Box sx={{ flex: "1 1 200px" }}>
+              <GenomicInputBox
+                variant="range"
+                name="alternateBases"
+                label="Alternate Bases"
+                isSelectable
+                isSelected={selectedInput === "alternateBases"}
+                onSelect={() => setSelectedInput("alternateBases")}
+              />
+            </Box>
+            {config.ui.genomicQueries.queryByAminoacidChange && (
               <Box sx={{ flex: "1 1 200px" }}>
                 <GenomicInputBox
                   name="aminoacidChange"
@@ -177,7 +204,7 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
             You can add the Genomic Location:
           </Typography>
 
-          {/* Genomic location */}
+          {/* Optional genomic location constraints */}
           <Box
             sx={{
               display: "flex",
@@ -195,10 +222,7 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
                 description="Select the Min Variant Length in bases"
                 placeholder="ex. 5"
                 endAdornmentLabel="Bases"
-                disabled={
-                  selectedInput === "variationType" &&
-                  values.variationType === "SNP"
-                }
+                disabled={!lengthEnabled}
               />
             </Box>
 
@@ -209,10 +233,7 @@ export default function GeneIdForm({ selectedInput, setSelectedInput }) {
                 description="Select the Max Variant Length in bases"
                 placeholder="ex. 125"
                 endAdornmentLabel="Bases"
-                disabled={
-                  selectedInput === "variationType" &&
-                  values.variationType === "SNP"
-                }
+                disabled={!lengthEnabled}
               />
             </Box>
           </Box>

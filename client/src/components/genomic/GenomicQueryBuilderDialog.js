@@ -68,7 +68,7 @@ const EMPTY_INITIAL_VALUES = {
   chromosome: "",
   start: "",
   end: "",
-  variationType: "",
+  variantType: "",
   alternateBases: "",
   refBases: "",
   altBases: "",
@@ -163,7 +163,7 @@ export default function GenomicQueryBuilderDialog({
 }) {
   // This selectes on load the first query type, without user's interaction
   const [selectedQueryType, setSelectedQueryType] = useState("Need Help?");
-  const [selectedInput, setSelectedInput] = useState("variationType");
+  const [selectedInput, setSelectedInput] = useState("variantType");
   const [duplicateMessage, setDuplicateMessage] = useState("");
   const [tabDrafts, setTabDrafts] = useState({});
   const {
@@ -257,7 +257,7 @@ export default function GenomicQueryBuilderDialog({
 
   const resetBuilderState = () => {
     setSelectedQueryType("Need Help?");
-    setSelectedInput("variationType");
+    setSelectedInput("variantType");
     setDuplicateMessage("");
   };
 
@@ -346,7 +346,7 @@ export default function GenomicQueryBuilderDialog({
 
             // These are exclusive groups...
             const mutuallyExclusiveGroups = {
-              variationType: ["variationType"],
+              variantType: ["variantType"],
               alternateBases: ["alternateBases", "refBases", "altBases"],
               aminoacidChange: [
                 "aminoacidChange",

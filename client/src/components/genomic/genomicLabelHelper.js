@@ -4,7 +4,7 @@ export const GENOMIC_LABELS_MAP = {
   chromosome: "Chromosome",
   start: "Start Position",
   end: "End Position",
-  variationType: "Variant Type",
+  variantType: "Variant Type",
   alternateBases: "Alternate Bases",
   referenceBases: "Reference Bases",
   referenceName: "Chromosome",

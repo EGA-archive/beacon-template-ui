@@ -6,8 +6,7 @@ import { alpha } from "@mui/material/styles";
 import Founders from "../../Founders";
 import contactValidation from "./contactValidation";
 import config from "../../../config/runtimeConfig";
-import FormTextField from "./FormTextField"; // Reusable input wrapper
-import StyledButton from "../../styling/StyledButtons";
+import FormTextField from "./FormTextField";
 
 // Contact form component using MUI + Formik
 export default function ContactForm() {
@@ -23,7 +22,7 @@ export default function ContactForm() {
       privacy: false,
     },
     validationSchema: contactValidation,
-    onSubmit: (values) => {
+    onSubmit: (values, { resetForm }) => {
       const subject = "Contact Form";
 
       const body = [
@@ -42,7 +41,9 @@ export default function ContactForm() {
         body
       )}`;
 
-      window.location.href = mailtoUrl;
+      window.open(mailtoUrl, "_blank");
+
+      resetForm();
     },
   });
 

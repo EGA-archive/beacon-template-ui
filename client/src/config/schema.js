@@ -82,6 +82,57 @@ const GENOMIC_QUERY_TYPE_CONFIG_KEYS = {
 
 const CODE_PROVIDED_GENOMIC_ANNOTATION_CATEGORY = "Molecular Effects";
 
+/**
+ * Default amino-acid notations available in the Genomic Query Builder.
+ * Includes both standard three-letter and one-letter amino-acid codes.
+ * Stop codons are represented by "Ter" and "*".
+ * Deployers may override this list in config.json to match their data.
+ */
+const DEFAULT_AMINO_ACID_NOTATION = [
+  "Ala",
+  "Cys",
+  "Asp",
+  "Glu",
+  "Phe",
+  "Gly",
+  "His",
+  "Ile",
+  "Lys",
+  "Leu",
+  "Met",
+  "Asn",
+  "Pro",
+  "Gln",
+  "Arg",
+  "Ser",
+  "Thr",
+  "Val",
+  "Trp",
+  "Tyr",
+  "A",
+  "C",
+  "D",
+  "E",
+  "F",
+  "G",
+  "H",
+  "I",
+  "K",
+  "L",
+  "M",
+  "N",
+  "P",
+  "Q",
+  "R",
+  "S",
+  "T",
+  "V",
+  "W",
+  "Y",
+  "Ter",
+  "*",
+];
+
 const DEFAULT_COOKIE_MESSAGE =
   "This website uses cookies and limited processing of personal data in order to function.";
 
@@ -245,7 +296,7 @@ const genomicQueryTypesSchema = Joi.object({
 
 /**
  * Genomic query configuration.
- * chromosomeLibrary, showAminoacidChange and aminoAcidNotation are shared across genomic-query features.
+ * chromosomeLibrary, queryByAminoacidChange and aminoAcidNotation are shared across genomic-query features.
  * The Genomic Query Builder configuration is required when genomicQueries is configured.
  */
 const genomicQueriesSchema = Joi.object({
@@ -269,26 +320,29 @@ const genomicQueriesSchema = Joi.object({
    * Controls whether amino-acid change inputs are available.
    * This setting is shared by the Genomic Query Builder and genomic annotation examples.
    */
-  showAminoacidChange: Joi.boolean().default(true),
+  queryByAminoacidChange: Joi.boolean().default(true),
 
   /**
-   * Amino-acid notation shared by the Genomic Query Builder and genomic annotation examples.
-   * Required when amino-acid changes are enabled.
-   * It may remain configured when amino-acid changes are disabled.
+   * Amino-acid notations available in the Genomic Query Builder
+   * and genomic annotation examples.
+   *
+   * When amino-acid change queries are enabled and this setting is omitted,
+   * the standard one-letter and three-letter amino-acid codes are used.
+   *
+   * Deployers may override the list to match the amino-acid annotations
+   * supported by their data, including adding custom values.
    */
-  aminoAcidNotation: Joi.when("showAminoacidChange", {
+  aminoAcidNotation: Joi.when("queryByAminoacidChange", {
     is: true,
 
     then: Joi.array()
       .items(nonEmptyString)
       .min(1)
       .unique()
-      .required()
+      .default(DEFAULT_AMINO_ACID_NOTATION)
       .messages({
-        "any.required":
-          "aminoAcidNotation is required when showAminoacidChange is true",
         "array.min":
-          "At least one amino-acid notation must be provided when showAminoacidChange is true",
+          "At least one amino-acid notation must be provided when queryByAminoacidChange is true",
         "array.unique": "aminoAcidNotation values must be unique",
       }),
 
@@ -317,15 +371,6 @@ const genomicQueriesSchema = Joi.object({
 
     alternateBases: nucleotideSequence.required(),
   }).optional(),
-
-  /**
-   * Genomic Query Builder configuration.
-   * The builder is required when genomicQueries is configured.
-   * Builder-specific settings remain nested here.
-   */
-  genomicQueryBuilder: Joi.object({
-    showAlternateBases: Joi.boolean().default(true),
-  }).required(),
 });
 
 /**
@@ -470,30 +515,22 @@ const schema = Joi.object({
     }),
 
   /**
-   * Variant types available in the UI.
-   * Optional because it is only relevant when genomic variations are available.
-   * When provided, each variation type may define jsonName, displayName, or both, but at least one of the two fields must be provided.
+   * Variant Types available in the Genomic Query Builder.
+   *
+   * Optional. If omitted, the standard Variant Types are used.
+   * It can also be set to an empty array if no Variant Types should be available.
    */
-  variationType: Joi.array()
+  variantType: Joi.array()
     .items(
-      Joi.object({
-        jsonName: Joi.string()
-          .pattern(/^[A-Za-z0-9_]+$/)
-          .optional()
-          .messages({
-            "string.pattern.base":
-              "jsonName must contain only letters, numbers, or underscores",
-          }),
-
-        displayName: nonEmptyString.optional(),
-      }).or("jsonName", "displayName")
+      Joi.string()
+        .pattern(/^[A-Za-z0-9_]+$/)
+        .messages({
+          "string.pattern.base":
+            "Variant Type must contain only letters, numbers, or underscores",
+        })
     )
-    .min(1)
     .optional()
-    .messages({
-      "array.min":
-        "At least one variationType must be provided when variationType is configured",
-    }),
+    .default(["SNP", "DEL", "DUP", "INV", "INS", "CNV", "BND"]),
 
   /**
    * Defines whether genomic query coordinates are 0-based.
@@ -534,7 +571,7 @@ const schema = Joi.object({
             url: httpUrl.optional(),
           })
         )
-        .max(3)
+        .max(6)
         .optional(),
     }).required(),
 
@@ -1032,7 +1069,8 @@ const schema = Joi.object({
 
       const aminoAcidNotation = value.genomicQueries?.aminoAcidNotation || [];
 
-      const showAminoacidChange = value.genomicQueries?.showAminoacidChange;
+      const queryByAminoacidChange =
+        value.genomicQueries?.queryByAminoacidChange;
 
       const annotationLabels = value.genomicAnnotations?.annotationLabels || {};
 
@@ -1040,9 +1078,9 @@ const schema = Joi.object({
         for (const annotation of annotations) {
           const { refAa, altAa } = annotation.queryParams || {};
 
-          if ((refAa || altAa) && showAminoacidChange !== true) {
+          if ((refAa || altAa) && queryByAminoacidChange !== true) {
             return helpers.message(
-              `Genomic annotation category "${category}" uses an amino-acid change, but showAminoacidChange is not enabled in genomicQueries`
+              `Genomic annotation category "${category}" uses an amino-acid change, but queryByAminoacidChange is not enabled in genomicQueries`
             );
           }
 

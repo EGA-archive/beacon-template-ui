@@ -1,16 +1,8 @@
 {
   "beaconType": "networkBeacon",
-  "apiUrl": "https://beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
+  "apiUrl": "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
-  "variationType": [
-    { "jsonName": "SNP", "displayName": "SNP" },
-    { "jsonName": "DEL", "displayName": "DEL" },
-    { "jsonName": "DUP", "displayName": "DUP" },
-    { "jsonName": "INV", "displayName": "INV" },
-    { "jsonName": "INS", "displayName": "INS" },
-    { "jsonName": "CNV", "displayName": "CNV" },
-    { "jsonName": "BND", "displayName": "BND" }
-  ],
+  "variantType": ["SNP", "DEL", "DUP", "INV", "INS", "CNV", "BND"],
   "queryCoordinatesAre0Based": true,
   "ui": {
     "title": "EGA Beacon Template UI - Main main",
@@ -355,32 +347,51 @@
         "Y",
         "MT"
       ],
-      "showAminoacidChange": true,
+      "queryByAminoacidChange": true,
       "aminoAcidNotation": [
         "Ala",
-        "Arg",
-        "Asn",
-        "Asp",
         "Cys",
-        "Gln",
+        "Asp",
         "Glu",
+        "Phe",
         "Gly",
         "His",
         "Ile",
-        "Leu",
         "Lys",
+        "Leu",
         "Met",
-        "Phe",
+        "Asn",
         "Pro",
+        "Gln",
+        "Arg",
         "Ser",
-        "Ter",
         "Thr",
+        "Val",
         "Trp",
         "Tyr",
-        "Val",
-        "Xaa"
+        "A",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "K",
+        "L",
+        "M",
+        "N",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "V",
+        "W",
+        "Y",
+        "Ter",
+        "*"
       ],
-
       "genomicQueryTypes": {
         "sequenceQuery": true,
         "geneId": true,
@@ -394,10 +405,6 @@
         "position": 16050527,
         "referenceBases": "C",
         "alternateBases": "A"
-      },
-
-      "genomicQueryBuilder": {
-        "showAlternateBases": true
       }
     }
   }
