@@ -1,158 +1,58 @@
-import * as Yup from "yup";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
   Box,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import StyledGenomicLabels from "./styling/StyledGenomicLabels";
-import GeneIdForm from "./querybuilder/GeneIdForm";
-import GenomicLocationRage from "./querybuilder/GenomicLocationRange";
-import GenomicAlleleQuery from "./querybuilder/GenomicAlleleQuery";
-import GenomicLocationBracket from "./querybuilder/GenomicLocationBracket";
-import DefinedVariationSequence from "./querybuilder/DefinedVariationSequence";
-import GenomicQueryBuilderHelp from "./querybuilder/GenomicQueryBuilderHelp";
-import GenomicSubmitButton from "../genomic/GenomicSubmitButton";
-import { Formik, Form } from "formik";
+// Formik manages form state and submission.
+import { Form, Formik } from "formik";
+// Shared message component and message texts.
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
-import { buildGenomicParams } from "../genomic/utils/buildGenomicParams";
-import { GENOMIC_LABELS_MAP } from "../genomic/genomicLabelHelper";
-import {
-  bracketRangeValidator,
-  assemblyIdRequired,
-  chromosomeValidator,
-  createStartValidator,
-  createEndValidator,
-  refAaValidator,
-  aaPositionValidator,
-  altAaValidator,
-  minVariantLength,
-  maxVariantLength,
-  requiredRefBases,
-  requiredAltBases,
-  nonRequiredAltBases,
-  genomicHGVSshortForm,
-  aminoAcidChangeGroupValidator,
-} from "../genomic/genomicQueryBuilderValidator";
-import config from "../../config/runtimeConfig";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
+import config from "../../config/runtimeConfig";
+import GenomicSubmitButton from "./GenomicSubmitButton";
+import GenomicQueryBuilderHelp from "./querybuilder/GenomicQueryBuilderHelp";
+import StyledGenomicLabels from "./styling/StyledGenomicLabels";
+import { buildGenomicFilter } from "./utils/buildGenomicFilter";
+import { mapQueryParamsToFormik } from "./utils/mapQueryParamsToFormik";
 
-// List of all query types shown as options in the UI
-// Used to display the selection buttons and control which form is shown
-// This list comes from the configuration file
-const QUERY_TYPE_LABELS = {
-  help: "Need Help?",
-  sequenceQuery: "Sequence Query",
-  geneId: "Gene ID",
-  rangeQuery: "Range Query",
-  bracketQuery: "Bracket Query",
-  hgvsQuery: "Genomic Allele Query (HGVS)",
-};
+// Shared genomic query configuration.
+import {
+  EMPTY_INITIAL_VALUES,
+  QUERY_TYPE_CONFIG,
+  VALIDATION_SCHEMA_MAP,
+} from "./genomicQueryConfig";
 
+// Label used for the help page.
+const HELP_QUERY_TYPE = "Need Help?";
+
+// Default genomic input selected when the builder starts.
+const DEFAULT_SELECTED_INPUT = "variantType";
+
+// Value used to identify genomic filters.
+const GENOMIC_FILTER_TYPE = "genomic";
+
+// Read the enabled query types from the runtime configuration.
 const enabledQueryTypes = Object.entries(
-  config.ui.genomicQueries?.genomicQueryTypes || {}
+  config.ui?.genomicQueries?.genomicQueryTypes || {}
 )
-  .filter(([_, enabled]) => enabled)
+  // Keep only enabled query types that exist in QUERY_TYPE_CONFIG.
+  .filter(([key, enabled]) => enabled && QUERY_TYPE_CONFIG[key])
+
+  // Add the label and component defined for each query type.
   .map(([key]) => ({
     key,
-    label: QUERY_TYPE_LABELS[key],
+    ...QUERY_TYPE_CONFIG[key],
   }));
 
-// Helper, most probably will need to move it
-const EMPTY_INITIAL_VALUES = {
-  geneId: "",
-  assemblyId: "",
-  chromosome: "",
-  start: "",
-  end: "",
-  variantType: "",
-  alternateBases: "",
-  refBases: "",
-  altBases: "",
-  aminoacidChange: "",
-  minVariantLength: "",
-  maxVariantLength: "",
-  genomicHGVSshortForm: "",
-  startMin: "",
-  startMax: "",
-  endMin: "",
-  endMax: "",
-  refAa: "",
-  altAa: "",
-  aaPosition: "",
-};
-
-const mapQueryParamsToFormik = (queryType, queryParams = {}) => {
-  const base = { ...EMPTY_INITIAL_VALUES };
-  const firstOrEmpty = (v) => (Array.isArray(v) ? v[0] ?? "" : v ?? "");
-  const hasEnd = queryParams.end !== undefined && queryParams.end !== null;
-
-  switch (queryType) {
-    case "Gene ID":
-      return {
-        ...base,
-        geneId: queryParams.geneId || "",
-        refAa: queryParams.refAa || "",
-        aaPosition: queryParams.aaPosition || "",
-        altAa: queryParams.altAa || "",
-      };
-
-    case "Genomic Allele Query (HGVS)":
-      return {
-        ...base,
-        genomicHGVSshortForm: queryParams.genomicAlleleShortForm || "",
-      };
-
-    case "Sequence Query":
-      return {
-        ...base,
-        assemblyId: queryParams.assemblyId || "",
-        chromosome: queryParams.referenceName || "",
-        start: firstOrEmpty(queryParams.start),
-        refBases: queryParams.referenceBases || "",
-        alternateBases: queryParams.alternateBases || "",
-      };
-
-    case "Range Query":
-      return {
-        ...base,
-        assemblyId: queryParams.assemblyId || "",
-        chromosome: queryParams.referenceName || "",
-        start: firstOrEmpty(queryParams.start),
-        end: hasEnd ? firstOrEmpty(queryParams.end) : "",
-      };
-
-    case "Bracket Query":
-      return {
-        ...base,
-        assemblyId: queryParams.assemblyId || "",
-        chromosome: queryParams.referenceName || "",
-        startMin: queryParams.start?.[0] ?? "",
-        startMax: queryParams.start?.[1] ?? "",
-        endMin: queryParams.end?.[0] ?? "",
-        endMax: queryParams.end?.[1] ?? "",
-      };
-
-    default:
-      return base;
-  }
-};
-
-function DraftSaver({ values, selectedQueryType, setTabDrafts }) {
-  useEffect(() => {
-    if (selectedQueryType !== "Need Help?") {
-      setTabDrafts((prev) => ({
-        ...prev,
-        [selectedQueryType]: values,
-      }));
-    }
-  }, [values, selectedQueryType, setTabDrafts]);
-
-  return null;
-}
+// Create a direct lookup from query label to React component.
+// Example: "Gene ID" -> GeneIdForm.
+const QUERY_COMPONENTS = Object.fromEntries(
+  enabledQueryTypes.map(({ label, component }) => [label, component])
+);
 
 export default function GenomicQueryBuilderDialog({
   open,
@@ -161,11 +61,19 @@ export default function GenomicQueryBuilderDialog({
   setSelectedFilter,
   setActiveInput,
 }) {
-  // This selectes on load the first query type, without user's interaction
-  const [selectedQueryType, setSelectedQueryType] = useState("Need Help?");
-  const [selectedInput, setSelectedInput] = useState("variantType");
+  // Stores the query type currently displayed.
+  const [selectedQueryType, setSelectedQueryType] = useState(HELP_QUERY_TYPE);
+
+  // Stores the active genomic input group.
+  const [selectedInput, setSelectedInput] = useState(DEFAULT_SELECTED_INPUT);
+
+  // Stores an error message shown inside the dialog.
   const [duplicateMessage, setDuplicateMessage] = useState("");
+
+  // Stores unfinished form values for each query type.
   const [tabDrafts, setTabDrafts] = useState({});
+
+  // Read genomic edit and prefill information from context.
   const {
     genomicPrefill,
     clearGenomicPrefill,
@@ -173,112 +81,144 @@ export default function GenomicQueryBuilderDialog({
     setEditingGenomicFilter,
   } = useSelectedEntry();
 
-  // This map links each query type label to the corresponding form component
-  // It tells the app which form to display based on the user's selection
-  const formComponentsMap = {
-    "Gene ID": GeneIdForm,
-    "Range Query": GenomicLocationRage,
-    "Bracket Query": GenomicLocationBracket,
-    "Sequence Query": DefinedVariationSequence,
-    "Genomic Allele Query (HGVS)": GenomicAlleleQuery,
-  };
+  // Get the form component for the currently selected query type.
+  const SelectedFormComponent = QUERY_COMPONENTS[selectedQueryType];
 
-  // The rules of the validation schema can be checked in the component: genomicQueryBuilderValidator
-  // Validation rules for each query type form
-  // Each type has its own schema to check if required fields are filled
-  const validationSchemaMap = {
-    "Sequence Query": Yup.object({
-      assemblyId: assemblyIdRequired.required("Assembly ID is required"),
-      chromosome: chromosomeValidator.required("Chromosome is required"),
-      start: createStartValidator("Start"),
-      alternateBases: requiredAltBases,
-      refBases: requiredRefBases,
-    }),
+  // True when the help page is currently selected.
+  const isHelpPage = selectedQueryType === HELP_QUERY_TYPE;
 
-    "Gene ID": Yup.object({
-      // Gene ID is required
-      geneId: Yup.string().required("Gene ID is required"),
-      // These are optional and validated if present
-      alternateBases: nonRequiredAltBases,
-      refAa: refAaValidator,
-      altAa: altAaValidator,
-      aaPosition: aaPositionValidator,
-      minVariantLength,
-      maxVariantLength,
-    }).concat(aminoAcidChangeGroupValidator),
+  // Check whether the current query type has matching prefill data.
+  const hasMatchingPrefill =
+    open &&
+    genomicPrefill?.queryType === selectedQueryType &&
+    genomicPrefill?.queryParams;
 
-    // This form requires more positional data and variation info
-    "Range Query": Yup.object({
-      assemblyId: assemblyIdRequired,
-      chromosome: chromosomeValidator.required("Chromosome is required"),
-      start: createStartValidator("Start"),
-      end: createEndValidator("End", "Start"),
-      alternateBases: nonRequiredAltBases,
-      refAa: refAaValidator,
-      altAa: altAaValidator,
-      aaPosition: aaPositionValidator,
-      minVariantLength,
-      maxVariantLength,
-    }).concat(aminoAcidChangeGroupValidator),
-
-    // Bracket query uses a simpler schema, just needs the chromosome + location range
-    "Bracket Query": bracketRangeValidator.shape({
-      assemblyId: assemblyIdRequired,
-      chromosome: chromosomeValidator.required("Chromosome is required"),
-    }),
-
-    // This is a shortcut query type using HGVS format
-    "Genomic Allele Query (HGVS)": Yup.object({
-      genomicHGVSshortForm,
-    }),
-  };
-
-  // Get the form component that matches the currently selected query type
-  // This is used to render the correct form in the UI based on user's selection
-  const SelectedFormComponent = formComponentsMap[selectedQueryType];
-
-  const isHelpPage = selectedQueryType === "Need Help?";
-
-  // Compute initial values: ONLY the tab matching genomicPrefill.queryType gets values
+  // Formik first uses a saved draft if one exists.
+  // Otherwise it uses matching prefill data or empty values.
   const initialValues =
-    tabDrafts[selectedQueryType] ||
-    (open &&
-    genomicPrefill?.queryType &&
-    genomicPrefill?.queryParams &&
-    selectedQueryType === genomicPrefill.queryType
+    tabDrafts[selectedQueryType] ??
+    (hasMatchingPrefill
       ? mapQueryParamsToFormik(selectedQueryType, genomicPrefill.queryParams)
       : EMPTY_INITIAL_VALUES);
 
+  // When the dialog opens with genomic prefill data,
+  // automatically open the matching query type.
   useEffect(() => {
     if (open && genomicPrefill?.queryType) {
       setSelectedQueryType(genomicPrefill.queryType);
     }
   }, [open, genomicPrefill]);
 
-  const resetBuilderState = () => {
-    setSelectedQueryType("Need Help?");
-    setSelectedInput("variantType");
-    setDuplicateMessage("");
-  };
-
+  // Reset local state and close the dialog.
   const handleDialogClose = () => {
-    resetBuilderState();
-    clearGenomicPrefill();
-    setEditingGenomicFilter(null);
+    // Return to the help page.
+    setSelectedQueryType(HELP_QUERY_TYPE);
+
+    // Return to the default selected genomic input.
+    setSelectedInput(DEFAULT_SELECTED_INPUT);
+
+    // Clear any visible error message.
+    setDuplicateMessage("");
+
+    // Remove saved tab drafts.
     setTabDrafts({});
+
+    // Clear genomic prefill data from context.
+    clearGenomicPrefill();
+
+    // Stop editing the current genomic filter.
+    setEditingGenomicFilter(null);
+
+    // Call the close function received from the parent.
     handleClose();
   };
 
+  // Show a message and remove it after 5 seconds.
+  const showTemporaryMessage = (message) => {
+    setDuplicateMessage(message);
+
+    setTimeout(() => {
+      setDuplicateMessage("");
+    }, 5000);
+  };
+
+  // Handle Formik submission.
+  const handleSubmit = (values) => {
+    // Convert the current form values into a genomic filter.
+    const newFilter = buildGenomicFilter(
+      selectedQueryType,
+      values,
+      selectedInput
+    );
+
+    // Check whether exactly the same filter already exists.
+    const isDuplicate = selectedFilter.some(
+      (filter) => filter.id === newFilter.id
+    );
+
+    // Stop submission when the same filter already exists.
+    if (isDuplicate) {
+      console.warn("[GQB] Duplicate genomic query prevented");
+
+      showTemporaryMessage(COMMON_MESSAGES.doubleValue);
+
+      return;
+    }
+
+    // Check whether any genomic filter already exists.
+    const alreadyHasGenomic = selectedFilter.some(
+      (filter) => filter.type === GENOMIC_FILTER_TYPE
+    );
+
+    // Block a second genomic filter unless the current one is being edited.
+    if (alreadyHasGenomic && !editingGenomicFilter) {
+      console.warn("[GQB] Attempted to add a second genomic query — blocked");
+
+      // Show the message until the dialog closes.
+      setDuplicateMessage(COMMON_MESSAGES.singleGenomicQuery);
+
+      // Close and reset the dialog after 3 seconds.
+      setTimeout(handleDialogClose, 3000);
+
+      return;
+    }
+
+    // Update the selected filters.
+    setSelectedFilter((previousFilters) =>
+      editingGenomicFilter
+        ? [
+            // When editing, remove the previous genomic filter.
+            ...previousFilters.filter(
+              (filter) => filter.type !== GENOMIC_FILTER_TYPE
+            ),
+
+            // Add the updated genomic filter.
+            newFilter,
+          ]
+        : [
+            // When adding, keep the existing filters.
+            ...previousFilters,
+
+            // Add the new genomic filter.
+            newFilter,
+          ]
+    );
+
+    // Close the dialog and reset its local state.
+    handleDialogClose();
+  };
+
   return (
-    // This is the empty dialog
     <Dialog
+      // Controls whether the dialog is visible.
       open={open}
+      // Reset state when the dialog is closed.
       onClose={handleDialogClose}
-      disablePortal={false}
-      disableAutoFocus={false}
-      disableEnforceFocus={false}
+      // Use the extra-large dialog width.
       maxWidth="xl"
+      // Allow the dialog to use the available width.
       fullWidth
+      // Style the dialog container.
       PaperProps={{
         sx: {
           borderRadius: "10px",
@@ -287,7 +227,7 @@ export default function GenomicQueryBuilderDialog({
         },
       }}
     >
-      {/* This is the box in which the title is contained */}
+      {/* Header containing the title and close button. */}
       <Box
         sx={{
           display: "flex",
@@ -295,7 +235,7 @@ export default function GenomicQueryBuilderDialog({
           alignItems: "center",
         }}
       >
-        {/* Title that is consistent across all query types */}
+        {/* Dialog title. */}
         <DialogTitle
           sx={{
             fontSize: "16px",
@@ -306,7 +246,8 @@ export default function GenomicQueryBuilderDialog({
         >
           Genomic Query Builder
         </DialogTitle>
-        {/* This is the icon to close the dialog + the dialog closes by tapping outside of it  */}
+
+        {/* Button used to close the dialog. */}
         <IconButton
           edge="start"
           color="inherit"
@@ -318,211 +259,111 @@ export default function GenomicQueryBuilderDialog({
         </IconButton>
       </Box>
 
-      {/*The dyamic content of the dialog starts here */}
-      <DialogContent
-        sx={{
-          pt: 0,
-        }}
-      >
-        {/* This is the form wrapper that controls validation and submission, 
-        it uses dynamic initial values as empty and validation schemas based on the
-        selected query type */}
+      {/* Main dialog content. */}
+      <DialogContent sx={{ pt: 0 }}>
         <Formik
+          // Recreate Formik when the selected query type changes.
           key={selectedQueryType}
+          // Run validation when the form is created.
           validateOnMount
+          // Load values for the selected query type.
           initialValues={initialValues}
-          validationSchema={validationSchemaMap[selectedQueryType]}
-          onSubmit={(values) => {
-            if (values.chromosome) {
-              values.chromosome = values.chromosome.trim().toUpperCase();
-            }
-
-            // STEP 2A: build Beacon-compatible query params
-            const queryParams = buildGenomicParams(
-              selectedQueryType,
-              values,
-              selectedInput
-            );
-
-            // These are exclusive groups...
-            const mutuallyExclusiveGroups = {
-              variantType: ["variantType"],
-              alternateBases: ["alternateBases", "refBases", "altBases"],
-              aminoacidChange: [
-                "aminoacidChange",
-                "refAa",
-                "altAa",
-                "aaPosition",
-              ],
-            };
-
-            const allExclusiveKeys = Object.values(
-              mutuallyExclusiveGroups
-            ).flat();
-            const allowedExclusiveKeys =
-              mutuallyExclusiveGroups[selectedInput] || [];
-
-            const validEntries = Object.entries(values).filter(
-              ([key, value]) => {
-                if (
-                  value === undefined ||
-                  value === null ||
-                  (typeof value === "string" && value.trim() === "")
-                ) {
-                  return false;
-                }
-                if (allExclusiveKeys.includes(key)) {
-                  if (selectedQueryType === "Sequence Query") return true;
-                  if (!selectedInput) return true;
-                  return allowedExclusiveKeys.includes(key);
-                }
-                return true;
-              }
-            );
-
-            const idLabel = validEntries
-              .map(([key, value]) => `${key}:${value}`)
-              .join("-");
-
-            const combinedLabel = validEntries
-              .map(([key, value]) => {
-                const displayKey = GENOMIC_LABELS_MAP[key] || key;
-                return `${displayKey}: ${value}`;
-              })
-              .join(" | ");
-
-            // STEP 2B: add queryParams to the filter
-            const newFilter = {
-              id: `genomic-${selectedQueryType}-${idLabel}`,
-              label: combinedLabel,
-              key: selectedQueryType,
-              scope: "genomicQueryBuilder",
-              bgColor: "genomic",
-              type: "genomic",
-              queryType: selectedQueryType,
-              queryParams,
-            };
-
-            // Prevent duplicates
-            const exists = selectedFilter.some((f) => f.id === newFilter.id);
-            if (exists) {
-              console.warn("[GQB] Duplicate genomic query prevented");
-              setDuplicateMessage(COMMON_MESSAGES.doubleValue);
-              setTimeout(() => setDuplicateMessage(""), 5000);
-              return;
-            }
-            const alreadyHasGenomic = selectedFilter.some(
-              (f) => f.type === "genomic"
-            );
-
-            if (alreadyHasGenomic && !editingGenomicFilter) {
-              console.warn(
-                "[GQB] Attempted to add a second genomic query — blocked"
-              );
-              setDuplicateMessage(COMMON_MESSAGES.singleGenomicQuery);
-              setTimeout(() => setDuplicateMessage(""), 5000);
-              setTimeout(() => handleClose(), 3000);
-              return;
-            }
-
-            // STEP 2C: update applied filters
-            setSelectedFilter((prev) => {
-              // If editing a genomic filter → replace the existing genomic filter
-              if (editingGenomicFilter) {
-                return [...prev.filter((f) => f.type !== "genomic"), newFilter];
-              }
-
-              // Otherwise just add the new genomic filter
-              return [...prev, newFilter];
-            });
-
-            setEditingGenomicFilter(null);
-
-            setDuplicateMessage("");
-            handleDialogClose();
-          }}
+          // Use the validation schema for the selected query type.
+          validationSchema={VALIDATION_SCHEMA_MAP[selectedQueryType]}
+          // Submit using the shared handler above.
+          onSubmit={handleSubmit}
         >
-          {({ resetForm, isValid, dirty, values, errors }) => {
+          {({ isValid, values }) => {
+            // Save the current tab and switch to another query type.
+            const switchQueryType = (nextQueryType) => {
+              // Do nothing when the selected tab is clicked again.
+              if (nextQueryType === selectedQueryType) {
+                return;
+              }
+
+              // Save current values before leaving a query form.
+              if (selectedQueryType !== HELP_QUERY_TYPE) {
+                setTabDrafts((previousDrafts) => ({
+                  ...previousDrafts,
+                  [selectedQueryType]: values,
+                }));
+              }
+
+              // Open the requested query type.
+              setSelectedQueryType(nextQueryType);
+            };
+
             return (
-              <>
-                <DraftSaver
-                  values={values}
-                  selectedQueryType={selectedQueryType}
-                  setTabDrafts={setTabDrafts}
-                />
-                <Form>
-                  {/* Render the selectable query type buttons */}
-                  {/* When a user clicks a button, the form type changes and the form is reset */}
+              <Form>
+                {/* Query type selection buttons. */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 2,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  {/* Help button is always displayed. */}
+                  <StyledGenomicLabels
+                    label={HELP_QUERY_TYPE}
+                    isHelpButton
+                    selected={isHelpPage}
+                    onClick={() => switchQueryType(HELP_QUERY_TYPE)}
+                  />
+
+                  {/* Display each enabled genomic query type. */}
+                  {enabledQueryTypes.map(({ key, label }) => (
+                    <StyledGenomicLabels
+                      key={key}
+                      label={label}
+                      selected={selectedQueryType === label}
+                      onClick={() => switchQueryType(label)}
+                    />
+                  ))}
+                </Box>
+
+                {/* Display either help content or the selected query form. */}
+                <Box sx={{ mt: 2 }}>
+                  {isHelpPage ? (
+                    // Help page.
+                    <GenomicQueryBuilderHelp
+                      setSelectedQueryType={setSelectedQueryType}
+                      handleClose={handleClose}
+                      setActiveInput={setActiveInput}
+                      setTabDrafts={setTabDrafts}
+                    />
+                  ) : (
+                    // Query form matching the selected query type.
+                    SelectedFormComponent && (
+                      <SelectedFormComponent
+                        selectedInput={selectedInput}
+                        setSelectedInput={setSelectedInput}
+                      />
+                    )
+                  )}
+                </Box>
+
+                {/* Show an error message only when one exists. */}
+                {duplicateMessage && (
+                  <Box sx={{ mt: 2 }}>
+                    <CommonMessage text={duplicateMessage} type="error" />
+                  </Box>
+                )}
+
+                {/* The help page does not have a submit button. */}
+                {!isHelpPage && (
                   <Box
                     sx={{
                       display: "flex",
-                      gap: 2,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <StyledGenomicLabels
-                      label="Need Help?"
-                      isHelpButton
-                      selected={selectedQueryType === "Need Help?"}
-                      onClick={() => {
-                        setSelectedQueryType("Need Help?");
-                        resetForm({ values: EMPTY_INITIAL_VALUES });
-                      }}
-                    />
-
-                    {enabledQueryTypes.map(({ key, label }) => (
-                      <StyledGenomicLabels
-                        key={key}
-                        label={label}
-                        selected={selectedQueryType === label}
-                        onClick={() => {
-                          setSelectedQueryType(label);
-                          resetForm({ values: EMPTY_INITIAL_VALUES });
-                        }}
-                      />
-                    ))}
-                  </Box>
-                  {/* Render the selected form based on the current query type based on user's selection */}
-                  <Box
-                    sx={{
+                      justifyContent: "flex-end",
                       mt: 2,
                     }}
                   >
-                    {isHelpPage ? (
-                      <GenomicQueryBuilderHelp
-                        setSelectedQueryType={setSelectedQueryType}
-                        handleClose={handleClose}
-                        setActiveInput={setActiveInput}
-                        setTabDrafts={setTabDrafts}
-                      />
-                    ) : (
-                      SelectedFormComponent && (
-                        <SelectedFormComponent
-                          selectedInput={selectedInput}
-                          setSelectedInput={setSelectedInput}
-                        />
-                      )
-                    )}
+                    {/* Disable submission while the form is invalid. */}
+                    <GenomicSubmitButton disabled={!isValid} />
                   </Box>
-                  <Box sx={{ mt: 2, mb: 0 }}>
-                    {duplicateMessage && (
-                      <CommonMessage text={duplicateMessage} type="error" />
-                    )}
-                  </Box>
-                  {/* Submit button is shown at the bottom right of all the query types and is disabled if the form is invalid or untouched */}
-                  {!isHelpPage && (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        mt: 2,
-                      }}
-                    >
-                      <GenomicSubmitButton disabled={!isValid} />
-                    </Box>
-                  )}
-                </Form>
-              </>
+                )}
+              </Form>
             );
           }}
         </Formik>
