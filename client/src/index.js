@@ -6,26 +6,13 @@ import { setRuntimeConfig } from "./config/runtimeConfig";
 import { createOidcConfig } from "./auth/createOidcConfig";
 import OidcCallbackGate from "./auth/OidcCallbackGate";
 import "./index.css";
-import schema from "./config/schema";
 
 /**
  * Starts the application after runtime configuration is loaded.
  */
 async function bootstrap() {
   try {
-    const config = await loadRuntimeConfig();
-
-    // Validate the runtime configuration before starting the application.
-    const { error, value: validatedConfig } = schema.validate(config);
-
-    if (error) {
-      const validationErrors = error.details
-        .map((detail) => detail.message)
-        .join("\n");
-
-      throw new Error(`Invalid runtime configuration:\n${validationErrors}`);
-    }
-
+    const validatedConfig = await loadRuntimeConfig();
     // Validate authentication only after the full config is valid.
     const oidcConfig = createOidcConfig(validatedConfig);
 

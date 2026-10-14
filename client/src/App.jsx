@@ -11,8 +11,6 @@ import {
   Routes,
   Route,
   Navigate,
-  useLocation,
-  Link,
 } from "react-router-dom";
 import config from "./config/runtimeConfig";
 import { useState, useEffect } from "react";
@@ -33,14 +31,6 @@ if (window.Cypress) {
   };
 }
 
-function RouteDebugger() {
-  const location = useLocation();
-
-  console.log("ROUTER:", location.pathname);
-  console.log("WINDOW:", window.location.pathname);
-
-  return null;
-}
 export default function App() {
   const [selectedTool, setSelectedTool] = useState(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -90,7 +80,6 @@ export default function App() {
   return (
     <Router useTransitions={false}>
       <SelectedEntryProvider>
-        <RouteDebugger />
         <Box
           sx={{
             backgroundColor: "#F5F5F5",
@@ -137,14 +126,10 @@ export default function App() {
                 <Route path="/about" element={<About />} />
               )}
               {config.ui.showContactPage && (
-                <>
-                  <Route path="/contact" element={<ContactForm />} />
-                </>
+                <Route path="/contact" element={<ContactForm />} />
               )}
               {config.ui.showLogin && (
-                <>
-                  <Route path="/login" element={<Login />} />
-                </>
+                <Route path="/login" element={<Login />} />
               )}
               <Route
                 path="/dataset-detailed-table"
