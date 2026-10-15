@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "apiVersion": "v2.0.0",
+    "beaconId": "es.ega-archive.impact-beacon-network",
+    "isAggregated": true,
+    "returnedSchemas": [
+      {
+        "entityType": "boolean",
+        "schema": "https://raw.githubusercontent.com/ga4gh-beacon/beacon-v2/main/framework/json/responses/beaconBooleanResponse.json"
+      },
+      {
+        "entityType": "count",
+        "schema": "https://raw.githubusercontent.com/ga4gh-beacon/beacon-v2/main/framework/json/responses/beaconCountResponse.json"
+      },
+      {
+        "entityType": "record",
+        "schema": "https://raw.githubusercontent.com/ga4gh-beacon/beacon-v2/main/framework/json/responses/beaconResultsetsResponse.json"
+      }
+    ]
+  },
+  "response": {
+    "endpointSets": {
+      "genomicVariant": {
+        "endpoints": {
+          "individual": {
+            "returnedEntryType": "individual",
+            "url": "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0/g_variants/{variantInternalId}/individuals"
+          },
+          "cohort": {
+            "returnedEntryType": "cohort",
+            "url": "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0/g_variants/{id}/cohorts"
+          },
+          "run": {
+            "returnedEntryType": "run",
+            "url": "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0/g_variants/{variantInternalId}/runs"
+          },
+          "biosample": {
+            "returnedEntryType": "biosample",
+            "url": "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0/g_variants/{variantInternalId}/biosamples"
+          },
+          "analysis": {
+            "returnedEntryType": "analysis",
+            "url": "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0/g_variants/{variantInternalId}/analyses"
+          },
+          "dataset": {
+            "returnedEntryType": "dataset",
+            "url": "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0/g_variants/{id}/datasets"
+          }
+        },
+        "entryType": "genomicVariant",
+        "filteringTermsUrl": "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0/g_variants/filtering_terms",
+        "rootUrl": "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0/g_variants",
+        "singleEntryUrl": "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0/g_variants/{variantInternalId}"
+      }
+    }
+  }
+}

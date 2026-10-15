@@ -1,7 +1,5 @@
 /// <reference types="cypress" />
 
-import config from "../../../src/config/config.json";
-
 // This test verifies the All Filtering Terms feature.
 // It checks that the button updates its style when selected and ensures the filtering terms table renders properly.
 // It validates that all expected table headers are visible in the UI.
@@ -9,18 +7,27 @@ import config from "../../../src/config/config.json";
 // It also navigates through paginated results to ensure nothing is missing across all pages.
 
 describe("All Filtering Terms behavior and backend consistency", () => {
-  const primaryDarkColor = config.ui.colors.darkPrimary;
+  let config;
+  let primaryRgb;
 
   // Helper: convert HEX → RGB
   const hexToRgb = (hex) => {
     const bigint = parseInt(hex.replace("#", ""), 16);
+
     return `rgb(${(bigint >> 16) & 255}, ${(bigint >> 8) & 255}, ${
       bigint & 255
     })`;
   };
 
-  const primaryRgb = hexToRgb(primaryDarkColor);
   const expectedHeaders = ["Select", "ID", "Label", "Scope"];
+
+  before(() => {
+    // Load the runtime config served by the app
+    cy.request("/config/config.json").then((response) => {
+      config = response.body;
+      primaryRgb = hexToRgb(config.ui.colors.darkPrimary);
+    });
+  });
 
   beforeEach(() => {
     cy.visit("/");

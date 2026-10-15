@@ -13,10 +13,9 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PropTypes from "prop-types";
-import config from "../config/config.json";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import config from "../config/runtimeConfig";
+import { Link, useLocation } from "react-router-dom";
 import { useAuthSafe as useAuth } from "../components/pages/login/useAuthSafe";
-import { useSelectedEntry } from "../components/context/SelectedEntryContext";
 
 /**
  * Displays a responsive navigation bar with a title, logo, and links.
@@ -28,10 +27,7 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
   // State to control mobile drawer open/close
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const navigate = useNavigate();
   const location = useLocation();
-
-  const { resetHomeState } = useSelectedEntry();
 
   // Retrieves the authentication context provided by the oidc-react context
   const auth = useAuth();
@@ -117,6 +113,7 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
                   alt="Logo"
                   data-cy="navbar-logo"
                   sx={{
+                    height: "42px",
                     maxHeight: "42px",
                     width: "auto",
                     objectFit: "contain",
@@ -131,11 +128,11 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
 
             {/* Title text linking to homepage */}
             <Typography
+              component={Link}
+              to="/"
               data-cy="navbar-title"
               className="font-sans"
               onClick={() => {
-                resetHomeState();
-                navigate("/");
                 setSelectedTool(null);
                 setMobileOpen(false);
               }}
@@ -146,6 +143,7 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
                 cursor: "pointer",
                 fontSize: "15px",
                 whiteSpace: "nowrap",
+                textDecoration: "none",
                 "@media (max-width: 410px)": { fontSize: "14px" },
                 "@media (min-width: 768px)": { fontSize: "16px" },
                 "@media (max-width: 930px) and (min-width: 900px)": {
@@ -195,7 +193,7 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
                   const isLogin = item.label.toLowerCase() === "log in";
 
                   const buttonProps = {
-                    key: item.label,
+                    // key: item.label,
                     sx: {
                       ...textStyle,
                       textTransform: "none",
@@ -211,6 +209,7 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
 
                   return item.url?.startsWith("http") ? (
                     <Button
+                      key={item.label}
                       {...buttonProps}
                       href={item.url}
                       target="_blank"
@@ -221,6 +220,7 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
                     />
                   ) : (
                     <Button
+                      key={item.label}
                       {...buttonProps}
                       component={isDemoMode && isLogin ? "button" : Link}
                       to={isDemoMode && isLogin ? undefined : item.url}
@@ -284,7 +284,7 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
               textTransform: "none",
               fontFamily: '"Open Sans", sans-serif',
               fontWeight: 700,
-              fontSize: "16px",
+              fontSize: "14px",
               color: config.ui.colors.primary,
             }}
           >
@@ -317,7 +317,7 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
                         textTransform: "none",
                         fontFamily: '"Open Sans", sans-serif',
                         fontWeight: 400,
-                        fontSize: "16px",
+                        fontSize: "13px",
                         color: config.ui.colors.primary,
                       }}
                     >
@@ -341,7 +341,7 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
                         textTransform: "none",
                         fontFamily: '"Open Sans", sans-serif',
                         fontWeight: isActive ? 700 : 400,
-                        fontSize: "16px",
+                        fontSize: "13px",
                         color: isActive ? "white" : config.ui.colors.primary,
                         backgroundColor: isActive
                           ? config.ui.colors.primary
@@ -384,7 +384,10 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
                 size="small"
                 aria-label="logout"
                 data-cy="logout-button"
-                sx={{ color: config.ui.colors.primary }}
+                sx={{
+                  color: config.ui.colors.primary,
+                  pl: 0,
+                }}
               >
                 <LogoutIcon fontSize="small" />
               </IconButton>

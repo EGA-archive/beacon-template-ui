@@ -1,7 +1,8 @@
 import { Box } from "@mui/material";
 import { truncateCaseLevelData } from "../../utils/tableHelpers";
+import { highlightText } from "../../utils/highlightText";
 
-export default function CaseLevelDataCell({ value }) {
+export default function CaseLevelDataCell({ value, searchTerm }) {
   if (!Array.isArray(value) || value.length === 0) return "-";
 
   const formatted = value
@@ -19,7 +20,11 @@ export default function CaseLevelDataCell({ value }) {
 
   // Single value → inline
   if (entries.length === 1) {
-    return <Box sx={{ whiteSpace: "nowrap" }}>{entries[0]}</Box>;
+    return (
+      <Box sx={{ whiteSpace: "nowrap" }}>
+        {highlightText(entries[0], searchTerm)}
+      </Box>
+    );
   }
 
   return (
@@ -43,7 +48,7 @@ export default function CaseLevelDataCell({ value }) {
               lineHeight: 1.3,
             }}
           >
-            {entry}
+            {highlightText(entry, searchTerm)}
             {truncated && i === entries.length - 1 ? " …" : ""}
           </Box>
         ))}

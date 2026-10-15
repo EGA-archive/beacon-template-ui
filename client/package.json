@@ -9,9 +9,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "validate-config": "node scripts/validate-config.js",
     "eject": "react-scripts eject"
   },
   "dependencies": {
+    "@ega/beacon-cookie-consent": "https://github.com/EGA-archive/beacon-cookie-consent.git",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.0.1",
@@ -23,8 +25,9 @@
     "oidc-react": "^4.0.1",
     "react": "18",
     "react-dom": "18",
-    "react-router-dom": "^7.5.0",
+    "react-router-dom": "7.18.0",
     "react-scripts": "5.0.1",
+    "recharts": "^3.8.1",
     "resend": "^6.0.1",
     "yup": "^1.6.1"
   },

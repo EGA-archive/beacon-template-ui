@@ -1,15 +1,12 @@
 import * as Yup from "yup";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 
-// Yup base pattern for Ref/Alt bases — allows IUPAC codes (excluding U), '.' and '-'
-export const basePattern = /^[ACGTRYSWKMBDHVN.\-]+$/;
+const minimumCoordinate = config.queryCoordinatesAre0Based ?? true ? 0 : 1;
+
+export const basePattern = /^(?:[ACGTRYSWKMBDHVN]+|[.-])$/;
 
 // Chromosome validator:
-// Accepts a variety of chromosome formats:
-// - Standard numeric chromosomes: "1" to "22"
-// - Sex chromosomes: "X", "Y" (case-insensitive)
 // - With or without "chr" prefix: e.g. "chr1", "chrX"
-// - RefSeq identifiers: starting with "refseq:" or "nc_"
 
 // Chromosome validator (dynamic from config)
 export const chromosomeValidator = Yup.string()
@@ -20,14 +17,16 @@ export const chromosomeValidator = Yup.string()
     function (input) {
       if (!input) return false;
 
-      const library =
-        config.ui.genomicQueries.genomicQueryBuilder.chromosomeLibrary;
+      const library = config.ui.genomicQueries.chromosomeLibrary;
 
-      // Normalize input (trim, uppercase)
-      const normalized = input.trim().toUpperCase();
+      // Normalize the optional "chr" prefix and compare case-insensitively.
+      const normalized = input.trim().replace(/^chr/i, "").toUpperCase();
 
-      // Only allow exact matches from library from the config
-      return library.map((c) => c.toUpperCase()).includes(normalized);
+      const normalizedLibrary = library.map((chromosome) =>
+        chromosome.trim().replace(/^chr/i, "").toUpperCase()
+      );
+
+      return normalizedLibrary.includes(normalized);
     }
   );
 
@@ -66,17 +65,7 @@ export const nonRequiredAltBases = Yup.string().matches(
 // Aminoacid Change fields (Ref and Alt): optional string
 export const refAaValidator = Yup.string().optional();
 
-export const altAaValidator = Yup.string()
-  .optional()
-  .test(
-    "not-equal-to-refAa",
-    "Ref AA and Alt AA cannot be the same",
-    function (value) {
-      const { refAa } = this.parent;
-      if (!refAa || !value) return true;
-      return refAa !== value;
-    }
-  );
+export const altAaValidator = Yup.string().optional();
 
 // As part of Aminoacid Change fields: aaPosition, must be a positive integer number
 export const aaPositionValidator = Yup.number()
@@ -90,6 +79,12 @@ export const createStartValidator = (label = "Start") =>
   Yup.number()
     .typeError(`${label} must be a number`)
     .integer(`${label} must be an integer`)
+    .min(
+      minimumCoordinate,
+      minimumCoordinate === 1
+        ? `${label} must be greater than 0`
+        : `${label} must be 0 or greater`
+    )
     .required(`${label} is required`);
 
 // End position: required, must be ≥ start
@@ -97,6 +92,12 @@ export const createEndValidator = (label = "End", startLabel = "Start") =>
   Yup.number()
     .typeError(`${label} must be a number`)
     .integer(`${label} must be an integer`)
+    .min(
+      minimumCoordinate,
+      minimumCoordinate === 1
+        ? `${label} must be greater than 0`
+        : `${label} must be 0 or greater`
+    )
     .when("start", (start, schema) =>
       start
         ? schema.min(
@@ -152,6 +153,12 @@ const numberField = (label) =>
   Yup.number()
     .typeError(`${label} must be a number`)
     .integer(`${label} must be an integer`)
+    .min(
+      minimumCoordinate,
+      minimumCoordinate === 1
+        ? `${label} must be greater than 0`
+        : `${label} must be 0 or greater`
+    )
     .required(`${label} is required`);
 
 export const bracketRangeValidator = Yup.object({

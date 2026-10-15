@@ -6,7 +6,7 @@ import {
   InputAdornment,
   IconButton,
 } from "@mui/material";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import SearchIcon from "@mui/icons-material/Search";
 import { alpha } from "@mui/material/styles";
 import FilteringTermsTable from "./FilteringTermsTable";
@@ -123,7 +123,6 @@ export default function AllFilteringTermsComponent({
         pb: "48px",
         backgroundColor: "white",
         boxShadow: "0px 8px 11px 0px #9BA0AB24",
-
         marginBottom: "20px",
       }}
     >
@@ -133,6 +132,7 @@ export default function AllFilteringTermsComponent({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+
           mb: 2,
         }}
       >
@@ -175,7 +175,12 @@ export default function AllFilteringTermsComponent({
             // Left side: search icon
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ color: primaryDarkColor, mr: 1 }} />
+                <SearchIcon
+                  sx={{
+                    color: primaryDarkColor,
+                    mr: 1,
+                  }}
+                />
               </InputAdornment>
             ),
             // Right side: clear button, only visible when query is not empty
@@ -232,6 +237,7 @@ export default function AllFilteringTermsComponent({
         <FilteringTermsTable
           filteringTerms={{ response: { filteringTerms: filteredTerms } }} // Pass filtered results
           defaultScope={selectedPathSegment} // Scope comes from selected entry
+          searchQuery={searchQuery}
           searchWasPerformed={searchQuery.trim().length > 0} // Used for conditional rendering
           loading={loading} // Show loader while fetching
           handleChangePage={handleChangePage} // Pagination: change page

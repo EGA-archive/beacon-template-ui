@@ -11,13 +11,14 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { lighten } from "@mui/material/styles";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import Loader from "../common/Loader";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import { FILTERING_TERMS_COLUMNS } from "../../lib/tableConstants";
 import { capitalize } from "../common/textFormatting";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import HighlightedText from "../common/HighlightedText";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
   assignDefaultScopesToTerms,
@@ -26,6 +27,7 @@ import {
 } from "../common/filteringTermsHelpers";
 import { getSelectableScopeStyles } from "../styling/selectableScopeStyles";
 import { alpha } from "@mui/material/styles";
+import { isMolecularEffect } from "../genomic/utils/molecularEffects";
 
 // This component displays a table of filtering terms.
 // It also lets users select a scope (like individual or biosample) when a filtering term is linked to multiple scopes.
@@ -35,6 +37,7 @@ export default function FilteringTermsTable({
   searchWasPerformed,
   loading,
   handleChangePage,
+  searchQuery = "",
   handleChangeRowsPerPage,
   page,
   rowsPerPage,
@@ -210,7 +213,9 @@ export default function FilteringTermsTable({
                       const item = {
                         id: term.id,
                         key: uniqueId,
-                        bgColor: "common",
+                        bgColor: isMolecularEffect(term.id)
+                          ? "genomic"
+                          : "common",
                         label: displayLabel?.trim() ? displayLabel : term.id,
                         type: term.type,
                         scope: activeScope,
@@ -327,7 +332,7 @@ export default function FilteringTermsTable({
 
                               const isSelected = selectedFilter.some(
                                 (filter) =>
-                                  filter.label === item.label &&
+                                  filter.id === item.id &&
                                   filter.scope === item.scope
                               );
 
@@ -336,7 +341,7 @@ export default function FilteringTermsTable({
                                   prev.filter(
                                     (filter) =>
                                       !(
-                                        filter.label === item.label &&
+                                        filter.id === item.id &&
                                         filter.scope === item.scope
                                       )
                                   )
@@ -355,7 +360,7 @@ export default function FilteringTermsTable({
                             {/* Check whether this filter is currently applied */}
                             {selectedFilter.some(
                               (filter) =>
-                                filter.label === item.label &&
+                                filter.id === item.id &&
                                 filter.scope === item.scope
                             ) ? (
                               <CheckCircleIcon
@@ -376,15 +381,25 @@ export default function FilteringTermsTable({
 
                           {/* Column 2: ID */}
                           <TableCell data-cy="filtering-term-id">
-                            {term.id}
+                            <HighlightedText
+                              text={term.id}
+                              searchQuery={searchQuery}
+                            />
                           </TableCell>
                           {/* Column 3: Label + Type */}
                           <TableCell data-cy="filtering-term-label">
-                            {" "}
-                            {displayLabel?.trim() ? item.label : "–"}
+                            <HighlightedText
+                              text={displayLabel?.trim() ? item.label : "–"}
+                              searchQuery={searchQuery}
+                            />
                           </TableCell>
                           {/* Column 4: Rendering Filter Types*/}
-                          <TableCell>{capitalize(item.type)}</TableCell>
+                          <TableCell>
+                            <HighlightedText
+                              text={capitalize(item.type)}
+                              searchQuery={searchQuery}
+                            />
+                          </TableCell>
                           {/* Column 5: Available scopes as selectable chips */}
                           <TableCell data-cy="filtering-term-scope">
                             {item.scopes.length > 0 &&
@@ -407,7 +422,12 @@ export default function FilteringTermsTable({
                                     }}
                                     sx={getSelectableScopeStyles(isSelected)}
                                   >
-                                    {capitalize(scopeAlias[scope] || scope)}
+                                    <HighlightedText
+                                      text={capitalize(
+                                        scopeAlias[scope] || scope
+                                      )}
+                                      searchQuery={searchQuery}
+                                    />
                                   </Box>
                                 );
                               })}

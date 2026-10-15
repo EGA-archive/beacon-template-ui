@@ -1,4 +1,5 @@
 import { Box } from "@mui/material";
+import { highlightText } from "../../utils/highlightText";
 
 /**
  * Renders Molecular Attributes in a flat, readable list.
@@ -6,7 +7,7 @@ import { Box } from "@mui/material";
  * - Prefers human-readable labels
  * - No nested bullets
  */
-export default function MolecularAttributesCell({ value }) {
+export default function MolecularAttributesCell({ value, searchTerm }) {
   if (!value || typeof value !== "object") return "-";
 
   const renderValue = (val) => {
@@ -28,7 +29,11 @@ export default function MolecularAttributesCell({ value }) {
     .map(([key, val]) => {
       const rendered = renderValue(val);
       if (!rendered) return null;
-      return `${formatLabel(key)}: ${rendered}`;
+
+      return {
+        label: formatLabel(key),
+        value: rendered,
+      };
     })
     .filter(Boolean);
 
@@ -39,9 +44,9 @@ export default function MolecularAttributesCell({ value }) {
       {entries.map((entry, i) => (
         <Box key={i} sx={{ display: "flex", alignItems: "flex-start" }}>
           <Box sx={{ width: 12 }}>•</Box>
+
           <Box sx={{ flex: 1 }}>
-            <b>{entry.split(":")[0]}:</b>
-            {entry.slice(entry.indexOf(":") + 1)}
+            <b>{entry.label}:</b> {highlightText(entry.value, searchTerm)}
           </Box>
         </Box>
       ))}

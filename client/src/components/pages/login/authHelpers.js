@@ -1,4 +1,4 @@
-import config from "../../../config/config.json";
+import config from "../../../config/runtimeConfig";
 
 /**
  * Helper to check if login is enabled in the configuration file.

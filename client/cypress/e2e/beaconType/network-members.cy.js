@@ -7,10 +7,11 @@ describe("Network Members Page - core rendering tests", () => {
   let networkLogo = null;
 
   before(() => {
-    // Fetch backend beacons directly from the API
-    cy.readFile("src/config/config.json").then((config) => {
-      const apiUrl = `${config.apiUrl}/`;
+    // Load the runtime config served by the app
+    cy.request("/config/config.json").then((response) => {
+      const apiUrl = `${response.body.apiUrl}/`;
 
+      // Fetch backend beacons directly from the configured API
       cy.request(apiUrl).then((res) => {
         backendBeacons = res.body.responses || [];
         networkLogo = res.body?.response?.organization?.logoUrl || null;
@@ -97,6 +98,8 @@ describe("Network Members Page - core rendering tests", () => {
 
       const apiVersion = beacon?.meta?.apiVersion || "Undefined";
       const environment = res.environment || "Undefined";
+
+      console.log(environment);
       const name = res.name || "Undefined";
       const orgName = res.organization?.name || "Undefined";
       const description = (res.description || "").replace(/<[^>]*>/g, "");

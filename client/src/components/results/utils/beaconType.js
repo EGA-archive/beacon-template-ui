@@ -2,21 +2,27 @@ export function getBeaconAggregationInfo(item) {
   const datasets = Array.isArray(item.items) ? item.items : [];
   const datasetCount = datasets.length;
 
-  // 1. Record Beacon: real datasets present
+  // Aggregate all visibility types exposed by the datasets.
   if (datasetCount > 0) {
-    return { type: "record", datasetCount };
+    const types = [
+      ...new Set(
+        datasets.map(getDatasetType).filter((type) => type !== "unavailable")
+      ),
+    ];
+
+    return { types, datasetCount };
   }
 
-  // 2. Count Beacon: no datasets, but resultsCount > 0
+  // No datasets, but a result count is available.
   const hasCount =
     typeof item.totalResultsCount === "number" && item.totalResultsCount > 0;
 
   if (hasCount) {
-    return { type: "count", datasetCount: 0 };
+    return { types: ["count"], datasetCount: 0 };
   }
 
-  // 3. Boolean Beacon: no datasets, no count, only boolean exists
-  return { type: "boolean", datasetCount: 0 };
+  // No datasets or count, so this is a boolean response.
+  return { types: ["boolean"], datasetCount: 0 };
 }
 
 export function getDatasetType(ds) {

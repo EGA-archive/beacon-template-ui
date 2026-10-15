@@ -1,6 +1,6 @@
 import { Button } from "@mui/material";
 import PropTypes from "prop-types";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import { lighten } from "@mui/system";
 import { alpha } from "@mui/material/styles";
 
@@ -22,15 +22,14 @@ export default function StyledButtons({
 }) {
   // Base styling common to all buttons
   const baseStyles = {
-    borderRadius: "999px", // Makes button pill-shaped
-    textTransform: "none", // Keep label casing as-is
-    fontSize: { xs: "13px", sm: "14px" },
+    borderRadius: "7px",
+    textTransform: "none",
+    textDecoration: "underline",
+    fontSize: { xs: "12px", sm: "12px" },
     fontWeight: 400,
     fontFamily: '"Open Sans", sans-serif',
-    minWidth: { xs: "120px", sm: "180px" },
-    height: { xs: "45px", sm: "40px" },
-    px: 2,
-    py: 0.5,
+    height: { xs: "29px", sm: "26px" },
+    px: 0,
   };
 
   // Styles for 'contained' vs 'outlined' variant
@@ -38,34 +37,37 @@ export default function StyledButtons({
     variant === "contained"
       ? {
           backgroundColor: primaryColor,
-          border: `1px solid ${primaryColor}`,
+          border: "none",
           color: "#fff",
           boxShadow: "none",
+
           "&:hover": {
             backgroundColor: "#fff",
-            border: `1px solid ${primaryColor}`,
+            border: "none",
             color: primaryColor,
+            textDecoration: "underline",
           },
+
           "&.Mui-disabled": {
             backgroundColor: "#F2F4F7",
-            borderColor: "#F2F4F7",
+            border: "none",
             color: "#98A2B3",
           },
         }
       : {
           backgroundColor: selected ? selectedBg : "white",
-          border: `1px solid ${
-            selected ? primaryDarkColor : unselectedBorderColor
-          }`,
+          border: "none",
           color: primaryDarkColor,
 
           "&:hover": {
             backgroundColor: selected ? selectedBg : lighten("#fff", 0.05),
-            border: `1px solid ${primaryDarkColor}`,
+            border: "none",
+            textDecoration: "underline",
           },
+
           "&.Mui-disabled": {
             backgroundColor: "#F2F4F7",
-            borderColor: "#F2F4F7",
+            border: "none",
             color: "#98A2B3",
           },
         };
@@ -91,7 +93,6 @@ export default function StyledButtons({
 
 // Colors from config and utilities
 const primaryColor = config.ui.colors.primary;
-const unselectedBorderColor = alpha(primaryColor, 0.15); // Light border for non-selected buttons
 const selectedBg = alpha(primaryColor, 0.15); // Light background when selected
 const primaryDarkColor = config.ui.colors.darkPrimary;
 

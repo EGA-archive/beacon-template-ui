@@ -1,10 +1,9 @@
 import { useAuth } from "oidc-react";
-import config from "../../../config/config.json";
+import { isLoginEnabled } from "./authHelpers";
 
-// If login is enabled → returns the real auth object from oidc-react
-// If login is disabled → returns null
-
+// Return authentication only when login is enabled.
 export const useAuthSafe = () => {
-  const loginEnabled = config?.ui?.showLogin === true;
+  const loginEnabled = isLoginEnabled();
+
   return loginEnabled ? useAuth() : null;
 };

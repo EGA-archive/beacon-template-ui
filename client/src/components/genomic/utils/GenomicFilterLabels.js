@@ -1,101 +1,69 @@
-const parseAminoAcidChange = (value = "") => {
-  const match = value.match(/^([A-Za-z]+)(\d+)([A-Za-z]+)$/);
-  if (!match) return null;
+import config from "../../../config/runtimeConfig";
 
-  const [, refAa, aaPosition, altAa] = match;
-  return { refAa, aaPosition, altAa };
+const inferGenomicAnnotationLabel = ({ queryType, queryParams = {} }) => {
+  switch (queryType) {
+    case "Gene ID": {
+      const { geneId, refAa, aaPosition, altAa } = queryParams;
+
+      if (refAa && aaPosition && altAa) {
+        return `${geneId}:p.${refAa}${aaPosition}${altAa}`;
+      }
+
+      return geneId;
+    }
+
+    case "Sequence Query":
+      return `${queryParams.assemblyId} | ${queryParams.referenceName}-${queryParams.start?.[0]}-${queryParams.referenceBases}-${queryParams.alternateBases}`;
+
+    case "Range Query":
+      return `${queryParams.assemblyId}:${queryParams.referenceName}:${queryParams.start?.[0]}-${queryParams.end?.[0]}`;
+
+    case "Bracket Query":
+      return `${queryParams.assemblyId}:${
+        queryParams.referenceName
+      }:start[${queryParams.start?.join(", ")}] end[${queryParams.end?.join(
+        ", "
+      )}]`;
+
+    case "Genomic Allele Query (HGVS)":
+      return queryParams.genomicAlleleShortForm;
+
+    default:
+      return queryType;
+  }
 };
 
-const snpExamples = [
-  {
-    key: "GRCh38 | 22-16050527-C-A",
-    id: "GRCh38 | 22-16050527-C-A",
-    label: "GRCh38 | 22-16050527-C-A",
-    type: "genomic",
-    queryType: "Sequence Query",
-    queryParams: {
-      assemblyId: "GRCh38",
-      referenceName: "22",
-      start: [16050527],
-      referenceBases: "C",
-      alternateBases: "A",
-    },
-  },
-  {
-    key: "GRCh38 | 22:16050655G>A",
-    id: "GRCh38 | 22:16050655G>A",
-    label: "GRCh38 | 22:16050655G>A",
-    type: "genomic",
-    queryType: "Sequence Query",
-    queryParams: {
-      assemblyId: "GRCh38",
-      referenceName: "22",
-      start: [16050655],
-      referenceBases: "G",
-      alternateBases: "A",
-    },
-  },
-  {
-    key: "GRCh38 | 22:16050568C>A",
-    id: "GRCh38 | 22:16050568C>A",
-    label: "GRCh38 | 22:16050568C>A",
-    type: "genomic",
-    queryType: "Sequence Query",
-    queryParams: {
-      assemblyId: "GRCh38",
-      referenceName: "22",
-      start: [16050568],
-      referenceBases: "C",
-      alternateBases: "A",
-    },
-  },
-];
+const normalizeGenomicAnnotation = (annotation) => {
+  const label = annotation.label || inferGenomicAnnotationLabel(annotation);
 
-const HGVSexamples = [
-  {
-    key: "NC_000022.11:g.16050075A>G",
-    id: "NC_000022.11:g.16050075A>G",
-    label: "NC_000022.11:g.16050075A>G",
-    type: "genomic",
-    queryType: "Genomic Allele Query (HGVS)",
-    queryParams: {
-      genomicAlleleShortForm: "NC_000022.11:g.16050075A>G",
-    },
-  },
-  {
-    key: "NC_000022.11:g.16050688C>T",
-    id: "NC_000022.11:g.16050688C>T",
-    label: "NC_000022.11:g.16050688C>T",
-    type: "genomic",
-    queryType: "Genomic Allele Query (HGVS)",
-    queryParams: {
-      genomicAlleleShortForm: "NC_000022.11:g.16050688C>T",
-    },
-  },
-  {
-    key: "NC_000022.11:g.16050607G>A",
-    id: "NC_000022.11:g.16050607G>A",
-    label: "NC_000022.11:g.16050607G>A",
-    type: "genomic",
-    queryType: "Genomic Allele Query (HGVS)",
-    queryParams: {
-      genomicAlleleShortForm: "NC_000022.11:g.16050607G>A",
-    },
-  },
-];
+  const id = `${annotation.queryType}:${JSON.stringify(
+    annotation.queryParams
+  )}`;
 
-const proteinExamples = [
-  {
-    key: "CHR_START-DUXAP8",
-    id: "CHR_START-DUXAP8",
-    label: "CHR_START-DUXAP8",
+  return {
+    key: id,
+    id,
+    label,
     type: "genomic",
-    queryType: "Gene ID",
-    queryParams: {
-      geneId: "CHR_START-DUXAP8",
-    },
-  },
-];
+    queryType: annotation.queryType,
+    queryParams: annotation.queryParams,
+  };
+};
+
+const annotationCategories =
+  config.ui.genomicAnnotations?.annotationCategories || [];
+
+const configuredAnnotationLabels =
+  config.ui.genomicAnnotations?.annotationLabels || {};
+
+const configuredGenomicAnnotations = Object.fromEntries(
+  annotationCategories.map((category) => [
+    category,
+    (configuredAnnotationLabels[category] || []).map(
+      normalizeGenomicAnnotation
+    ),
+  ])
+);
 
 const molecularEffectLabels = [
   {
@@ -115,8 +83,6 @@ const molecularEffectLabels = [
 ];
 
 export const filterLabels = {
-  "SNP Examples": snpExamples,
-  "HGVS Examples": HGVSexamples,
-  "Protein Examples": proteinExamples,
-  "Molecular Effect": molecularEffectLabels,
+  ...configuredGenomicAnnotations,
+  "Molecular Effects": molecularEffectLabels,
 };

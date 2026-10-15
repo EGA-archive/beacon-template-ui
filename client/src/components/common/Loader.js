@@ -1,5 +1,5 @@
 import { Box, Typography, CircularProgress, Fade } from "@mui/material";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 
 /**
  * Shows a spinning loader and a message while data is loading.

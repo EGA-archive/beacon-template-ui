@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import SearchIcon from "@mui/icons-material/Search";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import { COMMON_MESSAGES } from "../common/CommonMessage";
@@ -38,6 +38,7 @@ export default function SearchButton({ setSelectedTool }) {
     setRawItems,
     setResponseMeta,
     isExtraFilterValid,
+    setIsFilteringTermsOpen,
   } = useSelectedEntry();
 
   // Get authentication headers (includes Bearer token if user is logged in)
@@ -45,6 +46,7 @@ export default function SearchButton({ setSelectedTool }) {
 
   // Main logic executed when the user clicks "Search"
   const handleSearch = async () => {
+    setIsFilteringTermsOpen(false);
     const entryTypeId = PATH_SEGMENT_TO_ENTRY_ID[selectedPathSegment];
     const configForEntry = entryTypesConfig?.[entryTypeId];
     const nonFilteredAllowed =

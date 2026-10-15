@@ -2,23 +2,25 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import About from "./components/pages/About";
 import ContactForm from "./components/pages/contact/ContactForm";
-import ContactSuccess from "./components/pages/contact/ContactSuccess";
 import NetworkMembers from "./components/pages/NetworkMembers";
 import Login from "./components/pages/login/Login";
 import HomePage from "./components/pages/HomePage";
 import { CssBaseline, Box } from "@mui/material";
-import config from "./config/config.json";
-import { useState, useEffect } from "react";
-import LoginModal from "./components/common/LoginModal";
-import { logosHelper } from "./lib/logosHelper";
-
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
+import config from "./config/runtimeConfig";
+import { useState, useEffect } from "react";
+import LoginModal from "./components/common/LoginModal";
+import { logosHelper } from "./lib/logosHelper";
+import { CookieBanner } from "@ega/beacon-cookie-consent";
+import DatasetDetailedTablePage from "./components/pages/DatasetDetailedTablePage";
+import AlleleFrequencyPage from "./components/results/modal/alleleFrequency/AlleleFrequencyPage";
 import { SelectedEntryProvider } from "./components/context/SelectedEntryContext";
+import ProtectedRoute from "./auth/ProtectedRoute";
 
 if (window.Cypress) {
   window.__beaconTestHooks = {
@@ -54,7 +56,7 @@ export default function App() {
   const baseNavItems = [
     { label: "Network Members", url: "/network-members" },
     ...(config.ui.showAboutPage ? [{ label: "About", url: "/about" }] : []),
-    ...(config.ui.contact?.showContactPage
+    ...(config.ui.showContactPage
       ? [{ label: "Contact", url: "/contact" }]
       : []),
     ...(config.ui.showLogin ? [{ label: "Log in", url: "/login" }] : []),
@@ -76,17 +78,21 @@ export default function App() {
   const navItems = [...cleanedExternalLinks, ...filteredBaseItems];
 
   return (
-    <SelectedEntryProvider>
-      <Router>
+    <Router useTransitions={false}>
+      <SelectedEntryProvider>
         <Box
           sx={{
             backgroundColor: "#F5F5F5",
             minHeight: "100vh",
             display: "flex",
             flexDirection: "column",
+            width: "100%",
+            minWidth: 0,
+            overflowX: "hidden",
           }}
         >
           <CssBaseline />
+          <CookieBanner config={config.ui?.cookies} />
           <Navbar
             title={config.ui.title}
             main={logosHelper(config.ui.logos.main)}
@@ -119,28 +125,38 @@ export default function App() {
               {config.ui.showAboutPage && (
                 <Route path="/about" element={<About />} />
               )}
-              {config.ui.contact?.showContactPage && (
-                <>
-                  <Route path="/contact" element={<ContactForm />} />
-                  <Route path="/contact-success" element={<ContactSuccess />} />
-                </>
+              {config.ui.showContactPage && (
+                <Route path="/contact" element={<ContactForm />} />
               )}
               {config.ui.showLogin && (
-                <>
-                  <Route path="/login" element={<Login />} />
-                </>
+                <Route path="/login" element={<Login />} />
               )}
+              <Route
+                path="/dataset-detailed-table"
+                element={
+                  <ProtectedRoute>
+                    <DatasetDetailedTablePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/allele-frequency"
+                element={
+                  <ProtectedRoute>
+                    <AlleleFrequencyPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </Box>
-
           <Footer navItems={navItems} />
           <LoginModal
             open={loginModalOpen}
             onClose={() => setLoginModalOpen(false)}
           />
         </Box>
-      </Router>
-    </SelectedEntryProvider>
+      </SelectedEntryProvider>
+    </Router>
   );
 }

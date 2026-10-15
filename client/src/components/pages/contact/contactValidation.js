@@ -24,9 +24,6 @@ const validationSchema = Yup.object({
 
   // Comment is required
   comment: Yup.string().required("Please enter your message"),
-
-  // Privacy checkbox must be checked (true)
-  privacy: Yup.boolean().oneOf([true], "You must accept the Privacy Policy"),
 });
 
 export default validationSchema;

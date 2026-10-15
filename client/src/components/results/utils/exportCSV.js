@@ -1,9 +1,23 @@
-import config from "../../../config/config.json";
+import config from "../../../config/runtimeConfig";
+import { downloadCsvFile } from "./downloadCsvFile";
+
+/**
+ * Maximum number of records allowed in a CSV download.
+ * Configurable through runtime config.
+ */
+const MAX_DOWNLOAD_RECORDS =
+  config.ui.download?.maxRecordsDownloadableLimit ?? 10000;
 
 /**
  * Exports either:
- * - All backend rows (if no search term)
- * - Or only visible filtered rows (if user searched)
+ *
+ * Download View:
+ * - current/searched table rows
+ * - selected/visible columns only
+ *
+ * Download All:
+ * - all backend rows
+ * - all available columns, including unselected columns
  */
 export const exportCSV = async ({
   dataTable,
@@ -16,27 +30,82 @@ export const exportCSV = async ({
   queryBuilder,
   datasetId,
   authHeaders,
+  selectedFilters = [],
+  downloadMode = "view",
+  onDownloadLimitReached,
+  onProgress,
 }) => {
   try {
     let results = [];
+    let totalResults = 0;
+    let downloadLimit = 0;
+    let wasTruncated = false;
 
-    // Case 1: user typed a search term: export only filtered rows
-    if (searchTerm.trim()) {
-      results = dataTable.filter((item) => {
-        const rowString = sortedHeaders
-          .map((h) => summarizeValue(item[h.id], h.id))
-          .join(" ")
-          .toLowerCase();
-        return rowString.includes(searchTerm.toLowerCase());
-      });
-    }
+    /**
+     * Keep download progress between 0 and 100.
+     */
+    const updateProgress = (value) => {
+      if (typeof onProgress === "function") {
+        onProgress(Math.max(0, Math.min(100, Math.round(value))));
+      }
+    };
 
-    // Case 2: no search: fetch everything from backend
-    else {
-      const fullQuery = queryBuilder([], entryTypeId);
-      fullQuery.query.pagination = { skip: 0, limit: 100 };
+    /**
+     * Calculate progress according to the number of
+     * records actually downloaded.
+     */
+    const updateRecordProgress = (downloaded, total) => {
+      if (!total) {
+        return;
+      }
+
+      const percentage = (Math.min(downloaded, total) / total) * 100;
+
+      updateProgress(percentage);
+    };
+
+    updateProgress(0);
+
+    /**
+     * DOWNLOAD VIEW
+     *
+     * Export only the rows currently visible in the table.
+     * Search is applied across the available headers.
+     */
+    if (downloadMode === "view") {
+      results = searchTerm.trim()
+        ? dataTable.filter((item) => {
+            const rowString = sortedHeaders
+              .map((header) => summarizeValue(item[header.id], header.id))
+              .join(" ")
+              .toLowerCase();
+
+            return rowString.includes(searchTerm.toLowerCase());
+          })
+        : dataTable;
+
+      totalResults = results.length;
+      downloadLimit = results.length;
+      wasTruncated = false;
+    } else {
+      /**
+       * DOWNLOAD ALL
+       *
+       * Request all available records from the backend.
+       */
+      const fullQuery = queryBuilder(selectedFilters, entryTypeId);
+
+      /**
+       * Ask the backend for the first page.
+       * The backend may still apply its own limits.
+       */
+      fullQuery.query.pagination = {
+        skip: 0,
+        limit: 0,
+      };
 
       const fullUrl = `${config.apiUrl}/${selectedPathSegment}`;
+
       const response = await fetch(fullUrl, {
         method: "POST",
         headers: authHeaders,
@@ -45,73 +114,190 @@ export const exportCSV = async ({
 
       if (!response.ok) {
         console.error("Fetch failed with status:", response.status);
+
         alert("Failed to fetch data for export.");
         return;
       }
 
       const data = await response.json();
+
       const resultSets = data?.response?.resultSets ?? [];
+
       const selectedDataset = resultSets.find(
-        (r) => r.id === datasetId || r.dataset === datasetId
+        (resultSet) =>
+          resultSet.id === datasetId || resultSet.dataset === datasetId
       );
 
       if (!selectedDataset) {
         alert(`No dataset found for ID: ${datasetId}`);
         return;
       }
-      results = selectedDataset.results || [];
+
+      const initialResults = selectedDataset.results || [];
+
+      totalResults = selectedDataset.resultsCount ?? initialResults.length;
+
+      /**
+       * Number of records returned by the backend in one page.
+       * We reuse this size when requesting the following pages.
+       */
+      const pageSize = initialResults.length;
+
+      downloadLimit = Math.min(totalResults, MAX_DOWNLOAD_RECORDS);
+
+      wasTruncated = totalResults > MAX_DOWNLOAD_RECORDS;
+
+      /**
+       * Notify the UI if the download was limited.
+       */
+      if (wasTruncated && onDownloadLimitReached) {
+        onDownloadLimitReached({
+          totalResults,
+          downloadLimit,
+        });
+      }
+
+      if (!pageSize) {
+        alert("No data available to export.");
+        return;
+      }
+
+      const allResults = [...initialResults];
+
+      /**
+       * The first response already contains records,
+       * so report the initial real progress.
+       */
+      updateRecordProgress(allResults.length, downloadLimit);
+
+      /**
+       * Beacon pagination:
+       *
+       * skip = page number
+       * limit = page size
+       *
+       * Example:
+       * skip: 0, limit: 100 → first page
+       * skip: 1, limit: 100 → second page
+       * skip: 2, limit: 100 → third page
+       */
+      let page = 1;
+
+      /**
+       * Keep requesting pages until:
+       * - we reach the download limit
+       * - or the backend has no more results.
+       */
+      while (allResults.length < downloadLimit) {
+        const nextQuery = JSON.parse(JSON.stringify(fullQuery));
+
+        nextQuery.query.pagination = {
+          skip: page,
+          limit: pageSize,
+        };
+
+        const nextResponse = await fetch(fullUrl, {
+          method: "POST",
+          headers: authHeaders,
+          body: JSON.stringify(nextQuery),
+        });
+
+        if (!nextResponse.ok) {
+          console.error("Fetch failed with status:", nextResponse.status);
+
+          alert("Failed to fetch all data for export.");
+
+          return;
+        }
+
+        const nextData = await nextResponse.json();
+        const nextResultSets = nextData?.response?.resultSets ?? [];
+
+        const nextDataset = nextResultSets.find(
+          (resultSet) =>
+            resultSet.id === datasetId || resultSet.dataset === datasetId
+        );
+
+        const nextResults = nextDataset?.results || [];
+
+        /**
+         * Stop if there are no more records.
+         */
+        if (!nextResults.length) {
+          break;
+        }
+
+        allResults.push(...nextResults);
+
+        /**
+         * Update progress after every
+         * successfully downloaded page.
+         */
+        updateRecordProgress(allResults.length, downloadLimit);
+        page += 1;
+      }
+
+      /**
+       * Keep only the allowed number of records.
+       */
+      results = allResults.slice(0, downloadLimit);
     }
 
+    /**
+     * Nothing to export.
+     */
     if (!results.length) {
       alert("No data available to export.");
       return;
     }
 
-    // Use only visible columns
-    const visibleHeaderObjects = sortedHeaders.filter((h) =>
-      visibleColumns.includes(h.id)
-    );
-    const headers = visibleHeaderObjects.map((h) => h.id);
-    const headerLabels = visibleHeaderObjects.map((h) => h.name);
+    /**
+     * DOWNLOAD VIEW:
+     * Export only columns currently selected/visible
+     * in the table.
+     *
+     * DOWNLOAD ALL:
+     * Export every available column, including columns
+     * that are currently unselected/hidden.
+     */
+    const columnsToExport =
+      downloadMode === "view"
+        ? sortedHeaders.filter((header) => visibleColumns.includes(header.id))
+        : sortedHeaders;
 
-    // Build CSV
-    const csvRows = [
-      headerLabels.join(","),
-      ...results.map((row) =>
-        headers
-          .map((field) => {
-            const value = summarizeValue(
-              row[field] !== undefined && row[field] !== null ? row[field] : "",
-              field
-            );
-
-            if (typeof value === "string") {
-              return `"${value.replace(/"/g, '""')}"`;
-            }
-
-            return value;
-          })
-          .join(",")
-      ),
-    ];
-    const csvContent = csvRows.join("\n");
-
-    // Create file
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
     const fileName = `beacon-${selectedPathSegment || "results"}-${
       new Date().toISOString().split("T")[0]
     }.csv`;
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", fileName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadCsvFile({
+      rows: results,
+      columns: columnsToExport,
+      fileName,
+
+      getCellValue: (row, column) =>
+        summarizeValue(
+          row[column.id] !== undefined && row[column.id] !== null
+            ? row[column.id]
+            : "",
+          column.id
+        ),
+    });
+
+    /**
+     * CSV has been generated successfully.
+     */
+    updateProgress(100);
+
+    return {
+      totalResults,
+      downloadLimit,
+      wasTruncated,
+    };
   } catch (err) {
     console.error("CSV export failed:", err);
+
     alert("CSV export failed. Check the console for details.");
+
+    throw err;
   }
 };

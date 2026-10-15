@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Box, Select, MenuItem, TextField } from "@mui/material";
 import { useFormikContext, useField } from "formik";
-import config from "../../../config/config.json";
+import config from "../../../config/runtimeConfig";
 import {
   selectStyle,
   textFieldStyle,
@@ -9,14 +9,25 @@ import {
 } from "../styling/genomicInputBoxStyling";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
+import {
+  getCompatibleAltAminoAcids,
+  isAltAminoAcidCompatible,
+} from "./aminoAcidUtils";
 
 /*
-   This component renders the Amino Acid Change (deployer needs to decide whether to show case this input filed or not) fields in the Genomic Query Builder.
-   It includes:
- 1. Ref AA (Reference Amino Acid) as dropdown. The "format/list" comes from the config file.
- 2. Position - numeric input
- 3. Alt AA (Alternate Amino Acid) as dropdown. The "format/list" comes from the config file.
-  Validation ensures that Ref AA and Alt AA cannot be the same.
+  This component renders the Amino Acid Change fields in the Genomic Query Builder.
+
+  The deployer controls whether this input is available and which amino-acid
+  notations are supported through the configuration.
+
+  It includes:
+  1. Ref AA (Reference Amino Acid) dropdown.
+  2. Position numeric input.
+  3. Alt AA (Alternate Amino Acid) dropdown.
+
+  Ref AA and Alt AA may contain the same amino acid.
+  Alt AA options follow the notation format selected in Ref AA.
+  Custom deployer values remain available.
 */
 
 export default function AminoAcidChangeFields({
@@ -26,13 +37,19 @@ export default function AminoAcidChangeFields({
 }) {
   const { values, setFieldValue } = useFormikContext();
   const [positionField, aaPositionMeta] = useField("aaPosition");
-  const [refAaField, refAaMeta] = useField("refAa");
+  const [refAaField] = useField("refAa");
   const [altAaField, altAaMeta] = useField("altAa");
   const [openSelect, setOpenSelect] = useState(null);
 
   // The amino acid list from configuration
-  const aminoAcidList =
-    config.ui.genomicQueries.genomicQueryBuilder.aminoAcidNotation || [];
+  const aminoAcidList = config.ui.genomicQueries.aminoAcidNotation || [];
+
+  // Alt AA follows the notation selected in Ref AA.
+  // Custom deployer values remain available.
+  const altAminoAcidList = getCompatibleAltAminoAcids(
+    values.refAa,
+    aminoAcidList
+  );
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -50,7 +67,16 @@ export default function AminoAcidChangeFields({
             fullWidth
             {...refAaField}
             value={values.refAa || ""}
-            onChange={(e) => setFieldValue("refAa", e.target.value)}
+            onChange={(e) => {
+              const newRefAa = e.target.value;
+              setFieldValue("refAa", newRefAa);
+              if (
+                values.altAa &&
+                !isAltAminoAcidCompatible(newRefAa, values.altAa, aminoAcidList)
+              ) {
+                setFieldValue("altAa", "");
+              }
+            }}
             onBlur={() => refAaField.onBlur({ target: { name: "refAa" } })}
             onOpen={() => setOpenSelect("ref")}
             onClose={() => setOpenSelect(null)}
@@ -113,7 +139,7 @@ export default function AminoAcidChangeFields({
             }
             sx={selectStyle}
           >
-            {aminoAcidList.map((aa) => (
+            {altAminoAcidList.map((aa) => (
               <MenuItem key={aa} value={aa} sx={{ fontSize: "12px" }}>
                 {aa}
               </MenuItem>
@@ -127,7 +153,6 @@ export default function AminoAcidChangeFields({
         <Box
           sx={{
             width: "100%",
-            color: "red",
             fontSize: "12px",
             mt: 0.5,
             textAlign: "left",

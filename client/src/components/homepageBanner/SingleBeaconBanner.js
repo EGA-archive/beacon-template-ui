@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { alpha } from "@mui/material/styles";
 import { Box, Typography, Tabs, Tab, Link } from "@mui/material";
-import config from "../../config/config.json";
+import config from "../../config/runtimeConfig";
 import { useSelectedEntry } from "../context/SelectedEntryContext";
 import Loader from "../common/Loader";
 
@@ -33,8 +33,8 @@ export default function SingleBeaconBanner() {
     if (!status) return "Undefined";
     const normalized = status.toUpperCase();
     if (normalized === "PROD") return "Production";
-    if (normalized === "TEST") return "Test";
-    if (normalized === "DEV") return "Development";
+    if (normalized === "TEST") return "Non Production";
+    if (normalized === "DEV") return "Non Production";
     return status;
   };
 

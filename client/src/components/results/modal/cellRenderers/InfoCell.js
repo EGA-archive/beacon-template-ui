@@ -1,4 +1,5 @@
 import { Box } from "@mui/material";
+import { highlightText } from "../../utils/highlightText";
 
 /**
  * Generic renderer for `info` objects.
@@ -8,7 +9,7 @@ import { Box } from "@mui/material";
  * - Multiple values → custom bullets
  * - Safe inside tables
  */
-export default function InfoCell({ value }) {
+export default function InfoCell({ value, searchTerm }) {
   if (!value || typeof value !== "object") return "-";
 
   const isSkippableKey = (key) => key.toLowerCase().includes("ontologyTerm");
@@ -53,21 +54,28 @@ export default function InfoCell({ value }) {
         .filter(([k]) => !isSkippableKey(k))
         .map(([k, v]) => {
           const rendered = renderInline(v);
-          return rendered ? `${formatLabel(k)}: ${rendered}` : null;
+
+          return rendered ? (
+            <span key={k}>
+              <b>{formatLabel(k)}:</b> {highlightText(rendered, searchTerm)}
+            </span>
+          ) : null;
         })
         .filter(Boolean);
 
       if (entries.length === 1 && !forceList) return entries[0];
+
       return renderList(entries);
     }
 
-    return String(val);
+    return highlightText(String(val), searchTerm);
   };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
       {Object.entries(value).map(([key, val]) => {
         const rendered = renderValue(val);
+
         if (!rendered) return null;
 
         return (
