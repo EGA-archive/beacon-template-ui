@@ -6,7 +6,7 @@
   "queryCoordinatesAre0Based": true,
 
   "ui": {
-    "title": "EGA Beacon Template UI - Main main",
+    "title": "EGA Beacon Template UI",
     "favicon": "/assets/logos/favicon.ico",
 
     "colors": {

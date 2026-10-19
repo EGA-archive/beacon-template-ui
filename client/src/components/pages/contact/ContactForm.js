@@ -1,17 +1,33 @@
-// Formik handles form state and validation
 import { useFormik } from "formik";
 import { Box, Typography, Grid, Button } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { alpha } from "@mui/material/styles";
+
 import Founders from "../../Founders";
 import contactValidation from "./contactValidation";
 import config from "../../../config/runtimeConfig";
 import FormTextField from "./FormTextField";
 
-// Contact form component using MUI + Formik
+/**
+ * ContactForm
+ *
+ * Displays the contact form for both Single Beacon and
+ * Beacon Network deployments.
+ * Formik manages the form values, validation, and submission.
+ * MUI provides the layout, styling, and responsive behaviour.
+ * The form prepares an email using the configured contact
+ * address and opens the user's email application.
+ */
 export default function ContactForm() {
-  // Formik setup: field defaults, validation, spam checks, submit handler
+  /**
+   * Formik configuration
+   *
+   * Defines the initial values of the form fields.
+   * Applies the validation rules from contactValidation.
+   * Handles the form submission and resets the fields.
+   */
   const formik = useFormik({
+    // All visible fields start with empty values.
     initialValues: {
       firstName: "",
       lastName: "",
@@ -21,10 +37,20 @@ export default function ContactForm() {
       comment: "",
       privacy: false,
     },
+
+    // External validation schema for form fields.
     validationSchema: contactValidation,
+
+    /**
+     * Handles the submission of a valid form.
+     * Instead of sending data directly to a backend, the form generates a mailto URL containing the user's information and message.
+     */
     onSubmit: (values, { resetForm }) => {
+      // Default subject of the generated email.
       const subject = "Contact Form";
 
+      // Build the email body from the submitted form values.
+      // Each entry is displayed on a separate line.
       const body = [
         `Name: ${values.firstName} ${values.lastName}`,
         `Email: ${values.email}`,
@@ -35,60 +61,102 @@ export default function ContactForm() {
         values.comment,
       ].join("\n");
 
+      // Retrieve the recipient from the runtime configuration.
+      // Encode the subject and body for use in the mailto URL.
       const mailtoUrl = `mailto:${
         config.ui.contactEmail
       }?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
         body
       )}`;
 
+      // Open the user's email application in a new window.
+      // Actual behaviour depends on the browser and mail handler.
       window.open(mailtoUrl, "_blank");
 
+      // Clear the form values after opening the email link.
       resetForm();
     },
   });
 
-  // Custom styling for input background and borders
+  /**
+   * Dynamic UI configuration
+   * Colours and labels are retrieved from runtimeConfig.
+   * This allows the same component to be reused across different Beacon deployments without code changes.
+   */
+
+  // Apply the primary colour with low opacity to input backgrounds.
   const bgColor = alpha(config.ui.colors.primary, 0.05);
+
+  // Display a different Beacon name depending on the deployment type.
   const beaconTitle =
     config.beaconType === "networkBeacon" ? "Beacon Network" : "Single Beacon";
 
+  /**
+   * Shared text field styles
+   * Applied to all FormTextField components to maintain consistent backgrounds, borders, spacing, and typography.
+   * The border colour changes when the user hovers over an input or focuses on it.
+   */
   const textFieldStyles = {
+    // Default input appearance.
     backgroundColor: bgColor,
     borderRadius: "7px",
+
+    // Text size and internal input spacing.
     "& .MuiInputBase-input": { padding: "12px", fontSize: "14px" },
+
+    // Placeholder text styling.
     "& .MuiInputBase-input::placeholder": { fontSize: "14px" },
+
+    // Default outlined border colour.
     "& .MuiOutlinedInput-notchedOutline": { borderColor: bgColor },
+
+    // Highlight the border on hover.
     "&:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: config.ui.colors.primary,
     },
+
+    // Highlight the border when the input is focused.
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       borderColor: config.ui.colors.primary,
     },
+
+    // Apply the focus styling to multiline inputs.
     "&.Mui-focused.MuiInputBase-multiline .MuiOutlinedInput-notchedOutline": {
       borderColor: config.ui.colors.primary,
     },
+
+    // Apply the hover styling to multiline inputs.
     "&.MuiInputBase-multiline:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: config.ui.colors.primary,
     },
   };
 
+  /**
+   * Shared field label styles
+   *
+   * Ensures all input labels use the same font size, font weight, and configurable primary colour.
+   */
   const inputTitleStyle = {
     fontSize: "14px",
     fontWeight: 700,
     color: config.ui.colors.primary,
   };
 
-  // Disable submit button unless form is valid, changed, and privacy checked
+  // Disable the submit button if the form is invalid or if the user has not modified any initial values.
   const isSubmitDisabled = !formik.isValid || !formik.dirty;
 
   return (
     <>
-      {/* Section showing project founders (optional info/header) */}
+      {/* Display the project's founders information above the form. */}
       <Founders />
 
-      {/* Outer container for centering the form on the page */}
+      {/* Main container that horizontally centres the contact form. */}
       <Box sx={{ pb: "2rem", display: "flex", justifyContent: "center" }}>
-        {/* Card-like box with padding, shadow, border radius */}
+        {/*
+          Form container
+          Uses a white background, shadow, and rounded corners to visually separate the form from the page.
+          The maximum width prevents the form from becoming too wide on larger screens.
+        */}
         <Box
           sx={{
             p: 3,
@@ -99,7 +167,7 @@ export default function ContactForm() {
             mt: 2,
           }}
         >
-          {/* Main heading of the contact form */}
+          {/* Main heading displayed at the top of the contact form. */}
           <Typography
             variant="h5"
             sx={{
@@ -112,7 +180,10 @@ export default function ContactForm() {
             Contact Form
           </Typography>
 
-          {/* Introductory message for users filling the form */}
+          {/*
+            Introduction text
+            The Beacon name is dynamically selected using the beaconType value from the runtime configuration.
+          */}
           <Typography
             variant="body2"
             sx={{ mb: 3, fontSize: "12px", fontWeight: 400, color: "#203241" }}
@@ -121,11 +192,18 @@ export default function ContactForm() {
             works, please fill out this form and we will get back to you.
           </Typography>
 
-          {/* Main form logic handled by Formik */}
+          {/*
+            Form submission
+            Formik handles the submit event, validates the field values, and executes the onSubmit callback.
+          */}
           <form onSubmit={formik.handleSubmit}>
-            {/* Responsive layout using MUI Grid system */}
+            {/* MUI Grid handles the responsive layout of the fields. */}
             <Grid container spacing={2}>
-              {/* Honeypot field to trap bots (hidden input) */}
+              {/*
+                Honeypot field
+                Intended to detect automated submissions.
+                Hidden from regular users but available in the DOM.
+              */}
               <input
                 type="text"
                 name="website"
@@ -135,14 +213,20 @@ export default function ContactForm() {
                 style={{ display: "none" }}
               />
 
-              {/* Timestamp to detect fast (automated) submissions */}
+              {/*
+                Submission timestamp
+                Intended to help identify forms submitted unusually quickly by automated scripts.
+              */}
               <input
                 type="hidden"
                 name="startedAt"
                 value={formik.values.startedAt}
               />
 
-              {/* First Name field */}
+              {/*
+                First Name
+                Occupies half the available width on larger screens and the full width on smaller screens.
+              */}
               <Grid size={{ xs: 12, sm: 6 }}>
                 <FormTextField
                   label="First Name *"
@@ -153,7 +237,7 @@ export default function ContactForm() {
                 />
               </Grid>
 
-              {/* Last Name field */}
+              {/* Last Name uses the same responsive layout and shared styles. */}
               <Grid size={{ xs: 12, sm: 6 }}>
                 <FormTextField
                   label="Last Name *"
@@ -164,7 +248,10 @@ export default function ContactForm() {
                 />
               </Grid>
 
-              {/* Email address */}
+              {/*
+                Business Email Address
+                The entered address is included in the generated email body so the recipient can contact the user.
+              */}
               <Grid size={{ xs: 12, sm: 6 }}>
                 <FormTextField
                   label="Business Email Address *"
@@ -175,7 +262,7 @@ export default function ContactForm() {
                 />
               </Grid>
 
-              {/* Job title */}
+              {/* Job Title identifies the user's professional role. */}
               <Grid size={{ xs: 12, sm: 6 }}>
                 <FormTextField
                   label="Job Title *"
@@ -186,7 +273,11 @@ export default function ContactForm() {
                 />
               </Grid>
 
-              {/* Institution name */}
+              {/*
+                Institution
+                Takes the full width of the Grid container.
+                The institution is included in the email body.
+              */}
               <Grid size={{ xs: 12 }}>
                 <FormTextField
                   label="Institution *"
@@ -197,7 +288,10 @@ export default function ContactForm() {
                 />
               </Grid>
 
-              {/* Main comment textarea */}
+              {/*
+                Message field
+                Multiline text input where users describe their question or request.
+              */}
               <Grid size={{ xs: 12 }}>
                 <FormTextField
                   label="How can we help you? *"
@@ -209,7 +303,11 @@ export default function ContactForm() {
                   sx={{ textField: textFieldStyles, label: inputTitleStyle }}
                 />
               </Grid>
-              {/* Submit button: disabled unless all conditions are valid */}
+
+              {/*
+                Submit button container
+                Uses flexbox to align the button to the right while preserving the full available form width.
+              */}
               <Box
                 sx={{
                   width: "100%",
@@ -217,23 +315,35 @@ export default function ContactForm() {
                   justifyContent: "flex-end",
                 }}
               >
+                {/*
+                  Send button
+                  Submission is disabled until the form has been modified and passes Formik validation.
+                  The button uses the primary configuration colour and changes appearance on hover or when disabled.
+                */}
                 <Button
                   data-cy="contact-send-button"
                   type="submit"
                   variant="contained"
                   disabled={isSubmitDisabled}
                   sx={{
+                    // Rounded button with normal text capitalization.
                     borderRadius: "999px",
                     textTransform: "none",
                     fontSize: "14px",
+
+                    // Default button colours and border.
                     backgroundColor: config.ui.colors.primary,
                     border: `1px solid ${config.ui.colors.primary}`,
                     boxShadow: "none",
+
+                    // Hover state with inverted background and text colours.
                     "&:hover": {
                       backgroundColor: "white",
                       border: `1px solid ${config.ui.colors.primary}`,
                       color: config.ui.colors.primary,
                     },
+
+                    // Grey styling when submission is disabled.
                     "&.Mui-disabled": {
                       backgroundColor: "#d3d3d3",
                       color: "#888",

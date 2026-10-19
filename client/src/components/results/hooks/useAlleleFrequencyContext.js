@@ -17,12 +17,8 @@ const parseFilters = (value) => {
 
 /**
  * Collects the information required by the Allele Frequency page.
- *
- * localStorage is used when the page was opened from the current
- * browser session.
- *
- * URL values allow the same query and selected variant to be
- * reconstructed when the link is shared or refreshed.
+ * localStorage is used when the page was opened from the current browser session.
+ * URL values allow the same query and selected variant to be reconstructed when the link is shared or refreshed.
  */
 export const useAlleleFrequencyContext = () => {
   const search = window.location.search;
@@ -42,9 +38,7 @@ export const useAlleleFrequencyContext = () => {
   const genomicHGVSIdFromUrl = searchParams.get("genomicHGVSId");
 
   /**
-   * Memoizing this is important because JSON.parse creates
-   * a new array. A stable reference prevents fallback effects
-   * from firing repeatedly.
+   * Memoizing this is important because JSON.parse creates a new array. A stable reference prevents fallback effects from firing repeatedly.
    */
   const filtersFromUrl = useMemo(
     () => parseFilters(searchParams.get("filters")),
@@ -87,22 +81,14 @@ export const useAlleleFrequencyContext = () => {
   return {
     queryId,
     storedData,
-
     beaconId: storedData?.beaconId || beaconIdFromUrl,
-
     datasetId: storedData?.datasetId || datasetIdFromUrl,
-
     entryTypeId,
-
     selectedFilters,
-
     appliedQuery,
-
     variantId: storedData?.variantId || variantIdFromUrl,
-
     genomicHGVSId:
       storedData?.identifiers?.genomicHGVSId || genomicHGVSIdFromUrl,
-
     contactEmail: storedData?.contactEmail || contactEmailFromUrl || null,
   };
 };
