@@ -57,13 +57,6 @@ export default function HomePage({
     const handleUnauthenticatedInteraction = (event) => {
       const target = event.target;
 
-      console.log("GLOBAL CAPTURE CLICK:", {
-        target,
-        text: target?.textContent,
-        closestLink: target?.closest?.("a")?.getAttribute("href"),
-        pathname: window.location.pathname,
-      });
-
       /**
        * Allow the user to explicitly open the login flow.
        */
@@ -165,7 +158,6 @@ export default function HomePage({
   const twoValuesStackSearchandCommonFilters =
     "@media (min-width:900px) and (max-width:1180px)";
 
-  console.log("HOME PAGE RENDERED", location.pathname);
   return (
     <>
       {/* Main container */}

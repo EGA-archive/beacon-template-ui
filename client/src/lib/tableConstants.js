@@ -3,7 +3,6 @@ import { Box, Tooltip } from "@mui/material";
 import config from "../config/runtimeConfig";
 
 // This is a helper component for the tables' structure
-
 const primaryColor = config.ui.colors.primary;
 
 export const BEACON_NETWORK_COLUMNS = [

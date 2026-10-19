@@ -134,11 +134,6 @@ export const exportCSV = async ({
       }
 
       const initialResults = selectedDataset.results || [];
-
-      console.log("selectedDataset.resultsCount", selectedDataset.resultsCount);
-
-      console.log("selectedDataset.results.length", initialResults.length);
-
       totalResults = selectedDataset.resultsCount ?? initialResults.length;
 
       /**
@@ -146,14 +141,7 @@ export const exportCSV = async ({
        * We reuse this size when requesting the following pages.
        */
       const pageSize = initialResults.length;
-
-      console.log({
-        totalResults,
-        pageSize,
-      });
-
       downloadLimit = Math.min(totalResults, MAX_DOWNLOAD_RECORDS);
-
       wasTruncated = totalResults > MAX_DOWNLOAD_RECORDS;
 
       /**
@@ -198,14 +186,7 @@ export const exportCSV = async ({
        * - or the backend has no more results.
        */
       while (allResults.length < downloadLimit) {
-        console.log({
-          page,
-          pageSize,
-          currentResults: allResults.length,
-        });
-
         const nextQuery = JSON.parse(JSON.stringify(fullQuery));
-
         nextQuery.query.pagination = {
           skip: page,
           limit: pageSize,
@@ -217,59 +198,23 @@ export const exportCSV = async ({
           body: JSON.stringify(nextQuery),
         });
 
-        console.log("HTTP status:", nextResponse.status, "page:", page);
-
         if (!nextResponse.ok) {
           console.error("Fetch failed with status:", nextResponse.status);
-
           alert("Failed to fetch all data for export.");
-
           return;
         }
 
         const nextData = await nextResponse.json();
-
-        console.log("page", page, {
-          responseSummary: nextData.responseSummary,
-        });
-
         const nextResultSets = nextData?.response?.resultSets ?? [];
-
         const nextDataset = nextResultSets.find(
           (resultSet) =>
             resultSet.id === datasetId || resultSet.dataset === datasetId
         );
-
-        console.log("nextDataset:", {
-          page,
-          beaconId: nextDataset?.beaconId,
-          exists: !!nextDataset,
-          id: nextDataset?.id,
-          results: nextDataset?.results?.length,
-          resultsCount: nextDataset?.resultsCount,
-        });
-
-        console.log("expected datasetId:", datasetId);
-
         const nextResults = nextDataset?.results || [];
-
-        console.log("nextResults returned:", nextResults.length);
-
         /**
          * Stop if there are no more records.
          */
         if (!nextResults.length) {
-          console.log("STOPPING DOWNLOAD", {
-            page,
-            datasetId,
-            nextDataset,
-            responseSummary: nextData.responseSummary,
-            availableDatasets: nextResultSets.map((resultSet) => ({
-              id: resultSet.id,
-              beaconId: resultSet.beaconId,
-            })),
-          });
-
           break;
         }
 
@@ -280,14 +225,6 @@ export const exportCSV = async ({
          * successfully downloaded page.
          */
         updateRecordProgress(allResults.length, downloadLimit);
-
-        console.log(
-          "total so far:",
-          allResults.length,
-          "received:",
-          nextResults.length
-        );
-
         page += 1;
       }
 
