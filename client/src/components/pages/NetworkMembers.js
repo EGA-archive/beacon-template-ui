@@ -9,7 +9,6 @@ import {
   Grid,
 } from "@mui/material";
 import { darken } from "@mui/system";
-import { useEffect, useState } from "react";
 import config from "../../config/runtimeConfig";
 import Founders from "../Founders";
 import useBeaconMetadata from "../../hooks/useBeaconMetaData";
