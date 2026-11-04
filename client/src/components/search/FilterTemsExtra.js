@@ -14,7 +14,7 @@ import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import config from "../../config/runtimeConfig";
 import CancelIcon from "@mui/icons-material/Cancel";
 
-// FilterTermsExtra allows users to add a custom numeric filter
+// FilterTermsExtra allows users to add a custom alphanumeric filter
 // It provides:
 // - a dropdown to select the operator (> = < ≠ contains does-not-contain)
 // - an input field to enter the value
@@ -36,10 +36,6 @@ export default function FilterTermsExtra() {
   const [selectedOperator, setSelectedOperator] = useState(">");
   const [selectedValue, setSelectedValue] = useState("");
   const [error, setError] = useState("");
-
-  // Allele Frequency uses the standard alphanumeric filter flow, but only supports numeric comparison operators.
-  const isAlleleFrequency =
-    extraFilter?.label?.trim().toLowerCase() === "allele frequency";
 
   // Any single Entry Type uses the same spacing before this section.
   const isSingleEntryType = entryTypes.length === 1;
@@ -186,15 +182,6 @@ export default function FilterTermsExtra() {
     setIsExtraFilterValid(true);
   }, [extraFilter, setIsExtraFilterValid]);
 
-  useEffect(() => {
-    if (
-      isAlleleFrequency &&
-      (selectedOperator === "LIKE" || selectedOperator === "!LIKE")
-    ) {
-      setSelectedOperator(">");
-    }
-  }, [isAlleleFrequency, selectedOperator]);
-
   return (
     <Box
       ref={valueInputRef}
@@ -267,12 +254,8 @@ export default function FilterTermsExtra() {
             <MenuItem value="=">{"="}</MenuItem>
             <MenuItem value="<">{"<"}</MenuItem>
             <MenuItem value="!">{"≠"}</MenuItem>
-            {!isAlleleFrequency && (
-              <MenuItem value="LIKE">{"contains"}</MenuItem>
-            )}
-            {!isAlleleFrequency && (
-              <MenuItem value="!LIKE">{"does not contain"}</MenuItem>
-            )}
+            <MenuItem value="LIKE">{"contains"}</MenuItem>
+            <MenuItem value="!LIKE">{"does not contain"}</MenuItem>
           </Select>
         </FormControl>
       </Box>
@@ -292,19 +275,10 @@ export default function FilterTermsExtra() {
         }}
       >
         <InputBase
-          type={isAlleleFrequency ? "number" : "text"}
+          type="text"
           placeholder="Value"
           value={selectedValue}
           onChange={(e) => setSelectedValue(e.target.value)}
-          inputProps={
-            isAlleleFrequency
-              ? {
-                  min: 0,
-                  max: 1,
-                  step: "any",
-                }
-              : undefined
-          }
           sx={{
             fontFamily: '"Open Sans", sans-serif',
             fontSize: "14px",
@@ -325,6 +299,7 @@ export default function FilterTermsExtra() {
         }}
       >
         <Button
+          data-cy="extra-filter-add"
           variant="outlined"
           onClick={handleAddFilter}
           sx={{

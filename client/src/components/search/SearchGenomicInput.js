@@ -39,7 +39,7 @@ export default function SearchGenomicInput({
   hasOneEntryTypeColumn,
   hasEntryTypeSelector = false,
 }) {
-  const { openGenomicQueryBuilder, setExtraFilter } = useSelectedEntry();
+  const { openGenomicQueryBuilder } = useSelectedEntry();
   const inputRef = useRef(null); // For managing focus on the input field
   const suggestionsRef = useRef(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -147,24 +147,6 @@ export default function SearchGenomicInput({
     setGenomicDraft("");
   };
 
-  const handleAddAlleleFrequency = () => {
-    setGenomicDraft("Allele Frequency");
-    setShowSuggestions(false);
-    setMessage(null);
-
-    setExtraFilter({
-      id: "alleleFrequency",
-      key: "alleleFrequency",
-      label: "Allele Frequency",
-      type: "alphanumeric",
-      scope: "genomicVariation",
-      scopes: ["genomicVariation"],
-
-      // Clear the genomic search once the AF filter is completed or cancelled.
-      onComplete: () => setGenomicDraft(""),
-    });
-  };
-
   return (
     <Box
       sx={{
@@ -250,7 +232,6 @@ export default function SearchGenomicInput({
             onAddSequence={commitGenomicDraft}
             onAddString={commitStringQuery}
             onOpenBuilder={handleOpenGenomicQueryBuilder}
-            onAddAlleleFrequency={handleAddAlleleFrequency}
           />
         )}
       </Box>

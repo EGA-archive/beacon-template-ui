@@ -20,7 +20,6 @@ export default function QueryAppliedItems({
     selectedPathSegment,
     lastSearchedPathSegment,
     hasSearchResults,
-    setGenomicDraft,
   } = useSelectedEntry();
 
   // Track which label is expanded (if any)
@@ -133,16 +132,7 @@ export default function QueryAppliedItems({
             <FilterLabelRemovable
               key={isGenomic ? filter.id : `${filter.key}__${filter.scope}`}
               keyValue={keyValue}
-              label={
-                filter.id === "alleleFrequency" ? (
-                  <>
-                    {filter.filterLabel} {filter.operatorDisplay}{" "}
-                    <strong>{filter.displayValue}</strong>
-                  </>
-                ) : (
-                  filter.label
-                )
-              }
+              label={filter.label}
               type={filter.type}
               scope={filter.scope}
               scopes={filter.scopes}
@@ -151,9 +141,6 @@ export default function QueryAppliedItems({
               onDelete={() => {
                 if (hasSearchResults) {
                   setQueryDirty(true);
-                }
-                if (filter.id === "alleleFrequency") {
-                  setGenomicDraft("");
                 }
                 handleFilterRemove(filter);
               }}
