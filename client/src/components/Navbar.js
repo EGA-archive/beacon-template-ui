@@ -128,7 +128,6 @@ export default function Navbar({ title, main, navItems, setSelectedTool }) {
               component={Link}
               to="/"
               data-cy="navbar-title"
-              className="font-sans"
               onClick={() => {
                 setSelectedTool(null);
                 setMobileOpen(false);

@@ -11,11 +11,10 @@ describe("Beacon type rendering", () => {
     });
   });
 
-  it("should show the Single Beacon Banner tabs when beaconType is singleBeacon", () => {
+  it("should show the Single Beacon Banner tabs when beaconType is singleBeacon", function () {
     // Only run the UI checks if beaconType is singleBeacon
     if (beaconType !== "singleBeacon") {
-      cy.log("Skipping test because beaconType is not singleBeacon");
-      return;
+      this.skip();
     }
 
     cy.visit("/");

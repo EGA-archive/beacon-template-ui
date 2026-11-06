@@ -4,7 +4,6 @@ describe("Network Members Page - core rendering tests", () => {
   const pageUrl = "/network-members";
 
   let backendBeacons = [];
-  let networkLogo = null;
 
   before(() => {
     // Load the runtime config served by the app
@@ -14,10 +13,7 @@ describe("Network Members Page - core rendering tests", () => {
       // Fetch backend beacons directly from the configured API
       cy.request(apiUrl).then((res) => {
         backendBeacons = res.body.responses || [];
-        networkLogo = res.body?.response?.organization?.logoUrl || null;
-
         cy.log(`Backend beacons found: ${backendBeacons.length}`);
-        cy.log(`Network logo URL: ${networkLogo}`);
       });
     });
   });
@@ -39,53 +35,52 @@ describe("Network Members Page - core rendering tests", () => {
     });
   });
 
-  it("each beacon card shows correct external links (information, website, API, contact)", () => {
-    cy.get("[data-cy=network-beacon-card]").each(($card, index) => {
-      const beacon = backendBeacons[index];
-      const response = beacon?.response || {};
+  it("each beacon card shows the correct available external links", () => {
+    cy.get('[data-cy="network-beacon-card"]').each(($card, index) => {
+      const response = backendBeacons[index]?.response || {};
 
-      const infoLink = response.welcomeUrl || response.alternativeUrl;
-      const websiteLink =
-        response.organization?.welcomeUrl || response.alternativeUrl;
-      const apiLink = response.alternativeUrl || response.welcomeUrl;
-      const contactLink = response.organization?.contactUrl || "#";
+      const expectedLinks = [
+        {
+          label: "Website",
+          href: response.organization?.welcomeUrl || response.alternativeUrl,
+        },
+        {
+          label: "Beacon API",
+          href: response.alternativeUrl || response.welcomeUrl,
+        },
+        {
+          label: "Contact",
+          href: response.organization?.contactUrl || "#",
+        },
+      ];
 
-      // Buttons visible
       cy.wrap($card).within(() => {
-        cy.contains("Information").should("exist");
-        cy.contains("Website").should("exist");
-        cy.contains("Beacon API").should("exist");
-        cy.contains("Contact").should("exist");
+        // The Information link is no longer part of the UI.
+        cy.contains("a", "Information").should("not.exist");
 
-        // Check href correctness
-        cy.contains("Information").should(
-          "have.attr",
-          "href",
-          infoLink || null
-        );
-        cy.contains("Website").should("have.attr", "href", websiteLink || null);
-        cy.contains("Beacon API").should("have.attr", "href", apiLink || null);
-        cy.contains("Contact").should("have.attr", "href", contactLink || null);
+        expectedLinks.forEach(({ label, href }) => {
+          if (typeof href === "string" && href.trim()) {
+            cy.contains("a", label).should("have.attr", "href", href);
+          } else {
+            cy.contains("a", label).should("not.exist");
+          }
+        });
       });
     });
   });
 
-  it("renders beacon logos OR fallback, and network logo when available", () => {
-    cy.get("[data-cy=network-beacon-card]").each(($card, index) => {
+  it("renders each configured beacon logo or missing-logo fallback", () => {
+    cy.get('[data-cy="network-beacon-card"]').each(($card, index) => {
       const beacon = backendBeacons[index];
       const logoUrl = beacon?.response?.organization?.logoUrl;
 
       cy.wrap($card).within(() => {
         if (logoUrl) {
-          cy.get("img")
-            .should("have.attr", "src", logoUrl)
-            .should("be.visible");
+          // Verify the correct URL without depending on
+          // the external image server being available.
+          cy.get("img").should("exist").and("have.attr", "src", logoUrl);
         } else {
           cy.contains("No Logo").should("be.visible");
-        }
-
-        if (networkLogo) {
-          cy.get("img[src='" + networkLogo + "']").should("be.visible");
         }
       });
     });
@@ -99,7 +94,6 @@ describe("Network Members Page - core rendering tests", () => {
       const apiVersion = beacon?.meta?.apiVersion || "Undefined";
       const environment = res.environment || "Undefined";
 
-      console.log(environment);
       const name = res.name || "Undefined";
       const orgName = res.organization?.name || "Undefined";
       const description = (res.description || "").replace(/<[^>]*>/g, "");

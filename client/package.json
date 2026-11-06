@@ -5,6 +5,12 @@
   "repository": "https://github.com/EGA-archive/beacon-template-ui",
   "author": "<giulia.cellerino@icloud.com>",
   "license": "MIT",
+  "resolutions": {
+    "shell-quote": "1.11.0",
+    "websocket-driver": "0.7.5",
+    "proxy-addr": "2.0.8",
+    "**/jsdom/form-data": "3.0.5"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -28,7 +34,6 @@
     "react-router-dom": "7.18.0",
     "react-scripts": "5.0.1",
     "recharts": "^3.8.1",
-    "resend": "^6.0.1",
     "yup": "^1.6.1"
   },
   "browserslist": {

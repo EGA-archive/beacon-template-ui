@@ -2,7 +2,7 @@
 
 # --- stage 1: build React app ---
 
-    FROM node:22.19.0 AS build
+    FROM node:22.23.4 AS build
 
     # set working directory
     WORKDIR /client
@@ -27,7 +27,7 @@
     
     # --- stage 2: serve production app with Nginx ---
     
-    FROM nginx:1.27-alpine
+    FROM nginx:1.30.6-alpine
     
     # replace default Nginx configuration with ours
     RUN rm -f /etc/nginx/conf.d/default.conf

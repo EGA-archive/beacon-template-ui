@@ -67,69 +67,53 @@ describe("Navbar (config-driven + auth)", () => {
   });
 
   context("Authentication behavior", () => {
-    const fakeLogin = {
-      profile: { given_name: "Giulia" },
-      access_token: "fake_access_token",
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
-    };
-
-    it("shows login when user is not logged in", () => {
+    it("shows the desktop login link only when enabled in config", () => {
       cy.viewport(1280, 800);
+      const loginLink = '[data-cy="nav-link-internal-log-in"]';
 
-      cy.get('[data-cy="navbar-links"]')
-        .contains("Log in")
-        .should("be.visible");
+      if (config.ui.showLogin) {
+        cy.get(loginLink).should("be.visible").and("have.attr", "href", "/login");
+      } else {
+        cy.get(loginLink).should("not.exist");
+      }
     });
 
-    it("shows username and logout icon when logged in (desktop)", () => {
-      cy.then(() => {
-        window.localStorage.setItem(
-          OIDC_STORAGE_KEY,
-          JSON.stringify(fakeLogin)
-        );
-      });
-
-      cy.visit("/");
+    it("does not show a user greeting or logout button without a session", () => {
       cy.viewport(1280, 800);
-      cy.wait(1000);
-
-      cy.contains("Hello, Giulia").should("be.visible");
-      cy.get('[data-cy="logout-button"]').should("exist");
+      cy.get('[data-cy="navbar-links"]').should("be.visible");
+      cy.get('[data-cy="navbar-links"]').contains("Hello,").should("not.exist");
+      cy.get('[data-cy="logout-button"]').should("not.exist");
     });
 
-    it("shows logout inside mobile drawer when logged in", () => {
-      cy.then(() => {
-        window.localStorage.setItem(
-          OIDC_STORAGE_KEY,
-          JSON.stringify(fakeLogin)
-        );
-      });
-
-      cy.visit("/");
+    it("shows the correct login state in the mobile drawer", () => {
       cy.viewport(375, 667);
-      cy.wait(1000);
-
       cy.get('[data-cy="burger-menu"]').click();
       cy.get('[data-cy="navbar-drawer"]').should("be.visible");
-      cy.get('[data-cy="logout-button"]').should("exist");
+
+      if (config.ui.showLogin) {
+        cy.get('[data-cy="navbar-drawer"]')
+          .contains("Log in")
+          .should("be.visible");
+      } else {
+        cy.get('[data-cy="navbar-drawer"]')
+          .contains("Log in")
+          .should("not.exist");
+      }
+
+      cy.get('[data-cy="navbar-drawer"]')
+        .find('[data-cy="logout-button"]')
+        .should("not.exist");
     });
 
-    it("removes OIDC data from localStorage on logout click", () => {
-      cy.then(() => {
-        window.localStorage.setItem(
-          OIDC_STORAGE_KEY,
-          JSON.stringify(fakeLogin)
-        );
-      });
+    it("keeps the configured login visibility after reload", () => {
+      cy.viewport(1280, 800);
+      cy.reload();
 
-      cy.visit("/");
-      cy.wait(1000);
-
-      cy.get('[data-cy="logout-button"]').click();
-
-      cy.window().then((win) => {
-        expect(win.localStorage.getItem(OIDC_STORAGE_KEY)).to.be.null;
-      });
+      if (config.ui.showLogin) {
+        cy.get('[data-cy="nav-link-internal-log-in"]').should("be.visible");
+      } else {
+        cy.get('[data-cy="nav-link-internal-log-in"]').should("not.exist");
+      }
     });
   });
 });

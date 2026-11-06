@@ -154,17 +154,20 @@ describe("All Filtering Terms behavior and backend consistency", () => {
       })
       .then(() => {
         // 3. Clear the search and confirm the original list is restored
-        cy.get('button:has(svg[data-testid="CloseIcon"])').click({
-          force: true,
-        });
+        cy.get('button[aria-label="Clear filtering terms search"]')
+          .should("be.visible")
+          .click();
 
-        cy.get('[data-cy="filtering-term-id"]', { timeout: 5000 }).then(
+        cy.get("input[placeholder='Search Filtering Terms']")
+          .should("have.value", "");
+
+        cy.get('[data-cy="filtering-term-id"]', { timeout: 10000 }).should(
           ($cells) => {
             const restoredIds = [...$cells].map((el) => el.innerText.trim());
-            expect(restoredIds.length).to.equal(
-              allUiIds.length,
-              "Clearing the search should restore all filtering terms"
-            );
+            expect(
+              restoredIds,
+              "Clearing the search should restore the original first page"
+            ).to.deep.equal(allUiIds);
           }
         );
       });

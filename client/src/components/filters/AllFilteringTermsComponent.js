@@ -147,6 +147,7 @@ export default function AllFilteringTermsComponent({
         </Typography>
 
         <IconButton
+          aria-label="Close filtering terms"
           size="small"
           onClick={() => {
             setIsFilteringTermsOpen(false);
@@ -187,7 +188,8 @@ export default function AllFilteringTermsComponent({
             endAdornment: searchQuery && (
               <InputAdornment position="end">
                 <IconButton
-                  onClick={() => setSearchQuery("")} // Clear search
+                  aria-label="Clear filtering terms search"
+                  onClick={() => setSearchQuery("")}
                   size="small"
                   sx={{ color: primaryDarkColor }}
                 >

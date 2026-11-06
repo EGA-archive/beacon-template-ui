@@ -25,7 +25,6 @@ import ProtectedRoute from "./auth/ProtectedRoute";
 if (window.Cypress) {
   window.__beaconTestHooks = {
     setActiveInput: (val) => {
-      console.log("[Cypress] setActiveInput:", val);
       window.dispatchEvent(new CustomEvent("setActiveInput", { detail: val }));
     },
   };

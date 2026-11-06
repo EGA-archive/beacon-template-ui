@@ -22,7 +22,6 @@ function uiLabelFor(segment) {
 
 describe("EntryTypes /map vs UI alignment", () => {
   beforeEach(() => {
-    // Track the /map request from the UI
     cy.intercept("GET", "**/map").as("mapRequest");
     cy.visit("/");
   });
@@ -31,68 +30,69 @@ describe("EntryTypes /map vs UI alignment", () => {
     cy.wait("@mapRequest").then((interception) => {
       const mapJson = interception.response.body;
       const backendTypes = extractEntryTypes(mapJson);
+
       expect(
         backendTypes.length,
         "Backend must expose at least one entry type"
       ).to.be.gt(0);
 
-      // Wait for UI to render either pills or a Search title
-      cy.get("body", { timeout: 15000 }).should(($body) => {
-        const pillsExist =
-          $body.find('[data-testid="entrytype-buttons"]').length > 0;
-        const titlePresent = $body
-          .find("h1, h2, h3, h4, h5, h6")
-          .toArray()
-          .some((el) => el.innerText.includes("Search"));
-        expect(
-          pillsExist || titlePresent,
-          "UI must render entry type pills or single-type title"
-        ).to.be.true;
-      });
+      // Single-entry-type mode may not render the selector.
+      if (backendTypes.length === 1) {
+        cy.get('[data-cy="search-button"]', {
+          timeout: 15000,
+        }).should("exist");
 
-      cy.get("body").then(($body) => {
-        const pillsExist =
-          $body.find('[data-testid="entrytype-buttons"]').length > 0;
+        cy.get("body").then(($body) => {
+          const radios = $body.find('[data-testid^="entrytype-radio-"]');
 
-        // Single entry type mode: UI must hide pills
-        if (!pillsExist) {
-          expect(
-            backendTypes.length,
-            "UI hides pills only when backend has exactly one entry type"
-          ).to.equal(1);
-          return;
-        }
-
-        // Multi entry type mode: pills must match backend exactly
-        cy.get(
-          '[data-testid="entrytype-buttons"] [data-testid^="entrytype-"]',
-          { timeout: 15000 }
-        )
-          .should("have.length", backendTypes.length)
-          .then(($btns) => {
-            const uiTypes = [...$btns].map((el) =>
-              el.getAttribute("data-testid").replace("entrytype-", "").trim()
+          // If a radio is rendered, its value must match the backend.
+          if (radios.length > 0) {
+            const uiTypes = [...radios].map((el) =>
+              el.getAttribute("data-testid").replace("entrytype-radio-", "")
             );
-            expect(uiTypes.sort()).to.deep.equal(
-              backendTypes.sort(),
-              "UI and backend entry types must match"
-            );
-          });
 
-        // Tooltip validation
-        cy.get('[data-testid="entrytypes-tooltip-trigger"]').trigger(
-          "mouseover"
-        );
-        cy.get('[data-testid="entrytypes-tooltip-content"] li').then(
-          ($items) => {
-            const tooltipTexts = [...$items].map((li) => li.textContent.trim());
-            backendTypes.forEach((type) => {
-              const expected = uiLabelFor(type);
-              const exists = tooltipTexts.some((t) => t.includes(expected));
-              expect(exists, `Tooltip must contain '${expected}'`).to.be.true;
-            });
+            expect(uiTypes.sort()).to.deep.equal(backendTypes.sort());
           }
-        );
+        });
+
+        return;
+      }
+
+      // Multiple entry types must render the selector.
+      cy.get('[data-testid="entrytype-selector"]', {
+        timeout: 15000,
+      }).should("be.visible");
+
+      cy.get('[data-testid^="entrytype-radio-"]', { timeout: 15000 })
+        .should("have.length", backendTypes.length)
+        .then(($radios) => {
+          const uiTypes = [...$radios].map((el) =>
+            el
+              .getAttribute("data-testid")
+              .replace("entrytype-radio-", "")
+              .trim()
+          );
+
+          expect(uiTypes.sort()).to.deep.equal(
+            backendTypes.sort(),
+            "UI and backend entry types must match"
+          );
+        });
+
+      // Verify tooltip labels.
+      cy.get('[data-testid="entrytypes-tooltip-trigger"]').trigger("mouseover");
+
+      cy.get('[data-testid="entrytypes-tooltip-content"] li').then(($items) => {
+        const tooltipTexts = [...$items].map((li) => li.textContent.trim());
+
+        backendTypes.forEach((type) => {
+          const expected = uiLabelFor(type);
+
+          expect(
+            tooltipTexts.some((text) => text.includes(expected)),
+            `Tooltip must contain '${expected}'`
+          ).to.be.true;
+        });
       });
     });
   });

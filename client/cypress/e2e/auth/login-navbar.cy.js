@@ -1,91 +1,56 @@
-// This test tests the login access via the login button in the navbar
+/// <reference types="cypress" />
 
-describe("Login via Navbar (real redirect)", () => {
+// These checks are deterministic for both public and login-enabled deployments.
+// Real OIDC sign-in, callback, and logout still need an integration test on an
+// auth-enabled environment. Do not fake authentication by writing an OIDC key
+// directly to localStorage: the OIDC provider validates that state.
+
+describe("Login via Navbar (runtime configuration)", () => {
   let config;
 
   before(() => {
-    cy.request("/config/config.json").then((response) => {
-      config = response.body;
+    cy.request("/config/config.json").then(({ body }) => {
+      config = body;
     });
   });
 
-  it("navigates to LifeScience AAI login page after clicking Log in", () => {
-    if (!config.ui.showLogin) {
-      cy.log("Login feature disabled, skipping login flow test.");
-      return;
-    }
-
-    // 1. Visit homepage
+  it("matches the configured login availability", () => {
     cy.visit("/");
 
-    // 2. Click 'Log in' in navbar
-    cy.get('[data-cy^="nav-link-internal-log-in"]')
-      .should("be.visible")
-      .click();
+    if (config.ui.showLogin) {
+      cy.get('[data-cy="nav-link-internal-log-in"]')
+        .should("be.visible")
+        .and("have.attr", "href", "/login");
+      cy.get('[data-testid="footer-right"]')
+        .contains("a", /^Log in$/)
+        .should("be.visible");
+    } else {
+      cy.get('[data-cy="nav-link-internal-log-in"]').should("not.exist");
+      cy.get('[data-testid="footer-right"]')
+        .contains("a", /^Log in$/)
+        .should("not.exist");
+    }
+  });
 
-    // 3. Confirm /login page loads first
-    cy.url().should("include", "/login");
-    cy.get('[data-cy="login-page-loader"]').should("be.visible");
+  it("does not initiate sign-in for public Beacons", function () {
+    if (config.ui.showLogin) {
+      this.skip(); // Requires a separate OIDC-enabled integration run.
+    }
+
+    cy.visit("/login");
     cy.contains("You will be redirected to the login shortly").should(
-      "be.visible"
+      "not.exist"
     );
+  });
 
-    // 4. Wait for redirect to occur (app leaves localhost)
-    cy.wait(2000);
+  it("exposes a configured OIDC login entry when authentication is enabled", function () {
+    if (!config.ui.showLogin) {
+      this.skip(); // Public Beacon; no OIDC login is expected.
+    }
 
-    // 5. Once redirected, check the external page origin safely
-    cy.origin("https://login.aai.lifescience-ri.eu", () => {
-      cy.location("href").should(
-        "include",
-        "https://login.aai.lifescience-ri.eu"
-      );
-    });
-
-    cy.wait(300);
-
-    cy.origin("https://login.aai.lifescience-ri.eu", () => {
-      cy.location("href").should(
-        "include",
-        "https://login.aai.lifescience-ri.eu"
-      );
-
-      // Click GitHub option
-      cy.get('a[href*="github"]').should("be.visible").click();
-    });
-
-    cy.origin("https://github.com", () => {
-      cy.get('input[name="login"]').should("be.visible");
-      cy.get('input[name="password"]').should("be.visible");
-
-      cy.get('input[name="login"]').type(Cypress.env("GITHUB_USERNAME"));
-
-      cy.get('input[name="password"]').type(Cypress.env("GITHUB_PASSWORD"), {
-        log: false,
-      });
-
-      cy.get('input[name="commit"], button[name="commit"]').click();
-    });
-
-    cy.origin("https://login.aai.lifescience-ri.eu", () => {
-      cy.get('input[name="continue"]').should("be.visible").click();
-
-      cy.wait(10000);
-    });
-
-    // 6. Verify we returned to the app
-    cy.url().should("match", /^http:\/\/localhost:3000(\/.*)?$/);
-
-    cy.wait(2000);
-
-    // Navbar checks
-    cy.get('[data-cy="navbar-title"]').should("contain.text", config.ui.title);
-    cy.contains("Hello, Giulia").should("be.visible");
-    cy.get('[data-cy="logout-button"]').should("be.visible");
-
-    // Footer checks
-    cy.get("footer").within(() => {
-      cy.get("svg[data-testid='LogoutIcon']").should("be.visible");
-      cy.contains("Log in").should("not.exist");
-    });
+    cy.visit("/");
+    cy.get('[data-cy="nav-link-internal-log-in"]')
+      .should("be.visible")
+      .and("have.attr", "href", "/login");
   });
 });

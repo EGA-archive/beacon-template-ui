@@ -6,67 +6,95 @@ const VIEWPORTS = [
   { name: "desktop", width: 1280, height: 900 },
 ];
 
+const INSTITUTIONS = [
+  { name: "EGA", href: "https://ega-archive.org/" },
+  { name: "CRG", href: "https://www.crg.eu/" },
+  { name: "BSC", href: "https://www.bsc.es/" },
+];
+
 describe("Footer Component", () => {
+  let config;
+
+  before(() => {
+    cy.request("/config/config.json").then(({ body }) => {
+      config = body;
+    });
+  });
+
   beforeEach(() => {
     cy.visit("/");
   });
 
   it("renders the footer container", () => {
-    cy.get('[data-testid="footer"]').should("exist").and("be.visible");
+    cy.get('[data-testid="footer"]').should("be.visible");
   });
 
-  it("shows the credit text", () => {
-    cy.get('[data-testid="footer-credit-text"]')
-      .should("exist")
-      .and("contain.text", "Beacon User Interface template provided by");
+  it("shows the appropriate institutional credit text", () => {
+    const hasLegalLinks = (config.ui?.cookies?.links || []).length > 0;
+    const expectedText = hasLegalLinks
+      ? "Beacon Template User Interface provided by:"
+      : "Beacon User Interface template provided by:";
+
+    cy.get('[data-testid="footer"]').contains(expectedText).should("be.visible");
   });
 
-  it("renders all institutional logos", () => {
-    cy.get('[data-testid="footer-logo-ega"] img').should("have.attr", "src");
-    cy.get('[data-testid="footer-logo-crg"] img').should("have.attr", "src");
-    cy.get('[data-testid="footer-logo-bsc"] img').should("have.attr", "src");
+  it("renders EGA, CRG and BSC logos with accessible names", () => {
+    INSTITUTIONS.forEach(({ name, href }) => {
+      cy.get('[data-testid="footer"]')
+        .find(`a[href="${href}"] img[alt="${name} Logo"]`)
+        .should("be.visible")
+        .and("have.attr", "src")
+        .and("not.be.empty");
+    });
   });
 
-  it("checks that each logo link opens in a new tab and is safe", () => {
-    ["footer-logo-ega", "footer-logo-crg", "footer-logo-bsc"].forEach((id) => {
-      cy.get(`[data-testid="${id}"]`)
+  it("opens institutional links safely in a new tab", () => {
+    INSTITUTIONS.forEach(({ href }) => {
+      cy.get('[data-testid="footer"]')
+        .find(`a[href="${href}"]`)
         .should("have.attr", "target", "_blank")
         .and("have.attr", "rel")
         .and((rel) => {
-          expect(rel).to.include("noopener");
-          expect(rel).to.include("noreferrer");
+          expect(rel.split(/\s+/)).to.include("noopener");
+          expect(rel.split(/\s+/)).to.include("noreferrer");
         });
     });
   });
 
-  it("shows login button when showLogin=true, otherwise footer-right is hidden", () => {
-    cy.get("body").then(($body) => {
-      if ($body.find('[data-testid="footer-right"]').length > 0) {
-        cy.get('[data-testid="footer-login-button"]').should("exist");
-      } else {
-        cy.get('[data-testid="footer-login-button"]').should("not.exist");
-      }
-    });
+  it("shows the footer login action only when login is enabled", () => {
+    cy.get('[data-testid="footer-right"]').should("exist");
+    if (config.ui.showLogin) {
+      cy.get('[data-testid="footer-right"]')
+        .contains("a", /^Log in$/)
+        .should("be.visible");
+    } else {
+      cy.get('[data-testid="footer-right"]')
+        .contains("a", /^Log in$/)
+        .should("not.exist");
+    }
   });
 
   VIEWPORTS.forEach(({ name, width, height }) => {
-    it(`renders correctly on ${name} viewport`, () => {
+    it(`renders logos without horizontal page overflow on ${name}`, () => {
       cy.viewport(width, height);
-      cy.get('[data-testid="footer"]').should("be.visible");
+      cy.get('[data-testid="footer"]').scrollIntoView().should("be.visible");
 
-      cy.get('[data-testid="footer-logo-ega"]').should("be.visible");
-      cy.get('[data-testid="footer-logo-crg"]').should("be.visible");
-      cy.get('[data-testid="footer-logo-bsc"]').should("be.visible");
+      INSTITUTIONS.forEach(({ name, href }) => {
+        cy.get('[data-testid="footer"]')
+          .find(`a[href="${href}"] img[alt="${name} Logo"]`)
+          .should("be.visible");
+      });
 
       cy.window().then((win) => {
-        const docWidth = win.document.documentElement.scrollWidth;
-        const viewportWidth = win.innerWidth;
-        expect(docWidth).to.be.lte(viewportWidth + 2);
+        expect(
+          win.document.documentElement.scrollWidth,
+          "No horizontal overflow"
+        ).to.be.lte(win.innerWidth + 2);
       });
     });
   });
 
-  it("footer appears after main content (correct layout ordering)", () => {
+  it("appears after the main page content", () => {
     cy.get('[data-testid="footer"]')
       .parent()
       .children()

@@ -10,10 +10,9 @@ describe("Beacon Network rendering", () => {
     });
   });
 
-  it("should show the Beacon Network Members banner and navbar link when beaconType is networkBeacon", () => {
+  it("should show the Beacon Network Members banner and navbar link when beaconType is networkBeacon", function () {
     if (beaconType !== "networkBeacon") {
-      cy.log("Skipping test because beaconType is not networkBeacon");
-      return;
+      this.skip();
     }
 
     cy.visit("/");
