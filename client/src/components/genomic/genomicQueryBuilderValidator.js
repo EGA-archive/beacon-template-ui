@@ -1,7 +1,7 @@
 import * as Yup from "yup";
 import config from "../../config/runtimeConfig";
 
-const minimumCoordinate = config.queryCoordinatesAre0Based ?? true ? 0 : 1;
+const minimumCoordinate = config.enableZeroBasedQueryInput ?? true ? 0 : 1;
 
 export const basePattern = /^(?:[ACGTRYSWKMBDHVN]+|[.-])$/;
 

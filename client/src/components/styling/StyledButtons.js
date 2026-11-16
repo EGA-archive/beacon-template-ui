@@ -1,7 +1,7 @@
 import { Button } from "@mui/material";
 import PropTypes from "prop-types";
 import config from "../../config/runtimeConfig";
-import { lighten } from "@mui/system";
+import { border, lighten } from "@mui/system";
 import { alpha } from "@mui/material/styles";
 
 /**
@@ -29,7 +29,7 @@ export default function StyledButtons({
     fontWeight: 400,
     fontFamily: '"Open Sans", sans-serif',
     height: { xs: "29px", sm: "26px" },
-    px: 0,
+    px: 3,
   };
 
   // Styles for 'contained' vs 'outlined' variant

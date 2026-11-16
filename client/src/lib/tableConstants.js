@@ -67,8 +67,8 @@ export const BEACON_NETWORK_COLUMNS = [
                 </li>
                 <br></br>
                 <li>
-                  <b>Non-production:</b> The Beacon instance is in development
-                  or testing. It may be potentially unstable and/or does not
+                  <b>Non production:</b> The Beacon instance is in development
+                  or testing. It may potentially be unstable and/or does not
                   contain real data that can be trusted for real-world queries.
                 </li>
               </ul>
@@ -136,24 +136,27 @@ export const BEACON_NETWORK_COLUMNS = [
               dataset based on privacy, consent, and data-sharing policies.
               <br></br>
               <ul>
-                <br></br>
                 <li>
-                  <b>Presence only (boolean):</b>
-                  <br></br>The dataset only indicates whether matching data
-                  exists.
+                  <b>Presence only (Boolean):</b>
+                  <br />
+                  Indicates whether matching data exists.
                 </li>
-                <br></br>
+                <br />
                 <li>
                   <b>Count:</b>
-                  <br></br>The dataset reports the number of matching records.
+                  <br />
+                  Reports the number of matching records.
                 </li>
-                <br></br>
+                <br />
                 <li>
                   <b>Detailed records:</b>
-                  <br></br>The dataset allows viewing individual matching
-                  records.
+                  <br />
+                  Allows viewing individual matching records.
                 </li>
               </ul>
+              <b>Note:</b> The availability of dataset information depends on
+              the Beacon owner's configuration. Not all Beacon responses include
+              dataset details.
             </Box>
           }
           placement="top-start"
@@ -199,13 +202,7 @@ export const BEACON_NETWORK_COLUMNS = [
     align: "left",
     width: "15%",
   },
-  // {
-  //   id: "datasets_count",
-  //   label: "nº of Datasets",
-  //   align: "left",
-  //   numeric: true,
-  //   width: "15%",
-  // },
+
   {
     id: "datasets_count",
     label: (

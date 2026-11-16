@@ -45,7 +45,27 @@ export default function SingleBeaconResultsRows({
         );
 
         // Normalize dataset responses before rendering them.
-        const datasets = (item.items || []).map((dataset) => ({
+        // const datasets = (item.items || []).map((dataset) => ({
+        //   ...dataset,
+        //   type: getDatasetType(dataset),
+        //   results: Array.isArray(dataset.results) ? dataset.results : [],
+        //   dataset: dataset.dataset ?? dataset.id ?? undefined,
+        //   exists: dataset.exists ?? false,
+        // }));
+
+        const rawDatasets = item.items?.length
+          ? item.items
+          : [
+              {
+                ...item,
+                id: undefined,
+                dataset: undefined,
+                name: undefined,
+                datasetName: undefined,
+              },
+            ];
+
+        const datasets = rawDatasets.map((dataset) => ({
           ...dataset,
           type: getDatasetType(dataset),
           results: Array.isArray(dataset.results) ? dataset.results : [],
@@ -72,7 +92,13 @@ export default function SingleBeaconResultsRows({
           const dataVisibility = DATA_VISIBILITY_LABELS[dataset.type] || "-";
 
           const datasetId = dataset.dataset || dataset.id;
+          const datasetName = dataset.datasetName || dataset.name;
+
           const beaconId = item.beaconId || item.id || "singleBeacon";
+          const beaconName = findBeaconName(beaconsInfo, beaconId);
+
+          const firstColumnValue =
+            datasetName || datasetId || beaconName || beaconId;
 
           const hasData = dataset.results.length > 0;
 
@@ -120,7 +146,7 @@ export default function SingleBeaconResultsRows({
                     wordBreak: "break-word",
                   }}
                 >
-                  {datasetId || <i>Undefined</i>}
+                  {firstColumnValue}
                 </Box>
               </TableCell>
 

@@ -69,36 +69,6 @@ export default function CohortsTable() {
     }
   };
 
-  // const getAgeRangeDistribution = (cohort) => {
-  //   try {
-  //     const ranges =
-  //       //  Here change for diseas - cohort?.collectionEvents?.[0]?.eventAgeRange?.distribution?.ranges;
-  //       cohort?.collectionEvents?.[0]?.eventAgeRange??.distribution?.ranges;
-  //     if (!ranges) return "-";
-
-  //     const keys = Object.keys(ranges);
-  //     if (keys.length === 0) return "-";
-
-  //     const numericRanges = keys.map((key) => {
-  //       const parts = key.split("-");
-  //       const min = parseInt(parts[0].replace(/\D/g, ""), 10);
-  //       const maxPart = parts[1] || "";
-  //       const max = maxPart.includes("+")
-  //         ? `${maxPart}` // keep "+" as is
-  //         : parseInt(maxPart.replace(/\D/g, ""), 10);
-  //       return { min, max };
-  //     });
-
-  //     const minValue = Math.min(...numericRanges.map((r) => r.min));
-  //     const last = numericRanges[numericRanges.length - 1].max;
-
-  //     return `${minValue}–${last}`;
-  //   } catch (error) {
-  //     console.warn("getAgeRangeDistribution error:", error);
-  //     return "-";
-  //   }
-  // };
-
   return (
     <Paper
       sx={{

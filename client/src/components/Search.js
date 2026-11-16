@@ -136,6 +136,14 @@ export default function Search({
         }
       }
 
+      console.table(
+        normalizedData.map((beacon) => ({
+          beaconId: beacon.meta?.beaconId,
+          organization: beacon.response?.organization?.name,
+          logoUrl: beacon.response?.organization?.logoUrl,
+        }))
+      );
+
       setBeaconsInfo(normalizedData);
     } catch (error) {
       console.error("Search failed", error);
@@ -205,6 +213,7 @@ export default function Search({
 
         // Use this when testing with the real API response:
         const data = await response.json();
+        console.log("[BTUI] Raw Beacon Network /info response:", data);
 
         // const data = mockEntryTypes;
 
@@ -408,7 +417,7 @@ export default function Search({
   /**
    * Build the Genomic Query title.
    */
-  const is0Based = config.queryCoordinatesAre0Based ?? true;
+  const is0Based = config.enableZeroBasedQueryInput ?? true;
 
   const genomicCoordinateLabel = is0Based
     ? "Genomic Query (0-based)"

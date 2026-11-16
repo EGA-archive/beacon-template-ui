@@ -16,7 +16,11 @@ import { resultsHeaderSubtitleStyle } from "./resultsTableStyles";
  * Single and Network Beacons use different column definitions,
  * but the Results table can consume them through the same API.
  */
-export default function useResultsTableColumns({ isSingleBeacon, entryType }) {
+export default function useResultsTableColumns({
+  isSingleBeacon,
+  entryType,
+  hasDatasetInfo,
+}) {
   return useMemo(() => {
     const baseColumns = isSingleBeacon
       ? BEACON_SINGLE_COLUMNS
@@ -27,11 +31,21 @@ export default function useResultsTableColumns({ isSingleBeacon, entryType }) {
       : BEACON_NETWORK_TABLET_COLUMN_WIDTHS;
 
     /**
-     * Add the searched entry type underneath
-     * the Search Results column heading.
+     * Set the first column to "Beacon" when a Single Beacon
+     * response does not contain dataset information.
+     * Add the searched entry type underneath Search Results.
      */
     const tableColumns = baseColumns.map((column) =>
-      column.id === "response"
+      isSingleBeacon && column.id === "beacon_dataset"
+        ? {
+            ...column,
+            label: (
+              <Box display="flex" alignItems="center">
+                {hasDatasetInfo ? "Dataset" : "Beacon"}
+              </Box>
+            ),
+          }
+        : column.id === "response"
         ? {
             ...column,
             label: (
@@ -71,5 +85,5 @@ export default function useResultsTableColumns({ isSingleBeacon, entryType }) {
       getResponsiveColumnWidth,
       getResponsiveColumnWidthById,
     };
-  }, [isSingleBeacon, entryType]);
+  }, [isSingleBeacon, entryType, hasDatasetInfo]);
 }

@@ -19,7 +19,7 @@ export const COMMON_MESSAGES = {
   invalidGenomicQuery:
     "This search bar only supports single nucleotide variants (SNVs/SNPs). To search by gene, range, bracket or HGVS queries, use the Genomic Query Builder (link).",
   invalidFormat:
-    "Unrecognized genomic query format. Please use 22-16050527-C-A or 22:16050527C>A",
+    "Unrecognized genomic query format. Please use 22-16050528-C-A or 22:16050528C>A",
 };
 
 // Reusable component to display messages (error or success)

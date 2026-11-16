@@ -63,7 +63,10 @@ function CircularProgressWithLabel({ value }) {
   );
 }
 
-export default function DownloadTablePopover({ handleExport }) {
+export default function DownloadTablePopover({
+  handleExport,
+  visibleRowCount,
+}) {
   const colors = config.ui.colors;
   const primaryColor = colors.primary;
   const hoverBg = alpha(primaryColor, 0.15);
@@ -169,7 +172,8 @@ export default function DownloadTablePopover({ handleExport }) {
                   <Box>
                     <Typography sx={optionTitleStyle}>Download View</Typography>
                     <Typography sx={optionSubtitleStyle}>
-                      Selected columns
+                      Selected columns / {visibleRowCount}{" "}
+                      {visibleRowCount === 1 ? "record" : "records"}
                     </Typography>
                   </Box>
                 }

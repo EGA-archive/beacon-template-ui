@@ -13,6 +13,8 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 import CommonMessage, { COMMON_MESSAGES } from "../common/CommonMessage";
 import config from "../../config/runtimeConfig";
 import CancelIcon from "@mui/icons-material/Cancel";
+import { alpha } from "@mui/material/styles";
+import { lighten } from "@mui/material/styles";
 
 // FilterTermsExtra allows users to add a custom alphanumeric filter
 // It provides:
@@ -33,9 +35,13 @@ export default function FilterTermsExtra() {
   } = useSelectedEntry();
 
   // Local state to hold operator, input value, and error message
-  const [selectedOperator, setSelectedOperator] = useState(">");
+  const [selectedOperator, setSelectedOperator] = useState("=");
   const [selectedValue, setSelectedValue] = useState("");
   const [error, setError] = useState("");
+
+  const bgPrimaryLight = alpha(config.ui.colors.primary, 0.05);
+  const bgPrimary = lighten(config.ui.colors.primary, 0.8);
+  // const bgPrimaryLight = config.ui.colors.primary;
 
   // Any single Entry Type uses the same spacing before this section.
   const isSingleEntryType = entryTypes.length === 1;
@@ -155,7 +161,7 @@ export default function FilterTermsExtra() {
       setIsExtraFilterValid(true);
       extraFilter.onComplete?.();
       setExtraFilter(null);
-      setSelectedOperator(">");
+      setSelectedOperator("=");
       setSelectedValue("");
 
       return [...prevFilters, extraFilterCustom];
@@ -164,7 +170,7 @@ export default function FilterTermsExtra() {
 
   // Runs when user clicks the Cancel (X) button
   const handleCancelFilter = () => {
-    setSelectedOperator(">");
+    setSelectedOperator("=");
     setSelectedValue("");
     setError("");
     extraFilter?.onComplete?.();
@@ -182,6 +188,8 @@ export default function FilterTermsExtra() {
     setIsExtraFilterValid(true);
   }, [extraFilter, setIsExtraFilterValid]);
 
+  const primary = config.ui.colors.primary;
+
   return (
     <Box
       ref={valueInputRef}
@@ -194,7 +202,10 @@ export default function FilterTermsExtra() {
         flexWrap: "wrap",
         mt: isSingleEntryType ? 2 : 0,
         borderRadius: "10px",
-        border: "1px solid #E0E0E0",
+        // Color change
+        // border: "1px solid #E0E0E0",
+        backgroundColor: bgPrimaryLight,
+        border: `1px solid ${primary}`,
         padding: "15px 15px",
       }}
     >
@@ -221,7 +232,7 @@ export default function FilterTermsExtra() {
             border: `1px solid ${config.ui.colors.primary}`,
             borderRadius: "10px",
             transition: "flex 0.3s ease",
-
+            backgroundColor: "white",
             "& .MuiOutlinedInput-notchedOutline": {
               border: "none",
             },
@@ -242,16 +253,14 @@ export default function FilterTermsExtra() {
               "& .MuiInputBase-root": {
                 border: "none",
               },
-
               "& fieldset": {
                 border: "none",
               },
-
               p: 0,
             }}
           >
-            <MenuItem value=">">{">"}</MenuItem>
             <MenuItem value="=">{"="}</MenuItem>
+            <MenuItem value=">">{">"}</MenuItem>
             <MenuItem value="<">{"<"}</MenuItem>
             <MenuItem value="!">{"≠"}</MenuItem>
             <MenuItem value="LIKE">{"contains"}</MenuItem>

@@ -50,6 +50,45 @@ export const mockSingleBeaconResponse = {
   },
 };
 
+export const mockSingleBeaconDatasetResponse = {
+  response: {
+    resultSets: [
+      {
+        id: "EGA0",
+        setType: "dataset",
+        exists: false,
+      },
+      {
+        id: "EGA1",
+        setType: "dataset",
+        exists: true,
+        resultsCount: 8,
+      },
+      {
+        id: "EGA2",
+        setType: "dataset",
+        exists: true,
+        resultsCount: 2,
+        results: [
+          {
+            id: "record_1",
+            something: "value",
+          },
+          {
+            id: "record_2",
+            something: "value",
+          },
+        ],
+      },
+      // Count response without dataset information
+      {
+        setType: "dataset",
+        exists: true,
+        resultsCount: 5,
+      },
+    ],
+  },
+};
 
 export const mockMapNoDatasets = {
   meta: { apiVersion: "2.0" },
@@ -58,18 +97,18 @@ export const mockMapNoDatasets = {
       {
         id: "individuals",
         name: "Individuals",
-        pathSegment: "individuals"
+        pathSegment: "individuals",
       },
       {
         id: "biosamples",
         name: "Biosamples",
-        pathSegment: "biosamples"
+        pathSegment: "biosamples",
       },
       {
         id: "g_variants",
         name: "Genomic Variants",
-        pathSegment: "g_variants"
-      }
-    ]
-  }
+        pathSegment: "g_variants",
+      },
+    ],
+  },
 };

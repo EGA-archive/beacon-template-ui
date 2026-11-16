@@ -1,6 +1,5 @@
 import { Box, Button, Typography } from "@mui/material";
 import LocalPostOfficeOutlinedIcon from "@mui/icons-material/LocalPostOfficeOutlined";
-
 import ChevronRight from "../../../assets/logos/chevron-right.svg";
 import FilterLabelRemovable from "../../styling/FilterLabelRemovable";
 import { formatEntryLabel } from "../../common/textFormatting";
@@ -256,6 +255,8 @@ export default function ResultsPageHeader({
           variant="simple"
           label={formatEntryLabel(appliedQuery?.entryType)}
           scope="entryType"
+          disableClick
+          disableTooltip
           preventWrap
         />
 

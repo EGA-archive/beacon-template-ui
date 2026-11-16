@@ -357,6 +357,7 @@ const ResultsTableModalBody = ({
         setVisibleColumns={setVisibleColumns}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
+        visibleRowCount={sortedFilteredData.length}
         handleExport={handleExport}
         // setDownloadLimitInfo={setDownloadLimitInfo}
         sortedHeaders={sortedHeaders}

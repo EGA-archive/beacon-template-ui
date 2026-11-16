@@ -14,7 +14,7 @@ import config from "../../../config/runtimeConfig";
  * HGVS queries are intentionally ignored.
  */
 export const normalizeGenomicRequestParameters = (requestParameters = {}) => {
-  const is0Based = config.queryCoordinatesAre0Based ?? true;
+  const is0Based = config.enableZeroBasedQueryInput ?? true;
 
   // UI already uses 0-based coordinates
   if (is0Based) {

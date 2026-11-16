@@ -37,6 +37,7 @@ export default function TableToolbarControls({
   searchTerm,
   setSearchTerm,
   handleExport,
+  visibleRowCount,
 }) {
   const colors = config.ui.colors;
 
@@ -236,14 +237,45 @@ export default function TableToolbarControls({
                     sm: "11px",
                     xs: "11px",
                   },
+                  whiteSpace: "nowrap",
                 }}
               >
                 Select columns
               </Box>
+
+              {/* Show selected count only when not all columns are visible */}
+              {!allColumnsSelected && columns.length > 0 && (
+                <Box
+                  component="span"
+                  sx={{
+                    borderLeft: `1.5px solid ${colors.darkPrimary}`,
+                    pl: 1,
+                    ml: 0.5,
+                  }}
+                >
+                  <Box
+                    component="span"
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      px: 1,
+                      py: 0,
+                      borderRadius: "16px",
+                      backgroundColor: "#EAF2F8",
+                      color: colors.darkPrimary,
+                      fontSize: "12px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {visibleColumns.length} of {columns.length} selected
+                  </Box>
+                </Box>
+              )}
             </Box>
           )}
           sx={{
             borderRadius: "24px",
+
             height: "40px",
             animation: shouldPulse ? "pulseBorder 3s ease-in-out 8" : "none",
             "@keyframes pulseBorder": {
@@ -271,13 +303,15 @@ export default function TableToolbarControls({
               alignItems: "center",
               gap: 1,
               py: 0.5,
-              width: {
-                xs: "120px",
-                sm: "130px",
-                md: "140px",
-                lg: "200px",
-              },
-
+              width:
+                !allColumnsSelected && columns.length > 0
+                  ? "233px"
+                  : {
+                      xs: "120px",
+                      sm: "130px",
+                      md: "140px",
+                      lg: "200px",
+                    },
               height: "40px",
             },
           }}
@@ -400,7 +434,10 @@ export default function TableToolbarControls({
 
       {/* CSV download */}
       {isDownloadEnabled && (
-        <DownloadTablePopover handleExport={handleExport} />
+        <DownloadTablePopover
+          handleExport={handleExport}
+          visibleRowCount={visibleRowCount}
+        />
       )}
     </Box>
   );

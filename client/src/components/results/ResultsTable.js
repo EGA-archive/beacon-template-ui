@@ -44,6 +44,16 @@ export default function ResultsTable() {
 
   const isSingleBeacon = config.beaconType === "singleBeacon";
 
+  const hasDatasetInfo = resultData.some(
+    (item) =>
+      item.exists === true &&
+      !item.info?.error &&
+      (item.items || []).some(
+        (dataset) =>
+          dataset.dataset || dataset.datasetName || dataset.name || dataset.id
+      )
+  );
+
   /**
    * Build the columns and responsive widths
    * required by the current Beacon type.
@@ -55,6 +65,7 @@ export default function ResultsTable() {
     getResponsiveColumnWidthById,
   } = useResultsTableColumns({
     isSingleBeacon,
+    hasDatasetInfo,
     entryType: lastSearchedPathSegment,
   });
 

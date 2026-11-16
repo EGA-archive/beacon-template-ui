@@ -95,9 +95,7 @@ export default function FilteringTermsSection({
             </li>
 
             <li>
-              Filtering terms are{" "}
-              <strong>independent of the Result Type</strong>, such as
-              Individuals or Biosamples.
+              The same Filtering Terms are available for all Result Types.
             </li>
           </Box>
         </InfoTooltip>
@@ -188,10 +186,8 @@ export default function FilteringTermsSection({
 
       {/*
        * Multiple Entry Types.
-       *
        * Ontology-only:
        * button is always outside.
-       *
        * Other multi-entry layouts:
        * button moves outside from 870px downward.
        */}

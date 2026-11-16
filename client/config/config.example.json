@@ -3,7 +3,7 @@
   "apiUrl": "https://beacon-elixir-demo.ega-archive.org/api",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
   "variantType": ["SNP", "DEL", "DUP", "INV", "INS", "CNV", "BND"],
-  "queryCoordinatesAre0Based": true,
+  "enableZeroBasedQueryInput": false,
 
   "ui": {
     "title": "EGA Beacon Template UI",

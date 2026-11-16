@@ -3,7 +3,7 @@
   "apiUrl": "https://impact-beacon-network-backend-demo.ega-archive.org/beacon-network/v2.0.0",
   "assemblyId": ["GRCh38", "GRCh37", "NCBI36"],
   "variantType": ["SNP", "DEL", "DUP", "INV", "INS", "CNV", "BND"],
-  "queryCoordinatesAre0Based": true,
+  "enableZeroBasedQueryInput": false,
   "ui": {
     "title": "EGA Beacon Template UI",
     "favicon": "/assets/logos/favicon.ico",
@@ -402,7 +402,7 @@
 
       "searchInputExample": {
         "referenceName": "22",
-        "position": 16050527,
+        "position": 16050528,
         "referenceBases": "C",
         "alternateBases": "A"
       }

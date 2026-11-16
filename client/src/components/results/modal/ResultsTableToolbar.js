@@ -18,6 +18,7 @@ export default function ResultsTableToolbar({
   count,
   loadedCount,
   handleExport,
+  visibleRowCount,
 }) {
   return (
     <Box sx={{ mb: 2 }}>
@@ -78,6 +79,7 @@ export default function ResultsTableToolbar({
 
         <TableToolbarControls
           columns={sortedHeaders}
+          visibleRowCount={visibleRowCount}
           visibleColumns={visibleColumns}
           setVisibleColumns={setVisibleColumns}
           searchTerm={searchTerm}

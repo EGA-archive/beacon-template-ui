@@ -5,7 +5,10 @@ import { useSelectedEntry } from "../context/SelectedEntryContext";
 import { COMMON_MESSAGES } from "../common/CommonMessage";
 import { PATH_SEGMENT_TO_ENTRY_ID } from "../../components/common/textFormatting";
 import { queryBuilder } from "./utils/queryBuilder";
-import { mockSingleBeaconResponse } from "./mockSingleBeaconResponse";
+import {
+  mockSingleBeaconResponse,
+  mockSingleBeaconDatasetResponse,
+} from "./mockSingleBeaconResponse";
 import useAuthHeaders from "../../hooks/useAuthHeaders";
 
 const buildHeaders = (results = []) => {

@@ -537,8 +537,8 @@ const schema = Joi.object({
    * Optional. Defaults to true.
    * When provided, the value must be either true or false.
    */
-  queryCoordinatesAre0Based: Joi.boolean().default(true).messages({
-    "boolean.base": "queryCoordinatesAre0Based must be either true or false",
+  enableZeroBasedQueryInput: Joi.boolean().default(false).messages({
+    "boolean.base": "enableZeroBasedQueryInput must be either true or false",
   }),
 
   // UI configuration

@@ -188,8 +188,8 @@ export default function ContactForm() {
             variant="body2"
             sx={{ mb: 3, fontSize: "12px", fontWeight: 400, color: "#203241" }}
           >
-            If you have any questions about how the {beaconTitle} search website
-            works, please fill out this form and we will get back to you.
+            For questions, feedback, suggestions or other enquiries, please
+            complete the contact form below.
           </Typography>
 
           {/*

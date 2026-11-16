@@ -43,6 +43,7 @@ export default function ResultsFilters() {
     >
       <QueryAppliedItems
         handleFilterRemove={handleFilterRemove}
+        showQueryWarning
         variant="readonly"
         intialEntryTypeFiltertoRender={intialEntryTypeFiltertoRender}
       />
