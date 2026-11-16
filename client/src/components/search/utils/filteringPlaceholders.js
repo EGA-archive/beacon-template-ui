@@ -5,7 +5,8 @@ const FILTERING_PLACEHOLDERS = {
   analyses: "Examples: variant caller, pipeline, aligner, etc.",
   cohorts: "Examples: population, sex, diseases, etc.",
   datasets: "Examples: study, diseases, data type, etc.",
-  g_variants: "Examples: sex, diseases, etc.",
+  g_variants:
+    "Examples: molecular attributes, intergenic region, missense variant, etc.",
 };
 
 export default FILTERING_PLACEHOLDERS;
