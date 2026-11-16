@@ -305,7 +305,7 @@ export default function TableToolbarControls({
               py: 0.5,
               width:
                 !allColumnsSelected && columns.length > 0
-                  ? "233px"
+                  ? "240px"
                   : {
                       xs: "120px",
                       sm: "130px",

@@ -33,7 +33,7 @@ export default function ResultsTable() {
   const {
     resultData,
     beaconsInfo,
-    selectedPathSegment: selectedEntryType,
+    // selectedPathSegment: selectedEntryType,
     lastSearchedFilters,
     lastSearchedPathSegment,
   } = useSelectedEntry();
@@ -118,11 +118,11 @@ export default function ResultsTable() {
   };
 
   // Entry types with dedicated Results tables.
-  if (["cohort", "cohorts"].includes(selectedEntryType)) {
+  if (["cohort", "cohorts"].includes(lastSearchedPathSegment)) {
     return <CohortsTable />;
   }
 
-  if (["dataset", "datasets"].includes(selectedEntryType)) {
+  if (["dataset", "datasets"].includes(lastSearchedPathSegment)) {
     return <DatasetsTable />;
   }
 

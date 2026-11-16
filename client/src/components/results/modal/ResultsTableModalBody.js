@@ -167,7 +167,7 @@ const ResultsTableModalBody = ({
     const filtered = dataTable.filter((item) => {
       if (searchWords.length === 0) return true;
 
-      const rowString = sortedHeaders
+      const rowString = orderedVisibleHeaders
         .map((h) => summarizeValue(item[h.id], h.id))
         .join(" ")
         .toLowerCase();
@@ -180,7 +180,7 @@ const ResultsTableModalBody = ({
     if (setSearchCount) {
       setSearchCount(filtered.length);
     }
-  }, [searchTerm, dataTable, sortedHeaders, setSearchCount]);
+  }, [searchTerm, dataTable, orderedVisibleHeaders, setSearchCount]);
 
   const handleSort = (columnId) => {
     if (sortColumn !== columnId) {
