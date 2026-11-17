@@ -36,7 +36,7 @@ export default function FilteringTermsSection({
           gap: 1,
           mt: {
             // Ontology-only mobile is already stacked.
-            xs: 0,
+            xs: 3,
             // Ontology-only sm+ does not need genomic spacing.
             // Single Entry Type: use 30px from sm upward.
             sm: !hasEntryTypeSelector

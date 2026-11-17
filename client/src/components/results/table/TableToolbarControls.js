@@ -165,7 +165,6 @@ export default function TableToolbarControls({
           xs: "center",
           sm: "flex-end",
         },
-
         width: {
           xs: "100%",
           sm: "auto",
@@ -177,7 +176,6 @@ export default function TableToolbarControls({
           md: 2,
           lg: 3,
         },
-
         flexWrap: "wrap",
       }}
     >
@@ -275,7 +273,6 @@ export default function TableToolbarControls({
           )}
           sx={{
             borderRadius: "24px",
-
             height: "40px",
             animation: shouldPulse ? "pulseBorder 3s ease-in-out 8" : "none",
             "@keyframes pulseBorder": {
@@ -313,6 +310,9 @@ export default function TableToolbarControls({
                       lg: "200px",
                     },
               height: "40px",
+            },
+            "& .MuiSelect-icon": {
+              color: colors.darkPrimary,
             },
           }}
           IconComponent={KeyboardArrowDownRoundedIcon}

@@ -415,13 +415,14 @@ export default function Search({
   };
 
   /**
-   * Build the Genomic Query title.
+   * Display the coordinate system only when 0-based input is enabled.
+   * By default, genomic queries use 1-based coordinates.
    */
-  const is0Based = config.enableZeroBasedQueryInput ?? true;
+  const is0Based = config.enableZeroBasedQueryInput ?? false;
 
   const genomicCoordinateLabel = is0Based
-    ? "Genomic Query (0-based)"
-    : "Genomic Query (1-based)";
+    ? "Genomic Query (0-based genomic coordinates)"
+    : "Genomic Query";
 
   const genomicQueryDescription = getGenomicQueryDescription();
 
